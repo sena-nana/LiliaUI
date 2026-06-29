@@ -160,19 +160,19 @@ export async function runBuildCli(argv, options = {}) {
     }
     if (command === "dev") {
       runPrepare(projectRoot, env);
-      runSync("vite", args, { cwd: projectRoot, env });
+      runYarn(argsFor("vite", args), { cwd: projectRoot, env });
       return;
     }
     if (command === "build") {
       runPrepare(projectRoot, env);
-      runSync("vue-tsc", ["--noEmit"], { cwd: projectRoot, env });
-      runSync("vite", ["build", ...args], { cwd: projectRoot, env });
+      runYarn(["vue-tsc", "--noEmit"], { cwd: projectRoot, env });
+      runYarn(["vite", "build", ...args], { cwd: projectRoot, env });
       return;
     }
     if (command === "docs") {
       runPrepare(projectRoot, env);
       const [docsCommand = "dev", ...docsArgs] = args;
-      runSync("vitepress", [docsCommand, "docs", ...docsArgs], { cwd: projectRoot, env });
+      runYarn(["vitepress", docsCommand, "docs", ...docsArgs], { cwd: projectRoot, env });
       return;
     }
     if (command === "tauri-dev") {
@@ -182,7 +182,7 @@ export async function runBuildCli(argv, options = {}) {
     }
     if (command === "tauri-build") {
       runPrepare(projectRoot, env);
-      runSync("yarn", ["tauri", "build", ...args], { cwd: projectRoot, env });
+      runYarn(["tauri", "build", ...args], { cwd: projectRoot, env });
       return;
     }
     if (command === "tauri-install") {
@@ -191,8 +191,8 @@ export async function runBuildCli(argv, options = {}) {
       return;
     }
     if (command === "verify") {
-      runSync("yarn", ["test"], { cwd: projectRoot, env });
-      runSync("yarn", ["build"], { cwd: projectRoot, env });
+      runYarn(["test"], { cwd: projectRoot, env });
+      runYarn(["build"], { cwd: projectRoot, env });
       runSync("cargo", ["check", "--manifest-path", "src-tauri/Cargo.toml"], { cwd: projectRoot, env });
       return;
     }
@@ -241,6 +241,15 @@ function runSync(command, args = [], options = {}) {
   if (result.status !== 0) {
     throw new Error(`Command failed (${result.status}): ${command} ${args.join(" ")}`);
   }
+}
+
+function runYarn(args = [], options = {}) {
+  const spawnConfig = yarnSpawn(process.platform, options.env ?? process.env);
+  runSync(spawnConfig.command, [...spawnConfig.argsPrefix, ...args], options);
+}
+
+function argsFor(command, args) {
+  return [command, ...args];
 }
 
 function spawnInherited(command, args = [], options = {}) {
