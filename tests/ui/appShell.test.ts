@@ -28,6 +28,11 @@ async function renderAppShell(initialRoute = "/") {
         component: { template: "<div>settings</div>" },
         meta: { sidebar: "settings", lockSidebar: true, returnable: false },
       },
+      {
+        path: "/components",
+        component: { template: "<div>components</div>" },
+        meta: { sidebar: "main", returnable: true },
+      },
       { path: "/:pathMatch(.*)*", redirect: "/" },
     ],
   });
@@ -130,6 +135,23 @@ describe("AppShell sidebar", () => {
     expect(view.queryByRole("button", { name: "更多" })).not.toBeInTheDocument();
 
     expect(view.router.currentRoute.value.fullPath).toBe("/");
+  });
+
+  it("主侧边栏只高亮当前精确路由", async () => {
+    const view = await renderAppShell("/");
+    const overview = agentTarget(view.container, "sidebar.nav.overview");
+    const components = agentTarget(view.container, "sidebar.nav.components");
+
+    expect(overview).toHaveClass("is-active");
+    expect(components).not.toHaveClass("is-active");
+
+    await view.router.push("/components");
+    await waitFor(() => {
+      expect(view.router.currentRoute.value.fullPath).toBe("/components");
+    });
+
+    expect(overview).not.toHaveClass("is-active");
+    expect(components).toHaveClass("is-active");
   });
 
   it("左上角按钮切换左侧栏折叠状态并写回本地存储", async () => {

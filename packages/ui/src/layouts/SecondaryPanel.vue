@@ -42,7 +42,7 @@ const hasMainSection = computed(() => SIDEBAR_NAV.length > 0 || SIDEBAR_GROUPS.l
           :key="item.label"
           :to="item.to ?? '/'"
           class="sb-tree__row"
-          active-class="is-active"
+          exact-active-class="is-active"
           :aria-disabled="item.disabled ? 'true' : undefined"
           :data-agent-id="`sidebar.nav.${item.key}`"
         >

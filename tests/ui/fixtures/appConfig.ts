@@ -21,6 +21,12 @@ export const testAppConfig = {
         label: "首页",
         icon: "home",
       },
+      {
+        key: "components",
+        to: "/components",
+        label: "组件",
+        icon: "puzzle",
+      },
     ],
     footerLinks: [{ key: "settings", to: "/settings", label: "设置", icon: "settings" }],
     footerStatus: {
