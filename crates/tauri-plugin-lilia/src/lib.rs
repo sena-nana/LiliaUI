@@ -58,10 +58,15 @@ impl Builder {
 
         PluginBuilder::new(PLUGIN_NAME)
             .setup(move |app, _api| {
-                prepare_main_window(app, &setup_options);
+                configure_main_window(app, &setup_options);
                 Ok(())
             })
             .on_event(move |app, event| {
+                if matches!(event, RunEvent::Ready) {
+                    present_main_window(app, &event_options);
+                    return;
+                }
+
                 if let RunEvent::WindowEvent { label, event, .. } = event {
                     if label == &event_options.main_window_label
                         && matches!(
@@ -217,7 +222,7 @@ pub fn restore_main_window_state<R: Runtime>(window: &WebviewWindow<R>, state: M
     }
 }
 
-fn prepare_main_window<R: Runtime>(app: &AppHandle<R>, options: &Builder) {
+fn configure_main_window<R: Runtime>(app: &AppHandle<R>, options: &Builder) {
     if let Some(window) = app.get_webview_window(&options.main_window_label) {
         if let Some(color) = options.background_color {
             let _ = window.set_background_color(Some(color));
@@ -225,7 +230,13 @@ fn prepare_main_window<R: Runtime>(app: &AppHandle<R>, options: &Builder) {
         if let Some(state) = load_main_window_state(app, &options.window_state) {
             restore_main_window_state(&window, state);
         }
+    }
+}
+
+fn present_main_window<R: Runtime>(app: &AppHandle<R>, options: &Builder) {
+    if let Some(window) = app.get_webview_window(&options.main_window_label) {
         let _ = window.show();
+        let _ = window.set_focus();
     }
 }
 
