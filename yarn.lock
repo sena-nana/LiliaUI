@@ -2134,7 +2134,6 @@ __metadata:
     "@vitejs/plugin-vue": "npm:^6.0.7"
     "@vue/compiler-sfc": "npm:^3.5.35"
     typescript: "npm:^6.0.3"
-    vite: "npm:^8.0.16"
     vitepress: "npm:^1.6.4"
     vitest: "npm:^4.1.8"
     vue: "npm:^3.5.35"
