@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { RouterLink } from "vue-router";
-import { Plus } from "@lucide/vue";
 import {
   APP_SHELL_COPY,
   SIDEBAR_FOOTER_LINKS,
@@ -11,11 +11,13 @@ import {
 } from "../config/appShell";
 import SidebarFooter from "../components/sidebar/SidebarFooter.vue";
 import SidebarRowTools from "../components/sidebar/SidebarRowTools.vue";
+
+const hasMainSection = computed(() => SIDEBAR_NAV.length > 0 || SIDEBAR_GROUPS.length > 0);
 </script>
 
 <template>
   <aside class="secondary-panel" data-agent-id="sidebar.main">
-    <div class="sb-section sb-section--actions">
+    <div v-if="SIDEBAR_GLOBAL_ACTIONS.length" class="sb-section sb-section--actions">
       <button
         v-for="action in SIDEBAR_GLOBAL_ACTIONS"
         :key="action.key"
@@ -30,23 +32,11 @@ import SidebarRowTools from "../components/sidebar/SidebarRowTools.vue";
       </button>
     </div>
 
-    <div class="sb-section">
+    <div v-if="hasMainSection" class="sb-section">
       <div class="sb-section__header">
         <span class="sb-section__title">{{ APP_SHELL_COPY.workspaceSectionTitle }}</span>
-        <div class="sb-section__tools">
-          <button
-            type="button"
-            class="sb-icon-btn"
-            title="添加"
-            aria-label="添加"
-            disabled
-            data-agent-id="sidebar.workspace.add"
-          >
-            <Plus :size="14" aria-hidden="true" />
-          </button>
-        </div>
       </div>
-      <nav class="sb-tree" aria-label="主导航">
+      <nav v-if="SIDEBAR_NAV.length" class="sb-tree" aria-label="主导航">
         <RouterLink
           v-for="item in SIDEBAR_NAV"
           :key="item.label"
