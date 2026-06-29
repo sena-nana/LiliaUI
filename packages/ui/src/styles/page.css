@@ -62,3 +62,97 @@
   overflow-wrap: anywhere;
   text-align: right;
 }
+
+.settings-page .settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.settings-page .settings-row:first-child {
+  padding-top: 4px;
+}
+
+.settings-page .settings-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 4px;
+}
+
+.settings-page .settings-row__label {
+  min-width: 0;
+}
+
+.settings-page .settings-row__hint {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.settings-page .segmented {
+  display: inline-flex;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 2px;
+  gap: 2px;
+  height: 34px;
+}
+
+.settings-page .segmented button {
+  background: transparent;
+  color: var(--text-muted);
+  border: 0;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.settings-page .segmented button:hover:not(.is-active) {
+  background: var(--bg-hover);
+  color: var(--text);
+  filter: none;
+}
+
+.settings-page .segmented button.is-active {
+  background: var(--bg-active);
+  color: var(--text);
+  filter: none;
+}
+
+.settings-page .radius-control {
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) 44px;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-page .radius-control input {
+  width: 100%;
+  padding-inline: 0;
+}
+
+.settings-page .radius-control output {
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: right;
+}
+
+@media (max-width: 900px) {
+  .settings-page .settings-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .settings-page .radius-control {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) 44px;
+  }
+}
