@@ -23,6 +23,17 @@ export {
   type LiliaCommandRegistry,
 } from "./commands";
 export {
+  installAgentDebugHarness,
+  isLiliaAgentDebugEnabled,
+  uninstallAgentDebugHarness,
+  type AgentDebugAction,
+  type AgentDebugElementSnapshot,
+  type AgentDebugLogEntry,
+  type AgentDebugSnapshot,
+  type InstallAgentDebugHarnessOptions,
+  type LiliaAgentDebugApi,
+} from "./agentDebug/index";
+export {
   APP_METADATA,
   APP_SHELL_COPY,
   SIDEBAR_CONFIG,

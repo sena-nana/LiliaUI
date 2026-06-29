@@ -13,6 +13,7 @@ import {
 import {
   bumpVersion,
   checkPackageManager,
+  createAgentDebugReport,
   copyLiliaAssets,
   createTemplateReport,
 } from "@lilia/tools";
@@ -64,6 +65,23 @@ describe("@lilia/tools", () => {
 
     expect(report.status).toBe("ready");
     expect(report.checks.every((check) => check.ok)).toBe(true);
+  });
+
+  it("reports Agent debug readiness without requiring desktop replay tools", () => {
+    const root = createProject();
+    const report = createAgentDebugReport(root, {
+      profile: {
+        expectedDependencies: ["@lilia/ui"],
+        importantFiles: [],
+        agentTargetFiles: {},
+      },
+    });
+
+    expect(report.status).toBe("ready");
+    expect(report.mode).toBe("agent-debug-readiness");
+    expect(report.desktopReplay.requiredForReadiness).toBe(false);
+    expect(report.runtimeTools.some((tool) => tool.id === "tauri-driver")).toBe(true);
+    expect(report.template.entrypoints.some((entry) => entry.id === "agent-debug")).toBe(true);
   });
 });
 

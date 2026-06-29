@@ -12,4 +12,7 @@ afterEach(() => {
     document.documentElement.removeAttribute("data-theme");
     document.documentElement.style.removeProperty("--app-corner-radius");
   }
+  if (typeof window !== "undefined") {
+    delete window.__liliaAgentDebug;
+  }
 });

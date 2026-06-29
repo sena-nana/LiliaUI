@@ -6,6 +6,7 @@ import {
   type RouterHistory,
 } from "vue-router";
 import AppRoot from "./AppRoot.vue";
+import { installAgentDebugHarness } from "./agentDebug/index";
 import LiliaDesktopShell from "./layouts/AppShell.vue";
 import { installCommandRegistry, type LiliaCommandMap } from "./commands";
 import { installContextMenu } from "./composables/useContextMenu";
@@ -48,6 +49,7 @@ export function createLiliaApp(options: CreateLiliaAppOptions) {
   installGlobalScrollbarVisibility();
   useTheme();
   useCornerStyle();
+  installAgentDebugHarness();
 
   const router = createLiliaRouter(options.routes, options.shell, options.history);
   const app = createApp(AppRoot);

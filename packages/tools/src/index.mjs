@@ -17,6 +17,10 @@ import {
   validateAppConfig,
   writeIfChanged,
 } from "@lilia/config";
+import {
+  createAgentDebugReportFromTemplate,
+  printAgentDebugReport,
+} from "./agentDebugReport.mjs";
 
 export const LILIA_TOOLS_ASSETS_ROOT = fileURLToPath(new URL("../assets/", import.meta.url));
 
@@ -224,6 +228,12 @@ export function printTemplateReport(report) {
   }
 }
 
+export function createAgentDebugReport(projectRoot = process.cwd(), options = {}) {
+  return createAgentDebugReportFromTemplate(projectRoot, options, createTemplateReport);
+}
+
+export { printAgentDebugReport };
+
 export async function runToolsCli(argv, options = {}) {
   const projectRoot = options.projectRoot ?? process.cwd();
   const env = options.env ?? process.env;
@@ -271,6 +281,19 @@ export async function runToolsCli(argv, options = {}) {
       return;
     }
 
+    if (command === "agent-debug") {
+      const report = createAgentDebugReport(projectRoot);
+      if (args.includes("--json")) {
+        process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+      } else {
+        printAgentDebugReport(report);
+      }
+      if (report.status !== "ready") {
+        process.exitCode = 1;
+      }
+      return;
+    }
+
     if (command === "migrate") {
       const copied = copyLiliaAssets(projectRoot, { force: args.includes("--force") });
       if (args.includes("--json")) {
@@ -301,12 +324,19 @@ function createTemplateProfile(overrides = {}) {
       ["src/routes.ts", "application route table"],
       ["src/commands.ts", "application command registration boundary"],
       ["src/features/home/HomePage.vue", "default business feature page"],
+      ["scripts/agent-debug.mjs", "template-level Agent debug compatibility entry"],
+      ["scripts/agent-debug-fallback.mjs", "temporary compatibility layer for older @lilia/tools installs"],
       ["node_modules/@lilia/ui/src/index.ts", "installed public UI package entry"],
       ["src-tauri/src/lib.rs", "Tauri command and plugin registration boundary"],
       ["tests/tooling.test.ts", "tooling and template-boundary regression tests"],
       ["docs/guide/development.md", "developer and agent orientation guide"],
     ],
     agentTargetFiles: {
+      "src/features/home/HomePage.vue": [
+        ["home.page"],
+        ["home.header"],
+        ["home.start-card"],
+      ],
       "node_modules/@lilia/ui/src/layouts/AppShell.vue": [["shell.sidebar.resizer"]],
       "node_modules/@lilia/ui/src/components/TitleBar.vue": [
         ["titlebar.left-sidebar.toggle"],
@@ -356,6 +386,11 @@ function createTemplateProfile(overrides = {}) {
       { id: "install", command: "corepack yarn install", purpose: "install dependencies with the pinned Yarn line" },
       { id: "frontend", command: "yarn dev", purpose: "run the Vite frontend only" },
       { id: "desktop", command: "yarn tauri:dev", purpose: "run the Tauri desktop app with dynamic devUrl" },
+      {
+        id: "agent-debug",
+        command: "yarn agent:debug --json",
+        purpose: "inspect template readiness, shared Agent targets, and desktop replay prerequisites",
+      },
       { id: "unit", command: "yarn test", purpose: "run Vitest regression tests" },
       { id: "build", command: "yarn build", purpose: "type-check and build frontend assets" },
       {
@@ -418,6 +453,7 @@ function printToolsUsage() {
     "  version-bump <patch|minor|major|x.y.z>",
     "  doctor [--json]",
     "  template-check [--json]",
+    "  agent-debug [--json]",
     "  copy-assets [--force] [--json]",
     "  migrate [--force] [--json]",
   ].join("\n"));
