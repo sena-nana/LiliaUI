@@ -93,6 +93,7 @@ export function defineLiliaViteConfig(options = {}) {
   const devPort = Number.parseInt(process.env[`${envPrefix}_DEV_PORT`] ?? "", 10);
   const strictPort = process.env[`${envPrefix}_DEV_STRICT_PORT`] === "1";
   const port = Number.isInteger(devPort) ? devPort : (options.defaultPort ?? 1420);
+  const { optimizeDeps, resolve, ...viteOptions } = options.vite ?? {};
 
   return defineViteConfig(() => ({
     plugins: [
@@ -108,6 +109,14 @@ export function defineLiliaViteConfig(options = {}) {
       ...(options.plugins ?? []),
     ],
     clearScreen: false,
+    resolve: {
+      ...(resolve ?? {}),
+      dedupe: unique(["vue", "vue-router", ...(resolve?.dedupe ?? [])]),
+    },
+    optimizeDeps: {
+      ...(optimizeDeps ?? {}),
+      exclude: unique(["@lilia/ui", ...(optimizeDeps?.exclude ?? [])]),
+    },
     server: {
       port,
       strictPort: strictPort || port === (options.defaultPort ?? 1420),
@@ -129,7 +138,7 @@ export function defineLiliaViteConfig(options = {}) {
       setupFiles: ["./tests/setupTests.ts"],
       ...(options.test ?? {}),
     },
-    ...(options.vite ?? {}),
+    ...viteOptions,
   }));
 }
 
@@ -215,4 +224,8 @@ function escapeHtml(value) {
 
 function toEnvPrefix(appName) {
   return appName.replace(/[^a-zA-Z0-9]+/g, "_").replace(/^_+|_+$/g, "").toUpperCase();
+}
+
+function unique(values) {
+  return [...new Set(values)];
 }

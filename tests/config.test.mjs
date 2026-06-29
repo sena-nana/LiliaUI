@@ -56,6 +56,8 @@ describe("@lilia/config", () => {
     const htmlPlugin = resolved.plugins.find((plugin) => plugin.name === "lilia-app-config-html");
 
     expect(resolved.server.port).toBe(1420);
+    expect(resolved.resolve.dedupe).toEqual(expect.arrayContaining(["vue", "vue-router"]));
+    expect(resolved.optimizeDeps.exclude).toEqual(expect.arrayContaining(["@lilia/ui"]));
     expect(htmlPlugin.transformIndexHtml("%APP_PRODUCT_TITLE%")).toBe("Config App");
 
     const docsConfig = defineLiliaDocsConfig({ title: "Docs", description: "Reference" });
