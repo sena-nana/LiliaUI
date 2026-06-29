@@ -61,22 +61,18 @@ impl Builder {
                 configure_main_window(app, &setup_options);
                 Ok(())
             })
-            .on_event(move |app, event| {
-                if matches!(event, RunEvent::Ready) {
-                    present_main_window(app, &event_options);
-                    return;
-                }
-
-                if let RunEvent::WindowEvent { label, event, .. } = event {
+            .on_event(move |app, event| match event {
+                RunEvent::Ready => present_main_window(app, &event_options),
+                RunEvent::WindowEvent { label, event, .. }
                     if label == &event_options.main_window_label
                         && matches!(
                             event,
                             WindowEvent::CloseRequested { .. } | WindowEvent::Destroyed
-                        )
-                    {
-                        persist_main_window_state(app, &event_options);
-                    }
+                        ) =>
+                {
+                    persist_main_window_state(app, &event_options);
                 }
+                _ => {}
             })
             .build()
     }
