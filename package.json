@@ -14,8 +14,12 @@
   "devDependencies": {
     "@lucide/vue": "^1.17.0",
     "@tauri-apps/api": "^2.11.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/vue": "^8.1.0",
     "@vitejs/plugin-vue": "^6.0.7",
     "@vue/compiler-sfc": "^3.5.35",
+    "jsdom": "^29.1.1",
     "typescript": "^6.0.3",
     "vite": "^8.0.16",
     "vitepress": "^1.6.4",
