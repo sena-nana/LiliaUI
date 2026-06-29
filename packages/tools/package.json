@@ -1,0 +1,23 @@
+{
+  "name": "@lilia/tools",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "lilia-tools": "./bin/lilia-tools.mjs"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./assets/*": "./assets/*"
+  },
+  "files": [
+    "assets",
+    "bin",
+    "src"
+  ],
+  "scripts": {
+    "typecheck": "node --check src/index.mjs && node --check bin/lilia-tools.mjs"
+  },
+  "dependencies": {
+    "@lilia/config": "workspace:*"
+  }
+}

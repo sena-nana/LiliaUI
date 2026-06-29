@@ -1,0 +1,26 @@
+{
+  "name": "@lilia/ui",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles.css",
+    "./theme/base.css": "./src/styles.css",
+    "./components/*": "./src/components/*.vue",
+    "./composables/*": "./src/composables/*.ts",
+    "./directives/*": "./src/directives/*.ts"
+  },
+  "sideEffects": [
+    "**/*.css",
+    "src/styles.css"
+  ],
+  "scripts": {
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "@lucide/vue": "^1.17.0",
+    "@tauri-apps/api": "^2.11.0",
+    "vue": "^3.5.35",
+    "vue-router": "^5.1.0"
+  }
+}
