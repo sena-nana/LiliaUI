@@ -3,7 +3,13 @@ import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { nativeBuildEnv, parsePort, pickBundleFile } from "@lilia/build";
+import {
+  createTauriDevBuildConfig,
+  nativeBuildEnv,
+  parsePort,
+  pickBundleFile,
+  viteDevArgs,
+} from "@lilia/build";
 import {
   bumpVersion,
   checkPackageManager,
@@ -71,6 +77,27 @@ describe("@lilia/build", () => {
     expect(nativeBuildEnv({ RUSTFLAGS: "-C target-cpu=x86-64-v3" }).RUSTFLAGS).toBe(
       "-C target-cpu=x86-64-v3",
     );
+  });
+
+  it("keeps Tauri devUrl and Vite dev server on the same dynamic port", () => {
+    const root = createProject();
+
+    expect(createTauriDevBuildConfig(34120)).toEqual({
+      devUrl: "http://localhost:34120",
+      beforeDevCommand: "yarn dev --host localhost --port 34120 --strictPort",
+    });
+    expect(
+      viteDevArgs(root, [], {
+        LILIA_TEST_DEV_PORT: "34120",
+        LILIA_TEST_DEV_STRICT_PORT: "1",
+      }),
+    ).toEqual(["vite", "--host", "localhost", "--port", "34120", "--strictPort"]);
+    expect(
+      viteDevArgs(root, ["--port", "5173"], {
+        LILIA_TEST_DEV_PORT: "34120",
+        LILIA_TEST_DEV_STRICT_PORT: "1",
+      }),
+    ).toEqual(["vite", "--port", "5173"]);
   });
 
   it("selects the newest supported bundle by platform priority", () => {

@@ -787,6 +787,9 @@ __metadata:
 "@lilia/ui@workspace:packages/ui":
   version: 0.0.0-use.local
   resolution: "@lilia/ui@workspace:packages/ui"
+  dependencies:
+    typescript: "npm:^6.0.3"
+    vue-tsc: "npm:^3.3.4"
   peerDependencies:
     "@lucide/vue": ^1.17.0
     "@tauri-apps/api": ^2.11.0

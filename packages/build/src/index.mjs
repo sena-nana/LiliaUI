@@ -48,6 +48,31 @@ export async function findAvailablePort(startPort) {
   throw new Error(`No available localhost port found from ${startPort}.`);
 }
 
+export function createTauriDevBuildConfig(port) {
+  return {
+    devUrl: `http://localhost:${port}`,
+    beforeDevCommand: `yarn dev --host localhost --port ${port} --strictPort`,
+  };
+}
+
+export function viteDevArgs(projectRoot = process.cwd(), args = [], env = process.env) {
+  if (hasViteOption(args, "--port") || hasViteOption(args, "-p")) {
+    return ["vite", ...args];
+  }
+
+  const envPrefix = toEnvPrefix(readAppConfig(projectRoot).appName);
+  const envPort = env[`${envPrefix}_DEV_PORT`];
+  if (!envPort) {
+    return ["vite", ...args];
+  }
+
+  const nextArgs = ["vite", "--host", "localhost", "--port", String(parsePort(envPort)), ...args];
+  if (env[`${envPrefix}_DEV_STRICT_PORT`] === "1" && !hasViteOption(args, "--strictPort")) {
+    nextArgs.push("--strictPort");
+  }
+  return nextArgs;
+}
+
 export function yarnSpawn(platform = process.platform, env = process.env) {
   if (platform !== "win32") {
     return { command: "yarn", argsPrefix: [] };
@@ -101,8 +126,8 @@ export async function runTauriDev(projectRoot = process.cwd(), argv = [], env = 
   const envPrefix = toEnvPrefix(appConfig.appName);
   const startPort = parsePort(env[`${envPrefix}_DEV_PORT`]);
   const port = await findAvailablePort(startPort);
-  const devUrl = `http://localhost:${port}`;
-  const config = JSON.stringify({ build: { devUrl } });
+  const build = createTauriDevBuildConfig(port);
+  const config = JSON.stringify({ build });
   const args = ["tauri", "dev", "--config", config, ...argv];
   const nextEnv = {
     ...env,
@@ -116,7 +141,7 @@ export async function runTauriDev(projectRoot = process.cwd(), argv = [], env = 
       command: spawnConfig.command,
       spawnArgs: [...spawnConfig.argsPrefix, ...args],
       args,
-      devUrl,
+      devUrl: build.devUrl,
       env: {
         [`${envPrefix}_DEV_PORT`]: nextEnv[`${envPrefix}_DEV_PORT`],
         [`${envPrefix}_DEV_STRICT_PORT`]: nextEnv[`${envPrefix}_DEV_STRICT_PORT`],
@@ -125,7 +150,7 @@ export async function runTauriDev(projectRoot = process.cwd(), argv = [], env = 
     return;
   }
 
-  console.log(`[${appConfig.appName}] Starting Tauri dev server at ${devUrl}`);
+  console.log(`[${appConfig.appName}] Starting Tauri dev server at ${build.devUrl}`);
   await spawnInherited(spawnConfig.command, [...spawnConfig.argsPrefix, ...args], {
     cwd: projectRoot,
     env: nextEnv,
@@ -160,7 +185,7 @@ export async function runBuildCli(argv, options = {}) {
     }
     if (command === "dev") {
       runPrepare(projectRoot, env);
-      runYarn(argsFor("vite", args), { cwd: projectRoot, env });
+      runYarn(viteDevArgs(projectRoot, args, env), { cwd: projectRoot, env });
       return;
     }
     if (command === "build") {
@@ -250,6 +275,10 @@ function runYarn(args = [], options = {}) {
 
 function argsFor(command, args) {
   return [command, ...args];
+}
+
+function hasViteOption(args, name) {
+  return args.some((arg) => arg === name || arg.startsWith(`${name}=`));
 }
 
 function spawnInherited(command, args = [], options = {}) {
