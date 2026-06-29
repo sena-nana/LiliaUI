@@ -4,11 +4,16 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./app": "./src/createLiliaApp.ts",
+    "./commands": "./src/commands.ts",
     "./styles.css": "./src/styles.css",
     "./theme/base.css": "./src/styles.css",
     "./components/*": "./src/components/*.vue",
     "./composables/*": "./src/composables/*.ts",
-    "./directives/*": "./src/directives/*.ts"
+    "./config/appShell": "./src/config/appShell.ts",
+    "./directives/*": "./src/directives/*.ts",
+    "./layouts/*": "./src/layouts/*.vue",
+    "./pages/*": "./src/pages/*.vue"
   },
   "sideEffects": [
     "**/*.css",

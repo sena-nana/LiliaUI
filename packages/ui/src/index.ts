@@ -1,3 +1,5 @@
+import { defineAsyncComponent } from "vue";
+
 export { default as LiliaAppRoot } from "./AppRoot.vue";
 export { default as LiliaDesktopShell } from "./layouts/AppShell.vue";
 export { default as ConfirmDialog } from "./components/ConfirmDialog.vue";
@@ -5,7 +7,7 @@ export { default as ContextMenuHost } from "./components/ContextMenuHost.vue";
 export { default as Dropdown } from "./components/Dropdown.vue";
 export { default as TitleBar } from "./components/TitleBar.vue";
 export { default as ViewTabs } from "./components/ViewTabs.vue";
-export { default as LiliaSettingsPage } from "./pages/SettingsPage.vue";
+export const LiliaSettingsPage = defineAsyncComponent(() => import("./pages/SettingsPage.vue"));
 
 export {
   createLiliaApp,

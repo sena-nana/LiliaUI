@@ -1,11 +1,13 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/vue";
 import ContextMenuHost from "@lilia/ui/components/ContextMenuHost";
 import { SB_MENU_POP_TRANSITION_MS } from "@lilia/ui/composables/menuMotion";
+import { createMemoryHistory, createRouter } from "vue-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { defineComponent } from "vue";
 import {
   closeContextMenu,
   installContextMenu,
+  LiliaAppRoot,
   openContextMenuAt,
   type ContextMenuItem,
 } from "@lilia/ui";
@@ -48,6 +50,47 @@ describe("ContextMenuHost", () => {
     closeContextMenu();
     vi.useRealTimers();
     vi.restoreAllMocks();
+  });
+
+  it("根组件在首次打开右键菜单时懒挂载菜单 Host", async () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: "/", component: { template: "<div />" } }],
+    });
+    await router.push("/");
+    await router.isReady();
+
+    const Wrapper = defineComponent({
+      components: { LiliaAppRoot },
+      template: `
+        <button data-testid="target" v-context-menu="items">目标</button>
+        <LiliaAppRoot />
+      `,
+      setup: () => ({
+        items: [{ id: "open", label: "打开", onSelect: vi.fn() }],
+      }),
+    });
+
+    render(Wrapper, {
+      global: {
+        directives: {
+          contextMenu: vContextMenu,
+        },
+        plugins: [router],
+      },
+    });
+
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+
+    await fireEvent.contextMenu(screen.getByTestId("target"), {
+      clientX: 96,
+      clientY: 128,
+    });
+
+    expect(await screen.findByRole("menu")).toHaveStyle({
+      left: "96px",
+      top: "128px",
+    });
   });
 
   it("全局屏蔽浏览器原生右键菜单", () => {
