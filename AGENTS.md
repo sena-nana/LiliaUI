@@ -9,6 +9,7 @@
   - `@lilia/config`: app 配置契约、同步逻辑、可继承 TS/Vite/VitePress 配置。
   - `@lilia/tools`: 默认资源、模板检查、迁移和周边 CLI。
   - `@lilia/build`: dev/build/docs/Tauri/verify 流程封装。
+  - `tauri-plugin-lilia`: Tauri 运行时公共边界,包含主窗口状态恢复、持久化和默认桌面窗口准备逻辑。
 
 ## 代码边界
 
@@ -18,6 +19,7 @@
 - `@lilia/config` 只负责配置读取、校验、同步和可继承配置;不承担 CLI 输出和流程编排。
 - `@lilia/tools` 负责面向项目的检查、资源复制、迁移和工具 CLI;不要放运行时 UI 状态。
 - `@lilia/build` 负责流程封装和跨平台命令执行;不要复制 `@lilia/config` 或 `@lilia/tools` 的业务逻辑。
+- `tauri-plugin-lilia` 负责 Rust/Tauri 运行时复用逻辑;不要把应用业务命令、业务状态或前端路由放进插件。
 - 包间运行时依赖优先用 peer dependency,并在 devDependency 用 `workspace:*` 支撑本仓库开发;消费端必须显式声明所需 `@lilia/*` 包。
 - 禁止直接修改消费仓库的 `node_modules/@lilia/*`;公共能力问题必须回到本仓库修复、验证、提交并推送。
 
@@ -46,6 +48,7 @@ yarn test
 
 - 修改 `@lilia/build` 或跨平台 CLI 时,优先用消费模板再验证 `yarn install`、`yarn agent:debug --json`、`yarn test`、`yarn build`。
 - 修改导出、包间依赖或 Git workspace 消费方式时,必须确认消费仓库能通过 `github:sena-nana/LiliaUI#workspace=<package>&head=main` 安装。
+- 修改 `tauri-plugin-lilia` 后,至少运行 `cargo test -p tauri-plugin-lilia`,并用消费模板运行 `cargo check --manifest-path src-tauri/Cargo.toml`。
 - 文档-only 改动可不跑测试,但最终说明要写清楚未运行原因。
 
 ## Git 提交

@@ -303,7 +303,6 @@ function createTemplateProfile(overrides = {}) {
       ["src/features/home/HomePage.vue", "default business feature page"],
       ["node_modules/@lilia/ui/src/index.ts", "installed public UI package entry"],
       ["src-tauri/src/lib.rs", "Tauri command and plugin registration boundary"],
-      ["src-tauri/src/window_state.rs", "window-state persistence boundary"],
       ["tests/tooling.test.ts", "tooling and template-boundary regression tests"],
       ["docs/guide/development.md", "developer and agent orientation guide"],
     ],
@@ -345,7 +344,7 @@ function createTemplateProfile(overrides = {}) {
         "thin Tauri 2 + Vue 3 scaffold",
         "@lilia/ui powered theme, titlebar, context menu, shell, and settings UI",
         "@lilia/config, @lilia/tools, and @lilia/build powered shared project tooling",
-        "window-state persistence and app metadata sync",
+        "tauri-plugin-lilia powered window-state persistence and app metadata sync",
       ],
       excludes: [
         "application-specific business flows",

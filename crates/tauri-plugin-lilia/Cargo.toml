@@ -1,0 +1,12 @@
+[package]
+name = "tauri-plugin-lilia"
+version.workspace = true
+edition.workspace = true
+description = "Shared Tauri runtime plugin for Lilia desktop scaffolds"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", features = ["image-png"] }
+tauri-plugin-store = "2"
