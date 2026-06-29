@@ -159,28 +159,34 @@ export async function runBuildCli(argv, options = {}) {
       return;
     }
     if (command === "dev") {
+      runPrepare(projectRoot, env);
       runSync("vite", args, { cwd: projectRoot, env });
       return;
     }
     if (command === "build") {
+      runPrepare(projectRoot, env);
       runSync("vue-tsc", ["--noEmit"], { cwd: projectRoot, env });
       runSync("vite", ["build", ...args], { cwd: projectRoot, env });
       return;
     }
     if (command === "docs") {
+      runPrepare(projectRoot, env);
       const [docsCommand = "dev", ...docsArgs] = args;
       runSync("vitepress", [docsCommand, "docs", ...docsArgs], { cwd: projectRoot, env });
       return;
     }
     if (command === "tauri-dev") {
+      runPrepare(projectRoot, env);
       await runTauriDev(projectRoot, args, env);
       return;
     }
     if (command === "tauri-build") {
+      runPrepare(projectRoot, env);
       runSync("yarn", ["tauri", "build", ...args], { cwd: projectRoot, env });
       return;
     }
     if (command === "tauri-install") {
+      runPrepare(projectRoot, env);
       runTauriInstall(projectRoot, env);
       return;
     }
