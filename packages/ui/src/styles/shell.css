@@ -104,6 +104,24 @@
     visibility 0s linear 0s;
 }
 
+.secondary-panel__top,
+.secondary-panel__footer {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.secondary-panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.secondary-panel__body > .sb-section + .sb-section {
+  margin-top: 14px;
+}
+
 .sb-tree__row {
   display: flex;
   align-items: center;

@@ -13,7 +13,8 @@ import {
 import SidebarFooter from "../components/sidebar/SidebarFooter.vue";
 import SidebarRowTools from "../components/sidebar/SidebarRowTools.vue";
 
-const hasMainSection = computed(() => SIDEBAR_NAV.length > 0 || SIDEBAR_GROUPS.length > 0);
+const hasNavSection = computed(() => SIDEBAR_NAV.length > 0);
+const hasTopSection = computed(() => SIDEBAR_GLOBAL_ACTIONS.length > 0 || hasNavSection.value);
 
 function selectAction(action: SidebarActionItem) {
   if (action.disabled || !action.onSelect) return;
@@ -23,100 +24,107 @@ function selectAction(action: SidebarActionItem) {
 
 <template>
   <aside class="secondary-panel" data-agent-id="sidebar.main">
-    <div v-if="SIDEBAR_GLOBAL_ACTIONS.length" class="sb-section sb-section--actions">
-      <button
-        v-for="action in SIDEBAR_GLOBAL_ACTIONS"
-        :key="action.key"
-        type="button"
-        class="sb-action"
-        :title="action.label"
-        :aria-label="action.label"
-        :disabled="action.disabled || !action.onSelect"
-        :data-agent-id="`sidebar.global.${action.key}`"
-        @click="selectAction(action)"
-      >
-        <component :is="action.icon" :size="16" aria-hidden="true" />
-      </button>
-    </div>
-
-    <div v-if="hasMainSection" class="sb-section">
-      <div class="sb-section__header">
-        <span class="sb-section__title">{{ APP_SHELL_COPY.workspaceSectionTitle }}</span>
-      </div>
-      <nav v-if="SIDEBAR_NAV.length" class="sb-tree" aria-label="主导航">
-        <RouterLink
-          v-for="item in SIDEBAR_NAV"
-          :key="item.label"
-          :to="item.to ?? '/'"
-          class="sb-tree__row"
-          exact-active-class="is-active"
-          :aria-disabled="item.disabled ? 'true' : undefined"
-          :data-agent-id="`sidebar.nav.${item.key}`"
+    <div v-if="hasTopSection" class="secondary-panel__top">
+      <div v-if="SIDEBAR_GLOBAL_ACTIONS.length" class="sb-section sb-section--actions">
+        <button
+          v-for="action in SIDEBAR_GLOBAL_ACTIONS"
+          :key="action.key"
+          type="button"
+          class="sb-action"
+          :title="action.label"
+          :aria-label="action.label"
+          :disabled="action.disabled || !action.onSelect"
+          :data-agent-id="`sidebar.global.${action.key}`"
+          @click="selectAction(action)"
         >
-          <component :is="item.icon" :size="14" aria-hidden="true" />
-          <span class="sb-tree__name">{{ item.label }}</span>
-          <SidebarRowTools
-            v-if="item.tools?.length"
-            :tools="item.tools"
-            :agent-id-base="`sidebar.nav.${item.key}.tool`"
-          />
-        </RouterLink>
-      </nav>
-    </div>
+          <component :is="action.icon" :size="16" aria-hidden="true" />
+        </button>
+      </div>
 
-    <div
-      v-for="group in SIDEBAR_GROUPS"
-      :key="group.title"
-      class="sb-section"
-      :data-agent-id="`sidebar.group.${group.key}`"
-    >
-      <div class="sb-section__header">
-        <span class="sb-section__title">{{ group.title }}</span>
-        <div v-if="group.tools?.length" class="sb-section__tools">
-          <button
-            v-for="tool in group.tools"
-            :key="tool.key"
-            type="button"
-            class="sb-icon-btn"
-            :title="tool.label"
-            :aria-label="tool.label"
-            :disabled="tool.disabled || !tool.onSelect"
-            :data-agent-id="`sidebar.group.${group.key}.tool.${tool.key}`"
-            @click="selectAction(tool)"
+      <div v-if="hasNavSection" class="sb-section">
+        <div class="sb-section__header">
+          <span class="sb-section__title">{{ APP_SHELL_COPY.workspaceSectionTitle }}</span>
+        </div>
+        <nav class="sb-tree" aria-label="主导航">
+          <RouterLink
+            v-for="item in SIDEBAR_NAV"
+            :key="item.label"
+            :to="item.to ?? '/'"
+            class="sb-tree__row"
+            exact-active-class="is-active"
+            :aria-disabled="item.disabled ? 'true' : undefined"
+            :data-agent-id="`sidebar.nav.${item.key}`"
           >
-            <component :is="tool.icon" :size="14" aria-hidden="true" />
-          </button>
-        </div>
-      </div>
-      <div class="sb-tree">
-        <div
-          v-for="item in group.items"
-          :key="item.label"
-          class="sb-tree__row sb-tree__row--project"
-          :aria-disabled="item.disabled ? 'true' : undefined"
-          :data-agent-id="`sidebar.group.${group.key}.item.${item.key}`"
-        >
-          <component :is="item.icon" :size="14" aria-hidden="true" />
-          <span class="sb-tree__name">{{ item.label }}</span>
-          <SidebarRowTools
-            v-if="item.tools?.length"
-            :tools="item.tools"
-            :agent-id-base="`sidebar.group.${group.key}.item.${item.key}.tool`"
-          />
-        </div>
-        <p v-if="group.emptyText" class="sb-tree__empty">{{ group.emptyText }}</p>
+            <component :is="item.icon" :size="14" aria-hidden="true" />
+            <span class="sb-tree__name">{{ item.label }}</span>
+            <SidebarRowTools
+              v-if="item.tools?.length"
+              :tools="item.tools"
+              :agent-id-base="`sidebar.nav.${item.key}.tool`"
+            />
+          </RouterLink>
+        </nav>
       </div>
     </div>
 
-    <SidebarFooter
-      :links="SIDEBAR_FOOTER_LINKS"
-      :status="SIDEBAR_FOOTER_STATUS"
-    />
+    <div class="secondary-panel__body">
+      <div
+        v-for="group in SIDEBAR_GROUPS"
+        :key="group.title"
+        class="sb-section"
+        :data-agent-id="`sidebar.group.${group.key}`"
+      >
+        <div class="sb-section__header">
+          <span class="sb-section__title">{{ group.title }}</span>
+          <div v-if="group.tools?.length" class="sb-section__tools">
+            <button
+              v-for="tool in group.tools"
+              :key="tool.key"
+              type="button"
+              class="sb-icon-btn"
+              :title="tool.label"
+              :aria-label="tool.label"
+              :disabled="tool.disabled || !tool.onSelect"
+              :data-agent-id="`sidebar.group.${group.key}.tool.${tool.key}`"
+              @click="selectAction(tool)"
+            >
+              <component :is="tool.icon" :size="14" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+        <div class="sb-tree">
+          <div
+            v-for="item in group.items"
+            :key="item.label"
+            class="sb-tree__row sb-tree__row--project"
+            :aria-disabled="item.disabled ? 'true' : undefined"
+            :data-agent-id="`sidebar.group.${group.key}.item.${item.key}`"
+          >
+            <component :is="item.icon" :size="14" aria-hidden="true" />
+            <span class="sb-tree__name">{{ item.label }}</span>
+            <SidebarRowTools
+              v-if="item.tools?.length"
+              :tools="item.tools"
+              :agent-id-base="`sidebar.group.${group.key}.item.${item.key}.tool`"
+            />
+          </div>
+          <p v-if="group.emptyText" class="sb-tree__empty">{{ group.emptyText }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="secondary-panel__footer">
+      <SidebarFooter
+        :links="SIDEBAR_FOOTER_LINKS"
+        :status="SIDEBAR_FOOTER_STATUS"
+      />
+    </div>
   </aside>
 </template>
 
 <style scoped>
 .sb-section {
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -195,7 +203,6 @@ function selectAction(action: SidebarActionItem) {
   display: flex;
   flex-direction: column;
   gap: 1px;
-  overflow-y: auto;
   min-height: 0;
 }
 

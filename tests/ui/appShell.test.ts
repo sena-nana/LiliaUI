@@ -76,6 +76,14 @@ function agentTarget(container: HTMLElement, id: string): HTMLElement {
   return target;
 }
 
+function sidebarZone(container: HTMLElement, className: string): HTMLElement {
+  const zone = container.querySelector(`.${className}`);
+  if (!(zone instanceof HTMLElement)) {
+    throw new Error(`未找到侧边栏区域: ${className}`);
+  }
+  return zone;
+}
+
 function sidebarRowForText(container: HTMLElement, text: string): HTMLElement {
   const label = Array.from(container.querySelectorAll(".sb-tree__name")).find(
     (node) => node.textContent === text,
@@ -135,6 +143,52 @@ describe("AppShell sidebar", () => {
     expect(view.queryByRole("button", { name: "更多" })).not.toBeInTheDocument();
 
     expect(view.router.currentRoute.value.fullPath).toBe("/");
+  });
+
+  it("主侧边栏将固定导航、滚动分组和底部状态拆成稳定区域", async () => {
+    const rowToolAction = vi.fn();
+    const view = await renderAppShell("/", {
+      ...testAppConfig,
+      sidebar: {
+        ...testAppConfig.sidebar,
+        groups: [
+          {
+            key: "repositories",
+            title: "仓库",
+            items: Array.from({ length: 100 }, (_, index) => {
+              const suffix = String(index + 1).padStart(3, "0");
+              return {
+                key: `repo-${suffix}`,
+                label: `Repo ${suffix}`,
+                icon: "folder",
+                tools: index === 0
+                  ? [{ key: "open", label: "打开仓库 001", icon: "folder", onSelect: rowToolAction }]
+                  : undefined,
+              };
+            }),
+          },
+        ],
+      },
+    });
+
+    const top = sidebarZone(view.container, "secondary-panel__top");
+    const body = sidebarZone(view.container, "secondary-panel__body");
+    const footer = sidebarZone(view.container, "secondary-panel__footer");
+    const overview = agentTarget(view.container, "sidebar.nav.overview");
+    const group = agentTarget(view.container, "sidebar.group.repositories");
+    const footerSettings = agentTarget(view.container, "sidebar.footer.settings");
+    const footerStatus = agentTarget(view.container, "sidebar.footer.status");
+
+    expect(top).toContainElement(overview);
+    expect(body).toContainElement(group);
+    expect(body).toContainElement(sidebarRowForText(view.container, "Repo 100"));
+    expect(footer).toContainElement(footerSettings);
+    expect(footer).toContainElement(footerStatus);
+    expect(body).not.toContainElement(overview);
+    expect(body).not.toContainElement(footerSettings);
+
+    await fireEvent.click(view.getByRole("button", { name: "打开仓库 001" }));
+    expect(rowToolAction).toHaveBeenCalledOnce();
   });
 
   it("主侧边栏工具按钮触发配置动作并禁用未接入动作", async () => {

@@ -12,12 +12,8 @@ defineProps<{
 
 <template>
   <aside class="secondary-panel settings-sidebar" aria-label="设置分类" data-agent-id="settings.sidebar">
-    <div class="settings-sidebar__head">
-      <RouterLink
-        :to="returnTo || '/'"
-        custom
-        v-slot="{ navigate }"
-      >
+    <div class="secondary-panel__top settings-sidebar__head">
+      <RouterLink :to="returnTo || '/'" custom v-slot="{ navigate }">
         <button
           type="button"
           class="settings-sidebar__back"
@@ -32,32 +28,34 @@ defineProps<{
       </RouterLink>
     </div>
 
-    <nav class="settings-sidebar__tabs" aria-label="设置分类">
-      <RouterLink
-        v-for="tab in tabs"
-        :key="tab.key"
-        :to="tab.to"
-        custom
-        v-slot="{ navigate }"
-      >
-        <button
-          type="button"
-          class="settings-sidebar__tab"
-          :class="{ 'is-active': activeKey === tab.key }"
-          :aria-current="activeKey === tab.key ? 'page' : undefined"
-          :data-agent-id="`settings.sidebar.tab.${tab.key}`"
-          @click="navigate"
+    <div class="secondary-panel__body">
+      <nav class="settings-sidebar__tabs" aria-label="设置分类">
+        <RouterLink
+          v-for="tab in tabs"
+          :key="tab.key"
+          :to="tab.to"
+          custom
+          v-slot="{ navigate }"
         >
-          <component
-            :is="tab.icon"
-            class="settings-sidebar__tab-icon"
-            :size="15"
-            aria-hidden="true"
-          />
-          <span class="settings-sidebar__tab-label">{{ tab.label }}</span>
-        </button>
-      </RouterLink>
-    </nav>
+          <button
+            type="button"
+            class="settings-sidebar__tab"
+            :class="{ 'is-active': activeKey === tab.key }"
+            :aria-current="activeKey === tab.key ? 'page' : undefined"
+            :data-agent-id="`settings.sidebar.tab.${tab.key}`"
+            @click="navigate"
+          >
+            <component
+              :is="tab.icon"
+              class="settings-sidebar__tab-icon"
+              :size="15"
+              aria-hidden="true"
+            />
+            <span class="settings-sidebar__tab-label">{{ tab.label }}</span>
+          </button>
+        </RouterLink>
+      </nav>
+    </div>
   </aside>
 </template>
 
