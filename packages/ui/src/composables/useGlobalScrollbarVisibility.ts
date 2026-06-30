@@ -33,6 +33,11 @@ type OverlayBinding = {
   target: ScrollTarget;
 };
 
+type OverflowState = {
+  horizontal: boolean;
+  vertical: boolean;
+};
+
 type DragState = OverlayBinding & {
   metrics: ThumbMetrics;
   pointerId: number | null;
@@ -48,11 +53,13 @@ const MIN_THUMB_SIZE = 24;
 let installed = false;
 let hoverTarget: ScrollTarget | null = null;
 let dragState: DragState | null = null;
+let overlayUpdateFrame: number | null = null;
 
 const hideTimers = new WeakMap<Element, ReturnType<typeof window.setTimeout>>();
 const removeTimers = new WeakMap<Element, ReturnType<typeof window.setTimeout>>();
 const overlays = new Map<Element, OverlayPair>();
 const overlayBindings = new WeakMap<HTMLDivElement, OverlayBinding>();
+const pendingOverlayTargets = new Map<Element, ScrollTarget>();
 
 function clamp(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return min;
@@ -157,14 +164,14 @@ function hasScrollableOverflow(target: ScrollTarget, metrics: ScrollMetrics, axi
   return overflow === "auto" || overflow === "scroll";
 }
 
-function hasScrollableOverflowOnAnyAxis(target: ScrollTarget, metrics: ScrollMetrics): boolean {
-  return (
-    hasScrollableOverflow(target, metrics, "vertical") ||
-    hasScrollableOverflow(target, metrics, "horizontal")
-  );
+function overflowState(target: ScrollTarget, metrics: ScrollMetrics): OverflowState {
+  return {
+    horizontal: hasScrollableOverflow(target, metrics, "horizontal"),
+    vertical: hasScrollableOverflow(target, metrics, "vertical"),
+  };
 }
 
-function inHotZone(target: ScrollTarget, metrics: ScrollMetrics, event: PointerEvent): boolean {
+function inHotZone(metrics: ScrollMetrics, overflow: OverflowState, event: PointerEvent): boolean {
   const { clientX, clientY } = event;
   if (
     clientX < metrics.rect.left ||
@@ -176,8 +183,8 @@ function inHotZone(target: ScrollTarget, metrics: ScrollMetrics, event: PointerE
   }
 
   return (
-    (hasScrollableOverflow(target, metrics, "vertical") && clientX >= metrics.rect.right - HOT_ZONE) ||
-    (hasScrollableOverflow(target, metrics, "horizontal") && clientY >= metrics.rect.bottom - HOT_ZONE)
+    (overflow.vertical && clientX >= metrics.rect.right - HOT_ZONE) ||
+    (overflow.horizontal && clientY >= metrics.rect.bottom - HOT_ZONE)
   );
 }
 
@@ -186,13 +193,15 @@ function findHoverTarget(event: PointerEvent): ScrollTarget | null {
     const target = node instanceof Element ? resolveTarget(node) : null;
     if (!target) continue;
     const metrics = readMetrics(target);
-    if (hasScrollableOverflowOnAnyAxis(target, metrics) && inHotZone(target, metrics, event)) return target;
+    const overflow = overflowState(target, metrics);
+    if ((overflow.vertical || overflow.horizontal) && inHotZone(metrics, overflow, event)) return target;
   }
 
   const documentTarget = resolveTarget(document);
   if (!documentTarget) return null;
   const metrics = readMetrics(documentTarget);
-  return hasScrollableOverflowOnAnyAxis(documentTarget, metrics) && inHotZone(documentTarget, metrics, event)
+  const overflow = overflowState(documentTarget, metrics);
+  return (overflow.vertical || overflow.horizontal) && inHotZone(metrics, overflow, event)
     ? documentTarget
     : null;
 }
@@ -206,6 +215,7 @@ function clearTimer(map: WeakMap<Element, ReturnType<typeof window.setTimeout>>,
 
 function removeOverlay(target: Element) {
   const overlay = overlays.get(target);
+  pendingOverlayTargets.delete(target);
   if (!overlay) return;
   overlayBindings.delete(overlay.vertical);
   overlayBindings.delete(overlay.horizontal);
@@ -214,8 +224,8 @@ function removeOverlay(target: Element) {
   overlays.delete(target);
 }
 
-function ensureOverlay(target: Element): OverlayPair {
-  const existing = overlays.get(target);
+function ensureOverlay(target: ScrollTarget): OverlayPair {
+  const existing = overlays.get(target.key);
   if (existing) return existing;
 
   const overlay = {
@@ -224,21 +234,21 @@ function ensureOverlay(target: Element): OverlayPair {
   };
   overlay.vertical.className = "global-scrollbar-overlay global-scrollbar-overlay--vertical";
   overlay.horizontal.className = "global-scrollbar-overlay global-scrollbar-overlay--horizontal";
+  overlayBindings.set(overlay.vertical, { axis: "vertical", target });
+  overlayBindings.set(overlay.horizontal, { axis: "horizontal", target });
   overlay.vertical.addEventListener("pointerdown", onOverlayPointerDown);
   overlay.horizontal.addEventListener("pointerdown", onOverlayPointerDown);
   document.body.append(overlay.vertical, overlay.horizontal);
-  overlays.set(target, overlay);
+  overlays.set(target.key, overlay);
   return overlay;
 }
 
 function updateOverlayAxis(
   element: HTMLDivElement,
-  target: ScrollTarget,
   axis: Axis,
   metrics: ScrollMetrics,
+  visible: boolean,
 ) {
-  const visible = hasScrollableOverflow(target, metrics, axis);
-  overlayBindings.set(element, { axis, target });
   element.classList.toggle("is-visible", visible);
 
   if (!visible) {
@@ -267,15 +277,29 @@ function updateOverlayAxis(
 
 function updateOverlay(target: ScrollTarget) {
   const metrics = readMetrics(target);
-  if (!hasScrollableOverflowOnAnyAxis(target, metrics)) {
+  const overflow = overflowState(target, metrics);
+  if (!overflow.vertical && !overflow.horizontal) {
     removeOverlay(target.key);
     return;
   }
 
   clearTimer(removeTimers, target.key);
-  const overlay = ensureOverlay(target.key);
-  updateOverlayAxis(overlay.vertical, target, "vertical", metrics);
-  updateOverlayAxis(overlay.horizontal, target, "horizontal", metrics);
+  const overlay = ensureOverlay(target);
+  updateOverlayAxis(overlay.vertical, "vertical", metrics, overflow.vertical);
+  updateOverlayAxis(overlay.horizontal, "horizontal", metrics, overflow.horizontal);
+}
+
+function flushOverlayUpdates() {
+  overlayUpdateFrame = null;
+  const targets = [...pendingOverlayTargets.values()];
+  pendingOverlayTargets.clear();
+  for (const target of targets) updateOverlay(target);
+}
+
+function scheduleOverlayUpdate(target: ScrollTarget) {
+  pendingOverlayTargets.set(target.key, target);
+  if (overlayUpdateFrame !== null) return;
+  overlayUpdateFrame = window.requestAnimationFrame(flushOverlayUpdates);
 }
 
 function hideOverlay(target: Element) {
@@ -306,7 +330,7 @@ function hideSoon(target: ScrollTarget) {
 
 function show(target: ScrollTarget) {
   clearTimer(hideTimers, target.key);
-  updateOverlay(target);
+  scheduleOverlayUpdate(target);
 }
 
 function axisMetrics(target: ScrollTarget, axis: Axis) {
@@ -354,6 +378,7 @@ function onOverlayPointerDown(event: PointerEvent) {
     startPointer: vertical ? event.clientY : event.clientX,
     startScroll: vertical ? metrics.scrollTop : metrics.scrollLeft,
   };
+  window.addEventListener("pointermove", onDragPointerMove, { capture: true });
   window.addEventListener("pointerup", onDragPointerEnd, true);
   window.addEventListener("pointercancel", onDragPointerEnd, true);
 }
@@ -375,6 +400,7 @@ function onDragPointerEnd(event: PointerEvent) {
   const target = dragState.target;
   dragState = null;
   hideSoon(target);
+  window.removeEventListener("pointermove", onDragPointerMove, true);
   window.removeEventListener("pointerup", onDragPointerEnd, true);
   window.removeEventListener("pointercancel", onDragPointerEnd, true);
 }
@@ -387,10 +413,7 @@ function onScroll(event: Event) {
 }
 
 function onPointerMove(event: PointerEvent) {
-  if (dragState) {
-    onDragPointerMove(event);
-    return;
-  }
+  if (dragState) return;
 
   const target = findHoverTarget(event);
   if (target) {
@@ -415,8 +438,14 @@ function onPointerLeave() {
 export function uninstallGlobalScrollbarVisibility() {
   if (!installed || typeof window === "undefined") return;
   installed = false;
+  if (overlayUpdateFrame !== null) {
+    window.cancelAnimationFrame(overlayUpdateFrame);
+    overlayUpdateFrame = null;
+  }
+  pendingOverlayTargets.clear();
   window.removeEventListener("scroll", onScroll, true);
   window.removeEventListener("pointermove", onPointerMove, true);
+  window.removeEventListener("pointermove", onDragPointerMove, true);
   window.removeEventListener("pointerleave", onPointerLeave);
   window.removeEventListener("pointerup", onDragPointerEnd, true);
   window.removeEventListener("pointercancel", onDragPointerEnd, true);
@@ -433,7 +462,7 @@ export function installGlobalScrollbarVisibility() {
   if (installed || typeof window === "undefined") return uninstallGlobalScrollbarVisibility;
   installed = true;
   window.addEventListener("scroll", onScroll, { capture: true, passive: true });
-  window.addEventListener("pointermove", onPointerMove, { capture: true });
+  window.addEventListener("pointermove", onPointerMove, { capture: true, passive: true });
   window.addEventListener("pointerleave", onPointerLeave);
   return uninstallGlobalScrollbarVisibility;
 }
