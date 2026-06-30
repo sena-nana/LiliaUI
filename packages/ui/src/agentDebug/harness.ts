@@ -13,10 +13,15 @@ let installed = false;
 let removeWindowListeners: (() => void) | null = null;
 let clearLogStore: (() => void) | null = null;
 
+type AgentDebugWindow = Window & {
+  __liliaAgentDebug?: LiliaAgentDebugApi;
+};
+
 export function installAgentDebugHarness(options: InstallAgentDebugHarnessOptions = {}) {
   if (typeof window === "undefined" || typeof document === "undefined") return null;
   if (options.enabled !== true && !isLiliaAgentDebugEnabled()) return null;
-  if (installed && window.__liliaAgentDebug) return window.__liliaAgentDebug;
+  const debugWindow = window as AgentDebugWindow;
+  if (installed && debugWindow.__liliaAgentDebug) return debugWindow.__liliaAgentDebug;
 
   const log = createAgentDebugLogStore(options.maxLogEntries ?? DEFAULT_MAX_LOG_ENTRIES);
   const observe = () => createAgentDebugSnapshot(log.entries());
@@ -49,15 +54,16 @@ export function installAgentDebugHarness(options: InstallAgentDebugHarnessOption
   removeWindowListeners?.();
   clearLogStore = log.clear;
   removeWindowListeners = installErrorListeners(log.append);
-  window.__liliaAgentDebug = api;
+  debugWindow.__liliaAgentDebug = api;
   installed = true;
   api.mark("agent-debug-installed", { route: api.observe().route });
   return api;
 }
 
 export function uninstallAgentDebugHarness() {
-  if (typeof window !== "undefined" && window.__liliaAgentDebug) {
-    delete window.__liliaAgentDebug;
+  if (typeof window !== "undefined") {
+    const debugWindow = window as AgentDebugWindow;
+    delete debugWindow.__liliaAgentDebug;
   }
   removeWindowListeners?.();
   clearLogStore?.();

@@ -53,9 +53,3 @@ export interface InstallAgentDebugHarnessOptions {
 }
 
 export type AppendAgentDebugLog = (entry: Omit<AgentDebugLogEntry, "timestamp">) => void;
-
-declare global {
-  interface Window {
-    __liliaAgentDebug?: LiliaAgentDebugApi;
-  }
-}

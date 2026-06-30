@@ -33,9 +33,7 @@ const open = ref(false);
 const placement = computed(() =>
   props.placement === "bottom" ? "bottom" : "top",
 );
-const menuMotion = useAnchoredMenuMotion(placement);
-const root = menuMotion.rootEl;
-const origin = menuMotion.origin;
+const menuMotion = useAnchoredMenuMotion(open, placement);
 
 const current = computed(() =>
   props.multiple ? undefined : props.options.find((option) => option.value === props.modelValue),
@@ -52,7 +50,10 @@ const buttonLabel = computed(() => {
   return `${selected.slice(0, 2).map((option) => option.label).join(", ")} +${selected.length - 2}`;
 });
 
-const placementClass = computed(() => `dd__menu--${placement.value}`);
+const menuStyle = computed(() => [
+  menuMotion.overlayStyle.value,
+  props.menuWidth ? { width: props.menuWidth } : null,
+]);
 
 function toggle(event: MouseEvent) {
   if (props.disabled) return;
@@ -83,8 +84,7 @@ function isSelected(option: Option) {
 }
 
 function onDocPointer(event: PointerEvent) {
-  if (!root.value) return;
-  if (!root.value.contains(event.target as Node)) open.value = false;
+  if (!menuMotion.containsTarget(event.target)) open.value = false;
 }
 
 function onKey(event: KeyboardEvent) {
@@ -94,13 +94,12 @@ function onKey(event: KeyboardEvent) {
   }
 }
 
-watch(open, async (value) => {
+watch(open, (value) => {
   if (value) {
-    menuMotion.resolveInitialOrigin();
-    await menuMotion.updateOrigin();
     document.addEventListener("pointerdown", onDocPointer, true);
     document.addEventListener("keydown", onKey);
   } else {
+    menuMotion.clearAnchor();
     document.removeEventListener("pointerdown", onDocPointer, true);
     document.removeEventListener("keydown", onKey);
   }
@@ -113,11 +112,11 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="root" class="dd">
+  <div class="dd">
     <button
       :ref="menuMotion.triggerEl"
       type="button"
-      class="chat-chip"
+      class="dd__button"
       :class="[buttonClass, { 'is-open': open, 'is-disabled': disabled }]"
       :data-agent-id="agentId"
       :disabled="disabled"
@@ -126,49 +125,44 @@ onBeforeUnmount(() => {
       @click="toggle"
     >
       <component v-if="icon" :is="icon" :size="13" aria-hidden="true" />
-      <span class="chat-chip__label">
+      <span class="dd__button-label">
         {{ buttonLabel }}
       </span>
-      <ChevronDown :size="12" aria-hidden="true" class="chat-chip__caret" />
+      <ChevronDown :size="12" aria-hidden="true" class="dd__button-caret" />
     </button>
 
-    <Transition name="sb-menu-pop" :duration="SB_MENU_POP_TRANSITION_MS">
-      <div
-        v-if="open"
-        :ref="menuMotion.menuEl"
-        class="dd__menu"
-        :class="placementClass"
-        role="listbox"
-        :aria-multiselectable="multiple ? 'true' : undefined"
-        :aria-label="menuLabel"
-        :style="[
-          {
-            '--sb-menu-origin-x': `${origin.x}px`,
-            '--sb-menu-origin-y': `${origin.y}px`,
-          },
-          menuWidth ? { width: menuWidth } : null,
-        ]"
-      >
-        <button
-          v-for="option in options"
-          :key="String(option.value)"
-          type="button"
-          class="dd__item"
-          :class="{ 'is-active': isSelected(option), 'is-multiple': multiple }"
-          :disabled="option.disabled"
-          role="option"
-          :aria-selected="isSelected(option)"
-          :data-agent-id="option.agentId"
-          @click="pick(option)"
+    <Teleport to="body">
+      <Transition name="sb-menu-pop" :duration="SB_MENU_POP_TRANSITION_MS">
+        <div
+          v-if="open"
+          :ref="menuMotion.menuEl"
+          class="dd__menu"
+          role="listbox"
+          :aria-multiselectable="multiple ? 'true' : undefined"
+          :aria-label="menuLabel"
+          :style="menuStyle"
         >
-          <span v-if="multiple" class="dd__item-check" aria-hidden="true">
-            <span v-if="isSelected(option)"></span>
-          </span>
-          <span class="dd__item-label">{{ option.label }}</span>
-          <span v-if="option.hint" class="dd__item-hint">{{ option.hint }}</span>
-        </button>
-      </div>
-    </Transition>
+          <button
+            v-for="option in options"
+            :key="String(option.value)"
+            type="button"
+            class="dd__item"
+            :class="{ 'is-active': isSelected(option), 'is-multiple': multiple }"
+            :disabled="option.disabled"
+            role="option"
+            :aria-selected="isSelected(option)"
+            :data-agent-id="option.agentId"
+            @click="pick(option)"
+          >
+            <span v-if="multiple" class="dd__item-check" aria-hidden="true">
+              <span v-if="isSelected(option)"></span>
+            </span>
+            <span class="dd__item-label">{{ option.label }}</span>
+            <span v-if="option.hint" class="dd__item-hint">{{ option.hint }}</span>
+          </button>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -179,7 +173,7 @@ onBeforeUnmount(() => {
   min-width: 0;
 }
 
-.chat-chip {
+.dd__button {
   height: 26px;
   padding: 0 8px;
   border: 1px solid var(--border);
@@ -196,14 +190,14 @@ onBeforeUnmount(() => {
   max-width: 100%;
 }
 
-.chat-chip:hover:not(.is-disabled):not(:disabled),
-.chat-chip.is-open {
+.dd__button:hover:not(.is-disabled):not(:disabled),
+.dd__button.is-open {
   background: var(--bg-hover);
   color: var(--text);
   filter: none;
 }
 
-.chat-chip__label {
+.dd__button-label {
   white-space: nowrap;
   max-width: 160px;
   overflow: hidden;
@@ -211,9 +205,8 @@ onBeforeUnmount(() => {
 }
 
 .dd__menu {
-  position: absolute;
-  left: 0;
-  z-index: 20;
+  position: fixed;
+  z-index: var(--z-dropdown, 1900);
   min-width: 180px;
   max-width: 280px;
   background: var(--bg-elev);
@@ -228,14 +221,6 @@ onBeforeUnmount(() => {
   overflow: auto;
   transform-origin: var(--sb-menu-origin-x, 0px) var(--sb-menu-origin-y, 0px);
   will-change: transform, opacity;
-}
-
-.dd__menu--top {
-  bottom: calc(100% + 6px);
-}
-
-.dd__menu--bottom {
-  top: calc(100% + 6px);
 }
 
 .dd__item {

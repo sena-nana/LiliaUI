@@ -69,7 +69,7 @@ describe("Dropdown", () => {
             toJSON: () => ({}),
           } as DOMRect;
         }
-        if (this.classList.contains("chat-chip")) {
+        if (this.classList.contains("dd__button")) {
           return {
             x: 100,
             y: 200,
@@ -139,7 +139,7 @@ describe("Dropdown", () => {
             toJSON: () => ({}),
           } as DOMRect;
         }
-        if (this.classList.contains("chat-chip")) {
+        if (this.classList.contains("dd__button")) {
           return {
             x: 100,
             y: 200,
