@@ -68,6 +68,7 @@
 .shell.is-resizing .shell__main,
 .shell.is-resizing .secondary-panel {
   pointer-events: none;
+  transition: none;
 }
 
 .shell.is-sidebar-collapsed .shell__resizer {

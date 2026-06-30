@@ -27,6 +27,8 @@ export function useResizablePane(options: ResizablePaneOptions) {
   let startX = 0;
   let startWidth = 0;
   let activePointer: { id: number; target: Element | null } | null = null;
+  let pendingClientX: number | null = null;
+  let resizeFrame: number | null = null;
 
   function setWidth(nextWidth: number) {
     width.value = clampWidth(nextWidth);
@@ -50,11 +52,35 @@ export function useResizablePane(options: ResizablePaneOptions) {
     }
   }
 
-  function onPointerMove(event: PointerEvent) {
+  function setWidthFromClientX(clientX: number) {
     const delta = options.edge === "left"
-      ? startX - event.clientX
-      : event.clientX - startX;
+      ? startX - clientX
+      : clientX - startX;
     setWidth(startWidth + delta);
+  }
+
+  function flushPendingResize() {
+    if (resizeFrame != null && typeof cancelAnimationFrame === "function") {
+      cancelAnimationFrame(resizeFrame);
+    }
+    resizeFrame = null;
+    if (pendingClientX == null) return;
+    const clientX = pendingClientX;
+    pendingClientX = null;
+    setWidthFromClientX(clientX);
+  }
+
+  function onPointerMove(event: PointerEvent) {
+    pendingClientX = event.clientX;
+    if (typeof requestAnimationFrame !== "function") {
+      flushPendingResize();
+      return;
+    }
+    if (resizeFrame != null) return;
+    resizeFrame = requestAnimationFrame(() => {
+      resizeFrame = null;
+      flushPendingResize();
+    });
   }
 
   function releasePointerCapture() {
@@ -73,6 +99,7 @@ export function useResizablePane(options: ResizablePaneOptions) {
     if (!isResizing.value) return;
     isResizing.value = false;
     removeResizeListeners();
+    flushPendingResize();
     releasePointerCapture();
     activePointer = null;
     persistWidth();
@@ -89,6 +116,8 @@ export function useResizablePane(options: ResizablePaneOptions) {
     isResizing.value = true;
     startX = event.clientX;
     startWidth = width.value;
+    pendingClientX = null;
+    resizeFrame = null;
     const target = event.currentTarget instanceof Element ? event.currentTarget : null;
     target?.setPointerCapture?.(event.pointerId);
     activePointer = { id: event.pointerId, target };

@@ -1,10 +1,11 @@
 import { defineComponent, nextTick, ref } from "vue";
 import { fireEvent, render } from "@testing-library/vue";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SIDEBAR_CONFIG, setLiliaAppConfig } from "@lilia/ui";
 import {
   usePersistentBoolean,
   usePersistentNumber,
+  useResizablePane,
   useShellSidebar,
 } from "@lilia/ui";
 import { testAppConfig } from "./fixtures/appConfig";
@@ -59,6 +60,60 @@ describe("persistent state composables", () => {
 });
 
 describe("shell sidebar composable", () => {
+  it("拖拽宽度更新按动画帧合并并在结束时写入最后位置", async () => {
+    const frameCallbacks: FrameRequestCallback[] = [];
+    vi.stubGlobal("requestAnimationFrame", vi.fn((callback: FrameRequestCallback) => {
+      frameCallbacks.push(callback);
+      return frameCallbacks.length;
+    }));
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    try {
+      const Probe = defineComponent({
+        setup() {
+          const disabled = ref(false);
+          const pane = useResizablePane({
+            storageKey: "test.resize",
+            minWidth: 120,
+            maxWidth: 320,
+            defaultWidth: 200,
+            edge: "right",
+            disabled,
+          });
+          return { pane };
+        },
+        template: `
+          <div>
+            <button aria-label="resize" @pointerdown="pane.startResize" />
+            <span data-testid="width">{{ pane.width.value }}</span>
+            <span data-testid="resizing">{{ String(pane.isResizing.value) }}</span>
+          </div>
+        `,
+      });
+
+      const view = render(Probe);
+      const handle = view.getByRole("button", { name: "resize" });
+      expect(view.getByTestId("width")).toHaveTextContent("200");
+
+      await fireEvent.pointerDown(handle, { button: 0, clientX: 100, pointerId: 1 });
+      await fireEvent.pointerMove(window, { clientX: 160, pointerId: 1 });
+      expect(view.getByTestId("width")).toHaveTextContent("200");
+
+      frameCallbacks.shift()?.(0);
+      await nextTick();
+      expect(view.getByTestId("width")).toHaveTextContent("260");
+
+      await fireEvent.pointerMove(window, { clientX: 180, pointerId: 1 });
+      await fireEvent.pointerUp(window, { pointerId: 1 });
+      await nextTick();
+
+      expect(view.getByTestId("resizing")).toHaveTextContent("false");
+      expect(view.getByTestId("width")).toHaveTextContent("280");
+      expect(localStorage.getItem("test.resize")).toBe("280");
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("组合宽度、折叠状态和 disabled 规则", async () => {
     localStorage.setItem(SIDEBAR_CONFIG.widthStorageKey, "260");
     const Probe = defineComponent({
