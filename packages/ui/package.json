@@ -7,6 +7,8 @@
     "./app": "./src/createLiliaApp.ts",
     "./commands": "./src/commands.ts",
     "./styles.css": "./src/styles.css",
+    "./styles/page.css": "./src/styles/page.css",
+    "./styles/shell.css": "./src/styles/shell.css",
     "./theme/base.css": "./src/styles.css",
     "./components/*": "./src/components/*.vue",
     "./composables/*": "./src/composables/*.ts",
@@ -17,7 +19,9 @@
   },
   "sideEffects": [
     "**/*.css",
-    "src/styles.css"
+    "src/styles.css",
+    "src/styles/page.css",
+    "src/styles/shell.css"
   ],
   "scripts": {
     "typecheck": "vue-tsc --noEmit -p tsconfig.json"

@@ -1,68 +1,90 @@
 <script setup lang="ts" generic="T extends string | number">
-import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
+import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { ChevronDown } from "@lucide/vue";
-import {
-  SB_LAYER_Z_INDEX,
-  SB_MENU_POP_TRANSITION_MS,
-  clampAnchoredMenuPosition,
-  createAnchoredMenuPosition,
-  createPlacedAnchoredMenuPosition,
-  resolveMenuTransformOrigin,
-} from "../composables/menuMotion";
+import { SB_MENU_POP_TRANSITION_MS } from "../composables/menuMotion";
+import { useAnchoredMenuMotion } from "../composables/useAnchoredMenuMotion";
 
 interface Option {
   value: T;
   label: string;
   hint?: string;
+  disabled?: boolean;
+  agentId?: string;
 }
 
 const props = defineProps<{
-  modelValue: T;
-  options: Option[];
+  modelValue: T | readonly T[];
+  options: readonly Option[];
   icon?: unknown;
   placeholder?: string;
+  displayLabel?: string;
+  multiple?: boolean;
   placement?: "top" | "bottom";
   disabled?: boolean;
+  buttonClass?: string;
+  agentId?: string;
+  menuWidth?: string;
+  menuLabel?: string;
 }>();
 
-const emit = defineEmits<{ "update:modelValue": [value: T] }>();
+const emit = defineEmits<{ "update:modelValue": [value: any] }>();
 
 const open = ref(false);
-const root = ref<HTMLElement | null>(null);
-const triggerEl = ref<HTMLElement | null>(null);
-const menuEl = ref<HTMLElement | null>(null);
-const placement = computed(() => props.placement === "bottom" ? "bottom" : "top");
-const pos = ref(createAnchoredMenuPosition(0, 0));
-const origin = ref({ x: 0, y: 0 });
-const anchorX = ref<number | null>(null);
+const placement = computed(() =>
+  props.placement === "bottom" ? "bottom" : "top",
+);
+const menuMotion = useAnchoredMenuMotion(placement);
+const root = menuMotion.rootEl;
+const origin = menuMotion.origin;
 
 const current = computed(() =>
-  props.options.find((option) => option.value === props.modelValue),
+  props.multiple ? undefined : props.options.find((option) => option.value === props.modelValue),
 );
+const selectedValues = computed(() =>
+  props.multiple && Array.isArray(props.modelValue) ? props.modelValue : [],
+);
+const buttonLabel = computed(() => {
+  if (props.displayLabel) return props.displayLabel;
+  if (!props.multiple) return current.value?.label ?? props.placeholder ?? "-";
+  const selected = props.options.filter((option) => selectedValues.value.includes(option.value));
+  if (!selected.length) return props.placeholder ?? "-";
+  if (selected.length <= 2) return selected.map((option) => option.label).join(", ");
+  return `${selected.slice(0, 2).map((option) => option.label).join(", ")} +${selected.length - 2}`;
+});
+
+const placementClass = computed(() => `dd__menu--${placement.value}`);
 
 function toggle(event: MouseEvent) {
   if (props.disabled) return;
-  const trigger = triggerEl.value ?? root.value;
-  if (trigger) {
-    const rect = trigger.getBoundingClientRect();
-    anchorX.value = Number.isFinite(event.clientX) && event.clientX > 0
-      ? event.clientX
-      : rect.left + rect.width / 2;
-  }
+  menuMotion.captureAnchor(event);
   open.value = !open.value;
 }
 
 function pick(option: Option) {
+  if (option.disabled) return;
+  if (props.multiple) {
+    const values = selectedValues.value;
+    emit(
+      "update:modelValue",
+      values.includes(option.value)
+        ? values.filter((value) => value !== option.value)
+        : [...values, option.value],
+    );
+    return;
+  }
   emit("update:modelValue", option.value);
   open.value = false;
 }
 
+function isSelected(option: Option) {
+  return props.multiple
+    ? selectedValues.value.includes(option.value)
+    : option.value === props.modelValue;
+}
+
 function onDocPointer(event: PointerEvent) {
-  const target = event.target as Node | null;
-  if (!target) return;
-  if (root.value?.contains(target)) return;
-  if (menuEl.value?.contains(target)) return;
-  open.value = false;
+  if (!root.value) return;
+  if (!root.value.contains(event.target as Node)) open.value = false;
 }
 
 function onKey(event: KeyboardEvent) {
@@ -72,65 +94,32 @@ function onKey(event: KeyboardEvent) {
   }
 }
 
-function closeMenu() {
-  open.value = false;
-}
-
-function updatePosition(width = 0, height = 0) {
-  const trigger = triggerEl.value ?? root.value;
-  if (!trigger) return;
-  const nextPos = createPlacedAnchoredMenuPosition(
-    trigger.getBoundingClientRect(),
-    placement.value,
-    height,
-    anchorX.value ?? undefined,
-  );
-  pos.value = width > 0 && height > 0
-    ? clampAnchoredMenuPosition(nextPos, width, height)
-    : nextPos;
-  origin.value = resolveMenuTransformOrigin(
-    pos.value,
-    width > 0 ? width : Number.POSITIVE_INFINITY,
-    height > 0 ? height : Number.POSITIVE_INFINITY,
-  );
-}
-
 watch(open, async (value) => {
   if (value) {
-    updatePosition();
-    await nextTick();
-    const element = menuEl.value;
-    if (element) updatePosition(element.offsetWidth, element.offsetHeight);
+    menuMotion.resolveInitialOrigin();
+    await menuMotion.updateOrigin();
     document.addEventListener("pointerdown", onDocPointer, true);
     document.addEventListener("keydown", onKey);
-    window.addEventListener("scroll", closeMenu, true);
-    window.addEventListener("resize", closeMenu);
-    window.addEventListener("blur", closeMenu);
   } else {
     document.removeEventListener("pointerdown", onDocPointer, true);
     document.removeEventListener("keydown", onKey);
-    window.removeEventListener("scroll", closeMenu, true);
-    window.removeEventListener("resize", closeMenu);
-    window.removeEventListener("blur", closeMenu);
   }
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener("pointerdown", onDocPointer, true);
   document.removeEventListener("keydown", onKey);
-  window.removeEventListener("scroll", closeMenu, true);
-  window.removeEventListener("resize", closeMenu);
-  window.removeEventListener("blur", closeMenu);
 });
 </script>
 
 <template>
   <div ref="root" class="dd">
     <button
-      ref="triggerEl"
+      :ref="menuMotion.triggerEl"
       type="button"
       class="chat-chip"
-      :class="{ 'is-open': open, 'is-disabled': disabled }"
+      :class="[buttonClass, { 'is-open': open, 'is-disabled': disabled }]"
+      :data-agent-id="agentId"
       :disabled="disabled"
       :aria-haspopup="true"
       :aria-expanded="open"
@@ -138,63 +127,73 @@ onBeforeUnmount(() => {
     >
       <component v-if="icon" :is="icon" :size="13" aria-hidden="true" />
       <span class="chat-chip__label">
-        {{ current?.label ?? placeholder ?? "-" }}
+        {{ buttonLabel }}
       </span>
       <ChevronDown :size="12" aria-hidden="true" class="chat-chip__caret" />
     </button>
-  </div>
-  <Teleport to="body">
+
     <Transition name="sb-menu-pop" :duration="SB_MENU_POP_TRANSITION_MS">
       <div
         v-if="open"
-        ref="menuEl"
+        :ref="menuMotion.menuEl"
         class="dd__menu"
+        :class="placementClass"
         role="listbox"
-        :style="{
-          left: `${pos.x}px`,
-          top: `${pos.y}px`,
-          zIndex: String(SB_LAYER_Z_INDEX.dropdown),
-          '--sb-menu-origin-x': `${origin.x}px`,
-          '--sb-menu-origin-y': `${origin.y}px`,
-        }"
+        :aria-multiselectable="multiple ? 'true' : undefined"
+        :aria-label="menuLabel"
+        :style="[
+          {
+            '--sb-menu-origin-x': `${origin.x}px`,
+            '--sb-menu-origin-y': `${origin.y}px`,
+          },
+          menuWidth ? { width: menuWidth } : null,
+        ]"
       >
         <button
           v-for="option in options"
           :key="String(option.value)"
           type="button"
           class="dd__item"
-          :class="{ 'is-active': option.value === modelValue }"
+          :class="{ 'is-active': isSelected(option), 'is-multiple': multiple }"
+          :disabled="option.disabled"
           role="option"
-          :aria-selected="option.value === modelValue"
+          :aria-selected="isSelected(option)"
+          :data-agent-id="option.agentId"
           @click="pick(option)"
         >
+          <span v-if="multiple" class="dd__item-check" aria-hidden="true">
+            <span v-if="isSelected(option)"></span>
+          </span>
           <span class="dd__item-label">{{ option.label }}</span>
           <span v-if="option.hint" class="dd__item-hint">{{ option.hint }}</span>
         </button>
       </div>
     </Transition>
-  </Teleport>
+  </div>
 </template>
 
 <style scoped>
 .dd {
   position: relative;
   display: inline-flex;
+  min-width: 0;
 }
 
 .chat-chip {
-  height: 28px;
-  padding: 0 10px;
+  height: 26px;
+  padding: 0 8px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   background: var(--bg-subtle);
   color: var(--text-muted);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   font-size: 12px;
   font-weight: 500;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .chat-chip:hover:not(.is-disabled):not(:disabled),
@@ -212,45 +211,107 @@ onBeforeUnmount(() => {
 }
 
 .dd__menu {
-  position: fixed;
+  position: absolute;
+  left: 0;
+  z-index: 20;
   min-width: 180px;
   max-width: 280px;
   background: var(--bg-elev);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 4px;
+  padding: 3px;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 0;
   box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+  max-height: 280px;
+  overflow: auto;
   transform-origin: var(--sb-menu-origin-x, 0px) var(--sb-menu-origin-y, 0px);
   will-change: transform, opacity;
 }
 
+.dd__menu--top {
+  bottom: calc(100% + 6px);
+}
+
+.dd__menu--bottom {
+  top: calc(100% + 6px);
+}
+
 .dd__item {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  padding: 6px 10px;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 7px;
   border: 0;
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--text);
   cursor: pointer;
   text-align: left;
+  min-height: 26px;
   height: auto;
   font-weight: 500;
+  font-size: 12px;
+  line-height: 1.45;
+  width: 100%;
+  min-width: 0;
+  white-space: nowrap;
 }
 
-.dd__item:hover,
+.dd__item:hover:not(:disabled),
 .dd__item.is-active {
   background: var(--bg-hover);
   filter: none;
 }
 
+.dd__item.is-multiple {
+  align-items: center;
+}
+
+.dd__item-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  background: var(--bg-subtle);
+}
+
+.dd__item-check span {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.dd__item:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.dd__item:disabled:hover {
+  background: transparent;
+}
+
+.dd__item-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .dd__item-hint {
-  font-size: 11px;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 10px;
+  line-height: 1.4;
   color: var(--text-faint);
 }
 </style>

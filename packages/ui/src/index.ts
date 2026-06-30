@@ -47,8 +47,11 @@ export {
 export * from "./composables/useContextMenu";
 export * from "./composables/useCornerStyle";
 export * from "./composables/useGlobalScrollbarVisibility";
+export * from "./composables/useAnchoredMenuMotion";
+export * from "./composables/menuMotion";
 export * from "./composables/usePersistentState";
 export * from "./composables/useResizablePane";
+export * from "./composables/useRouteReturnTarget";
 export * from "./composables/useShellSidebar";
 export * from "./composables/useTheme";
 export { vContextMenu } from "./directives/contextMenu";

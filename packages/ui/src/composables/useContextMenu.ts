@@ -8,7 +8,8 @@ export interface ContextMenuItem {
   disabled?: boolean;
   danger?: boolean;
   confirmLabel?: string;
-  onSelect: () => void | Promise<void>;
+  children?: ContextMenuItem[];
+  onSelect?: () => void | Promise<void>;
 }
 
 export type ContextMenuProvider = (
@@ -39,6 +40,7 @@ const state = reactive<MenuState>({
 
 const providers = new WeakMap<Element, ContextMenuProvider>();
 let installed = false;
+let removeGlobalListeners: (() => void) | null = null;
 
 export function registerContextMenu(
   element: Element,
@@ -102,53 +104,75 @@ export function isContextMenuItemPending(item: ContextMenuItem): boolean {
 
 export async function selectContextMenuItem(item: ContextMenuItem) {
   if (item.disabled) return;
+  if (item.children?.length) {
+    state.items = item.children;
+    state.pendingConfirmId = null;
+    state.openSeq += 1;
+    return;
+  }
   const key = itemKey(item);
   if (item.confirmLabel && state.pendingConfirmId !== key) {
     state.pendingConfirmId = key;
     return;
   }
   closeContextMenu();
-  await item.onSelect();
+  await item.onSelect?.();
 }
 
 export function installContextMenu() {
-  if (installed || typeof window === "undefined") return;
+  if (installed || typeof window === "undefined") return uninstallContextMenu;
   installed = true;
 
-  window.addEventListener("contextmenu", (event) => {
+  const onContextMenu = (event: MouseEvent) => {
     event.preventDefault();
     const items = collectItemsFor(event);
     if (items.length) openMenu(event.clientX, event.clientY, items);
     else closeContextMenu();
-  });
+  };
 
-  window.addEventListener(
-    "pointerdown",
-    (event) => {
-      if (!state.open) return;
-      const target = event.target as Element | null;
-      if (target?.closest?.(".ctx-menu")) return;
-      closeContextMenu();
-    },
-    true,
-  );
+  const onPointerDown = (event: PointerEvent) => {
+    if (!state.open) return;
+    const target = event.target as Element | null;
+    if (target?.closest?.(".ctx-menu")) return;
+    closeContextMenu();
+  };
 
-  window.addEventListener("keydown", (event) => {
+  const onKeydown = (event: KeyboardEvent) => {
     if (event.key === "Escape" && state.open) {
       closeContextMenu();
       event.stopPropagation();
     }
-  });
+  };
 
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (state.open) closeContextMenu();
-    },
-    true,
-  );
+  const onScroll = () => {
+    if (state.open) closeContextMenu();
+  };
+
+  window.addEventListener("contextmenu", onContextMenu);
+  window.addEventListener("pointerdown", onPointerDown, true);
+  window.addEventListener("keydown", onKeydown);
+  window.addEventListener("scroll", onScroll, true);
   window.addEventListener("resize", closeContextMenu);
   window.addEventListener("blur", closeContextMenu);
+  removeGlobalListeners = () => {
+    window.removeEventListener("contextmenu", onContextMenu);
+    window.removeEventListener("pointerdown", onPointerDown, true);
+    window.removeEventListener("keydown", onKeydown);
+    window.removeEventListener("scroll", onScroll, true);
+    window.removeEventListener("resize", closeContextMenu);
+    window.removeEventListener("blur", closeContextMenu);
+  };
+
+  return uninstallContextMenu;
+}
+
+export function uninstallContextMenu() {
+  if (!installed || typeof window === "undefined") return;
+  installed = false;
+  removeGlobalListeners?.();
+  removeGlobalListeners = null;
+  closeContextMenu();
+  finalizeClosedContextMenu();
 }
 
 export function useContextMenu() {
