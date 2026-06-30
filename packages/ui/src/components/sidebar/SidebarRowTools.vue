@@ -5,6 +5,11 @@ defineProps<{
   tools: SidebarActionItem[];
   agentIdBase?: string;
 }>();
+
+function selectTool(tool: SidebarActionItem) {
+  if (tool.disabled || !tool.onSelect) return;
+  void tool.onSelect();
+}
 </script>
 
 <template>
@@ -16,8 +21,9 @@ defineProps<{
       class="sb-icon-btn"
       :title="tool.label"
       :aria-label="tool.label"
-      :disabled="tool.disabled"
+      :disabled="tool.disabled || !tool.onSelect"
       :data-agent-id="agentIdBase ? `${agentIdBase}.${tool.key}` : undefined"
+      @click="selectTool(tool)"
     >
       <component :is="tool.icon" :size="13" aria-hidden="true" />
     </button>

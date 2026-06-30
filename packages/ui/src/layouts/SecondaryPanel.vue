@@ -8,11 +8,17 @@ import {
   SIDEBAR_GLOBAL_ACTIONS,
   SIDEBAR_GROUPS,
   SIDEBAR_NAV,
+  type SidebarActionItem,
 } from "../config/appShell";
 import SidebarFooter from "../components/sidebar/SidebarFooter.vue";
 import SidebarRowTools from "../components/sidebar/SidebarRowTools.vue";
 
 const hasMainSection = computed(() => SIDEBAR_NAV.length > 0 || SIDEBAR_GROUPS.length > 0);
+
+function selectAction(action: SidebarActionItem) {
+  if (action.disabled || !action.onSelect) return;
+  void action.onSelect();
+}
 </script>
 
 <template>
@@ -25,8 +31,9 @@ const hasMainSection = computed(() => SIDEBAR_NAV.length > 0 || SIDEBAR_GROUPS.l
         class="sb-action"
         :title="action.label"
         :aria-label="action.label"
-        :disabled="action.disabled"
+        :disabled="action.disabled || !action.onSelect"
         :data-agent-id="`sidebar.global.${action.key}`"
+        @click="selectAction(action)"
       >
         <component :is="action.icon" :size="16" aria-hidden="true" />
       </button>
@@ -73,8 +80,9 @@ const hasMainSection = computed(() => SIDEBAR_NAV.length > 0 || SIDEBAR_GROUPS.l
             class="sb-icon-btn"
             :title="tool.label"
             :aria-label="tool.label"
-            :disabled="tool.disabled"
+            :disabled="tool.disabled || !tool.onSelect"
             :data-agent-id="`sidebar.group.${group.key}.tool.${tool.key}`"
+            @click="selectAction(tool)"
           >
             <component :is="tool.icon" :size="14" aria-hidden="true" />
           </button>

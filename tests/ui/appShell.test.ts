@@ -1,7 +1,7 @@
 import { fireEvent, render, waitFor } from "@testing-library/vue";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { LiliaDesktopShell, SIDEBAR_CONFIG, setLiliaAppConfig } from "@lilia/ui";
+import { LiliaDesktopShell, SIDEBAR_CONFIG, setLiliaAppConfig, type LiliaAppConfig } from "@lilia/ui";
 import { testAppConfig } from "./fixtures/appConfig";
 
 vi.mock("@tauri-apps/api/window", () => ({
@@ -14,7 +14,7 @@ vi.mock("@tauri-apps/api/window", () => ({
   }),
 }));
 
-async function renderAppShell(initialRoute = "/") {
+async function renderAppShell(initialRoute = "/", config: LiliaAppConfig = testAppConfig) {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
@@ -39,7 +39,7 @@ async function renderAppShell(initialRoute = "/") {
   await router.push(initialRoute);
   await router.isReady();
 
-  setLiliaAppConfig(testAppConfig);
+  setLiliaAppConfig(config);
   const view = render(LiliaDesktopShell, {
     global: {
       plugins: [router],
@@ -134,6 +134,57 @@ describe("AppShell sidebar", () => {
     expect(view.queryByRole("button", { name: "添加" })).not.toBeInTheDocument();
     expect(view.queryByRole("button", { name: "更多" })).not.toBeInTheDocument();
 
+    expect(view.router.currentRoute.value.fullPath).toBe("/");
+  });
+
+  it("主侧边栏工具按钮触发配置动作并禁用未接入动作", async () => {
+    const globalAction = vi.fn();
+    const navToolAction = vi.fn();
+    const groupToolAction = vi.fn();
+    const rowToolAction = vi.fn();
+    const view = await renderAppShell("/", {
+      ...testAppConfig,
+      sidebar: {
+        ...testAppConfig.sidebar,
+        globalActions: [
+          { key: "refresh", label: "刷新", icon: "search", onSelect: globalAction },
+          { key: "missing", label: "未接入", icon: "more" },
+        ],
+        nav: [
+          {
+            ...testAppConfig.sidebar.nav[0],
+            tools: [{ key: "pin", label: "固定", icon: "more", onSelect: navToolAction }],
+          },
+          testAppConfig.sidebar.nav[1],
+        ],
+        groups: [
+          {
+            key: "repositories",
+            title: "仓库",
+            tools: [{ key: "add", label: "添加仓库", icon: "file-plus", onSelect: groupToolAction }],
+            items: [
+              {
+                key: "demo",
+                label: "Demo",
+                icon: "folder",
+                tools: [{ key: "open", label: "打开仓库", icon: "folder", onSelect: rowToolAction }],
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    await fireEvent.click(view.getByRole("button", { name: "刷新" }));
+    await fireEvent.click(view.getByRole("button", { name: "固定" }));
+    await fireEvent.click(view.getByRole("button", { name: "添加仓库" }));
+    await fireEvent.click(view.getByRole("button", { name: "打开仓库" }));
+
+    expect(globalAction).toHaveBeenCalledOnce();
+    expect(navToolAction).toHaveBeenCalledOnce();
+    expect(groupToolAction).toHaveBeenCalledOnce();
+    expect(rowToolAction).toHaveBeenCalledOnce();
+    expect(view.getByRole("button", { name: "未接入" })).toBeDisabled();
     expect(view.router.currentRoute.value.fullPath).toBe("/");
   });
 

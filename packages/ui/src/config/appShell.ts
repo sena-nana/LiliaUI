@@ -44,6 +44,7 @@ export interface LiliaSidebarActionInput {
   icon: IconInput;
   key: string;
   label: string;
+  onSelect?: () => void | Promise<void>;
 }
 
 export interface LiliaSidebarNavInput {
@@ -135,6 +136,7 @@ export interface SidebarActionItem {
   icon: Component;
   key: string;
   label: string;
+  onSelect?: () => void | Promise<void>;
 }
 
 export interface SidebarNavItem {
