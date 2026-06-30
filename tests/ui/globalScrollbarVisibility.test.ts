@@ -14,6 +14,17 @@ function createScroller(input: {
 } = {}) {
   const scroller = document.createElement("div");
   let scrollTop = input.scrollTop ?? 0;
+  const measure = vi.fn(() => ({
+    top: 10,
+    right: 210,
+    bottom: 110,
+    left: 10,
+    width: 200,
+    height: 100,
+    x: 10,
+    y: 10,
+    toJSON: () => ({}),
+  }));
   scroller.style.overflowY = input.overflowY ?? "auto";
   scroller.style.overflowX = input.overflowX ?? "hidden";
   Object.defineProperties(scroller, {
@@ -30,20 +41,11 @@ function createScroller(input: {
     },
     scrollLeft: { configurable: true, value: 0 },
   });
-  scroller.getBoundingClientRect = () => ({
-    top: 10,
-    right: 210,
-    bottom: 110,
-    left: 10,
-    width: 200,
-    height: 100,
-    x: 10,
-    y: 10,
-    toJSON: () => ({}),
-  });
+  scroller.getBoundingClientRect = measure;
   document.body.appendChild(scroller);
   return {
     element: scroller,
+    measure,
     scrollTop: () => scrollTop,
   };
 }
@@ -58,6 +60,14 @@ function horizontalOverlay() {
 
 function runOverlayFrame() {
   vi.advanceTimersByTime(16);
+}
+
+function discoverScroller(element: HTMLElement) {
+  element.dispatchEvent(new WheelEvent("wheel", { bubbles: true }));
+}
+
+function scrollScroller(element: HTMLElement) {
+  element.dispatchEvent(new Event("scroll"));
 }
 
 describe("global scrollbar visibility", () => {
@@ -75,13 +85,16 @@ describe("global scrollbar visibility", () => {
     installGlobalScrollbarVisibility();
     const { element } = createScroller({ scrollTop: 50 });
 
-    element.dispatchEvent(new Event("scroll"));
+    discoverScroller(element);
+    scrollScroller(element);
     runOverlayFrame();
 
     const overlay = verticalOverlay();
     expect(overlay).toHaveClass("is-visible");
+    expect(overlay?.parentElement).toBe(element);
+    expect(overlay).toHaveClass("global-scrollbar-overlay--local");
     expect(overlay).toHaveStyle({ height: "24px" });
-    expect(Number.parseFloat((overlay as HTMLElement).style.top)).toBeGreaterThan(10);
+    expect((overlay as HTMLElement).style.transform).toContain("translate3d");
     expect(horizontalOverlay()).not.toHaveClass("is-visible");
 
     vi.advanceTimersByTime(480);
@@ -122,7 +135,8 @@ describe("global scrollbar visibility", () => {
   it("drags the overlay thumb through a larger hit target", () => {
     installGlobalScrollbarVisibility();
     const { element, scrollTop } = createScroller({ scrollHeight: 500 });
-    element.dispatchEvent(new Event("scroll"));
+    discoverScroller(element);
+    scrollScroller(element);
     runOverlayFrame();
 
     const overlay = verticalOverlay();
@@ -155,9 +169,11 @@ describe("global scrollbar visibility", () => {
     const first = createScroller().element;
     const second = createScroller().element;
 
-    first.dispatchEvent(new Event("scroll"));
+    discoverScroller(first);
+    scrollScroller(first);
     vi.advanceTimersByTime(240);
-    second.dispatchEvent(new Event("scroll"));
+    discoverScroller(second);
+    scrollScroller(second);
     vi.advanceTimersByTime(239);
 
     const overlays = () => document.querySelectorAll(".global-scrollbar-overlay--vertical.is-visible");
@@ -177,14 +193,15 @@ describe("global scrollbar visibility", () => {
     installGlobalScrollbarVisibility();
     const { element } = createScroller();
 
-    element.dispatchEvent(new Event("scroll"));
+    discoverScroller(element);
+    scrollScroller(element);
     runOverlayFrame();
     expect(verticalOverlay()).toBeInTheDocument();
 
     uninstallGlobalScrollbarVisibility();
     expect(verticalOverlay()).toBeNull();
 
-    element.dispatchEvent(new Event("scroll"));
+    scrollScroller(element);
     vi.advanceTimersByTime(480);
     expect(verticalOverlay()).toBeNull();
 
@@ -201,7 +218,8 @@ describe("global scrollbar visibility", () => {
       scrollWidth: 260,
     });
 
-    element.dispatchEvent(new Event("scroll"));
+    discoverScroller(element);
+    scrollScroller(element);
     element.dispatchEvent(new MouseEvent("pointermove", {
       bubbles: true,
       clientX: 60,
@@ -222,11 +240,50 @@ describe("global scrollbar visibility", () => {
       scrollWidth: 260,
     });
 
-    element.dispatchEvent(new Event("scroll"));
+    discoverScroller(element);
+    scrollScroller(element);
     runOverlayFrame();
 
     expect(verticalOverlay()).toHaveClass("is-visible");
     expect(horizontalOverlay()).not.toHaveClass("is-visible");
+
+    element.remove();
+  });
+
+  it("does not react to scroll events from undiscovered elements", () => {
+    installGlobalScrollbarVisibility();
+    const { element } = createScroller();
+
+    scrollScroller(element);
+    runOverlayFrame();
+
+    expect(verticalOverlay()).toBeNull();
+
+    element.remove();
+  });
+
+  it("does not remeasure layout during continuous scroll frames", () => {
+    installGlobalScrollbarVisibility();
+    const { element, measure } = createScroller({ scrollTop: 0 });
+
+    discoverScroller(element);
+    runOverlayFrame();
+    const initialMeasureCount = measure.mock.calls.length;
+
+    scrollScroller(element);
+    runOverlayFrame();
+    scrollScroller(element);
+    runOverlayFrame();
+    scrollScroller(element);
+    runOverlayFrame();
+
+    expect(measure).toHaveBeenCalledTimes(initialMeasureCount);
+
+    window.dispatchEvent(new Event("resize"));
+    scrollScroller(element);
+    runOverlayFrame();
+
+    expect(measure.mock.calls.length).toBeGreaterThan(initialMeasureCount);
 
     element.remove();
   });

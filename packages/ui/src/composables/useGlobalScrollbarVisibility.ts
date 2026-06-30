@@ -38,6 +38,16 @@ type OverflowState = {
   vertical: boolean;
 };
 
+type MetricsSnapshot = {
+  metrics: ScrollMetrics;
+  overflow: OverflowState;
+};
+
+type RegisteredTarget = {
+  cleanup: () => void;
+  target: ScrollTarget;
+};
+
 type DragState = OverlayBinding & {
   metrics: ThumbMetrics;
   pointerId: number | null;
@@ -54,12 +64,17 @@ let installed = false;
 let hoverTarget: ScrollTarget | null = null;
 let dragState: DragState | null = null;
 let overlayUpdateFrame: number | null = null;
+let resizeObserver: ResizeObserver | null = null;
 
 const hideTimers = new WeakMap<Element, ReturnType<typeof window.setTimeout>>();
 const removeTimers = new WeakMap<Element, ReturnType<typeof window.setTimeout>>();
 const overlays = new Map<Element, OverlayPair>();
 const overlayBindings = new WeakMap<HTMLDivElement, OverlayBinding>();
 const pendingOverlayTargets = new Map<Element, ScrollTarget>();
+const registeredTargets = new Map<Element, RegisteredTarget>();
+const metricsCache = new WeakMap<Element, MetricsSnapshot>();
+const dirtyMetricsTargets = new WeakSet<Element>();
+const localOverlayHostPositions = new WeakMap<HTMLElement, string>();
 
 function clamp(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return min;
@@ -105,6 +120,10 @@ function dragScrollOffset(startScroll: number, pointerDelta: number, metrics: Th
   return clamp(startScroll + (pointerDelta * scrollRange) / thumbTrackSize, 0, scrollRange);
 }
 
+function eventPath(event: Event): EventTarget[] {
+  return typeof event.composedPath === "function" ? event.composedPath() : [event.target].filter(Boolean) as EventTarget[];
+}
+
 function resolveTarget(target: EventTarget | null): ScrollTarget | null {
   if (typeof document === "undefined") return null;
   if (
@@ -118,7 +137,24 @@ function resolveTarget(target: EventTarget | null): ScrollTarget | null {
   return target instanceof Element ? { key: target, scroller: target } : null;
 }
 
+function readScrollOffsets(target: ScrollTarget) {
+  if (target.scroller === window) {
+    const scroller = document.scrollingElement ?? document.documentElement;
+    return {
+      scrollLeft: scroller.scrollLeft || window.scrollX,
+      scrollTop: scroller.scrollTop || window.scrollY,
+    };
+  }
+
+  const element = target.scroller as Element;
+  return {
+    scrollLeft: element.scrollLeft,
+    scrollTop: element.scrollTop,
+  };
+}
+
 function readMetrics(target: ScrollTarget): ScrollMetrics {
+  const offsets = readScrollOffsets(target);
   if (target.scroller === window) {
     const scroller = document.scrollingElement ?? document.documentElement;
     return {
@@ -133,8 +169,8 @@ function readMetrics(target: ScrollTarget): ScrollMetrics {
         height: window.innerHeight,
       },
       scrollHeight: scroller.scrollHeight,
-      scrollLeft: scroller.scrollLeft || window.scrollX,
-      scrollTop: scroller.scrollTop || window.scrollY,
+      scrollLeft: offsets.scrollLeft,
+      scrollTop: offsets.scrollTop,
       scrollWidth: scroller.scrollWidth,
     };
   }
@@ -146,8 +182,8 @@ function readMetrics(target: ScrollTarget): ScrollMetrics {
     clientWidth: element.clientWidth,
     rect,
     scrollHeight: element.scrollHeight,
-    scrollLeft: element.scrollLeft,
-    scrollTop: element.scrollTop,
+    scrollLeft: offsets.scrollLeft,
+    scrollTop: offsets.scrollTop,
     scrollWidth: element.scrollWidth,
   };
 }
@@ -171,6 +207,27 @@ function overflowState(target: ScrollTarget, metrics: ScrollMetrics): OverflowSt
   };
 }
 
+function currentMetrics(target: ScrollTarget, forceMeasure = false): MetricsSnapshot {
+  const cached = metricsCache.get(target.key);
+  if (!forceMeasure && cached && !dirtyMetricsTargets.has(target.key)) {
+    const offsets = readScrollOffsets(target);
+    return {
+      ...cached,
+      metrics: {
+        ...cached.metrics,
+        scrollLeft: offsets.scrollLeft,
+        scrollTop: offsets.scrollTop,
+      },
+    };
+  }
+
+  dirtyMetricsTargets.delete(target.key);
+  const metrics = readMetrics(target);
+  const snapshot = { metrics, overflow: overflowState(target, metrics) };
+  metricsCache.set(target.key, snapshot);
+  return snapshot;
+}
+
 function inHotZone(metrics: ScrollMetrics, overflow: OverflowState, event: PointerEvent): boolean {
   const { clientX, clientY } = event;
   if (
@@ -188,22 +245,8 @@ function inHotZone(metrics: ScrollMetrics, overflow: OverflowState, event: Point
   );
 }
 
-function findHoverTarget(event: PointerEvent): ScrollTarget | null {
-  for (const node of event.composedPath()) {
-    const target = node instanceof Element ? resolveTarget(node) : null;
-    if (!target) continue;
-    const metrics = readMetrics(target);
-    const overflow = overflowState(target, metrics);
-    if ((overflow.vertical || overflow.horizontal) && inHotZone(metrics, overflow, event)) return target;
-  }
-
-  const documentTarget = resolveTarget(document);
-  if (!documentTarget) return null;
-  const metrics = readMetrics(documentTarget);
-  const overflow = overflowState(documentTarget, metrics);
-  return (overflow.vertical || overflow.horizontal) && inHotZone(metrics, overflow, event)
-    ? documentTarget
-    : null;
+function isPointerLikeEvent(event: Event): event is PointerEvent {
+  return "clientX" in event && "clientY" in event;
 }
 
 function clearTimer(map: WeakMap<Element, ReturnType<typeof window.setTimeout>>, target: Element) {
@@ -211,6 +254,20 @@ function clearTimer(map: WeakMap<Element, ReturnType<typeof window.setTimeout>>,
   if (timer === undefined) return;
   window.clearTimeout(timer);
   map.delete(target);
+}
+
+function prepareLocalOverlayHost(target: ScrollTarget) {
+  if (!(target.scroller instanceof HTMLElement)) return;
+  if (localOverlayHostPositions.has(target.scroller)) return;
+  if (window.getComputedStyle(target.scroller).position !== "static") return;
+  localOverlayHostPositions.set(target.scroller, target.scroller.style.position);
+  target.scroller.style.position = "relative";
+}
+
+function restoreLocalOverlayHost(target: Element) {
+  if (!(target instanceof HTMLElement) || !localOverlayHostPositions.has(target)) return;
+  target.style.position = localOverlayHostPositions.get(target) ?? "";
+  localOverlayHostPositions.delete(target);
 }
 
 function removeOverlay(target: Element) {
@@ -234,26 +291,69 @@ function ensureOverlay(target: ScrollTarget): OverlayPair {
   };
   overlay.vertical.className = "global-scrollbar-overlay global-scrollbar-overlay--vertical";
   overlay.horizontal.className = "global-scrollbar-overlay global-scrollbar-overlay--horizontal";
+  if (target.scroller !== window) {
+    overlay.vertical.classList.add("global-scrollbar-overlay--local");
+    overlay.horizontal.classList.add("global-scrollbar-overlay--local");
+  }
   overlayBindings.set(overlay.vertical, { axis: "vertical", target });
   overlayBindings.set(overlay.horizontal, { axis: "horizontal", target });
   overlay.vertical.addEventListener("pointerdown", onOverlayPointerDown);
   overlay.horizontal.addEventListener("pointerdown", onOverlayPointerDown);
-  document.body.append(overlay.vertical, overlay.horizontal);
+  if (target.scroller === window) {
+    document.body.append(overlay.vertical, overlay.horizontal);
+  } else {
+    prepareLocalOverlayHost(target);
+    target.key.append(overlay.vertical, overlay.horizontal);
+  }
   overlays.set(target.key, overlay);
   return overlay;
 }
 
-function updateOverlayAxis(
+function setVisible(element: HTMLDivElement, visible: boolean) {
+  element.classList.toggle("is-visible", visible);
+}
+
+function updateLocalOverlayAxis(
   element: HTMLDivElement,
   axis: Axis,
   metrics: ScrollMetrics,
   visible: boolean,
 ) {
-  element.classList.toggle("is-visible", visible);
+  setVisible(element, visible);
+  if (!visible) return;
 
-  if (!visible) {
+  const vertical = axis === "vertical";
+  const thumb = thumbMetrics({
+    domainSize: vertical ? metrics.scrollHeight : metrics.scrollWidth,
+    scrollOffset: vertical ? metrics.scrollTop : metrics.scrollLeft,
+    trackSize: Math.max(0, (vertical ? metrics.clientHeight : metrics.clientWidth) - TRACK_PADDING * 2),
+    visibleSize: vertical ? metrics.clientHeight : metrics.clientWidth,
+  });
+
+  element.style.top = "0";
+  element.style.right = "";
+  element.style.bottom = "";
+  element.style.left = "0";
+  if (vertical) {
+    element.style.height = `${thumb.thumbSize}px`;
+    element.style.width = "";
+    element.style.transform = `translate3d(${metrics.scrollLeft + metrics.clientWidth - HOT_ZONE}px, ${metrics.scrollTop + TRACK_PADDING + thumb.thumbOffset}px, 0)`;
     return;
   }
+
+  element.style.width = `${thumb.thumbSize}px`;
+  element.style.height = "";
+  element.style.transform = `translate3d(${metrics.scrollLeft + TRACK_PADDING + thumb.thumbOffset}px, ${metrics.scrollTop + metrics.clientHeight - HOT_ZONE}px, 0)`;
+}
+
+function updateFixedOverlayAxis(
+  element: HTMLDivElement,
+  axis: Axis,
+  metrics: ScrollMetrics,
+  visible: boolean,
+) {
+  setVisible(element, visible);
+  if (!visible) return;
 
   const vertical = axis === "vertical";
   const thumb = thumbMetrics({
@@ -264,20 +364,27 @@ function updateOverlayAxis(
   });
 
   if (vertical) {
-    element.style.top = `${metrics.rect.top + TRACK_PADDING + thumb.thumbOffset}px`;
+    element.style.top = "0";
     element.style.right = `${Math.max(0, window.innerWidth - metrics.rect.right)}px`;
+    element.style.bottom = "";
+    element.style.left = "";
     element.style.height = `${thumb.thumbSize}px`;
+    element.style.width = "";
+    element.style.transform = `translate3d(0, ${metrics.rect.top + TRACK_PADDING + thumb.thumbOffset}px, 0)`;
     return;
   }
 
-  element.style.left = `${metrics.rect.left + TRACK_PADDING + thumb.thumbOffset}px`;
+  element.style.top = "";
+  element.style.right = "";
   element.style.bottom = `${Math.max(0, window.innerHeight - metrics.rect.bottom)}px`;
+  element.style.left = "0";
   element.style.width = `${thumb.thumbSize}px`;
+  element.style.height = "";
+  element.style.transform = `translate3d(${metrics.rect.left + TRACK_PADDING + thumb.thumbOffset}px, 0, 0)`;
 }
 
 function updateOverlay(target: ScrollTarget) {
-  const metrics = readMetrics(target);
-  const overflow = overflowState(target, metrics);
+  const { metrics, overflow } = currentMetrics(target);
   if (!overflow.vertical && !overflow.horizontal) {
     removeOverlay(target.key);
     return;
@@ -285,8 +392,9 @@ function updateOverlay(target: ScrollTarget) {
 
   clearTimer(removeTimers, target.key);
   const overlay = ensureOverlay(target);
-  updateOverlayAxis(overlay.vertical, "vertical", metrics, overflow.vertical);
-  updateOverlayAxis(overlay.horizontal, "horizontal", metrics, overflow.horizontal);
+  const updateAxis = target.scroller === window ? updateFixedOverlayAxis : updateLocalOverlayAxis;
+  updateAxis(overlay.vertical, "vertical", metrics, overflow.vertical);
+  updateAxis(overlay.horizontal, "horizontal", metrics, overflow.horizontal);
 }
 
 function flushOverlayUpdates() {
@@ -334,25 +442,25 @@ function show(target: ScrollTarget) {
 }
 
 function axisMetrics(target: ScrollTarget, axis: Axis) {
-  const metrics = readMetrics(target);
+  const { metrics } = currentMetrics(target, true);
   const vertical = axis === "vertical";
   return {
     metrics,
     thumb: thumbMetrics({
       domainSize: vertical ? metrics.scrollHeight : metrics.scrollWidth,
       scrollOffset: vertical ? metrics.scrollTop : metrics.scrollLeft,
-      trackSize: Math.max(0, (vertical ? metrics.rect.height : metrics.rect.width) - TRACK_PADDING * 2),
+      trackSize: Math.max(0, (vertical ? metrics.clientHeight : metrics.clientWidth) - TRACK_PADDING * 2),
       visibleSize: vertical ? metrics.clientHeight : metrics.clientWidth,
     }),
   };
 }
 
 function setScroll(target: ScrollTarget, axis: Axis, value: number) {
-  const metrics = readMetrics(target);
+  const offsets = readScrollOffsets(target);
   if (target.scroller === window) {
     window.scrollTo(
-      axis === "horizontal" ? value : metrics.scrollLeft,
-      axis === "vertical" ? value : metrics.scrollTop,
+      axis === "horizontal" ? value : offsets.scrollLeft,
+      axis === "vertical" ? value : offsets.scrollTop,
     );
     return;
   }
@@ -360,6 +468,55 @@ function setScroll(target: ScrollTarget, axis: Axis, value: number) {
   const element = target.scroller as Element;
   if (axis === "vertical") element.scrollTop = value;
   else element.scrollLeft = value;
+}
+
+function registerTarget(target: ScrollTarget): ScrollTarget {
+  const existing = registeredTargets.get(target.key);
+  if (existing) return existing.target;
+
+  currentMetrics(target, true);
+  const onTargetScroll = () => {
+    show(target);
+    hideSoon(target);
+  };
+  if (target.scroller === window) {
+    window.addEventListener("scroll", onTargetScroll, { passive: true });
+  } else {
+    target.scroller.addEventListener("scroll", onTargetScroll, { passive: true });
+    resizeObserver?.observe(target.key);
+  }
+
+  registeredTargets.set(target.key, {
+    target,
+    cleanup: () => {
+      if (target.scroller === window) {
+        window.removeEventListener("scroll", onTargetScroll);
+      } else {
+        target.scroller.removeEventListener("scroll", onTargetScroll);
+        resizeObserver?.unobserve(target.key);
+      }
+      restoreLocalOverlayHost(target.key);
+    },
+  });
+  return target;
+}
+
+function scrollTargetFromEvent(event: Event, options: { hotZone?: boolean } = {}): ScrollTarget | null {
+  for (const node of eventPath(event)) {
+    const target = resolveTarget(node);
+    if (!target) continue;
+    const { metrics, overflow } = currentMetrics(target, true);
+    if (!overflow.vertical && !overflow.horizontal) continue;
+    if (options.hotZone && (!isPointerLikeEvent(event) || !inHotZone(metrics, overflow, event))) continue;
+    return registerTarget(target);
+  }
+
+  const documentTarget = resolveTarget(document);
+  if (!documentTarget) return null;
+  const { metrics, overflow } = currentMetrics(documentTarget, true);
+  if (!overflow.vertical && !overflow.horizontal) return null;
+  if (options.hotZone && (!isPointerLikeEvent(event) || !inHotZone(metrics, overflow, event))) return null;
+  return registerTarget(documentTarget);
 }
 
 function onOverlayPointerDown(event: PointerEvent) {
@@ -405,17 +562,14 @@ function onDragPointerEnd(event: PointerEvent) {
   window.removeEventListener("pointercancel", onDragPointerEnd, true);
 }
 
-function onScroll(event: Event) {
-  const target = resolveTarget(event.target);
-  if (!target) return;
-  show(target);
-  hideSoon(target);
+function onPointerOver(event: PointerEvent) {
+  scrollTargetFromEvent(event);
 }
 
 function onPointerMove(event: PointerEvent) {
   if (dragState) return;
 
-  const target = findHoverTarget(event);
+  const target = scrollTargetFromEvent(event, { hotZone: true });
   if (target) {
     if (hoverTarget?.key && hoverTarget.key !== target.key) hideSoon(hoverTarget);
     hoverTarget = target;
@@ -429,10 +583,37 @@ function onPointerMove(event: PointerEvent) {
   }
 }
 
+function onWheel(event: WheelEvent) {
+  const target = scrollTargetFromEvent(event);
+  if (!target) return;
+  show(target);
+  hideSoon(target);
+}
+
+function onTouchStart(event: TouchEvent) {
+  const target = scrollTargetFromEvent(event);
+  if (!target) return;
+  show(target);
+  hideSoon(target);
+}
+
+function onFocusIn(event: FocusEvent) {
+  scrollTargetFromEvent(event);
+}
+
 function onPointerLeave() {
   if (!hoverTarget) return;
   hideSoon(hoverTarget);
   hoverTarget = null;
+}
+
+function onWindowResize() {
+  for (const key of registeredTargets.keys()) {
+    dirtyMetricsTargets.add(key);
+  }
+  for (const { target } of registeredTargets.values()) {
+    if (overlays.has(target.key)) scheduleOverlayUpdate(target);
+  }
 }
 
 export function uninstallGlobalScrollbarVisibility() {
@@ -443,26 +624,45 @@ export function uninstallGlobalScrollbarVisibility() {
     overlayUpdateFrame = null;
   }
   pendingOverlayTargets.clear();
-  window.removeEventListener("scroll", onScroll, true);
-  window.removeEventListener("pointermove", onPointerMove, true);
+  window.removeEventListener("pointerover", onPointerOver);
+  window.removeEventListener("pointermove", onPointerMove);
   window.removeEventListener("pointermove", onDragPointerMove, true);
   window.removeEventListener("pointerleave", onPointerLeave);
   window.removeEventListener("pointerup", onDragPointerEnd, true);
   window.removeEventListener("pointercancel", onDragPointerEnd, true);
+  window.removeEventListener("wheel", onWheel);
+  window.removeEventListener("touchstart", onTouchStart);
+  window.removeEventListener("focusin", onFocusIn);
+  window.removeEventListener("resize", onWindowResize);
   hoverTarget = null;
   dragState = null;
+  registeredTargets.forEach((registered) => {
+    clearTimer(hideTimers, registered.target.key);
+    clearTimer(removeTimers, registered.target.key);
+    registered.cleanup();
+  });
+  registeredTargets.clear();
   overlays.forEach((_overlay, target) => {
-    clearTimer(hideTimers, target);
-    clearTimer(removeTimers, target);
     removeOverlay(target);
   });
+  resizeObserver?.disconnect();
+  resizeObserver = null;
 }
 
 export function installGlobalScrollbarVisibility() {
   if (installed || typeof window === "undefined") return uninstallGlobalScrollbarVisibility;
   installed = true;
-  window.addEventListener("scroll", onScroll, { capture: true, passive: true });
-  window.addEventListener("pointermove", onPointerMove, { capture: true, passive: true });
+  resizeObserver = typeof ResizeObserver !== "undefined"
+    ? new ResizeObserver((entries) => {
+      for (const entry of entries) dirtyMetricsTargets.add(entry.target);
+    })
+    : null;
+  window.addEventListener("pointerover", onPointerOver, { passive: true });
+  window.addEventListener("pointermove", onPointerMove, { passive: true });
   window.addEventListener("pointerleave", onPointerLeave);
+  window.addEventListener("wheel", onWheel, { passive: true });
+  window.addEventListener("touchstart", onTouchStart, { passive: true });
+  window.addEventListener("focusin", onFocusIn);
+  window.addEventListener("resize", onWindowResize);
   return uninstallGlobalScrollbarVisibility;
 }

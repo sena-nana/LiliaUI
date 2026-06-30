@@ -207,10 +207,12 @@ pre code {
 .global-scrollbar-overlay {
   position: fixed;
   z-index: var(--z-scrollbar-overlay);
-  pointer-events: auto;
+  pointer-events: none;
   cursor: default;
   opacity: 0;
   transition: opacity 0.48s ease;
+  contain: layout paint style;
+  will-change: transform, opacity;
 }
 
 .global-scrollbar-overlay::before {
@@ -222,6 +224,12 @@ pre code {
 
 .global-scrollbar-overlay.is-visible {
   opacity: 1;
+  pointer-events: auto;
+}
+
+.global-scrollbar-overlay--local {
+  position: absolute;
+  z-index: 1;
 }
 
 .sb-menu-pop-enter-active,
