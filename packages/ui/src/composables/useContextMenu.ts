@@ -27,20 +27,37 @@ interface MenuState {
   openSeq: number;
 }
 
-const state = reactive<MenuState>({
-  open: false,
-  x: 0,
-  y: 0,
-  anchorX: 0,
-  anchorY: 0,
-  items: [],
-  pendingConfirmId: null,
-  openSeq: 0,
-});
+interface ContextMenuStore {
+  state: MenuState;
+  providers: WeakMap<Element, ContextMenuProvider>;
+  installed: boolean;
+  removeGlobalListeners: (() => void) | null;
+}
 
-const providers = new WeakMap<Element, ContextMenuProvider>();
-let installed = false;
-let removeGlobalListeners: (() => void) | null = null;
+declare global {
+  var __liliaUiContextMenuStore: ContextMenuStore | undefined;
+}
+
+function createContextMenuStore(): ContextMenuStore {
+  return {
+    state: reactive<MenuState>({
+      open: false,
+      x: 0,
+      y: 0,
+      anchorX: 0,
+      anchorY: 0,
+      items: [],
+      pendingConfirmId: null,
+      openSeq: 0,
+    }),
+    providers: new WeakMap<Element, ContextMenuProvider>(),
+    installed: false,
+    removeGlobalListeners: null,
+  };
+}
+
+const store = globalThis.__liliaUiContextMenuStore ??= createContextMenuStore();
+const { state, providers } = store;
 
 export function registerContextMenu(
   element: Element,
@@ -120,8 +137,8 @@ export async function selectContextMenuItem(item: ContextMenuItem) {
 }
 
 export function installContextMenu() {
-  if (installed || typeof window === "undefined" || typeof document === "undefined") return uninstallContextMenu;
-  installed = true;
+  if (store.installed || typeof window === "undefined" || typeof document === "undefined") return uninstallContextMenu;
+  store.installed = true;
 
   const onContextMenu = (event: MouseEvent) => {
     event.preventDefault();
@@ -154,7 +171,7 @@ export function installContextMenu() {
   window.addEventListener("scroll", onScroll, true);
   window.addEventListener("resize", closeContextMenu);
   window.addEventListener("blur", closeContextMenu);
-  removeGlobalListeners = () => {
+  store.removeGlobalListeners = () => {
     document.removeEventListener("contextmenu", onContextMenu);
     window.removeEventListener("pointerdown", onPointerDown, true);
     window.removeEventListener("keydown", onKeydown);
@@ -167,10 +184,10 @@ export function installContextMenu() {
 }
 
 export function uninstallContextMenu() {
-  if (!installed || typeof window === "undefined") return;
-  installed = false;
-  removeGlobalListeners?.();
-  removeGlobalListeners = null;
+  if (!store.installed || typeof window === "undefined") return;
+  store.installed = false;
+  store.removeGlobalListeners?.();
+  store.removeGlobalListeners = null;
   closeContextMenu();
   finalizeClosedContextMenu();
 }
