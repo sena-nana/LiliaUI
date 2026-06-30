@@ -9,12 +9,8 @@ import AppRoot from "./AppRoot.vue";
 import { installAgentDebugHarness } from "./agentDebug/index";
 import LiliaDesktopShell from "./layouts/AppShell.vue";
 import { installCommandRegistry, type LiliaCommandMap } from "./commands";
-import { installContextMenu } from "./composables/useContextMenu";
-import { useCornerStyle } from "./composables/useCornerStyle";
-import { installGlobalScrollbarVisibility } from "./composables/useGlobalScrollbarVisibility";
-import { useTheme } from "./composables/useTheme";
-import { setLiliaAppConfig, type LiliaAppConfig } from "./config/appShell";
-import { vContextMenu } from "./directives/contextMenu";
+import type { LiliaAppConfig } from "./config/appShell";
+import { installLiliaAppRuntime } from "./runtime";
 
 export interface CreateLiliaAppOptions {
   commands?: LiliaCommandMap;
@@ -44,18 +40,12 @@ export function createLiliaRouter(
 }
 
 export function createLiliaApp(options: CreateLiliaAppOptions) {
-  setLiliaAppConfig(options.config);
-  installContextMenu();
-  installGlobalScrollbarVisibility();
-  useTheme();
-  useCornerStyle();
-  installAgentDebugHarness();
-
   const router = createLiliaRouter(options.routes, options.shell, options.history);
   const app = createApp(AppRoot);
+  installLiliaAppRuntime({ app, config: options.config });
   app.use(router);
-  app.directive("context-menu", vContextMenu);
   installCommandRegistry(app, options.commands);
+  installAgentDebugHarness();
 
   return { app, router };
 }

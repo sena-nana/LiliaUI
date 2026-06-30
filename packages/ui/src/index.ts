@@ -15,6 +15,10 @@ export {
   type CreateLiliaAppOptions,
 } from "./createLiliaApp";
 export {
+  installLiliaAppRuntime,
+  type InstallLiliaAppRuntimeOptions,
+} from "./runtime";
+export {
   createCommandRegistry,
   installCommandRegistry,
   liliaCommandsKey,
