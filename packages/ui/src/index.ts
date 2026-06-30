@@ -2,6 +2,8 @@ import { defineAsyncComponent } from "vue";
 
 export { default as LiliaAppRoot } from "./AppRoot.vue";
 export { default as LiliaDesktopShell } from "./layouts/AppShell.vue";
+export { default as ActionMenuItem } from "./components/ActionMenuItem.vue";
+export { default as AnchoredActionMenu } from "./components/AnchoredActionMenu.vue";
 export { default as ConfirmDialog } from "./components/ConfirmDialog.vue";
 export { default as ContextMenuHost } from "./components/ContextMenuHost.vue";
 export { default as Dropdown } from "./components/Dropdown.vue";
@@ -66,6 +68,7 @@ export * from "./composables/useContextMenu";
 export * from "./composables/useCornerStyle";
 export * from "./composables/useGlobalScrollbarVisibility";
 export * from "./composables/useAnchoredOverlay";
+export * from "./composables/useAnchoredActionMenu";
 export * from "./composables/useAnchoredMenuMotion";
 export * from "./composables/menuMotion";
 export * from "./composables/usePersistentState";
