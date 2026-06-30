@@ -322,10 +322,6 @@ function runYarn(args = [], options = {}) {
   runSync(spawnConfig.command, [...spawnConfig.argsPrefix, ...args], options);
 }
 
-function argsFor(command, args) {
-  return [command, ...args];
-}
-
 function hasViteOption(args, name) {
   return args.some((arg) => arg === name || arg.startsWith(`${name}=`));
 }
