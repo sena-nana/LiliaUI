@@ -27,36 +27,32 @@ interface MenuState {
   openSeq: number;
 }
 
-interface ContextMenuStore {
+type ContextMenuStore = {
   state: MenuState;
   providers: WeakMap<Element, ContextMenuProvider>;
   installed: boolean;
   removeGlobalListeners: (() => void) | null;
-}
+};
 
 declare global {
   var __liliaUiContextMenuStore: ContextMenuStore | undefined;
 }
 
-function createContextMenuStore(): ContextMenuStore {
-  return {
-    state: reactive<MenuState>({
-      open: false,
-      x: 0,
-      y: 0,
-      anchorX: 0,
-      anchorY: 0,
-      items: [],
-      pendingConfirmId: null,
-      openSeq: 0,
-    }),
-    providers: new WeakMap<Element, ContextMenuProvider>(),
-    installed: false,
-    removeGlobalListeners: null,
-  };
-}
-
-const store = globalThis.__liliaUiContextMenuStore ??= createContextMenuStore();
+const store = globalThis.__liliaUiContextMenuStore ??= {
+  state: reactive<MenuState>({
+    open: false,
+    x: 0,
+    y: 0,
+    anchorX: 0,
+    anchorY: 0,
+    items: [],
+    pendingConfirmId: null,
+    openSeq: 0,
+  }),
+  providers: new WeakMap<Element, ContextMenuProvider>(),
+  installed: false,
+  removeGlobalListeners: null,
+} satisfies ContextMenuStore;
 const { state, providers } = store;
 
 export function registerContextMenu(
