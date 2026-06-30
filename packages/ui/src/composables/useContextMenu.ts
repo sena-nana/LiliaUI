@@ -120,7 +120,7 @@ export async function selectContextMenuItem(item: ContextMenuItem) {
 }
 
 export function installContextMenu() {
-  if (installed || typeof window === "undefined") return uninstallContextMenu;
+  if (installed || typeof window === "undefined" || typeof document === "undefined") return uninstallContextMenu;
   installed = true;
 
   const onContextMenu = (event: MouseEvent) => {
@@ -148,14 +148,14 @@ export function installContextMenu() {
     if (state.open) closeContextMenu();
   };
 
-  window.addEventListener("contextmenu", onContextMenu);
+  document.addEventListener("contextmenu", onContextMenu);
   window.addEventListener("pointerdown", onPointerDown, true);
   window.addEventListener("keydown", onKeydown);
   window.addEventListener("scroll", onScroll, true);
   window.addEventListener("resize", closeContextMenu);
   window.addEventListener("blur", closeContextMenu);
   removeGlobalListeners = () => {
-    window.removeEventListener("contextmenu", onContextMenu);
+    document.removeEventListener("contextmenu", onContextMenu);
     window.removeEventListener("pointerdown", onPointerDown, true);
     window.removeEventListener("keydown", onKeydown);
     window.removeEventListener("scroll", onScroll, true);
