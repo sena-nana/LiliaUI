@@ -21,6 +21,7 @@ import {
   createAgentDebugReportFromTemplate,
   printAgentDebugReport,
 } from "./agentDebugReport.mjs";
+import { generateOpenSourceLicenseManifest } from "./licenseManifest.mjs";
 
 export const LILIA_TOOLS_ASSETS_ROOT = fileURLToPath(new URL("../assets/", import.meta.url));
 
@@ -233,6 +234,7 @@ export function createAgentDebugReport(projectRoot = process.cwd(), options = {}
 }
 
 export { printAgentDebugReport };
+export { generateOpenSourceLicenseManifest };
 
 export async function runToolsCli(argv, options = {}) {
   const projectRoot = options.projectRoot ?? process.cwd();
@@ -264,6 +266,27 @@ export async function runToolsCli(argv, options = {}) {
       const copied = copyLiliaAssets(projectRoot, { force: args.includes("--force") });
       if (args.includes("--json")) {
         process.stdout.write(`${JSON.stringify({ copied }, null, 2)}\n`);
+      }
+      return;
+    }
+
+    if (command === "licenses") {
+      const result = await generateOpenSourceLicenseManifest({
+        projectRoot: resolve(projectRoot, readFlag(args, "--project-root") ?? "."),
+        outputPath: readFlag(args, "--output") ?? "src/generated/openSourceLicenseManifest.json",
+        cargoManifestPath: readFlag(args, "--cargo-manifest") ?? "src-tauri/Cargo.toml",
+        unknownLicense: readFlag(args, "--unknown-license") ?? "Undeclared",
+      });
+      if (args.includes("--json")) {
+        process.stdout.write(`${JSON.stringify({
+          outputPath: result.outputPath,
+          counts: {
+            npm: result.manifest.npmDependencies.length,
+            rust: result.manifest.rustDependencies.length,
+          },
+        }, null, 2)}\n`);
+      } else {
+        console.log(`Generated ${relative(process.cwd(), result.outputPath)}`);
       }
       return;
     }
@@ -353,8 +376,8 @@ function createTemplateProfile(overrides = {}) {
       ],
       "node_modules/@lilia/ui/src/layouts/SettingsSidebar.vue": [
         ["settings.sidebar.back"],
-        ["settings.sidebar.tab.appearance", "settings.sidebar.tab.${tab.key}"],
-        ["settings.sidebar.tab.about", "settings.sidebar.tab.${tab.key}"],
+        ["settings.tab.appearance", "settings.tab.${tab.key}"],
+        ["settings.tab.about", "settings.tab.${tab.key}"],
       ],
       "node_modules/@lilia/ui/src/pages/settings/AppearanceSection.vue": [
         ["settings.appearance.theme.dark"],
@@ -455,6 +478,13 @@ function printToolsUsage() {
     "  template-check [--json]",
     "  agent-debug [--json]",
     "  copy-assets [--force] [--json]",
+    "  licenses [--project-root <path>] [--output <path>] [--cargo-manifest <path>]",
     "  migrate [--force] [--json]",
   ].join("\n"));
+}
+
+function readFlag(args, name) {
+  const index = args.indexOf(name);
+  if (index === -1) return null;
+  return args[index + 1] ?? null;
 }

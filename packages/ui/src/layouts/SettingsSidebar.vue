@@ -42,7 +42,7 @@ defineProps<{
             class="settings-sidebar__tab"
             :class="{ 'is-active': activeKey === tab.key }"
             :aria-current="activeKey === tab.key ? 'page' : undefined"
-            :data-agent-id="`settings.sidebar.tab.${tab.key}`"
+            :data-agent-id="`settings.tab.${tab.key}`"
             @click="navigate"
           >
             <component

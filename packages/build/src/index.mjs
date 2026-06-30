@@ -48,11 +48,15 @@ export async function findAvailablePort(startPort) {
   throw new Error(`No available localhost port found from ${startPort}.`);
 }
 
-export function createTauriDevBuildConfig(port) {
-  return {
+export function createTauriDevBuildConfig(port, options = {}) {
+  const build = {
     devUrl: `http://localhost:${port}`,
-    beforeDevCommand: `yarn dev --host localhost --port ${port} --strictPort`,
   };
+  if (options.beforeDevCommand !== false) {
+    build.beforeDevCommand = options.beforeDevCommand ??
+      `yarn dev --host localhost --port ${port} --strictPort`;
+  }
+  return build;
 }
 
 export function viteDevArgs(projectRoot = process.cwd(), args = [], env = process.env) {
@@ -121,22 +125,33 @@ export function runPrepare(projectRoot = process.cwd(), env = process.env) {
   copyLiliaAssets(projectRoot);
 }
 
-export async function runTauriDev(projectRoot = process.cwd(), argv = [], env = process.env) {
-  const appConfig = readAppConfig(projectRoot);
+export async function runTauriDev(projectRoot = process.cwd(), argv = [], env = process.env, options = {}) {
+  const appConfig = resolveRuntimeAppConfig(projectRoot, options);
   const envPrefix = toEnvPrefix(appConfig.appName);
   const startPort = parsePort(env[`${envPrefix}_DEV_PORT`]);
   const port = await findAvailablePort(startPort);
-  const build = createTauriDevBuildConfig(port);
+  const build = createTauriDevBuildConfig(port, {
+    beforeDevCommand: options.beforeDevCommand,
+  });
   const config = JSON.stringify({ build });
-  const args = ["tauri", "dev", "--config", config, ...argv];
+  const args = [
+    ...(options.appDir ? ["--cwd", options.appDir] : []),
+    "tauri",
+    "dev",
+    "--config",
+    config,
+    ...argv,
+  ];
   const nextEnv = {
     ...env,
     [`${envPrefix}_DEV_PORT`]: String(port),
     [`${envPrefix}_DEV_STRICT_PORT`]: "1",
+    ...resolveExtraEnv(options.extraEnv, env, appConfig),
   };
   const spawnConfig = yarnSpawn(process.platform, env);
 
-  if (env[`${envPrefix}_DEV_DRY_RUN`] === "1") {
+  const dryRunKey = options.dryRunEnvKey ?? `${envPrefix}_DEV_DRY_RUN`;
+  if (env[dryRunKey] === "1") {
     process.stdout.write(`${JSON.stringify({
       command: spawnConfig.command,
       spawnArgs: [...spawnConfig.argsPrefix, ...args],
@@ -145,6 +160,7 @@ export async function runTauriDev(projectRoot = process.cwd(), argv = [], env = 
       env: {
         [`${envPrefix}_DEV_PORT`]: nextEnv[`${envPrefix}_DEV_PORT`],
         [`${envPrefix}_DEV_STRICT_PORT`]: nextEnv[`${envPrefix}_DEV_STRICT_PORT`],
+        ...pickEnv(nextEnv, options.dryRunEnvKeys ?? []),
       },
     })}\n`);
     return;
@@ -157,17 +173,23 @@ export async function runTauriDev(projectRoot = process.cwd(), argv = [], env = 
   });
 }
 
-export function runTauriInstall(projectRoot = process.cwd(), env = process.env) {
+export function runTauriInstall(projectRoot = process.cwd(), env = process.env, options = {}) {
+  const appConfig = resolveRuntimeAppConfig(projectRoot, options);
+  const envPrefix = toEnvPrefix(appConfig.appName);
   const buildEnv = nativeBuildEnv(env);
-  const build = yarnBuildCommand(process.platform, env);
+  const build = yarnBuildCommand(process.platform, env, options.appDir);
+  const dryRunKey = options.dryRunEnvKey ?? `${envPrefix}_INSTALL_DRY_RUN`;
 
-  if (env[`${toEnvPrefix(readAppConfig(projectRoot).appName)}_INSTALL_DRY_RUN`] === "1") {
+  if (env[dryRunKey] === "1") {
     process.stdout.write(`${JSON.stringify({ command: build.command, args: build.args, env: { RUSTFLAGS: buildEnv.RUSTFLAGS } }, null, 2)}\n`);
     return;
   }
 
   runSync(build.command, build.args, { cwd: projectRoot, env: buildEnv });
-  const bundle = pickBundleFile(resolve(projectRoot, "src-tauri/target/release/bundle"));
+  const bundleRoot = options.appDir
+    ? resolve(projectRoot, options.appDir, "src-tauri/target/release/bundle")
+    : resolve(projectRoot, "src-tauri/target/release/bundle");
+  const bundle = pickBundleFile(bundleRoot);
   console.log(`[tauri:install] found installer: ${bundle}`);
   installBundle(bundle, process.platform, env);
   console.log(`[tauri:install] installer launched: ${bundle}`);
@@ -230,14 +252,41 @@ export async function runBuildCli(argv, options = {}) {
   }
 }
 
-function yarnBuildCommand(platform = process.platform, env = process.env) {
+function yarnBuildCommand(platform = process.platform, env = process.env, appDir = "") {
+  const yarnArgs = appDir ? ["--cwd", appDir, "tauri", "build"] : ["tauri", "build"];
   if (platform === "win32") {
     return {
       command: env.ComSpec || "cmd.exe",
-      args: ["/d", "/s", "/c", "yarn.cmd tauri build"],
+      args: ["/d", "/s", "/c", ["yarn.cmd", ...yarnArgs].join(" ")],
     };
   }
-  return { command: "yarn", args: ["tauri", "build"] };
+  return { command: "yarn", args: yarnArgs };
+}
+
+function resolveRuntimeAppConfig(projectRoot, options = {}) {
+  if (options.appConfig) return options.appConfig;
+  try {
+    return readAppConfig(options.appConfigRoot ?? projectRoot);
+  } catch {
+    return {
+      appName: options.appName ?? "lilia-app",
+      productTitle: options.productTitle ?? options.appName ?? "Lilia App",
+    };
+  }
+}
+
+function resolveExtraEnv(extraEnv, env, appConfig) {
+  if (!extraEnv) return {};
+  if (typeof extraEnv === "function") return extraEnv(env, appConfig);
+  return extraEnv;
+}
+
+function pickEnv(env, keys) {
+  return Object.fromEntries(
+    keys
+      .filter((key) => env[key] !== undefined)
+      .map((key) => [key, env[key]]),
+  );
 }
 
 function installBundle(path, platform = process.platform, env = process.env) {

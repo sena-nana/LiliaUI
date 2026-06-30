@@ -162,8 +162,13 @@ function onTitlebarPointerDown(event: PointerEvent) {
         />
       </button>
     </div>
-    <div class="titlebar__brand" data-agent-id="titlebar.brand">{{ title }}</div>
+    <div class="titlebar__center" data-agent-id="titlebar.center">
+      <slot name="center">
+        <span class="titlebar__brand" data-agent-id="titlebar.brand">{{ title }}</span>
+      </slot>
+    </div>
     <div class="titlebar__controls" data-agent-id="titlebar.window-controls">
+      <slot name="right-actions" />
       <button
         data-agent-id="titlebar.window.minimize"
         type="button"
@@ -216,13 +221,17 @@ function onTitlebarPointerDown(event: PointerEvent) {
   -webkit-app-region: no-drag;
 }
 
-.titlebar__brand {
+.titlebar__center {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 14px;
   min-width: 0;
   max-width: min(420px, 44vw);
+}
+
+.titlebar__brand {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -265,5 +274,26 @@ function onTitlebarPointerDown(event: PointerEvent) {
 .titlebar__btn--danger:hover {
   background: var(--err-soft);
   color: var(--err);
+}
+
+.titlebar__controls :slotted(.titlebar__btn) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.titlebar__controls :slotted(.titlebar__btn:hover) {
+  background: var(--bg-hover);
+  color: var(--text);
 }
 </style>

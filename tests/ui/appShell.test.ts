@@ -305,8 +305,10 @@ describe("AppShell sidebar", () => {
       pointerId: 1,
     });
 
-    expect(shell.style.getPropertyValue("--sidebar-width")).toBe("360px");
-    expect(resizer).toHaveAttribute("aria-valuenow", "360");
+    await waitFor(() => {
+      expect(shell.style.getPropertyValue("--sidebar-width")).toBe("360px");
+      expect(resizer).toHaveAttribute("aria-valuenow", "360");
+    });
 
     await fireEvent.pointerUp(window, {
       clientX: 300,
@@ -365,8 +367,8 @@ describe("AppShell sidebar", () => {
     expect(view.getByRole("navigation", { name: "设置分类" })).toBeInTheDocument();
     expect(agentTarget(view.container, "settings.sidebar")).toHaveAttribute("aria-label", "设置分类");
     expect(agentTarget(view.container, "settings.sidebar.back")).toHaveTextContent("返回");
-    expect(agentTarget(view.container, "settings.sidebar.tab.appearance")).toHaveClass("is-active");
-    expect(agentTarget(view.container, "settings.sidebar.tab.about")).toHaveTextContent("关于");
+    expect(agentTarget(view.container, "settings.tab.appearance")).toHaveClass("is-active");
+    expect(agentTarget(view.container, "settings.tab.about")).toHaveTextContent("关于");
     expect(view.queryByRole("navigation", { name: "主导航" })).not.toBeInTheDocument();
     expect(view.getByRole("button", { name: /外观/ })).toHaveClass("is-active");
     expect(view.router.currentRoute.value.meta.sidebar).toBe("settings");

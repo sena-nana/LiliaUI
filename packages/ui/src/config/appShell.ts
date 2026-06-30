@@ -1,31 +1,53 @@
 import {
+  Bot,
+  Brain,
+  Download,
   FilePlus2,
   Folder,
+  FolderCog,
+  Gauge,
   Home,
   Info,
   MoreHorizontal,
+  MonitorSmartphone,
+  Network,
+  PanelTop,
   Palette,
   Puzzle,
   Search,
+  Server,
   Settings,
   Sparkles,
+  Workflow,
 } from "@lucide/vue";
 import { defineAsyncComponent, reactive, type Component } from "vue";
 import type { RouteLocationRaw } from "vue-router";
 
 type IconName =
+  | "bot"
+  | "brain"
+  | "download"
   | "file-plus"
   | "folder"
+  | "folder-cog"
+  | "gauge"
   | "home"
   | "info"
+  | "monitor-smartphone"
   | "more"
+  | "network"
+  | "panel-top"
   | "palette"
   | "puzzle"
   | "search"
+  | "server"
   | "settings"
-  | "sparkles";
+  | "sparkles"
+  | "workflow";
 
 type IconInput = IconName | Component;
+export type LiliaSettingsSectionLoader = () => Promise<{ default: Component }>;
+export type LiliaSettingsSectionInput = Component | LiliaSettingsSectionLoader;
 
 export interface LiliaShellCopy {
   homeTitle: string;
@@ -93,10 +115,29 @@ export interface LiliaSidebarConfigInput {
   widthStorageKey?: string;
 }
 
+export interface LiliaSettingsTabInput {
+  icon: IconInput;
+  key: string;
+  label: string;
+  props?: Record<string, unknown>;
+  to?: RouteLocationRaw;
+}
+
+export interface LiliaSettingsConfigInput {
+  aliases?: Record<string, string>;
+  defaultTab?: string;
+  fullPageTabs?: string[];
+  hideHeader?: boolean;
+  path?: string;
+  sections?: Record<string, LiliaSettingsSectionInput>;
+  tabs?: LiliaSettingsTabInput[];
+}
+
 export interface LiliaAppConfig {
   appName: string;
   identifier?: string;
   productTitle: string;
+  settings?: LiliaSettingsConfigInput;
   shell?: Partial<LiliaShellCopy>;
   sidebar?: LiliaSidebarConfigInput;
   storageKeyPrefix: string;
@@ -184,12 +225,13 @@ export const SIDEBAR_FOOTER_STATUS = reactive<SidebarFooterStatus>({
   icon: Sparkles as Component,
 });
 
-export type SettingsTabKey = "appearance" | "about";
+export type SettingsTabKey = string;
 
 export interface SettingsTab {
   icon: Component;
   key: SettingsTabKey;
   label: string;
+  props?: Record<string, unknown>;
   to: RouteLocationRaw;
 }
 
@@ -215,17 +257,37 @@ export const SETTINGS_SECTIONS: Record<SettingsTabKey, Component> = {
   about: defineAsyncComponent(() => import("../pages/settings/AboutSection.vue")),
 };
 
+export const SETTINGS_SECTION_PROPS = reactive<Record<string, Record<string, unknown>>>({});
+
+export const SETTINGS_CONFIG = reactive({
+  aliases: {} as Record<string, string>,
+  defaultTab: DEFAULT_SETTINGS_TAB,
+  fullPageTabs: new Set<string>(),
+  hideHeader: false,
+  path: "/settings",
+});
+
 const iconMap: Record<IconName, Component> = {
+  bot: Bot as Component,
+  brain: Brain as Component,
+  download: Download as Component,
   "file-plus": FilePlus2 as Component,
   folder: Folder as Component,
+  "folder-cog": FolderCog as Component,
+  gauge: Gauge as Component,
   home: Home as Component,
   info: Info as Component,
+  "monitor-smartphone": MonitorSmartphone as Component,
   more: MoreHorizontal as Component,
+  network: Network as Component,
+  "panel-top": PanelTop as Component,
   palette: Palette as Component,
   puzzle: Puzzle as Component,
   search: Search as Component,
+  server: Server as Component,
   settings: Settings as Component,
   sparkles: Sparkles as Component,
+  workflow: Workflow as Component,
 };
 
 let currentConfig: LiliaAppConfig = {
@@ -256,6 +318,58 @@ function resolveNav(item: LiliaSidebarNavInput): SidebarNavItem {
 
 function replaceArray<T>(target: T[], next: T[]) {
   target.splice(0, target.length, ...next);
+}
+
+function replaceObject<T>(target: Record<string, T>, next: Record<string, T>) {
+  for (const key of Object.keys(target)) {
+    delete target[key];
+  }
+  Object.assign(target, next);
+}
+
+function replaceSet<T>(target: Set<T>, next: Iterable<T>) {
+  target.clear();
+  for (const value of next) target.add(value);
+}
+
+function isSectionLoader(section: LiliaSettingsSectionInput): section is LiliaSettingsSectionLoader {
+  return typeof section === "function" && !("setup" in section) && !("render" in section);
+}
+
+function resolveSettingsSection(section: LiliaSettingsSectionInput): Component {
+  return isSectionLoader(section) ? defineAsyncComponent(section) : section;
+}
+
+function defaultSettingsTabs(path: string): SettingsTab[] {
+  return [
+    {
+      key: "appearance",
+      label: "外观",
+      icon: Palette as Component,
+      to: { path, query: { tab: "appearance" } },
+    },
+    {
+      key: "about",
+      label: "关于",
+      icon: Info as Component,
+      to: { path, query: { tab: "about" } },
+    },
+  ];
+}
+
+function defaultSettingsSections(): Record<string, Component> {
+  return {
+    appearance: defineAsyncComponent(() => import("../pages/settings/AppearanceSection.vue")),
+    about: defineAsyncComponent(() => import("../pages/settings/AboutSection.vue")),
+  };
+}
+
+function resolveSettingsTab(tab: LiliaSettingsTabInput, path: string): SettingsTab {
+  return {
+    ...tab,
+    icon: resolveIcon(tab.icon),
+    to: tab.to ?? { path, query: { tab: tab.key } },
+  };
 }
 
 export function setLiliaAppConfig(config: LiliaAppConfig) {
@@ -316,6 +430,33 @@ export function setLiliaAppConfig(config: LiliaAppConfig) {
     }),
     icon: resolveIcon(sidebar.footerStatus?.icon ?? "sparkles"),
   });
+
+  const settings = config.settings ?? {};
+  SETTINGS_CONFIG.defaultTab = settings.defaultTab ?? "appearance";
+  SETTINGS_CONFIG.hideHeader = settings.hideHeader ?? false;
+  SETTINGS_CONFIG.path = settings.path ?? "/settings";
+  replaceObject(SETTINGS_CONFIG.aliases, settings.aliases ?? {});
+  replaceSet(SETTINGS_CONFIG.fullPageTabs, settings.fullPageTabs ?? []);
+  replaceArray(
+    SETTINGS_TABS,
+    settings.tabs?.map((tab) => resolveSettingsTab(tab, SETTINGS_CONFIG.path)) ??
+      defaultSettingsTabs(SETTINGS_CONFIG.path),
+  );
+  replaceObject(
+    SETTINGS_SECTIONS,
+    settings.sections
+      ? Object.fromEntries(
+        Object.entries(settings.sections).map(([key, section]) => [
+          key,
+          resolveSettingsSection(section),
+        ]),
+      )
+      : defaultSettingsSections(),
+  );
+  replaceObject(
+    SETTINGS_SECTION_PROPS,
+    Object.fromEntries(SETTINGS_TABS.map((tab) => [tab.key, tab.props ?? {}])),
+  );
 }
 
 export function getLiliaAppConfig(): LiliaAppConfig {
@@ -324,7 +465,9 @@ export function getLiliaAppConfig(): LiliaAppConfig {
 
 export function normalizeSettingsTab(value: unknown): SettingsTabKey {
   const candidate = Array.isArray(value) ? value[0] : value;
-  return SETTINGS_TABS.some((tab) => tab.key === candidate)
-    ? (candidate as SettingsTabKey)
-    : DEFAULT_SETTINGS_TAB;
+  const raw = typeof candidate === "string" ? candidate : "";
+  const resolved = SETTINGS_CONFIG.aliases[raw] ?? raw;
+  return SETTINGS_TABS.some((tab) => tab.key === resolved)
+    ? resolved
+    : SETTINGS_CONFIG.defaultTab;
 }

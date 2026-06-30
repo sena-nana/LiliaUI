@@ -1,4 +1,5 @@
 import { fireEvent, render, waitFor } from "@testing-library/vue";
+import { defineComponent } from "vue";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import TitleBar from "@lilia/ui/components/TitleBar";
 import { testAppConfig } from "./fixtures/appConfig";
@@ -121,5 +122,32 @@ describe("TitleBar dragging", () => {
     await pointerDown(view.getByLabelText("关闭"));
 
     expect(tauriWindow.appWindow.startDragging).not.toHaveBeenCalled();
+  });
+
+  it("renders app-provided center and right action slots", async () => {
+    const action = vi.fn();
+    const view = render(defineComponent({
+      components: { TitleBar },
+      setup() {
+        return { action };
+      },
+      template: `
+        <TitleBar title="Fallback">
+          <template #center>
+            <span>Project / Task</span>
+          </template>
+          <template #right-actions>
+            <button type="button" aria-label="业务动作" @click="action">Action</button>
+          </template>
+        </TitleBar>
+      `,
+    }));
+    await waitFor(() => expect(tauriWindow.appWindow.onResized).toHaveBeenCalled());
+
+    expect(view.queryByText("Fallback")).not.toBeInTheDocument();
+    expect(view.getByText("Project / Task")).toBeInTheDocument();
+
+    await fireEvent.click(view.getByRole("button", { name: "业务动作" }));
+    expect(action).toHaveBeenCalledOnce();
   });
 });
