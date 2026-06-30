@@ -17,5 +17,6 @@ export function installLiliaAppRuntime(options: InstallLiliaAppRuntimeOptions) {
   installGlobalScrollbarVisibility();
   useTheme();
   useCornerStyle();
+  options.app?.directive("contextMenu", vContextMenu);
   options.app?.directive("context-menu", vContextMenu);
 }

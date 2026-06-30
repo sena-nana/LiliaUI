@@ -6,12 +6,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { defineComponent } from "vue";
 import {
   closeContextMenu,
+  installLiliaAppRuntime,
   installContextMenu,
   LiliaAppRoot,
   openContextMenuAt,
   type ContextMenuItem,
 } from "@lilia/ui";
 import { vContextMenu } from "@lilia/ui";
+import { testAppConfig } from "./fixtures/appConfig";
 
 function renderWithTemplate(template: string, setup: () => Record<string, unknown>) {
   const Wrapper = defineComponent({
@@ -91,6 +93,37 @@ describe("ContextMenuHost", () => {
       left: "96px",
       top: "128px",
     });
+  });
+
+  it("应用运行时会注册右键菜单指令", async () => {
+    const action = vi.fn();
+    const Wrapper = defineComponent({
+      components: { ContextMenuHost },
+      template: `<button data-testid="target" v-context-menu="items">目标</button><ContextMenuHost />`,
+      setup: () => ({
+        items: [{ id: "open", label: "打开", onSelect: action }],
+      }),
+    });
+
+    render(Wrapper, {
+      global: {
+        plugins: [
+          {
+            install(app) {
+              installLiliaAppRuntime({ app, config: testAppConfig });
+            },
+          },
+        ],
+      },
+    });
+
+    await fireEvent.contextMenu(screen.getByTestId("target"), {
+      clientX: 96,
+      clientY: 128,
+    });
+
+    await fireEvent.click(await screen.findByRole("menuitem", { name: "打开" }));
+    expect(action).toHaveBeenCalledTimes(1);
   });
 
   it("全局屏蔽浏览器原生右键菜单", () => {
