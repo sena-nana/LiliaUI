@@ -26,6 +26,7 @@ export function useResizablePane(options: ResizablePaneOptions) {
 
   let startX = 0;
   let startWidth = 0;
+  let activePointer: { id: number; target: Element | null } | null = null;
 
   function setWidth(nextWidth: number) {
     width.value = clampWidth(nextWidth);
@@ -56,12 +57,30 @@ export function useResizablePane(options: ResizablePaneOptions) {
     setWidth(startWidth + delta);
   }
 
-  function onPointerUp(event: PointerEvent) {
-    isResizing.value = false;
+  function releasePointerCapture() {
+    if (!activePointer?.target?.hasPointerCapture?.(activePointer.id)) return;
+    activePointer.target.releasePointerCapture(activePointer.id);
+  }
+
+  function removeResizeListeners() {
     window.removeEventListener("pointermove", onPointerMove);
-    window.removeEventListener("pointerup", onPointerUp);
-    (event.target as Element | null)?.releasePointerCapture?.(event.pointerId);
+    window.removeEventListener("pointerup", onPointerEnd);
+    window.removeEventListener("pointercancel", onPointerEnd);
+    window.removeEventListener("blur", stopResize);
+  }
+
+  function stopResize() {
+    if (!isResizing.value) return;
+    isResizing.value = false;
+    removeResizeListeners();
+    releasePointerCapture();
+    activePointer = null;
     persistWidth();
+  }
+
+  function onPointerEnd(event: PointerEvent) {
+    if (activePointer && event.pointerId !== activePointer.id) return;
+    stopResize();
   }
 
   function startResize(event: PointerEvent) {
@@ -70,14 +89,17 @@ export function useResizablePane(options: ResizablePaneOptions) {
     isResizing.value = true;
     startX = event.clientX;
     startWidth = width.value;
-    (event.currentTarget as Element).setPointerCapture?.(event.pointerId);
+    const target = event.currentTarget instanceof Element ? event.currentTarget : null;
+    target?.setPointerCapture?.(event.pointerId);
+    activePointer = { id: event.pointerId, target };
     window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointerup", onPointerEnd);
+    window.addEventListener("pointercancel", onPointerEnd);
+    window.addEventListener("blur", stopResize);
   }
 
   onBeforeUnmount(() => {
-    window.removeEventListener("pointermove", onPointerMove);
-    window.removeEventListener("pointerup", onPointerUp);
+    stopResize();
   });
 
   return {

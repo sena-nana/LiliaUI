@@ -267,6 +267,38 @@ describe("AppShell sidebar", () => {
     expect(localStorage.getItem(SIDEBAR_CONFIG.widthStorageKey)).toBe("220");
   });
 
+  it("左侧栏拖拽取消或窗口失焦后恢复主界面交互", async () => {
+    const view = await renderAppShell();
+    const shell = shellElement(view.container);
+    const resizer = leftResizer(view.container);
+    const collapse = view.getByRole("button", { name: "折叠左侧栏" });
+
+    await fireEvent.pointerDown(resizer, {
+      button: 0,
+      clientX: 220,
+      pointerId: 1,
+    });
+    expect(shell).toHaveClass("is-resizing");
+
+    await fireEvent.pointerCancel(window, { pointerId: 1 });
+    expect(shell).not.toHaveClass("is-resizing");
+
+    await fireEvent.pointerDown(resizer, {
+      button: 0,
+      clientX: 220,
+      pointerId: 2,
+    });
+    expect(shell).toHaveClass("is-resizing");
+
+    window.dispatchEvent(new Event("blur"));
+    await waitFor(() => {
+      expect(shell).not.toHaveClass("is-resizing");
+    });
+
+    await fireEvent.click(collapse);
+    expect(shell).toHaveClass("is-sidebar-collapsed");
+  });
+
   it("设置页替换左侧栏、禁用折叠并保留折叠偏好", async () => {
     localStorage.setItem(SIDEBAR_CONFIG.collapsedStorageKey, "1");
     const view = await renderAppShell("/settings");
