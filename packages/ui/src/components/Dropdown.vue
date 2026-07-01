@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="T extends string | number">
 import { computed, ref, watch } from "vue";
-import { ChevronDown } from "@lucide/vue";
+import ChevronDown from "@lucide/vue/dist/esm/icons/chevron-down.mjs";
 import { SB_MENU_POP_TRANSITION_MS } from "../composables/menuMotion";
 import { useAnchoredMenuMotion } from "../composables/useAnchoredMenuMotion";
 import { useDismissableOverlay } from "../composables/useDismissableOverlay";

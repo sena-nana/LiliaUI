@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
-import { ArrowLeft } from "@lucide/vue";
+import ArrowLeft from "@lucide/vue/dist/esm/icons/arrow-left.mjs";
 import type { SettingsTab, SettingsTabKey } from "../config/appShell";
 
 defineProps<{

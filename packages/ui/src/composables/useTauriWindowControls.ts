@@ -57,10 +57,14 @@ export function useTauriWindowControls(options: TauriWindowControlOptions = {}) 
   onMounted(async () => {
     if (!options.trackMaximized) return;
     await syncMaximized();
-    if (!appWindow) return;
-    unlistenResize = await appWindow.onResized(() => {
-      void syncMaximized();
-    });
+    if (!appWindow || typeof appWindow.onResized !== "function") return;
+    try {
+      unlistenResize = await appWindow.onResized(() => {
+        void syncMaximized();
+      });
+    } catch {
+      unlistenResize = null;
+    }
   });
 
   onUnmounted(() => {

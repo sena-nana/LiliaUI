@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertTriangle } from "@lucide/vue";
+import AlertTriangle from "@lucide/vue/dist/esm/icons/triangle-alert.mjs";
 import UiButton from "./UiButton.vue";
 
 defineProps<{

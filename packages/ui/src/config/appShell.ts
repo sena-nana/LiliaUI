@@ -1,26 +1,24 @@
 import { defineAsyncComponent, reactive, type Component } from "vue";
-import {
-  Bot,
-  Brain,
-  Download,
-  Ellipsis,
-  FilePlus,
-  Folder,
-  FolderCog,
-  Gauge,
-  House,
-  Info,
-  MonitorSmartphone,
-  Network,
-  Palette,
-  PanelTop,
-  Puzzle,
-  Search,
-  Server,
-  Settings,
-  Sparkles,
-  Workflow,
-} from "@lucide/vue";
+import Bot from "@lucide/vue/dist/esm/icons/bot.mjs";
+import Brain from "@lucide/vue/dist/esm/icons/brain.mjs";
+import Download from "@lucide/vue/dist/esm/icons/download.mjs";
+import Ellipsis from "@lucide/vue/dist/esm/icons/ellipsis.mjs";
+import FilePlus from "@lucide/vue/dist/esm/icons/file-plus.mjs";
+import Folder from "@lucide/vue/dist/esm/icons/folder.mjs";
+import FolderCog from "@lucide/vue/dist/esm/icons/folder-cog.mjs";
+import Gauge from "@lucide/vue/dist/esm/icons/gauge.mjs";
+import House from "@lucide/vue/dist/esm/icons/house.mjs";
+import Info from "@lucide/vue/dist/esm/icons/info.mjs";
+import MonitorSmartphone from "@lucide/vue/dist/esm/icons/monitor-smartphone.mjs";
+import Network from "@lucide/vue/dist/esm/icons/network.mjs";
+import Palette from "@lucide/vue/dist/esm/icons/palette.mjs";
+import PanelTop from "@lucide/vue/dist/esm/icons/panel-top.mjs";
+import Puzzle from "@lucide/vue/dist/esm/icons/puzzle.mjs";
+import Search from "@lucide/vue/dist/esm/icons/search.mjs";
+import Server from "@lucide/vue/dist/esm/icons/server.mjs";
+import Settings from "@lucide/vue/dist/esm/icons/settings.mjs";
+import Sparkles from "@lucide/vue/dist/esm/icons/sparkles.mjs";
+import Workflow from "@lucide/vue/dist/esm/icons/workflow.mjs";
 import type { RouteLocationRaw } from "vue-router";
 
 type IconName =

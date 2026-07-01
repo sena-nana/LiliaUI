@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { onUnmounted } from "vue";
-import {
-  Copy,
-  Minus,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Square,
-  X,
-} from "@lucide/vue";
+import Copy from "@lucide/vue/dist/esm/icons/copy.mjs";
+import Minus from "@lucide/vue/dist/esm/icons/minus.mjs";
+import PanelLeftClose from "@lucide/vue/dist/esm/icons/panel-left-close.mjs";
+import PanelLeftOpen from "@lucide/vue/dist/esm/icons/panel-left-open.mjs";
+import Square from "@lucide/vue/dist/esm/icons/square.mjs";
+import X from "@lucide/vue/dist/esm/icons/x.mjs";
 import { useTauriWindowControls } from "../composables/useTauriWindowControls";
 
 interface Props {

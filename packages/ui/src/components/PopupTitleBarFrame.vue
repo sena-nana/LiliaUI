@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { ArrowLeft, Minimize2, Plus, X } from "@lucide/vue";
+import ArrowLeft from "@lucide/vue/dist/esm/icons/arrow-left.mjs";
+import Minimize2 from "@lucide/vue/dist/esm/icons/minimize-2.mjs";
+import Plus from "@lucide/vue/dist/esm/icons/plus.mjs";
+import X from "@lucide/vue/dist/esm/icons/x.mjs";
 import { useTauriWindowControls } from "../composables/useTauriWindowControls";
 import UiIconButton from "./UiIconButton.vue";
 import "./popup-titlebar-frame.css";

@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { Moon, Radius, SquareRoundCorner, Sun } from "@lucide/vue";
+import Moon from "@lucide/vue/dist/esm/icons/moon.mjs";
+import Radius from "@lucide/vue/dist/esm/icons/radius.mjs";
+import SquareRoundCorner from "@lucide/vue/dist/esm/icons/square-round-corner.mjs";
+import Sun from "@lucide/vue/dist/esm/icons/sun.mjs";
 import SettingsRow from "../../components/SettingsRow.vue";
 import UiCard from "../../components/UiCard.vue";
 import UiRangeField from "../../components/UiRangeField.vue";

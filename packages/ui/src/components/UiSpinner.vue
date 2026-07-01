@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LoaderCircle } from "@lucide/vue";
+import LoaderCircle from "@lucide/vue/dist/esm/icons/loader-circle.mjs";
 
 withDefaults(defineProps<{
   size?: number;
