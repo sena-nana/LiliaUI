@@ -1,3 +1,5 @@
+/// <reference path="./shims-vue.d.ts" />
+
 import { defineAsyncComponent } from "vue";
 
 export { default as LiliaAppRoot } from "./AppRoot.vue";
