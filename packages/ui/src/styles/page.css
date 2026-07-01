@@ -34,6 +34,19 @@
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-h2__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card.empty {
+  color: var(--text-muted);
 }
 
 .kv {
@@ -87,6 +100,10 @@
 .settings-row__label,
 .settings-page .settings-row__label {
   min-width: 0;
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .settings-row__hint,
@@ -96,12 +113,26 @@
   margin-top: 2px;
 }
 
-.settings-row__control {
+.settings-row__label-with-icon,
+.settings-row__control,
+.settings-row__status {
   display: inline-flex;
   align-items: center;
+}
+
+.settings-row__label-with-icon {
+  gap: 6px;
+}
+
+.settings-row__control {
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.settings-row__control--loose {
+  column-gap: 14px;
+  row-gap: 8px;
 }
 
 .segmented,
@@ -169,6 +200,56 @@
   text-align: right;
 }
 
+.settings-row__value,
+.settings-row__status-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-row__value {
+  max-width: 320px;
+}
+
+.settings-row__status {
+  min-width: 0;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.settings-row__status-text {
+  max-width: 220px;
+}
+
+.settings-row .ui-input {
+  width: min(360px, 45vw);
+  min-height: 34px;
+  background: var(--bg);
+  border-color: var(--border);
+  border-radius: var(--radius-md);
+  padding: 7px 10px;
+  font-size: 13px;
+}
+
+.settings-row .ui-input:focus {
+  outline: 2px solid var(--accent-soft);
+  outline-offset: 1px;
+}
+
+.settings-row .ui-textarea {
+  min-height: 78px;
+}
+
+.settings-row--stacked {
+  align-items: stretch;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-row--stacked .settings-row__label {
+  white-space: normal;
+}
+
 .ui-switch {
   position: relative;
   cursor: pointer;
@@ -229,6 +310,92 @@
 .ui-switch:has(.ui-switch__input:disabled) {
   cursor: not-allowed;
   opacity: 0.55;
+}
+
+.ui-switch input[type="checkbox"] {
+  position: relative;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 16px;
+  margin: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  appearance: none;
+  background: var(--bg-active);
+  cursor: inherit;
+  outline: none;
+  transition: background-color 0.14s ease, border-color 0.14s ease, outline-color 0.14s ease;
+}
+
+.ui-switch input[type="checkbox"]::before {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  content: "";
+  transition: transform 0.14s ease, background-color 0.14s ease;
+}
+
+.ui-switch input[type="checkbox"]:checked {
+  border-color: var(--accent-strong);
+  background: var(--accent-strong);
+}
+
+.ui-switch input[type="checkbox"]:checked::before {
+  background: var(--bg);
+  transform: translateX(14px);
+}
+
+.ui-switch:hover input[type="checkbox"]:not(:disabled) {
+  border-color: var(--text-muted);
+}
+
+.ui-switch input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--accent-soft);
+  outline-offset: 2px;
+}
+
+.ui-switch input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.ui-switch:has(input[type="checkbox"]:disabled) {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.settings-disclosure {
+  border-top: 1px solid var(--border-soft);
+  padding: 8px 0 0;
+}
+
+.settings-disclosure summary {
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.settings-disclosure summary:hover {
+  color: var(--text);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 16px;
+  color: var(--text-muted);
+  text-align: center;
 }
 
 .card-title-loader {

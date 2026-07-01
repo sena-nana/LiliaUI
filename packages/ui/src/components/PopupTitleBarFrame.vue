@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ArrowLeft, Minimize2, Plus, X } from "@lucide/vue";
 import { useTauriWindowControls } from "../composables/useTauriWindowControls";
+import "./popup-titlebar-frame.css";
 
 const emit = defineEmits<{
   close: [];

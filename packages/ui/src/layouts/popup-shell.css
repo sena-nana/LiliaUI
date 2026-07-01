@@ -1,0 +1,24 @@
+.popup-shell {
+  display: grid;
+  grid-template-rows: 36px minmax(0, 1fr);
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  background: var(--bg);
+}
+
+.popup-shell--status {
+  grid-template-rows: minmax(0, 1fr);
+  background: transparent;
+}
+
+.popup-shell--status .popup-shell__main {
+  background: transparent;
+}
+
+.popup-shell__main {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--bg);
+}

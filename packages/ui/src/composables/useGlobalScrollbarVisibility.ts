@@ -65,6 +65,13 @@ let hoverTarget: ScrollTarget | null = null;
 let dragState: DragState | null = null;
 let overlayUpdateFrame: number | null = null;
 let resizeObserver: ResizeObserver | null = null;
+let scrollbarStylesLoaded = false;
+
+function loadGlobalScrollbarStyles() {
+  if (scrollbarStylesLoaded || typeof window === "undefined") return;
+  scrollbarStylesLoaded = true;
+  void import("../styles/global-scrollbar.css");
+}
 
 const hideTimers = new WeakMap<Element, ReturnType<typeof window.setTimeout>>();
 const removeTimers = new WeakMap<Element, ReturnType<typeof window.setTimeout>>();
@@ -651,6 +658,7 @@ export function uninstallGlobalScrollbarVisibility() {
 
 export function installGlobalScrollbarVisibility() {
   if (installed || typeof window === "undefined") return uninstallGlobalScrollbarVisibility;
+  loadGlobalScrollbarStyles();
   installed = true;
   resizeObserver = typeof ResizeObserver !== "undefined"
     ? new ResizeObserver((entries) => {

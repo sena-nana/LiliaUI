@@ -4,6 +4,7 @@ import { ChevronDown } from "@lucide/vue";
 import { SB_MENU_POP_TRANSITION_MS } from "../composables/menuMotion";
 import { useAnchoredMenuMotion } from "../composables/useAnchoredMenuMotion";
 import { useDismissableOverlay } from "../composables/useDismissableOverlay";
+import "./action-menu.css";
 
 interface Option {
   value: T;

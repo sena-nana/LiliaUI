@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import "./popup-shell.css";
+
 withDefaults(defineProps<{
   status?: boolean;
 }>(), {

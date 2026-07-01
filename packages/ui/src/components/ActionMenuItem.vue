@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import "./action-menu.css";
+
 const props = withDefaults(defineProps<{
   icon?: unknown;
   agentId?: string;

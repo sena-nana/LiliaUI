@@ -7,22 +7,24 @@
     "./app": "./src/createLiliaApp.ts",
     "./commands": "./src/commands.ts",
     "./styles.css": "./src/styles.css",
+    "./styles/global-scrollbar.css": "./src/styles/global-scrollbar.css",
     "./styles/page.css": "./src/styles/page.css",
     "./styles/shell.css": "./src/styles/shell.css",
     "./theme/base.css": "./src/styles.css",
+    "./components/action-menu.css": "./src/components/action-menu.css",
+    "./components/popup-titlebar-frame.css": "./src/components/popup-titlebar-frame.css",
+    "./components/search-dropdown.css": "./src/components/search-dropdown.css",
     "./components/*": "./src/components/*.vue",
     "./composables/*": "./src/composables/*.ts",
     "./config/appShell": "./src/config/appShell.ts",
     "./directives/*": "./src/directives/*.ts",
+    "./layouts/popup-shell.css": "./src/layouts/popup-shell.css",
     "./layouts/*": "./src/layouts/*.vue",
     "./pages/*": "./src/pages/*.vue",
     "./utils/*": "./src/utils/*.ts"
   },
   "sideEffects": [
-    "**/*.css",
-    "src/styles.css",
-    "src/styles/page.css",
-    "src/styles/shell.css"
+    "**/*.css"
   ],
   "scripts": {
     "typecheck": "vue-tsc --noEmit -p tsconfig.json"

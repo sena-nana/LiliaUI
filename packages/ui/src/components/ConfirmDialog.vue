@@ -155,6 +155,37 @@ function onKeydown(event: KeyboardEvent) {
   border-top: 1px solid var(--border-soft);
 }
 
+.ghost {
+  background: transparent;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.ghost:hover {
+  background: var(--bg-hover);
+  filter: none;
+}
+
+.primary {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.primary:hover {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  color: var(--accent);
+}
+
+.ghost.danger {
+  color: var(--err);
+}
+
+.ghost.danger:hover {
+  background: color-mix(in srgb, var(--err) 18%, transparent);
+  filter: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .modal-enter-active,
   .modal-leave-active,

@@ -14,6 +14,7 @@ import {
   resolveMenuTransformOrigin,
   SB_MENU_POP_TRANSITION_MS,
 } from "../composables/menuMotion";
+import "./action-menu.css";
 
 const { state } = useContextMenu();
 

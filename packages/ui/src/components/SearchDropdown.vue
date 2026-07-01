@@ -6,6 +6,7 @@ import {
   highlightQuerySegments as createQuerySegments,
   highlightRangeSegments,
 } from "../utils/textSegments";
+import "./search-dropdown.css";
 
 const props = withDefaults(defineProps<{
   modelValue: string;

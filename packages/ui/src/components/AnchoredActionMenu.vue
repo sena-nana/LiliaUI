@@ -6,6 +6,7 @@ import {
   type AnchoredMenuPosition,
 } from "../composables/menuMotion";
 import { useAnchoredOverlay } from "../composables/useAnchoredOverlay";
+import "./action-menu.css";
 
 const props = withDefaults(defineProps<{
   open: boolean;
