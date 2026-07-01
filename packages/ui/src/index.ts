@@ -10,8 +10,20 @@ export { default as Dropdown } from "./components/Dropdown.vue";
 export { default as PopupTitleBarFrame } from "./components/PopupTitleBarFrame.vue";
 export { default as SearchDropdown } from "./components/SearchDropdown.vue";
 export { default as SettingsCollapsibleCard } from "./components/SettingsCollapsibleCard.vue";
+export { default as SettingsRow } from "./components/SettingsRow.vue";
 export { default as TitleBar } from "./components/TitleBar.vue";
+export { default as UiButton } from "./components/UiButton.vue";
+export { default as UiCard } from "./components/UiCard.vue";
+export { default as UiEmptyState } from "./components/UiEmptyState.vue";
+export { default as UiIconButton } from "./components/UiIconButton.vue";
+export { default as UiInput } from "./components/UiInput.vue";
+export { default as UiRangeField } from "./components/UiRangeField.vue";
+export { default as UiSegmentedControl } from "./components/UiSegmentedControl.vue";
+export { default as UiSpinner } from "./components/UiSpinner.vue";
+export { default as UiSwitch } from "./components/UiSwitch.vue";
+export { default as UiTextarea } from "./components/UiTextarea.vue";
 export { default as PopupShell } from "./layouts/PopupShell.vue";
+export type { UiSegmentedOption } from "./components/UiSegmentedControl.vue";
 export const LiliaSettingsPage = defineAsyncComponent(() => import("./pages/SettingsPage.vue"));
 
 export {

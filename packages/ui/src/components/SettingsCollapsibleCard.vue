@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ChevronDown, ChevronRight } from "@lucide/vue";
 import { computed } from "vue";
+import UiCard from "./UiCard.vue";
 
 const props = withDefaults(defineProps<{
   expanded: boolean;
@@ -30,7 +31,7 @@ function toggle() {
 </script>
 
 <template>
-  <section class="card settings-collapsible-card" :aria-label="resolvedAriaLabel">
+  <UiCard class="settings-collapsible-card" :aria-label="resolvedAriaLabel">
     <div
       class="settings-collapsible-card__header"
       :class="{ 'settings-collapsible-card__header--with-switch': withSwitch }"
@@ -67,7 +68,7 @@ function toggle() {
     <div v-if="expanded" :id="controlsId" class="settings-collapsible-card__details">
       <slot />
     </div>
-  </section>
+  </UiCard>
 </template>
 
 <style scoped>

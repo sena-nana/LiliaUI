@@ -10,6 +10,7 @@ import {
   SIDEBAR_NAV,
   type SidebarActionItem,
 } from "../config/appShell";
+import UiIconButton from "../components/UiIconButton.vue";
 import SidebarFooter from "../components/sidebar/SidebarFooter.vue";
 import SidebarRowTools from "../components/sidebar/SidebarRowTools.vue";
 
@@ -26,19 +27,17 @@ function selectAction(action: SidebarActionItem) {
   <aside class="secondary-panel" data-agent-id="sidebar.main">
     <div v-if="hasTopSection" class="secondary-panel__top">
       <div v-if="SIDEBAR_GLOBAL_ACTIONS.length" class="sb-section sb-section--actions">
-        <button
+        <UiIconButton
           v-for="action in SIDEBAR_GLOBAL_ACTIONS"
           :key="action.key"
-          type="button"
           class="sb-action"
-          :title="action.label"
-          :aria-label="action.label"
+          size="md"
+          :icon="action.icon"
+          :label="action.label"
           :disabled="action.disabled || !action.onSelect"
-          :data-agent-id="`sidebar.global.${action.key}`"
+          :agent-id="`sidebar.global.${action.key}`"
           @click="selectAction(action)"
-        >
-          <component :is="action.icon" :size="16" aria-hidden="true" />
-        </button>
+        />
       </div>
 
       <div v-if="hasNavSection" class="sb-section">
@@ -77,19 +76,17 @@ function selectAction(action: SidebarActionItem) {
         <div class="sb-section__header">
           <span class="sb-section__title">{{ group.title }}</span>
           <div v-if="group.tools?.length" class="sb-section__tools">
-            <button
+            <UiIconButton
               v-for="tool in group.tools"
               :key="tool.key"
-              type="button"
               class="sb-icon-btn"
-              :title="tool.label"
-              :aria-label="tool.label"
+              size="sm"
+              :icon="tool.icon"
+              :label="tool.label"
               :disabled="tool.disabled || !tool.onSelect"
-              :data-agent-id="`sidebar.group.${group.key}.tool.${tool.key}`"
+              :agent-id="`sidebar.group.${group.key}.tool.${tool.key}`"
               @click="selectAction(tool)"
-            >
-              <component :is="tool.icon" :size="14" aria-hidden="true" />
-            </button>
+            />
           </div>
         </div>
         <div class="sb-tree">
@@ -166,37 +163,18 @@ function selectAction(action: SidebarActionItem) {
   opacity: 1;
 }
 
-.sb-action,
-.sb-icon-btn {
-  border: 0;
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.12s ease, color 0.12s ease;
-}
-
 .sb-action {
   flex: 1;
+  width: auto;
+  min-width: 0;
   height: 30px;
-  padding: 0;
   border-radius: var(--radius-sm);
 }
 
 .sb-icon-btn {
   width: 22px;
   height: 22px;
-  padding: 0;
   border-radius: var(--radius-xs);
-}
-
-.sb-action:hover,
-.sb-icon-btn:hover {
-  background: var(--bg-hover);
-  color: var(--text);
-  filter: none;
 }
 
 .sb-tree {

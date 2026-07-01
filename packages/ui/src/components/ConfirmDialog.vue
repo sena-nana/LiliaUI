@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { AlertTriangle } from "@lucide/vue";
+import UiButton from "./UiButton.vue";
 
 defineProps<{
   open: boolean;
@@ -48,24 +49,22 @@ function onKeydown(event: KeyboardEvent) {
             <p>{{ message }}</p>
           </div>
           <div class="dialog-card__actions">
-            <button
-              type="button"
-              class="ghost"
+            <UiButton
+              variant="ghost"
               :disabled="busy"
-              data-agent-id="confirm-dialog.cancel"
+              agent-id="confirm-dialog.cancel"
               @click="emit('cancel')"
             >
               {{ cancelText ?? "取消" }}
-            </button>
-            <button
-              type="button"
-              :class="danger ? 'ghost danger' : 'primary'"
-              :disabled="busy"
-              data-agent-id="confirm-dialog.confirm"
+            </UiButton>
+            <UiButton
+              :variant="danger ? 'danger' : 'primary'"
+              :busy="busy"
+              agent-id="confirm-dialog.confirm"
               @click="emit('confirm')"
             >
               {{ busy ? (busyText ?? "处理中...") : (confirmText ?? "确认") }}
-            </button>
+            </UiButton>
           </div>
         </div>
       </div>
@@ -153,37 +152,6 @@ function onKeydown(event: KeyboardEvent) {
   gap: 8px;
   padding: 10px 14px;
   border-top: 1px solid var(--border-soft);
-}
-
-.ghost {
-  background: transparent;
-  color: var(--text);
-  font-weight: 500;
-}
-
-.ghost:hover {
-  background: var(--bg-hover);
-  filter: none;
-}
-
-.primary {
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.primary:hover {
-  background: color-mix(in srgb, var(--accent) 20%, transparent);
-  color: var(--accent);
-}
-
-.ghost.danger {
-  color: var(--err);
-}
-
-.ghost.danger:hover {
-  background: color-mix(in srgb, var(--err) 18%, transparent);
-  filter: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

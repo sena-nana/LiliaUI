@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import UiIconButton from "../UiIconButton.vue";
 import type { SidebarActionItem } from "../../config/appShell";
 
 defineProps<{
@@ -14,19 +15,17 @@ function selectTool(tool: SidebarActionItem) {
 
 <template>
   <div class="sb-tree__hover-tools" @click.stop>
-    <button
+    <UiIconButton
       v-for="tool in tools"
       :key="tool.key"
-      type="button"
       class="sb-icon-btn"
-      :title="tool.label"
-      :aria-label="tool.label"
+      size="sm"
+      :icon="tool.icon"
+      :label="tool.label"
       :disabled="tool.disabled || !tool.onSelect"
-      :data-agent-id="agentIdBase ? `${agentIdBase}.${tool.key}` : undefined"
+      :agent-id="agentIdBase ? `${agentIdBase}.${tool.key}` : undefined"
       @click="selectTool(tool)"
-    >
-      <component :is="tool.icon" :size="13" aria-hidden="true" />
-    </button>
+    />
   </div>
 </template>
 
@@ -41,24 +40,4 @@ function selectTool(tool: SidebarActionItem) {
   transition: opacity 0.12s ease;
 }
 
-.sb-icon-btn {
-  width: 22px;
-  height: 22px;
-  padding: 0;
-  border: 0;
-  border-radius: var(--radius-xs);
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.12s ease, color 0.12s ease;
-}
-
-.sb-icon-btn:hover {
-  background: var(--bg-hover);
-  color: var(--text);
-  filter: none;
-}
 </style>
