@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import * as publicUiExports from "../../packages/ui/src/index";
 import {
   type ComponentPerfReport,
   compareComponentPerfReport,
@@ -10,6 +11,7 @@ import {
 import { componentPerformanceScenarios } from "./componentScenarios";
 
 const componentPerfBaselinePath = resolve("tests/perf/componentPerformance.baseline.json");
+const vueComponentMarkers = ["__name", "setup", "render", "__asyncLoader"] as const;
 
 function readComponentPerfBaseline() {
   return JSON.parse(readFileSync(componentPerfBaselinePath, "utf8")) as ComponentPerfReport;
@@ -20,16 +22,17 @@ function writeComponentPerfBaseline(report: ComponentPerfReport) {
   writeFileSync(componentPerfBaselinePath, `${JSON.stringify(report, null, 2)}\n`);
 }
 
+function isPublicVueComponent(value: unknown) {
+  return typeof value === "object" &&
+    value !== null &&
+    vueComponentMarkers.some((marker) => marker in value);
+}
+
 function exportedVueComponentNames() {
-  const source = readFileSync(resolve("packages/ui/src/index.ts"), "utf8");
-  const names = Array.from(
-    source.matchAll(/export \{ default as (\w+) \} from "\.\/(?:AppRoot\.vue|components\/[^"]+|layouts\/[^"]+)";/g),
-    (match) => match[1],
-  );
-  if (source.includes("export const LiliaSettingsPage")) {
-    names.push("LiliaSettingsPage");
-  }
-  return names.sort();
+  return Object.entries(publicUiExports)
+    .filter(([, value]) => isPublicVueComponent(value))
+    .map(([name]) => name)
+    .sort();
 }
 
 describe("component performance scenarios", () => {
