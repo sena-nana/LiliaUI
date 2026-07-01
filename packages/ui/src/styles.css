@@ -138,6 +138,53 @@ select:focus {
   background: var(--bg);
 }
 
+input[type="checkbox"] {
+  display: inline-grid;
+  place-content: center;
+  width: 13px;
+  min-width: 13px;
+  height: 13px;
+  min-height: 13px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  appearance: none;
+  background: var(--bg);
+  color: var(--accent);
+  cursor: pointer;
+  line-height: 0;
+  vertical-align: middle;
+}
+
+input[type="checkbox"]::before {
+  width: 7px;
+  height: 7px;
+  transform: scale(0);
+  border-radius: 2px;
+  background: currentColor;
+  content: "";
+}
+
+input[type="checkbox"]:checked {
+  border-color: var(--accent-strong);
+  background: var(--accent-soft);
+}
+
+input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--accent-soft);
+  outline-offset: 2px;
+}
+
+input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 button {
   background: transparent;
   color: var(--text);
