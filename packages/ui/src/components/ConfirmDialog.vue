@@ -82,7 +82,7 @@ function onKeydown(event: KeyboardEvent) {
   align-items: flex-start;
   justify-content: center;
   padding-top: 12vh;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--scrim);
   backdrop-filter: blur(2px);
 }
 
@@ -93,7 +93,7 @@ function onKeydown(event: KeyboardEvent) {
   background: var(--bg-elev);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--shadow-dialog);
 }
 
 .modal-enter-active,

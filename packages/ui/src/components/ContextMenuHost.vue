@@ -179,7 +179,7 @@ watch(
   color: var(--text);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  box-shadow: 0 10px 28px -10px rgba(0, 0, 0, 0.55);
+  box-shadow: var(--shadow-menu);
   display: flex;
   flex-direction: column;
   gap: 1px;
@@ -269,7 +269,7 @@ watch(
   color: var(--text);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  box-shadow: 0 10px 28px -10px rgba(0, 0, 0, 0.55);
+  box-shadow: var(--shadow-menu);
   display: flex;
   flex-direction: column;
   gap: 1px;

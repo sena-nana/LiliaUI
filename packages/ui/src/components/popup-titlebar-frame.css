@@ -38,12 +38,12 @@
 
 .popup-titlebar .titlebar__btn:hover {
   color: var(--text);
-  background: var(--hover);
+  background: var(--bg-hover);
 }
 
 .popup-titlebar .titlebar__btn--danger:hover {
-  color: #fff;
-  background: #e5484d;
+  color: var(--err-solid-text);
+  background: var(--err-solid);
 }
 
 .popup-titlebar__crumbs {

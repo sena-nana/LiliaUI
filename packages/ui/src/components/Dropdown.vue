@@ -207,7 +207,7 @@ watch(open, (value) => {
   display: flex;
   flex-direction: column;
   gap: 0;
-  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-menu);
   max-height: 280px;
   overflow: auto;
   transform-origin: var(--sb-menu-origin-x, 0px) var(--sb-menu-origin-y, 0px);
