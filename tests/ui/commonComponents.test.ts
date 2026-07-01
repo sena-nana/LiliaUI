@@ -23,20 +23,30 @@ const TestIcon = defineComponent({
 describe("common UI components", () => {
   it("invokes enabled button actions and blocks disabled icon buttons", async () => {
     const action = vi.fn();
+    const warningAction = vi.fn();
     const disabledAction = vi.fn();
 
     render(defineComponent({
       components: { UiButton, UiIconButton },
       setup() {
-        return { action, disabledAction, TestIcon };
+        return { action, disabledAction, TestIcon, warningAction };
       },
       template: `
         <UiButton variant="primary" agent-id="actions.run" @click="action">
           Run
         </UiButton>
+        <UiButton variant="warning" agent-id="actions.warn" @click="warningAction">
+          Warn
+        </UiButton>
+        <UiButton aria-label="Icon action" agent-id="actions.icon">
+          <template #icon>
+            <TestIcon />
+          </template>
+        </UiButton>
         <UiIconButton
           :icon="TestIcon"
           label="Pinned"
+          variant="warning"
           active
           disabled
           agent-id="actions.pin"
@@ -45,12 +55,23 @@ describe("common UI components", () => {
       `,
     }));
 
-    await fireEvent.click(screen.getByRole("button", { name: "Run" }));
-    await fireEvent.click(screen.getByRole("button", { name: "Pinned" }));
+    const runButton = screen.getByRole("button", { name: "Run" });
+    const warningButton = screen.getByRole("button", { name: "Warn" });
+    const iconOnlyButton = screen.getByRole("button", { name: "Icon action" });
+    const pinnedButton = screen.getByRole("button", { name: "Pinned" });
+
+    await fireEvent.click(runButton);
+    await fireEvent.click(warningButton);
+    await fireEvent.click(pinnedButton);
 
     expect(action).toHaveBeenCalledTimes(1);
+    expect(warningAction).toHaveBeenCalledTimes(1);
     expect(disabledAction).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Pinned" })).toBeDisabled();
+    expect(pinnedButton).toBeDisabled();
+    expect(runButton.querySelector(".ui-button__label")).toBeInTheDocument();
+    expect(warningButton.querySelector(".ui-button__label")).toBeInTheDocument();
+    expect(iconOnlyButton.querySelector(".ui-button__label")).toBeNull();
+    expect(pinnedButton.querySelector(".ui-button__label")).toBeNull();
   });
 
   it("renders card, empty, and loading states through slots", () => {

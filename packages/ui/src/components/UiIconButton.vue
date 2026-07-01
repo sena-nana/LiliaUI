@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import UiButton from "./UiButton.vue";
+import type { UiButtonSize, UiButtonVariant } from "./UiButton.vue";
 import UiSpinner from "./UiSpinner.vue";
 
 const props = withDefaults(defineProps<{
   icon: unknown;
   label: string;
   title?: string;
-  size?: "sm" | "md";
-  variant?: "ghost" | "primary" | "danger";
+  size?: UiButtonSize;
+  variant?: UiButtonVariant;
   active?: boolean;
   disabled?: boolean;
   busy?: boolean;
@@ -81,6 +82,16 @@ const emit = defineEmits<{
 .ui-icon-button--primary.ui-button.is-active {
   background: var(--accent-soft);
   color: var(--accent);
+}
+
+.ui-icon-button--warning.ui-button {
+  color: var(--warn);
+}
+
+.ui-icon-button--warning.ui-button:hover:not(:disabled),
+.ui-icon-button--warning.ui-button.is-active {
+  background: var(--warn-soft);
+  color: var(--warn);
 }
 
 .ui-icon-button--danger.ui-button {

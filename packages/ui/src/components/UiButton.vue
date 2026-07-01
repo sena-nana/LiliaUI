@@ -1,8 +1,14 @@
 <script setup lang="ts">
+import { Comment, Fragment, Text, computed, useSlots, type VNode } from "vue";
+
+export type UiButtonVariant = "ghost" | "primary" | "warning" | "danger";
+export type UiButtonSize = "sm" | "md";
+export type UiButtonType = "button" | "submit" | "reset";
+
 const props = withDefaults(defineProps<{
-  variant?: "ghost" | "primary" | "danger";
-  size?: "sm" | "md";
-  type?: "button" | "submit" | "reset";
+  variant?: UiButtonVariant;
+  size?: UiButtonSize;
+  type?: UiButtonType;
   icon?: unknown;
   disabled?: boolean;
   busy?: boolean;
@@ -20,6 +26,20 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   click: [event: MouseEvent];
 }>();
+
+const slots = useSlots();
+const hasDefaultLabel = computed(() => hasRenderableSlotContent(slots.default?.() ?? []));
+
+function hasRenderableSlotContent(nodes: VNode[]): boolean {
+  return nodes.some((node) => {
+    if (node.type === Comment) return false;
+    if (node.type === Text) return String(node.children).trim().length > 0;
+    if (node.type === Fragment) {
+      return Array.isArray(node.children) && hasRenderableSlotContent(node.children as VNode[]);
+    }
+    return true;
+  });
+}
 
 function onClick(event: MouseEvent) {
   if (props.disabled || props.busy) return;
@@ -43,7 +63,7 @@ function onClick(event: MouseEvent) {
     <slot name="icon">
       <component v-if="icon" :is="icon" :size="size === 'sm' ? 13 : 14" aria-hidden="true" />
     </slot>
-    <span v-if="$slots.default" class="ui-button__label">
+    <span v-if="hasDefaultLabel" class="ui-button__label">
       <slot />
     </span>
   </button>
@@ -94,6 +114,18 @@ function onClick(event: MouseEvent) {
 .ui-button--primary:hover:not(:disabled) {
   background: color-mix(in srgb, var(--accent) 20%, transparent);
   color: var(--accent);
+  filter: none;
+}
+
+.ui-button--warning {
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-weight: 600;
+}
+
+.ui-button--warning:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--warn) 20%, transparent);
+  color: var(--warn);
   filter: none;
 }
 

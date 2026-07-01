@@ -23,6 +23,7 @@ export { default as UiSpinner } from "./components/UiSpinner.vue";
 export { default as UiSwitch } from "./components/UiSwitch.vue";
 export { default as UiTextarea } from "./components/UiTextarea.vue";
 export { default as PopupShell } from "./layouts/PopupShell.vue";
+export type { UiButtonSize, UiButtonType, UiButtonVariant } from "./components/UiButton.vue";
 export type { UiSegmentedOption } from "./components/UiSegmentedControl.vue";
 export const LiliaSettingsPage = defineAsyncComponent(() => import("./pages/SettingsPage.vue"));
 
