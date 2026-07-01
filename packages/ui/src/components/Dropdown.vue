@@ -195,6 +195,7 @@ watch(open, (value) => {
   font-weight: 500;
   min-width: 0;
   max-width: 100%;
+  text-align: left;
 }
 
 .dd--block .dd__button {
@@ -222,6 +223,7 @@ watch(open, (value) => {
   max-width: 160px;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: left;
 }
 
 .dd--block .dd__button-label,
