@@ -1,6 +1,7 @@
 import { fireEvent, render, waitFor } from "@testing-library/vue";
 import { defineComponent } from "vue";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import PopupTitleBarFrame from "@lilia/ui/components/PopupTitleBarFrame";
 import TitleBar from "@lilia/ui/components/TitleBar";
 import { testAppConfig } from "./fixtures/appConfig";
 
@@ -124,6 +125,18 @@ describe("TitleBar dragging", () => {
     expect(tauriWindow.appWindow.startDragging).not.toHaveBeenCalled();
   });
 
+  it("forwards titlebar window control actions", async () => {
+    const view = await renderTitleBar();
+
+    await fireEvent.click(view.getByLabelText("最小化"));
+    await fireEvent.click(view.getByLabelText("最大化"));
+    await fireEvent.click(view.getByLabelText("关闭"));
+
+    expect(tauriWindow.appWindow.minimize).toHaveBeenCalledOnce();
+    expect(tauriWindow.appWindow.toggleMaximize).toHaveBeenCalledOnce();
+    expect(tauriWindow.appWindow.close).toHaveBeenCalledOnce();
+  });
+
   it("renders app-provided center and right action slots", async () => {
     const action = vi.fn();
     const view = render(defineComponent({
@@ -149,5 +162,15 @@ describe("TitleBar dragging", () => {
 
     await fireEvent.click(view.getByRole("button", { name: "业务动作" }));
     expect(action).toHaveBeenCalledOnce();
+  });
+
+  it("uses shared window controls in popup titlebars", async () => {
+    const view = render(PopupTitleBarFrame);
+
+    await fireEvent.click(view.getByLabelText("最小化"));
+    await fireEvent.click(view.getByLabelText("关闭"));
+
+    expect(tauriWindow.appWindow.minimize).toHaveBeenCalledOnce();
+    expect(tauriWindow.appWindow.close).toHaveBeenCalledOnce();
   });
 });

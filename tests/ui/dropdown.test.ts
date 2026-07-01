@@ -51,6 +51,27 @@ describe("Dropdown", () => {
     expect(screen.getByRole("button", { name: /向上展开/i })).toBeInTheDocument();
   });
 
+  it("closes when dismissed by outside pointer or Escape", async () => {
+    renderDropdown();
+    const button = screen.getByRole("button", { name: /向下展开/i });
+
+    await fireEvent.click(button);
+    expect(await screen.findByRole("listbox")).toBeInTheDocument();
+
+    await fireEvent.pointerDown(document.body);
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    });
+
+    await fireEvent.click(button);
+    expect(await screen.findByRole("listbox")).toBeInTheDocument();
+
+    await fireEvent.keyDown(document, { key: "Escape" });
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    });
+  });
+
   it("向下展开时会从触发点击位置展开", async () => {
     const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
     Object.defineProperty(HTMLElement.prototype, "getBoundingClientRect", {

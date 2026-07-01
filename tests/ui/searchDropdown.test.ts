@@ -19,12 +19,18 @@ function renderSearchDropdown() {
         :close-on-outside="true"
         :close-on-escape="true"
       >
-        <template #default="{ highlightQuerySegments }">
+        <template #default="{ highlightQuerySegments, highlightRangeSegments }">
           <button type="button" class="search-dropdown__item" role="option">
             <template v-for="segment in highlightQuerySegments('Alpha')" :key="segment.text">
               <mark v-if="segment.mark">{{ segment.text }}</mark>
               <span v-else>{{ segment.text }}</span>
             </template>
+            <span data-testid="range-segments">
+              <template v-for="(segment, index) in highlightRangeSegments('abcdef', [[1, 3], [2, 5]])" :key="index">
+                <mark v-if="segment.mark">{{ segment.text }}</mark>
+                <span v-else>{{ segment.text }}</span>
+              </template>
+            </span>
           </button>
         </template>
       </SearchDropdown>
@@ -43,6 +49,7 @@ describe("SearchDropdown", () => {
     expect(document.body.contains(listbox)).toBe(true);
     expect(view.container.contains(listbox)).toBe(false);
     expect(listbox.querySelector("mark")).toHaveTextContent("Alp");
+    expect(screen.getByTestId("range-segments").querySelector("mark")).toHaveTextContent("bcde");
 
     await fireEvent.pointerDown(document.body);
 

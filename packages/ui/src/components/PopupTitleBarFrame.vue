@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowLeft, Minimize2, Plus, X } from "@lucide/vue";
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import { useTauriWindowControls } from "../composables/useTauriWindowControls";
 
 const emit = defineEmits<{
   close: [];
@@ -14,19 +14,11 @@ const props = withDefaults(defineProps<{
   closeWindow: true,
 });
 
-const appWindow = safeCurrentWindow();
-
-function safeCurrentWindow(): ReturnType<typeof getCurrentWindow> | null {
-  try {
-    return getCurrentWindow();
-  } catch {
-    return null;
-  }
-}
+const { close, minimize } = useTauriWindowControls();
 
 async function onClose() {
   emit("close");
-  if (props.closeWindow && appWindow) await appWindow.close();
+  if (props.closeWindow) await close();
 }
 </script>
 
@@ -67,7 +59,7 @@ async function onClose() {
           data-agent-id="popup.titlebar.minimize"
           aria-label="最小化"
           title="最小化"
-          @click="appWindow?.minimize()"
+          @click="minimize"
         >
           <Minimize2 :size="14" aria-hidden="true" />
         </button>

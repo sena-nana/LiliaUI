@@ -7,6 +7,7 @@ import {
   type ComputedRef,
   type Ref,
 } from "vue";
+import { addDomEventListener, runUnlistenFns } from "../utils/eventListeners";
 import {
   createAnchoredRect,
   rectFromDomRect,
@@ -22,20 +23,6 @@ export interface OverlayAnchorPoint {
 }
 
 type MaybeAnchorRef = Ref<HTMLElement | null | undefined> | ComputedRef<HTMLElement | null | undefined>;
-
-function addDomEventListener<K extends keyof WindowEventMap>(
-  target: Window,
-  type: K,
-  listener: (event: WindowEventMap[K]) => void,
-  options?: boolean | AddEventListenerOptions,
-) {
-  target.addEventListener(type, listener, options);
-  return () => target.removeEventListener(type, listener, options);
-}
-
-function runUnlistenFns(unlisteners: Array<() => void>) {
-  for (const unlisten of unlisteners) unlisten();
-}
 
 function pointRect(point: OverlayAnchorPoint): AnchoredRect {
   return createAnchoredRect(point.x, point.y, 0, 0);

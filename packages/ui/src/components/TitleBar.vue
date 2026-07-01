@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from "vue";
+import { onUnmounted } from "vue";
 import {
   Copy,
   Minus,
@@ -8,7 +8,7 @@ import {
   Square,
   X,
 } from "@lucide/vue";
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import { useTauriWindowControls } from "../composables/useTauriWindowControls";
 
 interface Props {
   title?: string;
@@ -22,10 +22,14 @@ defineEmits<{
   toggleLeftSidebar: [];
 }>();
 
-const isMaximized = ref(false);
-const appWindow = safeCurrentWindow();
+const {
+  close: onClose,
+  isMaximized,
+  minimize: onMinimize,
+  startDragging: startNativeDrag,
+  toggleMaximize: onToggleMaximize,
+} = useTauriWindowControls({ trackMaximized: true });
 const DRAG_THRESHOLD = 4;
-let unlistenResize: (() => void) | null = null;
 let pendingDrag: {
   pointerId: number;
   startX: number;
@@ -33,66 +37,15 @@ let pendingDrag: {
   target: HTMLElement | null;
 } | null = null;
 
-function safeCurrentWindow(): ReturnType<typeof getCurrentWindow> | null {
-  try {
-    return getCurrentWindow();
-  } catch {
-    return null;
-  }
-}
-
-async function syncMaximized() {
-  if (!appWindow) return;
-  try {
-    isMaximized.value = await appWindow.isMaximized();
-  } catch {
-    isMaximized.value = false;
-  }
-}
-
-onMounted(async () => {
-  await syncMaximized();
-  if (!appWindow) return;
-  unlistenResize = await appWindow.onResized(() => {
-    void syncMaximized();
-  });
-});
-
 onUnmounted(() => {
-  unlistenResize?.();
   clearPendingDrag();
 });
-
-async function onMinimize() {
-  if (!appWindow) return;
-  await appWindow.minimize();
-}
-
-async function onToggleMaximize() {
-  if (!appWindow) return;
-  await appWindow.toggleMaximize();
-  await syncMaximized();
-}
-
-async function onClose() {
-  if (!appWindow) return;
-  await appWindow.close();
-}
 
 function isTitlebarControl(target: EventTarget | null) {
   return (
     target instanceof Element &&
     Boolean(target.closest("button, a, input, textarea, select, [contenteditable='true']"))
   );
-}
-
-async function startNativeDrag() {
-  if (!appWindow || typeof appWindow.startDragging !== "function") return;
-  try {
-    await appWindow.startDragging();
-  } catch {
-    return;
-  }
 }
 
 function clearPendingDrag() {

@@ -4,9 +4,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   addDomEventListener,
   createLazyLoadState,
+  highlightQuerySegments,
+  highlightRangeSegments,
   installCombinedUnlisten,
   installUnlistenFns,
   scheduleAfterPaint,
+  useAnchoredOverlay,
   useFocusOnActivation,
   withComponentEpoch,
   type ComponentEpoch,
@@ -97,6 +100,51 @@ describe("event listener helpers", () => {
     target.dispatchEvent(new Event("test-event"));
 
     expect(listener).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("text segment helpers", () => {
+  it("creates stable query and range highlight segments", () => {
+    expect(highlightQuerySegments("Alpha beta alpha", "alp")).toEqual([
+      { text: "Alp", mark: true },
+      { text: "ha beta ", mark: false },
+      { text: "alp", mark: true },
+      { text: "ha", mark: false },
+    ]);
+
+    expect(highlightRangeSegments("abcdef", [[1, 3], [2, 5]])).toEqual([
+      { text: "a", mark: false },
+      { text: "bcde", mark: true },
+      { text: "f", mark: false },
+    ]);
+  });
+});
+
+describe("anchored overlay helpers", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("installs viewport listeners while open and removes them on unmount", () => {
+    const addListener = vi.spyOn(window, "addEventListener");
+    const removeListener = vi.spyOn(window, "removeEventListener");
+    const Host = defineComponent({
+      setup() {
+        const open = ref(true);
+        const preferredPlacement = ref<"bottom-start">("bottom-start");
+        useAnchoredOverlay({ open, preferredPlacement });
+        return () => h("div");
+      },
+    });
+
+    const view = render(Host);
+    expect(addListener).toHaveBeenCalledWith("resize", expect.any(Function), undefined);
+    expect(addListener).toHaveBeenCalledWith("scroll", expect.any(Function), true);
+
+    view.unmount();
+
+    expect(removeListener).toHaveBeenCalledWith("resize", expect.any(Function), undefined);
+    expect(removeListener).toHaveBeenCalledWith("scroll", expect.any(Function), true);
   });
 });
 

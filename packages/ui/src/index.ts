@@ -11,7 +11,6 @@ export { default as PopupTitleBarFrame } from "./components/PopupTitleBarFrame.v
 export { default as SearchDropdown } from "./components/SearchDropdown.vue";
 export { default as SettingsCollapsibleCard } from "./components/SettingsCollapsibleCard.vue";
 export { default as TitleBar } from "./components/TitleBar.vue";
-export { default as ViewTabs } from "./components/ViewTabs.vue";
 export { default as PopupShell } from "./layouts/PopupShell.vue";
 export const LiliaSettingsPage = defineAsyncComponent(() => import("./pages/SettingsPage.vue"));
 
@@ -70,6 +69,8 @@ export * from "./composables/useGlobalScrollbarVisibility";
 export * from "./composables/useAnchoredOverlay";
 export * from "./composables/useAnchoredActionMenu";
 export * from "./composables/useAnchoredMenuMotion";
+export * from "./composables/useDismissableOverlay";
+export * from "./composables/useTauriWindowControls";
 export * from "./composables/menuMotion";
 export * from "./composables/usePersistentState";
 export * from "./composables/useResizablePane";
@@ -82,4 +83,5 @@ export * from "./utils/eventListeners";
 export * from "./utils/lazyLoadState";
 export * from "./utils/perf";
 export * from "./utils/singleFlight";
+export * from "./utils/textSegments";
 export { vContextMenu } from "./directives/contextMenu";

@@ -15,7 +15,8 @@
     "./config/appShell": "./src/config/appShell.ts",
     "./directives/*": "./src/directives/*.ts",
     "./layouts/*": "./src/layouts/*.vue",
-    "./pages/*": "./src/pages/*.vue"
+    "./pages/*": "./src/pages/*.vue",
+    "./utils/*": "./src/utils/*.ts"
   },
   "sideEffects": [
     "**/*.css",

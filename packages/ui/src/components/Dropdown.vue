@@ -1,8 +1,9 @@
 <script setup lang="ts" generic="T extends string | number">
-import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { ChevronDown } from "@lucide/vue";
 import { SB_MENU_POP_TRANSITION_MS } from "../composables/menuMotion";
 import { useAnchoredMenuMotion } from "../composables/useAnchoredMenuMotion";
+import { useDismissableOverlay } from "../composables/useDismissableOverlay";
 
 interface Option {
   value: T;
@@ -83,31 +84,20 @@ function isSelected(option: Option) {
     : option.value === props.modelValue;
 }
 
-function onDocPointer(event: PointerEvent) {
-  if (!menuMotion.containsTarget(event.target)) open.value = false;
-}
-
-function onKey(event: KeyboardEvent) {
-  if (event.key === "Escape" && open.value) {
+useDismissableOverlay({
+  open,
+  closeOnOutside: true,
+  closeOnEscape: true,
+  containsTarget: menuMotion.containsTarget,
+  onDismiss: () => {
     open.value = false;
-    event.stopPropagation();
-  }
-}
-
-watch(open, (value) => {
-  if (value) {
-    document.addEventListener("pointerdown", onDocPointer, true);
-    document.addEventListener("keydown", onKey);
-  } else {
-    menuMotion.clearAnchor();
-    document.removeEventListener("pointerdown", onDocPointer, true);
-    document.removeEventListener("keydown", onKey);
-  }
+  },
 });
 
-onBeforeUnmount(() => {
-  document.removeEventListener("pointerdown", onDocPointer, true);
-  document.removeEventListener("keydown", onKey);
+watch(open, (value) => {
+  if (!value) {
+    menuMotion.clearAnchor();
+  }
 });
 </script>
 
