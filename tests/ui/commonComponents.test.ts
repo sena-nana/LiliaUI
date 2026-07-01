@@ -72,6 +72,9 @@ describe("common UI components", () => {
     expect(warningButton.querySelector(".ui-button__label")).toBeInTheDocument();
     expect(iconOnlyButton.querySelector(".ui-button__label")).toBeNull();
     expect(pinnedButton.querySelector(".ui-button__label")).toBeNull();
+    expect(runButton).not.toHaveClass("ui-button--icon-only");
+    expect(warningButton).not.toHaveClass("ui-button--icon-only");
+    expect(iconOnlyButton).toHaveClass("ui-button--icon-only");
   });
 
   it("renders card, empty, and loading states through slots", () => {

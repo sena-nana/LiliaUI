@@ -34,7 +34,7 @@ const emit = defineEmits<{
     :class="[
       `ui-icon-button--${size}`,
       `ui-icon-button--${variant}`,
-      { 'is-active': active, 'is-busy': busy },
+      { 'is-active': active },
     ]"
     :variant="variant"
     :size="size"
@@ -56,8 +56,6 @@ const emit = defineEmits<{
 .ui-icon-button.ui-button {
   flex: 0 0 auto;
   color: var(--text-muted);
-  padding: 0;
-  gap: 0;
 }
 
 .ui-icon-button--md.ui-button {

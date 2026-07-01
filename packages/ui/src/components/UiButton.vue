@@ -29,6 +29,8 @@ const emit = defineEmits<{
 
 const slots = useSlots();
 const hasDefaultLabel = computed(() => hasRenderableSlotContent(slots.default?.() ?? []));
+const hasIconContent = computed(() => Boolean(props.icon) || hasRenderableSlotContent(slots.icon?.() ?? []));
+const isIconOnly = computed(() => hasIconContent.value && !hasDefaultLabel.value);
 
 function hasRenderableSlotContent(nodes: VNode[]): boolean {
   return nodes.some((node) => {
@@ -54,7 +56,7 @@ function onClick(event: MouseEvent) {
     :class="[
       `ui-button--${variant}`,
       `ui-button--${size}`,
-      { 'is-busy': busy },
+      { 'ui-button--icon-only': isIconOnly, 'is-busy': busy },
     ]"
     :disabled="disabled || busy"
     :data-agent-id="agentId"
@@ -93,6 +95,19 @@ function onClick(event: MouseEvent) {
   height: 26px;
   padding: 0 8px;
   font-size: 12px;
+}
+
+.ui-button--icon-only {
+  gap: 0;
+  padding: 0;
+}
+
+.ui-button--md.ui-button--icon-only {
+  width: 32px;
+}
+
+.ui-button--sm.ui-button--icon-only {
+  width: 26px;
 }
 
 .ui-button--ghost {
