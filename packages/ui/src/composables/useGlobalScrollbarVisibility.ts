@@ -473,11 +473,13 @@ function hideSoon(target: ScrollTarget) {
 
 function show(target: ScrollTarget) {
   clearTimer(hideTimers, target.key);
+  clearTimer(removeTimers, target.key);
   scheduleOverlayUpdate(target);
 }
 
 function showImmediately(target: ScrollTarget) {
   clearTimer(hideTimers, target.key);
+  clearTimer(removeTimers, target.key);
   updateOverlay(target);
 }
 

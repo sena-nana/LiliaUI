@@ -194,6 +194,38 @@ describe("global scrollbar visibility", () => {
     second.remove();
   });
 
+  it("reuses hidden overlays when scrolling resumes before removal", () => {
+    installGlobalScrollbarVisibility();
+    const { element } = createScroller();
+
+    discoverScroller(element);
+    scrollScroller(element);
+    runOverlayFrame();
+    const overlay = verticalOverlay();
+    expect(overlay).toHaveClass("is-visible");
+
+    vi.advanceTimersByTime(480);
+    expect(overlay).not.toHaveClass("is-visible");
+
+    scrollScroller(element);
+    runOverlayFrame();
+
+    expect(verticalOverlay()).toBe(overlay);
+    expect(overlay).toHaveClass("is-visible");
+
+    vi.advanceTimersByTime(479);
+    expect(verticalOverlay()).toBe(overlay);
+
+    vi.advanceTimersByTime(1);
+    expect(verticalOverlay()).toBe(overlay);
+    expect(overlay).not.toHaveClass("is-visible");
+
+    vi.advanceTimersByTime(480);
+    expect(verticalOverlay()).toBeNull();
+
+    element.remove();
+  });
+
   it("cleans overlays and timers when uninstalled", () => {
     installGlobalScrollbarVisibility();
     const { element } = createScroller();
