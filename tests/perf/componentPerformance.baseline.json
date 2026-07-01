@@ -1,0 +1,542 @@
+{
+  "generatedAt": "2026-07-01T07:56:11.647Z",
+  "iterations": 9,
+  "runner": "vitest-jsdom",
+  "schemaVersion": 1,
+  "scenarios": {
+    "ActionMenuItem": {
+      "domNodes": {
+        "median": 6,
+        "p95": 6
+      },
+      "interaction": {
+        "median": 0.492,
+        "p95": 0.696
+      },
+      "mount": {
+        "median": 1.711,
+        "p95": 6.992
+      },
+      "unmount": {
+        "median": 0.186,
+        "p95": 0.489
+      },
+      "update": {
+        "median": 0.385,
+        "p95": 0.876
+      }
+    },
+    "AnchoredActionMenu": {
+      "domNodes": {
+        "median": 7,
+        "p95": 7
+      },
+      "interaction": {
+        "median": 0.436,
+        "p95": 0.535
+      },
+      "mount": {
+        "median": 2.79,
+        "p95": 4.457
+      },
+      "unmount": {
+        "median": 0.32,
+        "p95": 0.496
+      },
+      "update": {
+        "median": 0.693,
+        "p95": 1.262
+      }
+    },
+    "ConfirmDialog": {
+      "domNodes": {
+        "median": 16,
+        "p95": 16
+      },
+      "interaction": {
+        "median": 0.676,
+        "p95": 1.057
+      },
+      "mount": {
+        "median": 3.27,
+        "p95": 4.573
+      },
+      "unmount": {
+        "median": 0.291,
+        "p95": 0.571
+      },
+      "update": {
+        "median": 0.882,
+        "p95": 1.883
+      }
+    },
+    "ContextMenuHost": {
+      "domNodes": {
+        "median": 15,
+        "p95": 15
+      },
+      "interaction": {
+        "median": 1.265,
+        "p95": 1.835
+      },
+      "mount": {
+        "median": 3.47,
+        "p95": 6.973
+      },
+      "unmount": {
+        "median": 0.36,
+        "p95": 0.735
+      },
+      "update": {
+        "median": 0.005,
+        "p95": 0.01
+      }
+    },
+    "Dropdown": {
+      "domNodes": {
+        "median": 18,
+        "p95": 18
+      },
+      "interaction": {
+        "median": 2.109,
+        "p95": 6.064
+      },
+      "mount": {
+        "median": 2.193,
+        "p95": 3.834
+      },
+      "unmount": {
+        "median": 0.428,
+        "p95": 1.44
+      },
+      "update": {
+        "median": 0.218,
+        "p95": 0.608
+      }
+    },
+    "LiliaAppRoot": {
+      "domNodes": {
+        "median": 4,
+        "p95": 4
+      },
+      "interaction": {
+        "median": 0.003,
+        "p95": 0.005
+      },
+      "mount": {
+        "median": 1.463,
+        "p95": 2.233
+      },
+      "unmount": {
+        "median": 0.242,
+        "p95": 0.348
+      },
+      "update": {
+        "median": 0.004,
+        "p95": 0.005
+      }
+    },
+    "LiliaDesktopShell": {
+      "domNodes": {
+        "median": 56,
+        "p95": 56
+      },
+      "interaction": {
+        "median": 1.821,
+        "p95": 2.664
+      },
+      "mount": {
+        "median": 8.655,
+        "p95": 13.126
+      },
+      "unmount": {
+        "median": 0.591,
+        "p95": 1.063
+      },
+      "update": {
+        "median": 0.006,
+        "p95": 0.008
+      }
+    },
+    "LiliaSettingsPage": {
+      "domNodes": {
+        "median": 1,
+        "p95": 1
+      },
+      "interaction": {
+        "median": 0.002,
+        "p95": 0.002
+      },
+      "mount": {
+        "median": 0.415,
+        "p95": 0.551
+      },
+      "unmount": {
+        "median": 0.111,
+        "p95": 0.131
+      },
+      "update": {
+        "median": 0.005,
+        "p95": 0.006
+      }
+    },
+    "PopupShell": {
+      "domNodes": {
+        "median": 26,
+        "p95": 26
+      },
+      "interaction": {
+        "median": 0.002,
+        "p95": 0.005
+      },
+      "mount": {
+        "median": 3.96,
+        "p95": 14.251
+      },
+      "unmount": {
+        "median": 0.215,
+        "p95": 0.426
+      },
+      "update": {
+        "median": 0.355,
+        "p95": 0.482
+      }
+    },
+    "PopupTitleBarFrame": {
+      "domNodes": {
+        "median": 23,
+        "p95": 23
+      },
+      "interaction": {
+        "median": 0.5,
+        "p95": 0.675
+      },
+      "mount": {
+        "median": 3.101,
+        "p95": 3.855
+      },
+      "unmount": {
+        "median": 0.199,
+        "p95": 0.238
+      },
+      "update": {
+        "median": 0.171,
+        "p95": 0.219
+      }
+    },
+    "SearchDropdown": {
+      "domNodes": {
+        "median": 16,
+        "p95": 17
+      },
+      "interaction": {
+        "median": 0.269,
+        "p95": 0.367
+      },
+      "mount": {
+        "median": 1.126,
+        "p95": 2.23
+      },
+      "unmount": {
+        "median": 0.159,
+        "p95": 0.212
+      },
+      "update": {
+        "median": 0.379,
+        "p95": 0.655
+      }
+    },
+    "SettingsCollapsibleCard": {
+      "domNodes": {
+        "median": 7,
+        "p95": 9
+      },
+      "interaction": {
+        "median": 0.21,
+        "p95": 0.394
+      },
+      "mount": {
+        "median": 0.78,
+        "p95": 1.356
+      },
+      "unmount": {
+        "median": 0.055,
+        "p95": 0.115
+      },
+      "update": {
+        "median": 0.398,
+        "p95": 1.02
+      }
+    },
+    "SettingsRow": {
+      "domNodes": {
+        "median": 10,
+        "p95": 10
+      },
+      "interaction": {
+        "median": 0.001,
+        "p95": 0.004
+      },
+      "mount": {
+        "median": 0.826,
+        "p95": 1.481
+      },
+      "unmount": {
+        "median": 0.09,
+        "p95": 0.138
+      },
+      "update": {
+        "median": 0.243,
+        "p95": 0.847
+      }
+    },
+    "TitleBar": {
+      "domNodes": {
+        "median": 21,
+        "p95": 21
+      },
+      "interaction": {
+        "median": 0.386,
+        "p95": 0.622
+      },
+      "mount": {
+        "median": 2.288,
+        "p95": 2.558
+      },
+      "unmount": {
+        "median": 0.13,
+        "p95": 0.184
+      },
+      "update": {
+        "median": 0.607,
+        "p95": 1.122
+      }
+    },
+    "UiButton": {
+      "domNodes": {
+        "median": 6,
+        "p95": 6
+      },
+      "interaction": {
+        "median": 0.341,
+        "p95": 0.454
+      },
+      "mount": {
+        "median": 0.926,
+        "p95": 1.147
+      },
+      "unmount": {
+        "median": 0.103,
+        "p95": 0.133
+      },
+      "update": {
+        "median": 0.195,
+        "p95": 0.381
+      }
+    },
+    "UiCard": {
+      "domNodes": {
+        "median": 7,
+        "p95": 7
+      },
+      "interaction": {
+        "median": 0.001,
+        "p95": 0.002
+      },
+      "mount": {
+        "median": 0.581,
+        "p95": 0.717
+      },
+      "unmount": {
+        "median": 0.064,
+        "p95": 0.112
+      },
+      "update": {
+        "median": 0.312,
+        "p95": 1.01
+      }
+    },
+    "UiEmptyState": {
+      "domNodes": {
+        "median": 7,
+        "p95": 7
+      },
+      "interaction": {
+        "median": 0.001,
+        "p95": 0.002
+      },
+      "mount": {
+        "median": 0.605,
+        "p95": 20.368
+      },
+      "unmount": {
+        "median": 0.065,
+        "p95": 0.138
+      },
+      "update": {
+        "median": 0.125,
+        "p95": 0.215
+      }
+    },
+    "UiIconButton": {
+      "domNodes": {
+        "median": 5,
+        "p95": 5
+      },
+      "interaction": {
+        "median": 0.174,
+        "p95": 0.299
+      },
+      "mount": {
+        "median": 0.491,
+        "p95": 1.334
+      },
+      "unmount": {
+        "median": 0.049,
+        "p95": 0.103
+      },
+      "update": {
+        "median": 0.139,
+        "p95": 0.248
+      }
+    },
+    "UiInput": {
+      "domNodes": {
+        "median": 2,
+        "p95": 2
+      },
+      "interaction": {
+        "median": 0.152,
+        "p95": 0.192
+      },
+      "mount": {
+        "median": 0.207,
+        "p95": 0.295
+      },
+      "unmount": {
+        "median": 0.03,
+        "p95": 0.091
+      },
+      "update": {
+        "median": 0.068,
+        "p95": 0.086
+      }
+    },
+    "UiRangeField": {
+      "domNodes": {
+        "median": 4,
+        "p95": 4
+      },
+      "interaction": {
+        "median": 0.219,
+        "p95": 0.309
+      },
+      "mount": {
+        "median": 0.418,
+        "p95": 0.876
+      },
+      "unmount": {
+        "median": 0.05,
+        "p95": 0.202
+      },
+      "update": {
+        "median": 0.115,
+        "p95": 0.313
+      }
+    },
+    "UiSegmentedControl": {
+      "domNodes": {
+        "median": 12,
+        "p95": 12
+      },
+      "interaction": {
+        "median": 0.308,
+        "p95": 0.556
+      },
+      "mount": {
+        "median": 0.708,
+        "p95": 1.178
+      },
+      "unmount": {
+        "median": 0.082,
+        "p95": 0.133
+      },
+      "update": {
+        "median": 0.113,
+        "p95": 0.198
+      }
+    },
+    "UiSpinner": {
+      "domNodes": {
+        "median": 3,
+        "p95": 3
+      },
+      "interaction": {
+        "median": 0.001,
+        "p95": 0.002
+      },
+      "mount": {
+        "median": 0.298,
+        "p95": 0.722
+      },
+      "unmount": {
+        "median": 0.036,
+        "p95": 0.085
+      },
+      "update": {
+        "median": 0.123,
+        "p95": 0.275
+      }
+    },
+    "UiSwitch": {
+      "domNodes": {
+        "median": 7,
+        "p95": 7
+      },
+      "interaction": {
+        "median": 0.25,
+        "p95": 1.09
+      },
+      "mount": {
+        "median": 0.381,
+        "p95": 0.611
+      },
+      "unmount": {
+        "median": 0.072,
+        "p95": 0.253
+      },
+      "update": {
+        "median": 0.118,
+        "p95": 0.18
+      }
+    },
+    "UiTextarea": {
+      "domNodes": {
+        "median": 2,
+        "p95": 2
+      },
+      "interaction": {
+        "median": 0.108,
+        "p95": 0.119
+      },
+      "mount": {
+        "median": 0.144,
+        "p95": 0.291
+      },
+      "unmount": {
+        "median": 0.022,
+        "p95": 0.031
+      },
+      "update": {
+        "median": 0.047,
+        "p95": 0.072
+      }
+    }
+  },
+  "thresholds": {
+    "domNodeRegressionFloor": 8,
+    "domNodeRegressionRatio": 1.25,
+    "durationRegressionFloorMs": 20,
+    "durationRegressionRatio": 4
+  }
+}

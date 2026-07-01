@@ -7,12 +7,16 @@
     "packages/*"
   ],
   "scripts": {
+    "perf:components:browser": "node tests/perf/componentPerformance.browser.mjs",
+    "perf:components:light": "vitest run --config vitest.perf.config.ts",
+    "perf:components:update-baseline": "node tests/perf/updateComponentPerformanceBaseline.mjs",
     "typecheck": "yarn workspaces foreach -Ap run typecheck",
     "test": "vitest run",
-    "verify": "yarn typecheck && yarn test"
+    "verify": "yarn typecheck && yarn test && yarn perf:components:light"
   },
   "devDependencies": {
     "@lucide/vue": "^1.17.0",
+    "@playwright/test": "^1.61.1",
     "@tauri-apps/api": "^2.11.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",

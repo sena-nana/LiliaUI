@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [vue()],
   test: {
     environment: "jsdom",
-    include: ["tests/ui/**/*.test.ts", "tests/*.test.mjs"],
+    include: ["tests/perf/componentPerformance.test.ts"],
     setupFiles: ["./tests/setupTests.ts"],
   },
 });

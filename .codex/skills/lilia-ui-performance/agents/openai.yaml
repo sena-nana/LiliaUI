@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lilia UI Performance"
+  short_description: "Evaluate LiliaUI component performance."
+  default_prompt: "Use $lilia-ui-performance to evaluate this LiliaUI component change, update scenarios when needed, and run the light benchmark."

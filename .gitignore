@@ -2,6 +2,7 @@ node_modules/
 dist/
 .codegraph/
 target/
+tests/perf/reports/
 .pnp.*
 .yarn/*
 !.yarn/releases/
