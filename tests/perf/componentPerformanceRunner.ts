@@ -12,6 +12,8 @@ export interface ComponentPerfSample {
   update: number;
 }
 
+export type ComponentPerfRunner = "browser" | "vitest-jsdom";
+
 export interface ComponentPerfPhaseSummary {
   median: number;
   p95: number;
@@ -28,7 +30,7 @@ export interface ComponentPerfScenarioSummary {
 export interface ComponentPerfReport {
   generatedAt: string;
   iterations: number;
-  runner: "browser" | "vitest-jsdom";
+  runner: ComponentPerfRunner;
   schemaVersion: 1;
   scenarios: Record<string, ComponentPerfScenarioSummary>;
   thresholds: ComponentPerfThresholds;
@@ -139,12 +141,15 @@ async function runOneSample(scenario: ComponentPerfScenario, iteration: number) 
 
 export async function runComponentPerformanceSuite(options: {
   iterations?: number;
-  runner: ComponentPerfReport["runner"];
+  runner: ComponentPerfRunner;
 }): Promise<ComponentPerfReport> {
   const iterations = options.iterations ?? 9;
   const scenarios: ComponentPerfReport["scenarios"] = {};
+  const suiteScenarios = componentPerformanceScenarios.filter((scenario) =>
+    !scenario.runners || scenario.runners.includes(options.runner),
+  );
 
-  for (const scenario of componentPerformanceScenarios) {
+  for (const scenario of suiteScenarios) {
     const samples: ComponentPerfSample[] = [];
     await runOneSample(scenario, -1);
     for (let index = 0; index < iterations; index += 1) {
@@ -161,6 +166,33 @@ export async function runComponentPerformanceSuite(options: {
     scenarios,
     thresholds: defaultComponentPerfThresholds,
   };
+}
+
+export function validateComponentPerfBaseline(
+  actual: ComponentPerfReport,
+  baseline: ComponentPerfReport,
+) {
+  const mismatches: string[] = [];
+  if (baseline.runner !== actual.runner) {
+    mismatches.push(`runner: expected ${actual.runner}, received ${baseline.runner}`);
+  }
+  if (baseline.schemaVersion !== actual.schemaVersion) {
+    mismatches.push(
+      `schemaVersion: expected ${actual.schemaVersion}, received ${baseline.schemaVersion}`,
+    );
+  }
+
+  const actualScenarios = Object.keys(actual.scenarios).sort();
+  const baselineScenarios = Object.keys(baseline.scenarios).sort();
+  const missing = actualScenarios.filter((scenario) => !baseline.scenarios[scenario]);
+  const stale = baselineScenarios.filter((scenario) => !actual.scenarios[scenario]);
+  if (missing.length) {
+    mismatches.push(`missing baseline scenarios: ${missing.join(", ")}`);
+  }
+  if (stale.length) {
+    mismatches.push(`stale baseline scenarios: ${stale.join(", ")}`);
+  }
+  return mismatches;
 }
 
 export function compareComponentPerfReport(

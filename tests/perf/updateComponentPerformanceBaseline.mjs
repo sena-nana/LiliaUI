@@ -1,18 +1,27 @@
 import { spawnSync } from "node:child_process";
 
-const command = process.platform === "win32" ? process.env.ComSpec ?? "cmd.exe" : "yarn";
-const args = process.platform === "win32"
-  ? ["/d", "/s", "/c", "yarn vitest run --config vitest.perf.config.ts"]
-  : ["vitest", "run", "--config", "vitest.perf.config.ts"];
-const result = spawnSync(command, args, {
-  env: {
-    ...process.env,
-    LILIA_UPDATE_PERF_BASELINE: "1",
-  },
-  stdio: "inherit",
-});
-
-if (result.error) {
-  console.error(result.error.message);
+function run(command) {
+  const result = spawnSync(command, {
+    env: {
+      ...process.env,
+      LILIA_UPDATE_PERF_BASELINE: "1",
+    },
+    shell: true,
+    stdio: "inherit",
+  });
+  if (result.error) {
+    console.error(result.error.message);
+  }
+  return result.status ?? 1;
 }
-process.exitCode = result.status ?? 1;
+
+for (const command of [
+  "yarn vitest run --config vitest.perf.config.ts",
+  "node tests/perf/componentPerformance.browser.mjs",
+]) {
+  const status = run(command);
+  if (status !== 0) {
+    process.exitCode = status;
+    break;
+  }
+}

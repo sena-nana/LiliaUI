@@ -5,6 +5,7 @@ import {
   type ComponentPerfReport,
   compareComponentPerfReport,
   runComponentPerformanceSuite,
+  validateComponentPerfBaseline,
 } from "./componentPerformanceRunner";
 import { componentPerformanceScenarios } from "./componentScenarios";
 
@@ -33,8 +34,13 @@ function exportedVueComponentNames() {
 
 describe("component performance scenarios", () => {
   it("cover every public Vue component export", () => {
-    const scenarioNames = componentPerformanceScenarios.map((scenario) => scenario.name).sort();
-    expect(scenarioNames).toEqual(exportedVueComponentNames());
+    const scenarioNames = componentPerformanceScenarios.map((scenario) => scenario.name);
+    const uniqueScenarioNames = [...new Set(scenarioNames)].sort();
+    const missingComponents = exportedVueComponentNames().filter(
+      (name) => !uniqueScenarioNames.includes(name),
+    );
+    expect(uniqueScenarioNames).toHaveLength(scenarioNames.length);
+    expect(missingComponents).toEqual([]);
   });
 
   it("stays within the committed light benchmark baseline", async () => {
@@ -46,6 +52,7 @@ describe("component performance scenarios", () => {
     }
 
     const baseline = readComponentPerfBaseline();
+    expect(validateComponentPerfBaseline(actual, baseline)).toEqual([]);
     const regressions = compareComponentPerfReport(actual, baseline);
     expect(regressions).toEqual([]);
   }, 60_000);
