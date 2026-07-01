@@ -81,6 +81,7 @@ describe("global scrollbar visibility", () => {
   afterEach(() => {
     uninstallGlobalScrollbarVisibility();
     vi.useRealTimers();
+    vi.unstubAllGlobals();
   });
 
   it("renders the visible scrollbar as an overlay and removes it after fade-out", () => {
@@ -127,6 +128,7 @@ describe("global scrollbar visibility", () => {
       clientX: 40,
       clientY: 50,
     }));
+    runOverlayFrame();
     vi.advanceTimersByTime(480);
 
     expect(overlay).not.toHaveClass("is-visible");
@@ -154,6 +156,7 @@ describe("global scrollbar visibility", () => {
       clientX: 205,
       clientY: 32,
     }));
+    runOverlayFrame();
 
     expect(scrollTop()).toBeGreaterThan(0);
 
@@ -307,6 +310,71 @@ describe("global scrollbar visibility", () => {
     runOverlayFrame();
 
     expect(measure.mock.calls.length).toBeGreaterThan(initialMeasureCount);
+
+    element.remove();
+  });
+
+  it("coalesces hot-zone pointer moves into one frame", () => {
+    installGlobalScrollbarVisibility();
+    const { element, measure } = createScroller();
+
+    element.dispatchEvent(new MouseEvent("pointermove", {
+      bubbles: true,
+      clientX: 202,
+      clientY: 50,
+    }));
+    element.dispatchEvent(new MouseEvent("pointermove", {
+      bubbles: true,
+      clientX: 203,
+      clientY: 50,
+    }));
+    element.dispatchEvent(new MouseEvent("pointermove", {
+      bubbles: true,
+      clientX: 204,
+      clientY: 50,
+    }));
+
+    expect(verticalOverlay()).toBeNull();
+    runOverlayFrame();
+
+    expect(verticalOverlay()).toHaveClass("is-visible");
+    expect(measure).toHaveBeenCalledTimes(2);
+
+    element.remove();
+  });
+
+  it("refreshes a visible overlay when its scroller is resized", () => {
+    let resizeCallback: ResizeObserverCallback | null = null;
+    const observe = vi.fn();
+    const unobserve = vi.fn();
+    const disconnect = vi.fn();
+    vi.stubGlobal("ResizeObserver", vi.fn(class {
+      constructor(callback: ResizeObserverCallback) {
+        resizeCallback = callback;
+      }
+
+      observe = observe;
+      unobserve = unobserve;
+      disconnect = disconnect;
+    }));
+    installGlobalScrollbarVisibility();
+    const { element } = createScroller({ scrollHeight: 400 });
+
+    discoverScroller(element);
+    scrollScroller(element);
+    runOverlayFrame();
+    const overlay = verticalOverlay() as HTMLElement | null;
+    expect(overlay).toHaveStyle({ height: "24px" });
+    expect(observe).toHaveBeenCalledWith(element);
+
+    Object.defineProperty(element, "scrollHeight", {
+      configurable: true,
+      value: 200,
+    });
+    resizeCallback?.([{ target: element } as ResizeObserverEntry], {} as ResizeObserver);
+    runOverlayFrame();
+
+    expect(overlay).toHaveStyle({ height: "46px" });
 
     element.remove();
   });

@@ -41,6 +41,7 @@ export function useAnchoredOverlay(options: {
   const resolvedPlacement = ref<AnchoredMenuPlacement>(options.preferredPlacement.value);
   const anchorPoint = ref<OverlayAnchorPoint | null>(null);
   let viewportUnlisteners: Array<() => void> = [];
+  let positionFrame: number | null = null;
   let positionSeq = 0;
   let disposed = false;
 
@@ -69,10 +70,14 @@ export function useAnchoredOverlay(options: {
     );
   }
 
-  async function updatePosition() {
-    if (disposed || !options.open.value) return;
-    const seq = ++positionSeq;
-    await nextTick();
+  function cancelPositionFrame() {
+    if (positionFrame === null || typeof window === "undefined") return;
+    window.cancelAnimationFrame(positionFrame);
+    positionFrame = null;
+  }
+
+  function applyPosition(seq: number) {
+    positionFrame = null;
     if (disposed || seq !== positionSeq || !options.open.value) return;
     const anchorRect = activeAnchorRect.value;
     const overlay = overlayEl.value;
@@ -93,12 +98,26 @@ export function useAnchoredOverlay(options: {
     const origin = resolveMenuTransformOrigin(layout, overlayWidth, overlayHeight);
     resolvedPlacement.value = `${layout.placement}-${layout.alignment}` as AnchoredMenuPlacement;
     overlayStyle.value = {
-      left: `${layout.x}px`,
-      top: `${layout.y}px`,
+      left: "0px",
+      top: "0px",
+      translate: `${layout.x}px ${layout.y}px`,
       "--sb-menu-origin-x": `${origin.x}px`,
       "--sb-menu-origin-y": `${origin.y}px`,
       ...(matchAnchorWidth.value ? { width: `${anchorRect.width}px` } : {}),
     };
+  }
+
+  async function updatePosition() {
+    if (disposed || !options.open.value) return;
+    const seq = ++positionSeq;
+    await nextTick();
+    if (disposed || seq !== positionSeq || !options.open.value) return;
+    cancelPositionFrame();
+    if (typeof window === "undefined" || typeof window.requestAnimationFrame !== "function") {
+      applyPosition(seq);
+      return;
+    }
+    positionFrame = window.requestAnimationFrame(() => applyPosition(seq));
   }
 
   function onViewportChange() {
@@ -129,6 +148,7 @@ export function useAnchoredOverlay(options: {
     ([open]) => {
       if (!open) {
         positionSeq += 1;
+        cancelPositionFrame();
         overlayStyle.value = {};
         return;
       }
@@ -152,6 +172,7 @@ export function useAnchoredOverlay(options: {
   onBeforeUnmount(() => {
     disposed = true;
     positionSeq += 1;
+    cancelPositionFrame();
     clearViewportListeners();
   });
 

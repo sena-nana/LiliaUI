@@ -146,6 +146,134 @@ describe("anchored overlay helpers", () => {
     expect(removeListener).toHaveBeenCalledWith("resize", expect.any(Function), undefined);
     expect(removeListener).toHaveBeenCalledWith("scroll", expect.any(Function), true);
   });
+
+  it("positions overlays after animation frame and matches anchor width", async () => {
+    let frameCallback: FrameRequestCallback | null = null;
+    vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback: FrameRequestCallback) => {
+      frameCallback = callback;
+      return 1;
+    });
+    vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => {});
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function mockRect(this: HTMLElement) {
+      if (this.dataset.testid === "anchor") {
+        return {
+          x: 24,
+          y: 32,
+          left: 24,
+          top: 32,
+          right: 264,
+          bottom: 64,
+          width: 240,
+          height: 32,
+          toJSON: () => ({}),
+        } as DOMRect;
+      }
+      return {
+        x: 0,
+        y: 0,
+        left: 0,
+        top: 0,
+        right: 180,
+        bottom: 80,
+        width: 180,
+        height: 80,
+        toJSON: () => ({}),
+      } as DOMRect;
+    });
+    vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(80);
+    vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockReturnValue(180);
+    let overlay: HTMLElement | null = null;
+    const Host = defineComponent({
+      setup() {
+        const open = ref(true);
+        const anchorEl = ref<HTMLElement | null>(null);
+        const preferredPlacement = ref<"bottom-start">("bottom-start");
+        const motion = useAnchoredOverlay({
+          open,
+          anchorEl,
+          preferredPlacement,
+          matchAnchorWidth: true,
+        });
+        return () => h("div", [
+          h("button", { ref: anchorEl, "data-testid": "anchor" }),
+          h("div", {
+            ref: (element) => {
+              motion.overlayEl.value = element instanceof HTMLElement ? element : null;
+              overlay = motion.overlayEl.value;
+            },
+            style: motion.overlayStyle.value,
+          }),
+        ]);
+      },
+    });
+
+    render(Host);
+    await nextTick();
+    await nextTick();
+    expect(overlay?.style.width).toBe("");
+
+    expect(frameCallback).not.toBeNull();
+    frameCallback?.(0);
+    await nextTick();
+
+    expect(overlay?.style.left).toBe("0px");
+    expect(overlay?.style.top).toBe("0px");
+    expect(overlay?.style.width).toBe("240px");
+    expect(overlay?.style.getPropertyValue("translate")).toBe("24px 70px");
+  });
+
+  it("cancels pending overlay positioning when closed", async () => {
+    let frameCallback: FrameRequestCallback | null = null;
+    const requestFrame = vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback: FrameRequestCallback) => {
+      frameCallback = callback;
+      return 7;
+    });
+    const cancelFrame = vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => {});
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+      x: 0,
+      y: 0,
+      left: 0,
+      top: 0,
+      right: 100,
+      bottom: 30,
+      width: 100,
+      height: 30,
+      toJSON: () => ({}),
+    } as DOMRect);
+    vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(40);
+    vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockReturnValue(80);
+    const open = ref(true);
+    let overlay: HTMLElement | null = null;
+    const Host = defineComponent({
+      setup() {
+        const anchorEl = ref<HTMLElement | null>(null);
+        const preferredPlacement = ref<"bottom-start">("bottom-start");
+        const motion = useAnchoredOverlay({ open, anchorEl, preferredPlacement });
+        return () => h("div", [
+          h("button", { ref: anchorEl }),
+          h("div", {
+            ref: (element) => {
+              motion.overlayEl.value = element instanceof HTMLElement ? element : null;
+              overlay = motion.overlayEl.value;
+            },
+            style: motion.overlayStyle.value,
+          }),
+        ]);
+      },
+    });
+
+    render(Host);
+    await nextTick();
+    await nextTick();
+    expect(requestFrame).toHaveBeenCalled();
+    open.value = false;
+    await nextTick();
+
+    expect(cancelFrame).toHaveBeenCalledWith(7);
+    frameCallback?.(0);
+    await nextTick();
+    expect(overlay?.style.getPropertyValue("translate")).toBe("");
+  });
 });
 
 describe("component activation helpers", () => {

@@ -231,6 +231,8 @@ watch(open, (value) => {
 
 .dd__menu {
   position: fixed;
+  left: 0;
+  top: 0;
   z-index: var(--z-dropdown, 1900);
   min-width: 180px;
   max-width: 280px;
@@ -242,10 +244,11 @@ watch(open, (value) => {
   flex-direction: column;
   gap: 0;
   box-shadow: var(--shadow-menu);
+  contain: layout paint style;
   max-height: 280px;
   overflow: auto;
   transform-origin: var(--sb-menu-origin-x, 0px) var(--sb-menu-origin-y, 0px);
-  will-change: transform, opacity;
+  will-change: transform, opacity, translate;
 }
 
 .dd__menu.dd--large {

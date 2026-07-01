@@ -12,7 +12,6 @@
   overflow: hidden;
   background: var(--bg-elev);
   position: relative;
-  transition: grid-template-columns 0.24s var(--sidebar-easing);
 }
 
 .shell > .titlebar {
@@ -33,7 +32,8 @@
   position: absolute;
   top: 36px;
   bottom: 0;
-  left: var(--sidebar-width);
+  left: 0;
+  translate: var(--sidebar-width) 0;
   width: 1px;
   margin-left: -0.5px;
   background: transparent;
@@ -42,8 +42,9 @@
   touch-action: none;
   user-select: none;
   transition:
-    left 0.24s var(--sidebar-easing),
+    translate 0.24s var(--sidebar-easing),
     visibility 0s linear 0s;
+  will-change: translate;
 }
 
 .shell__resizer::before {
@@ -99,10 +100,12 @@
   min-height: 0;
   min-width: 0;
   overflow: hidden;
+  contain: layout paint style;
   transition:
     opacity 0.2s var(--sidebar-easing),
     transform 0.24s var(--sidebar-easing),
     visibility 0s linear 0s;
+  will-change: opacity, transform;
 }
 
 .secondary-panel__top,

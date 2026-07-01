@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import {
   finalizeClosedContextMenu,
   isContextMenuItemPending,
@@ -9,20 +9,32 @@ import {
 } from "../composables/useContextMenu";
 import {
   SB_LAYER_Z_INDEX,
-  clampAnchoredMenuPosition,
-  createAnchoredMenuPosition,
-  resolveMenuTransformOrigin,
   SB_MENU_POP_TRANSITION_MS,
 } from "../composables/menuMotion";
+import { useAnchoredOverlay } from "../composables/useAnchoredOverlay";
 import "./action-menu.css";
 
 const { state } = useContextMenu();
 
-const menuEl = ref<HTMLElement | null>(null);
 const rendered = ref(false);
-const pos = ref(createAnchoredMenuPosition(0, 0));
-const origin = ref({ x: 0, y: 0 });
 const activeSubmenuIndex = ref<number | null>(null);
+const openState = computed(() => rendered.value && state.open);
+const preferredPlacement = computed(() => "bottom-start" as const);
+const {
+  overlayEl: menuEl,
+  overlayStyle,
+  setAnchorPoint,
+  updatePosition,
+} = useAnchoredOverlay({
+  open: openState,
+  preferredPlacement,
+  offset: 0,
+});
+void menuEl;
+const menuStyle = computed(() => ({
+  ...overlayStyle.value,
+  zIndex: String(SB_LAYER_Z_INDEX.contextMenu),
+}));
 
 function displayLabel(item: ContextMenuItem) {
   return isContextMenuItemPending(item) ? item.confirmLabel : item.label;
@@ -53,23 +65,6 @@ function selectMenuItem(item: ContextMenuItem) {
   void selectContextMenuItem(item);
 }
 
-async function updateGeometry() {
-  const initialPos = createAnchoredMenuPosition(
-    state.x,
-    state.y,
-    state.anchorX,
-    state.anchorY,
-  );
-  pos.value = initialPos;
-  origin.value = resolveMenuTransformOrigin(initialPos);
-  await nextTick();
-  const element = menuEl.value;
-  if (!element) return;
-  const clampedPos = clampAnchoredMenuPosition(initialPos, element.offsetWidth, element.offsetHeight);
-  pos.value = clampedPos;
-  origin.value = resolveMenuTransformOrigin(clampedPos, element.offsetWidth, element.offsetHeight);
-}
-
 function onAfterLeave() {
   finalizeClosedContextMenu();
 }
@@ -84,7 +79,8 @@ watch(
     }
     rendered.value = true;
     clearSubmenu();
-    void updateGeometry();
+    setAnchorPoint({ x: state.x, y: state.y });
+    void updatePosition();
   },
   { immediate: true },
 );
@@ -103,13 +99,7 @@ watch(
         class="ctx-menu"
         role="menu"
         data-agent-id="context-menu"
-        :style="{
-          left: `${pos.x}px`,
-          top: `${pos.y}px`,
-          zIndex: String(SB_LAYER_Z_INDEX.contextMenu),
-          '--sb-menu-origin-x': `${origin.x}px`,
-          '--sb-menu-origin-y': `${origin.y}px`,
-        }"
+        :style="menuStyle"
         @mouseleave="clearSubmenu"
       >
         <div
@@ -172,6 +162,8 @@ watch(
 <style scoped>
 .ctx-menu {
   position: fixed;
+  left: 0;
+  top: 0;
   min-width: 180px;
   max-width: min(320px, calc(100vw - 8px));
   padding: 4px;
@@ -184,8 +176,9 @@ watch(
   flex-direction: column;
   gap: 1px;
   user-select: none;
+  contain: layout paint style;
   transform-origin: var(--sb-menu-origin-x, 0px) var(--sb-menu-origin-y, 0px);
-  will-change: transform, opacity;
+  will-change: transform, opacity, translate;
 }
 
 .ctx-menu__entry {

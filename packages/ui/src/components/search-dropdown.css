@@ -114,6 +114,8 @@
   border: 1px solid var(--border-strong);
   background: var(--bg-elev);
   box-shadow: var(--shadow-menu);
+  contain: layout paint style;
+  will-change: translate;
 }
 
 .search-dropdown__menu--bottom {

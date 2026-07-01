@@ -43,6 +43,12 @@ type MetricsSnapshot = {
   overflow: OverflowState;
 };
 
+type PointerSnapshot = {
+  clientX: number;
+  clientY: number;
+  path: EventTarget[];
+};
+
 type RegisteredTarget = {
   cleanup: () => void;
   target: ScrollTarget;
@@ -64,6 +70,10 @@ let installed = false;
 let hoverTarget: ScrollTarget | null = null;
 let dragState: DragState | null = null;
 let overlayUpdateFrame: number | null = null;
+let pointerMoveFrame: number | null = null;
+let pendingPointerMove: PointerSnapshot | null = null;
+let dragScrollFrame: number | null = null;
+let pendingDragPointer: number | null = null;
 let resizeObserver: ResizeObserver | null = null;
 let scrollbarStylesLoaded = false;
 
@@ -235,8 +245,12 @@ function currentMetrics(target: ScrollTarget, forceMeasure = false): MetricsSnap
   return snapshot;
 }
 
-function inHotZone(metrics: ScrollMetrics, overflow: OverflowState, event: PointerEvent): boolean {
-  const { clientX, clientY } = event;
+function inHotZone(
+  metrics: ScrollMetrics,
+  overflow: OverflowState,
+  pointer: Pick<PointerEvent, "clientX" | "clientY">,
+): boolean {
+  const { clientX, clientY } = pointer;
   if (
     clientX < metrics.rect.left ||
     clientX > metrics.rect.right ||
@@ -417,6 +431,20 @@ function scheduleOverlayUpdate(target: ScrollTarget) {
   overlayUpdateFrame = window.requestAnimationFrame(flushOverlayUpdates);
 }
 
+function cancelPointerMoveFrame() {
+  if (pointerMoveFrame === null) return;
+  window.cancelAnimationFrame(pointerMoveFrame);
+  pointerMoveFrame = null;
+  pendingPointerMove = null;
+}
+
+function cancelDragScrollFrame() {
+  if (dragScrollFrame === null) return;
+  window.cancelAnimationFrame(dragScrollFrame);
+  dragScrollFrame = null;
+  pendingDragPointer = null;
+}
+
 function hideOverlay(target: Element) {
   const overlay = overlays.get(target);
   if (!overlay) return;
@@ -446,6 +474,11 @@ function hideSoon(target: ScrollTarget) {
 function show(target: ScrollTarget) {
   clearTimer(hideTimers, target.key);
   scheduleOverlayUpdate(target);
+}
+
+function showImmediately(target: ScrollTarget) {
+  clearTimer(hideTimers, target.key);
+  updateOverlay(target);
 }
 
 function axisMetrics(target: ScrollTarget, axis: Axis) {
@@ -508,13 +541,13 @@ function registerTarget(target: ScrollTarget): ScrollTarget {
   return target;
 }
 
-function scrollTargetFromEvent(event: Event, options: { hotZone?: boolean } = {}): ScrollTarget | null {
-  for (const node of eventPath(event)) {
+function scrollTargetFromPath(path: EventTarget[], pointer?: Pick<PointerEvent, "clientX" | "clientY">): ScrollTarget | null {
+  for (const node of path) {
     const target = resolveTarget(node);
     if (!target) continue;
     const { metrics, overflow } = currentMetrics(target, true);
     if (!overflow.vertical && !overflow.horizontal) continue;
-    if (options.hotZone && (!isPointerLikeEvent(event) || !inHotZone(metrics, overflow, event))) continue;
+    if (pointer && !inHotZone(metrics, overflow, pointer)) continue;
     return registerTarget(target);
   }
 
@@ -522,8 +555,13 @@ function scrollTargetFromEvent(event: Event, options: { hotZone?: boolean } = {}
   if (!documentTarget) return null;
   const { metrics, overflow } = currentMetrics(documentTarget, true);
   if (!overflow.vertical && !overflow.horizontal) return null;
-  if (options.hotZone && (!isPointerLikeEvent(event) || !inHotZone(metrics, overflow, event))) return null;
+  if (pointer && !inHotZone(metrics, overflow, pointer)) return null;
   return registerTarget(documentTarget);
+}
+
+function scrollTargetFromEvent(event: Event, options: { hotZone?: boolean } = {}): ScrollTarget | null {
+  if (!options.hotZone) return scrollTargetFromPath(eventPath(event));
+  return isPointerLikeEvent(event) ? scrollTargetFromPath(eventPath(event), event) : null;
 }
 
 function onOverlayPointerDown(event: PointerEvent) {
@@ -547,10 +585,11 @@ function onOverlayPointerDown(event: PointerEvent) {
   window.addEventListener("pointercancel", onDragPointerEnd, true);
 }
 
-function onDragPointerMove(event: PointerEvent) {
-  if (!dragState || (dragState.pointerId !== null && event.pointerId !== dragState.pointerId)) return;
-  const pointer = dragState.axis === "vertical" ? event.clientY : event.clientX;
-  event.preventDefault();
+function flushDragPointerMove() {
+  dragScrollFrame = null;
+  if (!dragState || pendingDragPointer === null) return;
+  const pointer = pendingDragPointer;
+  pendingDragPointer = null;
   setScroll(
     dragState.target,
     dragState.axis,
@@ -559,9 +598,21 @@ function onDragPointerMove(event: PointerEvent) {
   show(dragState.target);
 }
 
+function onDragPointerMove(event: PointerEvent) {
+  if (!dragState || (dragState.pointerId !== null && event.pointerId !== dragState.pointerId)) return;
+  event.preventDefault();
+  pendingDragPointer = dragState.axis === "vertical" ? event.clientY : event.clientX;
+  if (dragScrollFrame !== null) return;
+  dragScrollFrame = window.requestAnimationFrame(flushDragPointerMove);
+}
+
 function onDragPointerEnd(event: PointerEvent) {
   if (!dragState || (dragState.pointerId !== null && event.pointerId !== dragState.pointerId)) return;
   const target = dragState.target;
+  if (dragScrollFrame !== null) {
+    window.cancelAnimationFrame(dragScrollFrame);
+    flushDragPointerMove();
+  }
   dragState = null;
   hideSoon(target);
   window.removeEventListener("pointermove", onDragPointerMove, true);
@@ -575,12 +626,26 @@ function onPointerOver(event: PointerEvent) {
 
 function onPointerMove(event: PointerEvent) {
   if (dragState) return;
+  pendingPointerMove = {
+    clientX: event.clientX,
+    clientY: event.clientY,
+    path: eventPath(event),
+  };
+  if (pointerMoveFrame !== null) return;
+  pointerMoveFrame = window.requestAnimationFrame(flushPointerMove);
+}
 
-  const target = scrollTargetFromEvent(event, { hotZone: true });
+function flushPointerMove() {
+  pointerMoveFrame = null;
+  const snapshot = pendingPointerMove;
+  pendingPointerMove = null;
+  if (!snapshot || dragState) return;
+
+  const target = scrollTargetFromPath(snapshot.path, snapshot);
   if (target) {
     if (hoverTarget?.key && hoverTarget.key !== target.key) hideSoon(hoverTarget);
     hoverTarget = target;
-    show(target);
+    showImmediately(target);
     return;
   }
 
@@ -630,6 +695,8 @@ export function uninstallGlobalScrollbarVisibility() {
     window.cancelAnimationFrame(overlayUpdateFrame);
     overlayUpdateFrame = null;
   }
+  cancelPointerMoveFrame();
+  cancelDragScrollFrame();
   pendingOverlayTargets.clear();
   window.removeEventListener("pointerover", onPointerOver);
   window.removeEventListener("pointermove", onPointerMove);
@@ -662,7 +729,13 @@ export function installGlobalScrollbarVisibility() {
   installed = true;
   resizeObserver = typeof ResizeObserver !== "undefined"
     ? new ResizeObserver((entries) => {
-      for (const entry of entries) dirtyMetricsTargets.add(entry.target);
+      for (const entry of entries) {
+        dirtyMetricsTargets.add(entry.target);
+        const registered = registeredTargets.get(entry.target);
+        if (registered && overlays.has(entry.target)) {
+          scheduleOverlayUpdate(registered.target);
+        }
+      }
     })
     : null;
   window.addEventListener("pointerover", onPointerOver, { passive: true });

@@ -128,9 +128,11 @@ describe("Dropdown", () => {
       });
 
       const listbox = await screen.findByRole("listbox");
-      expect(listbox).toHaveStyle({
-        "--sb-menu-origin-x": "36px",
-        "--sb-menu-origin-y": "0px",
+      await waitFor(() => {
+        expect(listbox).toHaveStyle({
+          "--sb-menu-origin-x": "36px",
+          "--sb-menu-origin-y": "0px",
+        });
       });
     } finally {
       Object.defineProperty(HTMLElement.prototype, "getBoundingClientRect", {
@@ -327,6 +329,8 @@ describe("Dropdown", () => {
       const listbox = await screen.findByRole("listbox");
       await waitFor(() => {
         expect(listbox).toHaveStyle({ width: "320px" });
+        expect(listbox).toHaveStyle({ left: "0px", top: "0px" });
+        expect((listbox as HTMLElement).style.getPropertyValue("translate")).toBe("40px 120px");
       });
     } finally {
       Object.defineProperty(HTMLElement.prototype, "getBoundingClientRect", {

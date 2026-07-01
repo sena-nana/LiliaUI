@@ -43,7 +43,8 @@ describe("AnchoredActionMenu", () => {
     expect(document.body.contains(menu)).toBe(true);
     expect(view.container.contains(menu)).toBe(false);
     await waitFor(() => {
-      expect(menu).toHaveStyle({ left: "48px", top: "64px" });
+      expect(menu).toHaveStyle({ left: "0px", top: "0px" });
+      expect((menu as HTMLElement).style.getPropertyValue("translate")).toBe("48px 64px");
     });
 
     await fireEvent.click(screen.getByRole("menuitem", { name: "Run action" }));
