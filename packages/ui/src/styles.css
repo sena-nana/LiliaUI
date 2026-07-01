@@ -65,6 +65,9 @@
   --ok-soft: rgba(63, 185, 80, 0.14);
   --warn-soft: rgba(212, 168, 91, 0.16);
   --err-soft: rgba(244, 113, 116, 0.14);
+  --err-solid: #b84a4f;
+  --err-solid-hover: #c5555a;
+  --err-solid-text: #ffffff;
   --panel: var(--bg-elev);
   --surface: var(--bg);
   --surface-raised: var(--bg-elev);
@@ -119,6 +122,9 @@
   --ok-soft: rgba(29, 133, 64, 0.10);
   --warn-soft: rgba(184, 119, 28, 0.12);
   --err-soft: rgba(201, 60, 60, 0.10);
+  --err-solid: #b73535;
+  --err-solid-hover: #a92f2f;
+  --err-solid-text: #ffffff;
   --shadow: #111827;
   --shadow-lg:
     0 18px 42px -24px rgba(15, 23, 42, 0.28),
@@ -417,6 +423,16 @@ button.primary:hover {
   color: var(--accent);
 }
 
+button.primary.danger {
+  background: var(--err-solid);
+  color: var(--err-solid-text);
+}
+
+button.primary.danger:hover {
+  background: var(--err-solid-hover);
+  color: var(--err-solid-text);
+}
+
 button.ghost.danger {
   color: var(--err);
 }
@@ -568,6 +584,16 @@ button.ghost.danger:hover {
 .ui-button--danger:hover {
   background: color-mix(in srgb, var(--err) 18%, transparent);
   filter: none;
+}
+
+.ui-button--primary.ui-button--danger {
+  background: var(--err-solid);
+  color: var(--err-solid-text);
+}
+
+.ui-button--primary.ui-button--danger:hover {
+  background: var(--err-solid-hover);
+  color: var(--err-solid-text);
 }
 
 .ui-icon-button {
