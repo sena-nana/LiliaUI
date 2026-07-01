@@ -14,6 +14,8 @@ interface Option {
   agentId?: string;
 }
 
+type DropdownSize = "small" | "large";
+
 const props = defineProps<{
   modelValue: T | readonly T[];
   options: readonly Option[];
@@ -23,6 +25,8 @@ const props = defineProps<{
   multiple?: boolean;
   placement?: "top" | "bottom";
   disabled?: boolean;
+  block?: boolean;
+  size?: DropdownSize;
   buttonClass?: string;
   agentId?: string;
   menuWidth?: string;
@@ -35,7 +39,13 @@ const open = ref(false);
 const placement = computed(() =>
   props.placement === "bottom" ? "bottom" : "top",
 );
-const menuMotion = useAnchoredMenuMotion(open, placement);
+const matchMenuWidth = computed(() => props.block === true);
+const sizeClass = computed(() => `dd--${props.size ?? "small"}`);
+const rootClasses = computed(() => [
+  sizeClass.value,
+  { "dd--block": props.block },
+]);
+const menuMotion = useAnchoredMenuMotion(open, placement, matchMenuWidth);
 
 const current = computed(() =>
   props.multiple ? undefined : props.options.find((option) => option.value === props.modelValue),
@@ -103,7 +113,7 @@ watch(open, (value) => {
 </script>
 
 <template>
-  <div class="dd">
+  <div class="dd" :class="rootClasses">
     <button
       :ref="menuMotion.triggerEl"
       type="button"
@@ -128,6 +138,7 @@ watch(open, (value) => {
           v-if="open"
           :ref="menuMotion.menuEl"
           class="dd__menu"
+          :class="sizeClass"
           role="listbox"
           :aria-multiselectable="multiple ? 'true' : undefined"
           :aria-label="menuLabel"
@@ -164,6 +175,11 @@ watch(open, (value) => {
   min-width: 0;
 }
 
+.dd--block {
+  display: flex;
+  width: 100%;
+}
+
 .dd__button {
   height: 26px;
   padding: 0 8px;
@@ -181,6 +197,17 @@ watch(open, (value) => {
   max-width: 100%;
 }
 
+.dd--block .dd__button {
+  width: 100%;
+}
+
+.dd--large .dd__button {
+  height: 34px;
+  padding: 0 11px;
+  gap: 7px;
+  font-size: 13px;
+}
+
 .dd__button:hover:not(.is-disabled):not(:disabled),
 .dd__button.is-open {
   background: var(--bg-hover);
@@ -189,10 +216,17 @@ watch(open, (value) => {
 }
 
 .dd__button-label {
+  flex: 1 1 auto;
+  min-width: 0;
   white-space: nowrap;
   max-width: 160px;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.dd--block .dd__button-label,
+.dd--large .dd__button-label {
+  max-width: none;
 }
 
 .dd__menu {
@@ -214,6 +248,13 @@ watch(open, (value) => {
   will-change: transform, opacity;
 }
 
+.dd__menu.dd--large {
+  min-width: 220px;
+  max-width: 420px;
+  padding: 4px;
+  max-height: 340px;
+}
+
 .dd__item {
   display: flex;
   align-items: center;
@@ -233,6 +274,13 @@ watch(open, (value) => {
   width: 100%;
   min-width: 0;
   white-space: nowrap;
+}
+
+.dd__menu.dd--large .dd__item {
+  gap: 8px;
+  padding: 5px 9px;
+  min-height: 32px;
+  font-size: 13px;
 }
 
 .dd__item:hover:not(:disabled),
@@ -289,5 +337,9 @@ watch(open, (value) => {
   font-size: 10px;
   line-height: 1.4;
   color: var(--text-faint);
+}
+
+.dd__menu.dd--large .dd__item-hint {
+  font-size: 11px;
 }
 </style>

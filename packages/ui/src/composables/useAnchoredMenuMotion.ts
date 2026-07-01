@@ -1,4 +1,4 @@
-import { computed, ref, type Ref } from "vue";
+import { computed, ref, type ComputedRef, type Ref } from "vue";
 import {
   type AnchoredMenuPlacement,
   type MenuPlacement,
@@ -32,6 +32,7 @@ function resolveAnchorFromEvent(
 export function useAnchoredMenuMotion(
   open: Ref<boolean>,
   placement: Ref<MenuPlacement>,
+  matchAnchorWidth?: Ref<boolean> | ComputedRef<boolean>,
 ) {
   const triggerEl = ref<HTMLElement | null>(null);
   const anchorEl = computed(() => triggerEl.value);
@@ -50,6 +51,7 @@ export function useAnchoredMenuMotion(
     anchorEl,
     preferredPlacement,
     offset: 6,
+    matchAnchorWidth,
   });
 
   function captureAnchor(event: MouseEvent) {

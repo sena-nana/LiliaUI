@@ -248,4 +248,97 @@ describe("Dropdown", () => {
       }
     }
   });
+
+  it("block 模式下菜单宽度匹配触发按钮", async () => {
+    const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
+    const originalOffsetWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "offsetWidth");
+    const originalOffsetHeight = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "offsetHeight");
+    Object.defineProperty(HTMLElement.prototype, "getBoundingClientRect", {
+      configurable: true,
+      value: function mockRect(this: HTMLElement) {
+        if (this.classList.contains("dd__button")) {
+          return {
+            x: 40,
+            y: 80,
+            left: 40,
+            top: 80,
+            right: 360,
+            bottom: 114,
+            width: 320,
+            height: 34,
+            toJSON: () => ({}),
+          } as DOMRect;
+        }
+        if (this.classList.contains("dd__menu")) {
+          return {
+            x: 40,
+            y: 120,
+            left: 40,
+            top: 120,
+            right: 260,
+            bottom: 188,
+            width: 220,
+            height: 68,
+            toJSON: () => ({}),
+          } as DOMRect;
+        }
+        return originalGetBoundingClientRect.call(this);
+      },
+    });
+    Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
+      configurable: true,
+      get() {
+        return this.classList.contains("dd__menu") ? 220 : 0;
+      },
+    });
+    Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
+      configurable: true,
+      get() {
+        return this.classList.contains("dd__menu") ? 68 : 0;
+      },
+    });
+
+    try {
+      render(defineComponent({
+        components: { Dropdown },
+        setup() {
+          const value = ref<"bottom" | "top">("bottom");
+          return { options, value };
+        },
+        template: `
+          <Dropdown
+            v-model="value"
+            :options="options"
+            block
+            size="large"
+            placement="bottom"
+          />
+        `,
+      }), {
+        global: {
+          stubs: {
+            transition: false,
+          },
+        },
+      });
+
+      await fireEvent.click(screen.getByRole("button", { name: /向下展开/i }));
+
+      const listbox = await screen.findByRole("listbox");
+      await waitFor(() => {
+        expect(listbox).toHaveStyle({ width: "320px" });
+      });
+    } finally {
+      Object.defineProperty(HTMLElement.prototype, "getBoundingClientRect", {
+        configurable: true,
+        value: originalGetBoundingClientRect,
+      });
+      if (originalOffsetWidth) {
+        Object.defineProperty(HTMLElement.prototype, "offsetWidth", originalOffsetWidth);
+      }
+      if (originalOffsetHeight) {
+        Object.defineProperty(HTMLElement.prototype, "offsetHeight", originalOffsetHeight);
+      }
+    }
+  });
 });

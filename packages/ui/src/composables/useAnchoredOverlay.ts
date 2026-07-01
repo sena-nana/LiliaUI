@@ -23,6 +23,7 @@ export interface OverlayAnchorPoint {
 }
 
 type MaybeAnchorRef = Ref<HTMLElement | null | undefined> | ComputedRef<HTMLElement | null | undefined>;
+type MaybeBooleanRef = boolean | Ref<boolean> | ComputedRef<boolean>;
 
 function pointRect(point: OverlayAnchorPoint): AnchoredRect {
   return createAnchoredRect(point.x, point.y, 0, 0);
@@ -33,7 +34,7 @@ export function useAnchoredOverlay(options: {
   anchorEl?: MaybeAnchorRef;
   preferredPlacement: Ref<AnchoredMenuPlacement> | ComputedRef<AnchoredMenuPlacement>;
   offset?: number;
-  matchAnchorWidth?: boolean;
+  matchAnchorWidth?: MaybeBooleanRef;
 }) {
   const overlayEl = ref<HTMLElement | null>(null);
   const overlayStyle = ref<Record<string, string>>({});
@@ -48,6 +49,11 @@ export function useAnchoredOverlay(options: {
     if (anchorPoint.value) return pointRect(anchorPoint.value);
     return null;
   });
+  const matchAnchorWidth = computed(() => (
+    typeof options.matchAnchorWidth === "boolean"
+      ? options.matchAnchorWidth
+      : options.matchAnchorWidth?.value === true
+  ));
 
   function setAnchorPoint(point: OverlayAnchorPoint | null) {
     positionSeq += 1;
@@ -72,7 +78,7 @@ export function useAnchoredOverlay(options: {
     const overlay = overlayEl.value;
     if (!anchorRect || !overlay) return;
     const overlayRect = overlay.getBoundingClientRect();
-    const overlayWidth = options.matchAnchorWidth
+    const overlayWidth = matchAnchorWidth.value
       ? Math.max(anchorRect.width, 0)
       : (overlay.offsetWidth || overlayRect.width || 0);
     const overlayHeight = overlay.offsetHeight || overlayRect.height || 0;
@@ -91,7 +97,7 @@ export function useAnchoredOverlay(options: {
       top: `${layout.y}px`,
       "--sb-menu-origin-x": `${origin.x}px`,
       "--sb-menu-origin-y": `${origin.y}px`,
-      ...(options.matchAnchorWidth ? { width: `${anchorRect.width}px` } : {}),
+      ...(matchAnchorWidth.value ? { width: `${anchorRect.width}px` } : {}),
     };
   }
 
@@ -116,6 +122,7 @@ export function useAnchoredOverlay(options: {
       options.open.value,
       options.preferredPlacement.value,
       options.anchorEl?.value,
+      matchAnchorWidth.value,
       anchorPoint.value?.x ?? -1,
       anchorPoint.value?.y ?? -1,
     ] as const,
