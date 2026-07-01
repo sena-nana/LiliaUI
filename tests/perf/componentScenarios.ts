@@ -280,8 +280,8 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
   {
     name: "PopupShell",
     render: (step) => h(PopupShell, { status: step.value % 2 === 1 }, {
-      titlebar: () => h(PopupTitleBarFrame, { closeWindow: false }, () => "Popup"),
-      default: () => h("section", { class: "card" }, "Popup content"),
+      titlebar: () => h("header", { "data-agent-id": "perf.popup-shell.titlebar" }, "Popup"),
+      default: () => h("section", { "data-agent-id": "perf.popup-shell.content" }, `Popup content ${step.value}`),
     }),
   },
   {
@@ -353,7 +353,7 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
     name: "UiEmptyState",
     render: (step) => h(UiEmptyState, {
       icon: Search,
-      title: "暂无结果",
+      title: step.value % 2 === 0 ? "暂无结果" : "没有匹配项",
       message: `尝试第 ${step.value + 1} 个关键词。`,
     }),
   },

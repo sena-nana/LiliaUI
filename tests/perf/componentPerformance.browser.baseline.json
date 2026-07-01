@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-01T08:32:47.346Z",
+  "generatedAt": "2026-07-01T09:09:49.834Z",
   "iterations": 7,
   "runner": "browser",
   "schemaVersion": 1,
@@ -14,15 +14,15 @@
         "p95": 0.1
       },
       "mount": {
-        "median": 0.3,
-        "p95": 0.8
+        "median": 0.4,
+        "p95": 0.5
       },
       "unmount": {
         "median": 0,
         "p95": 0.1
       },
       "update": {
-        "median": 0.1,
+        "median": 0.2,
         "p95": 0.2
       }
     },
@@ -36,16 +36,16 @@
         "p95": 0.1
       },
       "mount": {
-        "median": 0.5,
-        "p95": 2.6
+        "median": 0.8,
+        "p95": 0.9
       },
       "unmount": {
         "median": 0,
         "p95": 0.1
       },
       "update": {
-        "median": 0.2,
-        "p95": 0.3
+        "median": 0.3,
+        "p95": 0.4
       }
     },
     "ConfirmDialog": {
@@ -58,16 +58,16 @@
         "p95": 0.1
       },
       "mount": {
-        "median": 0.9,
-        "p95": 1
+        "median": 0.6,
+        "p95": 0.7
       },
       "unmount": {
         "median": 0.1,
-        "p95": 0.2
+        "p95": 0.1
       },
       "update": {
         "median": 0.4,
-        "p95": 0.9
+        "p95": 0.4
       }
     },
     "ContextMenuHost": {
@@ -76,16 +76,16 @@
         "p95": 15
       },
       "interaction": {
-        "median": 0.1,
-        "p95": 2
+        "median": 0.2,
+        "p95": 0.3
       },
       "mount": {
-        "median": 0.8,
-        "p95": 0.9
+        "median": 0.7,
+        "p95": 1
       },
       "unmount": {
-        "median": 0.1,
-        "p95": 0.2
+        "median": 0,
+        "p95": 0
       },
       "update": {
         "median": 0,
@@ -98,20 +98,20 @@
         "p95": 18
       },
       "interaction": {
-        "median": 1.3,
-        "p95": 2
+        "median": 1,
+        "p95": 1.3
       },
       "mount": {
-        "median": 1.1,
-        "p95": 2.1
+        "median": 0.8,
+        "p95": 0.9
       },
       "unmount": {
         "median": 0.1,
-        "p95": 0.2
+        "p95": 0.1
       },
       "update": {
         "median": 0.1,
-        "p95": 0.3
+        "p95": 0.2
       }
     },
     "GlobalScrollbarVisibility": {
@@ -121,15 +121,15 @@
       },
       "interaction": {
         "median": 32.7,
-        "p95": 33.5
+        "p95": 33.3
       },
       "mount": {
-        "median": 0.2,
-        "p95": 0.3
+        "median": 0.1,
+        "p95": 0.2
       },
       "unmount": {
-        "median": 0.2,
-        "p95": 0.2
+        "median": 0.1,
+        "p95": 0.1
       },
       "update": {
         "median": 0,
@@ -146,11 +146,11 @@
         "p95": 0
       },
       "mount": {
-        "median": 0.3,
-        "p95": 0.4
+        "median": 0.2,
+        "p95": 0.3
       },
       "unmount": {
-        "median": 0,
+        "median": 0.1,
         "p95": 0.1
       },
       "update": {
@@ -164,20 +164,20 @@
         "p95": 56
       },
       "interaction": {
-        "median": 0.4,
-        "p95": 1.1
+        "median": 0.8,
+        "p95": 0.9
       },
       "mount": {
-        "median": 2.4,
-        "p95": 3.9
+        "median": 4.3,
+        "p95": 4.8
       },
       "unmount": {
         "median": 0.2,
-        "p95": 0.4
+        "p95": 0.3
       },
       "update": {
         "median": 0,
-        "p95": 0.1
+        "p95": 0
       }
     },
     "LiliaSettingsPage": {
@@ -190,8 +190,8 @@
         "p95": 0
       },
       "mount": {
-        "median": 0.1,
-        "p95": 0.3
+        "median": 0,
+        "p95": 0.1
       },
       "unmount": {
         "median": 0,
@@ -204,23 +204,23 @@
     },
     "PopupShell": {
       "domNodes": {
-        "median": 26,
-        "p95": 26
+        "median": 5,
+        "p95": 5
       },
       "interaction": {
         "median": 0,
-        "p95": 0.1
+        "p95": 0
       },
       "mount": {
-        "median": 1.9,
-        "p95": 2.7
-      },
-      "unmount": {
-        "median": 0.1,
+        "median": 0.2,
         "p95": 0.2
       },
+      "unmount": {
+        "median": 0,
+        "p95": 0
+      },
       "update": {
-        "median": 0.2,
+        "median": 0.1,
         "p95": 0.2
       }
     },
@@ -234,60 +234,60 @@
         "p95": 0.1
       },
       "mount": {
-        "median": 1.2,
-        "p95": 1.7
+        "median": 1,
+        "p95": 2.5
       },
       "unmount": {
         "median": 0.1,
-        "p95": 0.2
+        "p95": 0.1
       },
       "update": {
-        "median": 0.1,
+        "median": 0,
         "p95": 0.1
       }
     },
     "SearchDropdown": {
       "domNodes": {
         "median": 16,
-        "p95": 17
-      },
-      "interaction": {
-        "median": 0,
-        "p95": 0
-      },
-      "mount": {
-        "median": 0.4,
-        "p95": 1
-      },
-      "unmount": {
-        "median": 0.1,
-        "p95": 0.2
-      },
-      "update": {
-        "median": 0.2,
-        "p95": 0.3
-      }
-    },
-    "SettingsCollapsibleCard": {
-      "domNodes": {
-        "median": 7,
-        "p95": 9
+        "p95": 16
       },
       "interaction": {
         "median": 0,
         "p95": 0.1
       },
       "mount": {
-        "median": 0.3,
+        "median": 0.5,
         "p95": 0.5
+      },
+      "unmount": {
+        "median": 0,
+        "p95": 0.1
+      },
+      "update": {
+        "median": 0.1,
+        "p95": 0.3
+      }
+    },
+    "SettingsCollapsibleCard": {
+      "domNodes": {
+        "median": 7,
+        "p95": 7
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0.1
+      },
+      "mount": {
+        "median": 0.4,
+        "p95": 0.6
       },
       "unmount": {
         "median": 0,
         "p95": 0
       },
       "update": {
-        "median": 0.2,
-        "p95": 0.2
+        "median": 0.4,
+        "p95": 0.5
       }
     },
     "SettingsRow": {
@@ -300,16 +300,16 @@
         "p95": 0
       },
       "mount": {
-        "median": 0.2,
+        "median": 0.4,
         "p95": 0.4
       },
       "unmount": {
         "median": 0,
-        "p95": 0.1
+        "p95": 0
       },
       "update": {
-        "median": 0.1,
-        "p95": 0.3
+        "median": 0.2,
+        "p95": 0.2
       }
     },
     "TitleBar": {
@@ -319,14 +319,14 @@
       },
       "interaction": {
         "median": 0.1,
-        "p95": 0.2
+        "p95": 0.1
       },
       "mount": {
         "median": 0.5,
-        "p95": 1
+        "p95": 0.6
       },
       "unmount": {
-        "median": 0,
+        "median": 0.1,
         "p95": 0.1
       },
       "update": {
@@ -341,19 +341,19 @@
       },
       "interaction": {
         "median": 0,
-        "p95": 0.1
+        "p95": 0
       },
       "mount": {
-        "median": 0.2,
-        "p95": 0.3
+        "median": 0.3,
+        "p95": 0.4
       },
       "unmount": {
         "median": 0,
-        "p95": 0.1
+        "p95": 0
       },
       "update": {
         "median": 0.1,
-        "p95": 0.2
+        "p95": 0.1
       }
     },
     "UiCard": {
@@ -366,7 +366,7 @@
         "p95": 0
       },
       "mount": {
-        "median": 0.3,
+        "median": 0.2,
         "p95": 0.3
       },
       "unmount": {
@@ -374,8 +374,8 @@
         "p95": 0.1
       },
       "update": {
-        "median": 0.2,
-        "p95": 0.5
+        "median": 0.3,
+        "p95": 0.4
       }
     },
     "UiEmptyState": {
@@ -389,7 +389,7 @@
       },
       "mount": {
         "median": 0.2,
-        "p95": 0.2
+        "p95": 0.3
       },
       "unmount": {
         "median": 0,
@@ -402,24 +402,24 @@
     },
     "UiIconButton": {
       "domNodes": {
-        "median": 5,
-        "p95": 5
+        "median": 4,
+        "p95": 4
       },
       "interaction": {
-        "median": 0.1,
+        "median": 0,
         "p95": 0.1
       },
       "mount": {
         "median": 0.4,
-        "p95": 0.8
+        "p95": 0.4
       },
       "unmount": {
         "median": 0,
-        "p95": 0
+        "p95": 0.1
       },
       "update": {
-        "median": 0.3,
-        "p95": 0.6
+        "median": 0.4,
+        "p95": 0.4
       }
     },
     "UiInput": {
@@ -432,7 +432,7 @@
         "p95": 0
       },
       "mount": {
-        "median": 0.2,
+        "median": 0.1,
         "p95": 0.2
       },
       "unmount": {
@@ -441,7 +441,7 @@
       },
       "update": {
         "median": 0,
-        "p95": 0.1
+        "p95": 0
       }
     },
     "UiRangeField": {
@@ -451,15 +451,15 @@
       },
       "interaction": {
         "median": 0,
-        "p95": 0.1
+        "p95": 0
       },
       "mount": {
         "median": 0.2,
-        "p95": 0.2
+        "p95": 0.3
       },
       "unmount": {
         "median": 0,
-        "p95": 0.1
+        "p95": 0
       },
       "update": {
         "median": 0.1,
@@ -481,7 +481,7 @@
       },
       "unmount": {
         "median": 0,
-        "p95": 0.1
+        "p95": 0
       },
       "update": {
         "median": 0.1,
@@ -498,7 +498,7 @@
         "p95": 0
       },
       "mount": {
-        "median": 0.1,
+        "median": 0.2,
         "p95": 0.2
       },
       "unmount": {
@@ -520,16 +520,16 @@
         "p95": 0.1
       },
       "mount": {
-        "median": 0.3,
-        "p95": 2.9
+        "median": 0.2,
+        "p95": 0.2
       },
       "unmount": {
         "median": 0,
         "p95": 0.1
       },
       "update": {
-        "median": 0.1,
-        "p95": 0.3
+        "median": 0,
+        "p95": 0.1
       }
     },
     "UiTextarea": {
@@ -539,19 +539,19 @@
       },
       "interaction": {
         "median": 0,
-        "p95": 0.2
+        "p95": 0
       },
       "mount": {
         "median": 0.1,
-        "p95": 0.5
+        "p95": 0.1
       },
       "unmount": {
         "median": 0,
-        "p95": 0.1
+        "p95": 0
       },
       "update": {
-        "median": 0,
-        "p95": 0.2
+        "median": 0.1,
+        "p95": 0.1
       }
     }
   },

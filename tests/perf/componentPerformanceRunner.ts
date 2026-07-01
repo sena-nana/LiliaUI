@@ -57,7 +57,7 @@ function now() {
 function percentile(values: number[], ratio: number) {
   if (!values.length) return 0;
   const sorted = [...values].sort((a, b) => a - b);
-  const index = Math.min(sorted.length - 1, Math.ceil(sorted.length * ratio) - 1);
+  const index = Math.min(sorted.length - 1, Math.floor((sorted.length - 1) * ratio));
   return Number(sorted[index].toFixed(3));
 }
 
@@ -86,14 +86,17 @@ function countDomNodes() {
   return document.body.querySelectorAll("*").length;
 }
 
-async function runOneSample(scenario: ComponentPerfScenario, iteration: number) {
-  clearPerfDom();
-  scenario.prepare?.();
+async function measure(work: () => Promise<void> | void) {
+  const start = now();
+  await work();
+  return now() - start;
+}
 
+async function runOneSample(scenario: ComponentPerfScenario) {
+  clearPerfDom();
   const container = document.createElement("div");
   container.dataset.perfRoot = scenario.name;
-  document.body.append(container);
-  const step = ref(iteration);
+  const step = ref(0);
   const root = defineComponent({
     name: `${scenario.name}PerfRoot`,
     setup() {
@@ -101,42 +104,55 @@ async function runOneSample(scenario: ComponentPerfScenario, iteration: number) 
     },
   });
   const app = createApp(root);
-  for (const plugin of scenario.createPlugins?.() ?? []) {
-    app.use(plugin);
+  const sample: ComponentPerfSample = {
+    domNodes: 0,
+    interaction: 0,
+    mount: 0,
+    unmount: 0,
+    update: 0,
+  };
+  let mounted = false;
+
+  try {
+    scenario.prepare?.();
+    document.body.append(container);
+    for (const plugin of scenario.createPlugins?.() ?? []) {
+      app.use(plugin);
+    }
+    await scenario.beforeMount?.();
+
+    sample.mount = await measure(async () => {
+      app.mount(container);
+      mounted = true;
+      await nextTick();
+    });
+
+    sample.update = await measure(async () => {
+      step.value = 1;
+      await nextTick();
+    });
+
+    const interact = scenario.interact;
+    if (interact) {
+      sample.interaction = await measure(async () => {
+        await interact(container);
+        await nextTick();
+      });
+    }
+    sample.domNodes = countDomNodes();
+  } finally {
+    const unmountStart = now();
+    if (mounted) {
+      app.unmount();
+      await nextTick();
+    }
+    sample.unmount = now() - unmountStart;
+    container.remove();
+    scenario.cleanup?.();
+    clearPerfDom();
   }
-  await scenario.beforeMount?.();
 
-  const mountStart = now();
-  app.mount(container);
-  await nextTick();
-  const mount = now() - mountStart;
-
-  const updateStart = now();
-  step.value += 1;
-  await nextTick();
-  const update = now() - updateStart;
-
-  const interactionStart = now();
-  await scenario.interact?.(container);
-  await nextTick();
-  const interaction = now() - interactionStart;
-  const domNodes = countDomNodes();
-
-  const unmountStart = now();
-  app.unmount();
-  await nextTick();
-  const unmount = now() - unmountStart;
-  container.remove();
-  scenario.cleanup?.();
-  clearPerfDom();
-
-  return {
-    domNodes,
-    interaction,
-    mount,
-    unmount,
-    update,
-  } satisfies ComponentPerfSample;
+  return sample;
 }
 
 export async function runComponentPerformanceSuite(options: {
@@ -151,9 +167,9 @@ export async function runComponentPerformanceSuite(options: {
 
   for (const scenario of suiteScenarios) {
     const samples: ComponentPerfSample[] = [];
-    await runOneSample(scenario, -1);
+    await runOneSample(scenario);
     for (let index = 0; index < iterations; index += 1) {
-      samples.push(await runOneSample(scenario, index));
+      samples.push(await runOneSample(scenario));
     }
     scenarios[scenario.name] = summarizeScenario(samples);
   }
