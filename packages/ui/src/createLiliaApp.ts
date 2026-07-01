@@ -6,7 +6,8 @@ import {
   type RouterHistory,
 } from "vue-router";
 import AppRoot from "./AppRoot.vue";
-import { installAgentDebugHarness } from "./agentDebug/index";
+import { isLiliaAgentDebugEnabled } from "./agentDebug/env";
+import type { InstallAgentDebugHarnessOptions } from "./agentDebug/types";
 import LiliaDesktopShell from "./layouts/AppShell.vue";
 import { installCommandRegistry, type LiliaCommandMap } from "./commands";
 import type { LiliaAppConfig } from "./config/appShell";
@@ -45,7 +46,24 @@ export function createLiliaApp(options: CreateLiliaAppOptions) {
   installLiliaAppRuntime({ app, config: options.config });
   app.use(router);
   installCommandRegistry(app, options.commands);
-  installAgentDebugHarness();
+  void installConfiguredAgentDebug(options.config);
 
   return { app, router };
+}
+
+function resolveAgentDebugOptions(config: LiliaAppConfig): InstallAgentDebugHarnessOptions | null {
+  const agentDebug = config.runtime?.agentDebug;
+  if (agentDebug === false) return null;
+  if (agentDebug === true) return { enabled: true };
+  if (agentDebug && typeof agentDebug === "object") {
+    return { ...agentDebug, enabled: true };
+  }
+  return isLiliaAgentDebugEnabled() ? {} : null;
+}
+
+async function installConfiguredAgentDebug(config: LiliaAppConfig) {
+  const debugOptions = resolveAgentDebugOptions(config);
+  if (!debugOptions) return;
+  const { installAgentDebugHarness } = await import("./agentDebug/index");
+  installAgentDebugHarness(debugOptions);
 }

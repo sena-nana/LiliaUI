@@ -1,25 +1,3 @@
-import {
-  Bot,
-  Brain,
-  Download,
-  FilePlus2,
-  Folder,
-  FolderCog,
-  Gauge,
-  Home,
-  Info,
-  MoreHorizontal,
-  MonitorSmartphone,
-  Network,
-  PanelTop,
-  Palette,
-  Puzzle,
-  Search,
-  Server,
-  Settings,
-  Sparkles,
-  Workflow,
-} from "@lucide/vue";
 import { defineAsyncComponent, reactive, type Component } from "vue";
 import type { RouteLocationRaw } from "vue-router";
 
@@ -133,10 +111,17 @@ export interface LiliaSettingsConfigInput {
   tabs?: LiliaSettingsTabInput[];
 }
 
+export interface LiliaRuntimeConfigInput {
+  agentDebug?: boolean | { maxLogEntries?: number };
+  contextMenu?: boolean;
+  globalScrollbar?: boolean;
+}
+
 export interface LiliaAppConfig {
   appName: string;
   identifier?: string;
   productTitle: string;
+  runtime?: LiliaRuntimeConfigInput;
   settings?: LiliaSettingsConfigInput;
   shell?: Partial<LiliaShellCopy>;
   sidebar?: LiliaSidebarConfigInput;
@@ -213,6 +198,31 @@ export interface SidebarFooterStatus {
   tone: "ok" | "warn" | "error";
 }
 
+const lucideIconLoaders = {
+  bot: () => import("@lucide/vue/dist/esm/icons/bot.mjs"),
+  brain: () => import("@lucide/vue/dist/esm/icons/brain.mjs"),
+  download: () => import("@lucide/vue/dist/esm/icons/download.mjs"),
+  "file-plus": () => import("@lucide/vue/dist/esm/icons/file-plus.mjs"),
+  folder: () => import("@lucide/vue/dist/esm/icons/folder.mjs"),
+  "folder-cog": () => import("@lucide/vue/dist/esm/icons/folder-cog.mjs"),
+  gauge: () => import("@lucide/vue/dist/esm/icons/gauge.mjs"),
+  home: () => import("@lucide/vue/dist/esm/icons/house.mjs"),
+  info: () => import("@lucide/vue/dist/esm/icons/info.mjs"),
+  "monitor-smartphone": () => import("@lucide/vue/dist/esm/icons/monitor-smartphone.mjs"),
+  more: () => import("@lucide/vue/dist/esm/icons/ellipsis.mjs"),
+  network: () => import("@lucide/vue/dist/esm/icons/network.mjs"),
+  "panel-top": () => import("@lucide/vue/dist/esm/icons/panel-top.mjs"),
+  palette: () => import("@lucide/vue/dist/esm/icons/palette.mjs"),
+  puzzle: () => import("@lucide/vue/dist/esm/icons/puzzle.mjs"),
+  search: () => import("@lucide/vue/dist/esm/icons/search.mjs"),
+  server: () => import("@lucide/vue/dist/esm/icons/server.mjs"),
+  settings: () => import("@lucide/vue/dist/esm/icons/settings.mjs"),
+  sparkles: () => import("@lucide/vue/dist/esm/icons/sparkles.mjs"),
+  workflow: () => import("@lucide/vue/dist/esm/icons/workflow.mjs"),
+} satisfies Record<IconName, () => Promise<{ default: Component }>>;
+
+const lazyLucideIcons = new Map<IconName, Component>();
+
 export const SIDEBAR_GLOBAL_ACTIONS = reactive<SidebarActionItem[]>([]);
 export const SIDEBAR_NAV = reactive<SidebarNavItem[]>([]);
 export const SIDEBAR_GROUPS = reactive<SidebarGroup[]>([]);
@@ -222,7 +232,7 @@ export const SIDEBAR_FOOTER_STATUS = reactive<SidebarFooterStatus>({
   label: "Ready",
   title: "应用状态正常。点击进入设置。",
   tone: "ok",
-  icon: Sparkles as Component,
+  icon: resolveLazyLucideIcon("sparkles"),
 });
 
 export type SettingsTabKey = string;
@@ -235,27 +245,11 @@ export interface SettingsTab {
   to: RouteLocationRaw;
 }
 
-export const SETTINGS_TABS = reactive<SettingsTab[]>([
-  {
-    key: "appearance",
-    label: "外观",
-    icon: Palette as Component,
-    to: { path: "/settings", query: { tab: "appearance" } },
-  },
-  {
-    key: "about",
-    label: "关于",
-    icon: Info as Component,
-    to: { path: "/settings", query: { tab: "about" } },
-  },
-]);
+export const SETTINGS_TABS = reactive<SettingsTab[]>(defaultSettingsTabs("/settings"));
 
 export const DEFAULT_SETTINGS_TAB: SettingsTabKey = "appearance";
 
-export const SETTINGS_SECTIONS: Record<SettingsTabKey, Component> = {
-  appearance: defineAsyncComponent(() => import("../pages/settings/AppearanceSection.vue")),
-  about: defineAsyncComponent(() => import("../pages/settings/AboutSection.vue")),
-};
+export const SETTINGS_SECTIONS: Record<SettingsTabKey, Component> = defaultSettingsSections();
 
 export const SETTINGS_SECTION_PROPS = reactive<Record<string, Record<string, unknown>>>({});
 
@@ -267,29 +261,6 @@ export const SETTINGS_CONFIG = reactive({
   path: "/settings",
 });
 
-const iconMap: Record<IconName, Component> = {
-  bot: Bot as Component,
-  brain: Brain as Component,
-  download: Download as Component,
-  "file-plus": FilePlus2 as Component,
-  folder: Folder as Component,
-  "folder-cog": FolderCog as Component,
-  gauge: Gauge as Component,
-  home: Home as Component,
-  info: Info as Component,
-  "monitor-smartphone": MonitorSmartphone as Component,
-  more: MoreHorizontal as Component,
-  network: Network as Component,
-  "panel-top": PanelTop as Component,
-  palette: Palette as Component,
-  puzzle: Puzzle as Component,
-  search: Search as Component,
-  server: Server as Component,
-  settings: Settings as Component,
-  sparkles: Sparkles as Component,
-  workflow: Workflow as Component,
-};
-
 let currentConfig: LiliaAppConfig = {
   appName: APP_METADATA.appName,
   productTitle: APP_METADATA.productTitle,
@@ -298,7 +269,15 @@ let currentConfig: LiliaAppConfig = {
 };
 
 function resolveIcon(icon: IconInput): Component {
-  return typeof icon === "string" ? iconMap[icon] : icon;
+  return typeof icon === "string" ? resolveLazyLucideIcon(icon) : icon;
+}
+
+function resolveLazyLucideIcon(icon: IconName): Component {
+  const cached = lazyLucideIcons.get(icon);
+  if (cached) return cached;
+  const component = defineAsyncComponent(lucideIconLoaders[icon]) as Component;
+  lazyLucideIcons.set(icon, component);
+  return component;
 }
 
 function resolveAction(action: LiliaSidebarActionInput): SidebarActionItem {
@@ -345,13 +324,13 @@ function defaultSettingsTabs(path: string): SettingsTab[] {
     {
       key: "appearance",
       label: "外观",
-      icon: Palette as Component,
+      icon: resolveLazyLucideIcon("palette"),
       to: { path, query: { tab: "appearance" } },
     },
     {
       key: "about",
       label: "关于",
-      icon: Info as Component,
+      icon: resolveLazyLucideIcon("info"),
       to: { path, query: { tab: "about" } },
     },
   ];

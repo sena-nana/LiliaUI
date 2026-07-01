@@ -1,8 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  installLiliaAppRuntime,
   installGlobalScrollbarVisibility,
   uninstallGlobalScrollbarVisibility,
 } from "@lilia/ui";
+import { testAppConfig } from "./fixtures/appConfig";
 
 function createScroller(input: {
   clientWidth?: number;
@@ -203,6 +205,27 @@ describe("global scrollbar visibility", () => {
 
     scrollScroller(element);
     vi.advanceTimersByTime(480);
+    expect(verticalOverlay()).toBeNull();
+
+    element.remove();
+  });
+
+  it("runtime config can disable the global scrollbar overlay", () => {
+    installLiliaAppRuntime({
+      config: {
+        ...testAppConfig,
+        runtime: {
+          contextMenu: false,
+          globalScrollbar: false,
+        },
+      },
+    });
+    const { element } = createScroller();
+
+    discoverScroller(element);
+    scrollScroller(element);
+    runOverlayFrame();
+
     expect(verticalOverlay()).toBeNull();
 
     element.remove();

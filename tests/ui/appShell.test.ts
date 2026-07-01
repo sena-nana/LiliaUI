@@ -1,4 +1,5 @@
 import { fireEvent, render, waitFor } from "@testing-library/vue";
+import { defineComponent } from "vue";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LiliaDesktopShell, SIDEBAR_CONFIG, setLiliaAppConfig, type LiliaAppConfig } from "@lilia/ui";
@@ -143,6 +144,37 @@ describe("AppShell sidebar", () => {
     expect(view.queryByRole("button", { name: "更多" })).not.toBeInTheDocument();
 
     expect(view.router.currentRoute.value.fullPath).toBe("/");
+  });
+
+  it("主侧边栏支持字符串图标和自定义组件图标配置", async () => {
+    const CustomIcon = defineComponent({
+      template: `<span data-testid="custom-sidebar-icon" aria-hidden="true" />`,
+    });
+    const view = await renderAppShell("/", {
+      ...testAppConfig,
+      sidebar: {
+        ...testAppConfig.sidebar,
+        nav: [
+          {
+            key: "overview",
+            to: "/",
+            label: "首页",
+            icon: "home",
+          },
+          {
+            key: "custom",
+            to: "/components",
+            label: "自定义",
+            icon: CustomIcon,
+          },
+        ],
+      },
+    });
+
+    await waitFor(() => {
+      expect(sidebarRowForText(view.container, "首页").querySelector("svg")).toBeInTheDocument();
+    });
+    expect(await view.findByTestId("custom-sidebar-icon")).toBeInTheDocument();
   });
 
   it("主侧边栏将固定导航、滚动分组和底部状态拆成稳定区域", async () => {

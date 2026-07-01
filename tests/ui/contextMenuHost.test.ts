@@ -126,6 +126,28 @@ describe("ContextMenuHost", () => {
     expect(action).toHaveBeenCalledTimes(1);
   });
 
+  it("运行时配置可以关闭全局右键菜单拦截", () => {
+    installLiliaAppRuntime({
+      config: {
+        ...testAppConfig,
+        runtime: {
+          contextMenu: false,
+          globalScrollbar: false,
+        },
+      },
+    });
+
+    const event = new MouseEvent("contextmenu", {
+      bubbles: true,
+      cancelable: true,
+      clientX: 24,
+      clientY: 24,
+    });
+    document.body.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(false);
+  });
+
   it("全局屏蔽浏览器原生右键菜单", () => {
     render(ContextMenuHost);
 

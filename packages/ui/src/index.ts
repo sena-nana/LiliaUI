@@ -54,6 +54,7 @@ export {
   normalizeSettingsTab,
   setLiliaAppConfig,
   type LiliaAppConfig,
+  type LiliaRuntimeConfigInput,
   type LiliaSettingsConfigInput,
   type LiliaSettingsSectionInput,
   type LiliaSettingsSectionLoader,
