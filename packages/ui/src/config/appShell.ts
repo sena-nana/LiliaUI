@@ -1,4 +1,26 @@
 import { defineAsyncComponent, reactive, type Component } from "vue";
+import {
+  Bot,
+  Brain,
+  Download,
+  Ellipsis,
+  FilePlus,
+  Folder,
+  FolderCog,
+  Gauge,
+  House,
+  Info,
+  MonitorSmartphone,
+  Network,
+  Palette,
+  PanelTop,
+  Puzzle,
+  Search,
+  Server,
+  Settings,
+  Sparkles,
+  Workflow,
+} from "@lucide/vue";
 import type { RouteLocationRaw } from "vue-router";
 
 type IconName =
@@ -198,30 +220,28 @@ export interface SidebarFooterStatus {
   tone: "ok" | "warn" | "error";
 }
 
-const lucideIconLoaders = {
-  bot: () => import("@lucide/vue/dist/esm/icons/bot.mjs"),
-  brain: () => import("@lucide/vue/dist/esm/icons/brain.mjs"),
-  download: () => import("@lucide/vue/dist/esm/icons/download.mjs"),
-  "file-plus": () => import("@lucide/vue/dist/esm/icons/file-plus.mjs"),
-  folder: () => import("@lucide/vue/dist/esm/icons/folder.mjs"),
-  "folder-cog": () => import("@lucide/vue/dist/esm/icons/folder-cog.mjs"),
-  gauge: () => import("@lucide/vue/dist/esm/icons/gauge.mjs"),
-  home: () => import("@lucide/vue/dist/esm/icons/house.mjs"),
-  info: () => import("@lucide/vue/dist/esm/icons/info.mjs"),
-  "monitor-smartphone": () => import("@lucide/vue/dist/esm/icons/monitor-smartphone.mjs"),
-  more: () => import("@lucide/vue/dist/esm/icons/ellipsis.mjs"),
-  network: () => import("@lucide/vue/dist/esm/icons/network.mjs"),
-  "panel-top": () => import("@lucide/vue/dist/esm/icons/panel-top.mjs"),
-  palette: () => import("@lucide/vue/dist/esm/icons/palette.mjs"),
-  puzzle: () => import("@lucide/vue/dist/esm/icons/puzzle.mjs"),
-  search: () => import("@lucide/vue/dist/esm/icons/search.mjs"),
-  server: () => import("@lucide/vue/dist/esm/icons/server.mjs"),
-  settings: () => import("@lucide/vue/dist/esm/icons/settings.mjs"),
-  sparkles: () => import("@lucide/vue/dist/esm/icons/sparkles.mjs"),
-  workflow: () => import("@lucide/vue/dist/esm/icons/workflow.mjs"),
-} satisfies Record<IconName, () => Promise<{ default: Component }>>;
-
-const lazyLucideIcons = new Map<IconName, Component>();
+const lucideIcons = {
+  bot: Bot,
+  brain: Brain,
+  download: Download,
+  "file-plus": FilePlus,
+  folder: Folder,
+  "folder-cog": FolderCog,
+  gauge: Gauge,
+  home: House,
+  info: Info,
+  "monitor-smartphone": MonitorSmartphone,
+  more: Ellipsis,
+  network: Network,
+  "panel-top": PanelTop,
+  palette: Palette,
+  puzzle: Puzzle,
+  search: Search,
+  server: Server,
+  settings: Settings,
+  sparkles: Sparkles,
+  workflow: Workflow,
+} satisfies Record<IconName, Component>;
 
 export const SIDEBAR_GLOBAL_ACTIONS = reactive<SidebarActionItem[]>([]);
 export const SIDEBAR_NAV = reactive<SidebarNavItem[]>([]);
@@ -273,11 +293,7 @@ function resolveIcon(icon: IconInput): Component {
 }
 
 function resolveLazyLucideIcon(icon: IconName): Component {
-  const cached = lazyLucideIcons.get(icon);
-  if (cached) return cached;
-  const component = defineAsyncComponent(lucideIconLoaders[icon]) as Component;
-  lazyLucideIcons.set(icon, component);
-  return component;
+  return lucideIcons[icon];
 }
 
 function resolveAction(action: LiliaSidebarActionInput): SidebarActionItem {
