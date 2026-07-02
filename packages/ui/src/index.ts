@@ -13,6 +13,7 @@ export { default as PopupTitleBarFrame } from "./components/PopupTitleBarFrame.v
 export { default as SearchDropdown } from "./components/SearchDropdown.vue";
 export { default as SettingsCollapsibleCard } from "./components/SettingsCollapsibleCard.vue";
 export { default as SettingsRow } from "./components/SettingsRow.vue";
+export { default as SidebarCollapse } from "./components/sidebar/SidebarCollapse.vue";
 export { default as TitleBar } from "./components/TitleBar.vue";
 export { default as UiButton } from "./components/UiButton.vue";
 export { default as UiCard } from "./components/UiCard.vue";
