@@ -1,21 +1,36 @@
 <script setup lang="ts">
+import { computed } from "vue";
+
+export type UiSwitchControlPosition = "start" | "end";
+
 const props = withDefaults(defineProps<{
   modelValue: boolean;
   label?: string;
   hint?: string;
+  controlPosition?: UiSwitchControlPosition;
+  block?: boolean;
   disabled?: boolean;
   agentId?: string;
+  ariaLabel?: string;
+  "aria-label"?: string;
 }>(), {
   label: undefined,
   hint: undefined,
+  controlPosition: "start",
+  block: false,
   disabled: false,
   agentId: undefined,
+  ariaLabel: undefined,
+  "aria-label": undefined,
 });
 
 const emit = defineEmits<{
   "update:modelValue": [value: boolean];
   change: [event: Event];
 }>();
+
+const hasText = computed(() => Boolean(props.label || props.hint));
+const resolvedAriaLabel = computed(() => props.ariaLabel ?? props["aria-label"]);
 
 function onChange(event: Event) {
   if (props.disabled) return;
@@ -25,11 +40,23 @@ function onChange(event: Event) {
 </script>
 
 <template>
-  <label class="ui-switch" :class="{ 'ui-switch--with-label': label || hint || $slots.default }">
+  <label
+    class="ui-switch"
+    :class="[
+      `ui-switch--control-${controlPosition}`,
+      {
+        'ui-switch--block': block,
+        'ui-switch--with-label': hasText || $slots.default,
+      },
+    ]"
+  >
     <input
       type="checkbox"
       class="ui-switch__input"
+      role="switch"
       :checked="modelValue"
+      :aria-checked="modelValue"
+      :aria-label="resolvedAriaLabel"
       :disabled="disabled"
       :data-agent-id="agentId"
       @change="onChange"
@@ -45,10 +72,90 @@ function onChange(event: Event) {
 </template>
 
 <style scoped>
-.ui-switch--with-label {
+.ui-switch {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.ui-switch--with-label {
+  gap: 8px;
+}
+
+.ui-switch--block {
+  width: 100%;
+}
+
+.ui-switch--control-end {
+  justify-content: space-between;
+}
+
+.ui-switch--control-end .ui-switch__track {
+  order: 2;
+}
+
+.ui-switch--control-end .ui-switch__text {
+  order: 1;
+}
+
+.ui-switch__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ui-switch__track {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 16px;
+  flex: 0 0 30px;
+  border: 1px solid color-mix(in srgb, var(--border-strong) 82%, transparent);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--bg-hover) 78%, var(--bg));
+  transition: background-color 0.14s ease, border-color 0.14s ease;
+}
+
+.ui-switch__track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--text-faint) 70%, var(--bg));
+  transition: transform 0.14s ease, background-color 0.14s ease;
+}
+
+.ui-switch__input:checked + .ui-switch__track {
+  border-color: color-mix(in srgb, var(--accent) 82%, transparent);
+  background: var(--accent);
+}
+
+.ui-switch__input:checked + .ui-switch__track::after {
+  transform: translateX(14px);
+  background: var(--accent-text);
+}
+
+.ui-switch__input:focus-visible + .ui-switch__track {
+  outline: 2px solid color-mix(in srgb, var(--accent) 58%, transparent);
+  outline-offset: 2px;
+}
+
+.ui-switch:hover .ui-switch__track {
+  border-color: color-mix(in srgb, var(--accent) 42%, var(--border-strong));
+}
+
+.ui-switch:has(.ui-switch__input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .ui-switch__text {

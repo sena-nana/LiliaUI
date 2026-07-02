@@ -105,21 +105,30 @@ describe("common UI components", () => {
         const name = ref("alpha");
         const notes = ref("draft");
         const enabled = ref(false);
-        return { enabled, name, notes };
+        const locked = ref(false);
+        return { enabled, locked, name, notes };
       },
       template: `
         <UiInput v-model="name" aria-label="Name" />
         <UiTextarea v-model="notes" aria-label="Notes" />
         <UiSwitch v-model="enabled" label="Enable" />
-        <output data-testid="values">{{ name }}|{{ notes }}|{{ String(enabled) }}</output>
+        <UiSwitch v-model="locked" label="Locked" disabled />
+        <output data-testid="values">{{ name }}|{{ notes }}|{{ String(enabled) }}|{{ String(locked) }}</output>
       `,
     }));
 
     await fireEvent.update(screen.getByRole("textbox", { name: "Name" }), "beta");
     await fireEvent.update(screen.getByRole("textbox", { name: "Notes" }), "ready");
-    await fireEvent.click(screen.getByRole("checkbox", { name: "Enable" }));
+    const enabledSwitch = screen.getByRole("switch", { name: "Enable" });
+    const lockedSwitch = screen.getByRole("switch", { name: "Locked" });
 
-    expect(view.getByTestId("values")).toHaveTextContent("beta|ready|true");
+    expect(enabledSwitch).toHaveAttribute("aria-checked", "false");
+    await fireEvent.click(enabledSwitch);
+    expect(enabledSwitch).toHaveAttribute("aria-checked", "true");
+    expect(lockedSwitch).toBeDisabled();
+    await fireEvent.click(lockedSwitch);
+
+    expect(view.getByTestId("values")).toHaveTextContent("beta|ready|true|false");
   });
 
   it("updates segmented and range controls inside settings rows", async () => {
