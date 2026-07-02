@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { computed } from "vue";
-
 export type UiSwitchControlPosition = "start" | "end";
 
 const props = withDefaults(defineProps<{
@@ -29,9 +27,6 @@ const emit = defineEmits<{
   change: [event: Event];
 }>();
 
-const hasText = computed(() => Boolean(props.label || props.hint));
-const resolvedAriaLabel = computed(() => props.ariaLabel ?? props["aria-label"]);
-
 function onChange(event: Event) {
   if (props.disabled) return;
   emit("update:modelValue", (event.target as HTMLInputElement).checked);
@@ -46,7 +41,6 @@ function onChange(event: Event) {
       `ui-switch--control-${controlPosition}`,
       {
         'ui-switch--block': block,
-        'ui-switch--with-label': hasText || $slots.default,
       },
     ]"
   >
@@ -56,7 +50,7 @@ function onChange(event: Event) {
       role="switch"
       :checked="modelValue"
       :aria-checked="modelValue"
-      :aria-label="resolvedAriaLabel"
+      :aria-label="ariaLabel ?? $props['aria-label']"
       :disabled="disabled"
       :data-agent-id="agentId"
       @change="onChange"
@@ -79,10 +73,6 @@ function onChange(event: Event) {
   gap: 8px;
   min-width: 0;
   cursor: pointer;
-}
-
-.ui-switch--with-label {
-  gap: 8px;
 }
 
 .ui-switch--block {
