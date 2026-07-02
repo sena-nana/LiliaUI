@@ -51,6 +51,41 @@ describe("Dropdown", () => {
     expect(screen.getByRole("button", { name: /向上展开/i })).toBeInTheDocument();
   });
 
+  it("隐藏按钮文字时保留当前选项名称和选择行为", async () => {
+    render(defineComponent({
+      components: { Dropdown },
+      setup() {
+        const value = ref<"bottom" | "top">("bottom");
+        return { options, value };
+      },
+      template: `
+        <Dropdown
+          v-model="value"
+          :options="options"
+          placement="bottom"
+          hide-button-label
+        />
+      `,
+    }), {
+      global: {
+        stubs: {
+          transition: false,
+        },
+      },
+    });
+
+    await fireEvent.click(screen.getByRole("button", { name: "向下展开" }));
+    await fireEvent.click(await screen.findByRole("option", { name: /向上展开/i }));
+
+    await waitFor(
+      () => {
+        expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+      },
+      { timeout: SB_MENU_POP_TRANSITION_MS + 400 },
+    );
+    expect(screen.getByRole("button", { name: "向上展开" })).toBeInTheDocument();
+  });
+
   it("closes when dismissed by outside pointer or Escape", async () => {
     renderDropdown();
     const button = screen.getByRole("button", { name: /向下展开/i });

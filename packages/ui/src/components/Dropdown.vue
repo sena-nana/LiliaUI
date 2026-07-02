@@ -28,6 +28,7 @@ const props = defineProps<{
   block?: boolean;
   size?: DropdownSize;
   buttonClass?: string;
+  hideButtonLabel?: boolean;
   agentId?: string;
   menuWidth?: string;
   menuLabel?: string;
@@ -121,12 +122,16 @@ watch(open, (value) => {
       :class="[buttonClass, { 'is-open': open, 'is-disabled': disabled }]"
       :data-agent-id="agentId"
       :disabled="disabled"
+      :aria-label="hideButtonLabel ? buttonLabel : undefined"
       :aria-haspopup="true"
       :aria-expanded="open"
       @click="toggle"
     >
       <component v-if="icon" :is="icon" :size="13" aria-hidden="true" />
-      <span class="dd__button-label">
+      <span
+        class="dd__button-label"
+        :class="{ 'dd__button-label--visually-hidden': hideButtonLabel }"
+      >
         {{ buttonLabel }}
       </span>
       <ChevronDown :size="12" aria-hidden="true" class="dd__button-caret" />
@@ -229,6 +234,17 @@ watch(open, (value) => {
 .dd--block .dd__button-label,
 .dd--large .dd__button-label {
   max-width: none;
+}
+
+.dd__button-label--visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }
 
 .dd__menu {
