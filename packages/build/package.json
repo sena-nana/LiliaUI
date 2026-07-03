@@ -16,8 +16,6 @@
     "typecheck": "node --check src/index.mjs && node --check bin/lilia-build.mjs"
   },
   "dependencies": {
-    "@lilia/config": "workspace:*",
-    "@lilia/tools": "workspace:*",
     "@tauri-apps/cli": "^2.11.4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -32,6 +30,10 @@
     "vitest": "^4.1.9",
     "vue": "^3.5.39",
     "vue-tsc": "^3.3.5"
+  },
+  "peerDependencies": {
+    "@lilia/config": "0.1.0",
+    "@lilia/tools": "0.1.0"
   },
   "devDependencies": {
     "@lilia/config": "workspace:*",

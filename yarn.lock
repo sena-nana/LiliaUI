@@ -767,6 +767,9 @@ __metadata:
     vitest: "npm:^4.1.9"
     vue: "npm:^3.5.39"
     vue-tsc: "npm:^3.3.5"
+  peerDependencies:
+    "@lilia/config": 0.1.0
+    "@lilia/tools": 0.1.0
   bin:
     lilia-build: ./bin/lilia-build.mjs
   languageName: unknown
@@ -788,6 +791,8 @@ __metadata:
   resolution: "@lilia/tools@workspace:packages/tools"
   dependencies:
     "@lilia/config": "workspace:*"
+  peerDependencies:
+    "@lilia/config": 0.1.0
   bin:
     lilia-tools: ./bin/lilia-tools.mjs
   languageName: unknown
