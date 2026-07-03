@@ -27,7 +27,6 @@ export const LILIA_TOOLS_ASSETS_ROOT = fileURLToPath(new URL("../assets/", impor
 
 export function checkPackageManager(projectRoot = process.cwd(), env = process.env) {
   const packageJson = readJson(resolve(projectRoot, "package.json"));
-  const appConfig = readAppConfig(projectRoot);
   const requiredPackageManager = packageJson.packageManager;
   const userAgent = env.npm_config_user_agent ?? "";
   const yarnMatch = userAgent.match(/\byarn\/([^\s]+)/);
@@ -47,11 +46,19 @@ export function checkPackageManager(projectRoot = process.cwd(), env = process.e
   return {
     ok: false,
     message: formatPackageManagerMessage({
-      productTitle: appConfig.productTitle,
+      productTitle: readOptionalProductTitle(projectRoot, packageJson.name),
       reason,
       requiredPackageManager,
     }),
   };
+}
+
+function readOptionalProductTitle(projectRoot, fallback) {
+  try {
+    return readAppConfig(projectRoot).productTitle;
+  } catch {
+    return fallback ?? "Lilia App";
+  }
 }
 
 export function syncAppConfig(projectRoot = process.cwd()) {

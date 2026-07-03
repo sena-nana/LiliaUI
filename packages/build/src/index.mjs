@@ -130,6 +130,9 @@ export function runPrepare(projectRoot = process.cwd(), env = process.env) {
   if (!packageManager.ok) {
     throw new Error(packageManager.message);
   }
+  if (!existsSync(resolve(projectRoot, "app.config.json"))) {
+    return;
+  }
   syncAppConfig(projectRoot);
   copyLiliaAssets(projectRoot);
 }

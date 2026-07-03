@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -9,6 +9,7 @@ import {
   parsePort,
   pickBundleFile,
   resolveToolCommand,
+  runPrepare,
   viteDevArgs,
 } from "@lilia/build";
 import {
@@ -189,6 +190,15 @@ describe("@lilia/build", () => {
       expect(command.args[0]).toContain("node_modules");
       expect(command.args.at(-1)).toBe("--version");
     }
+  });
+
+  it("allows custom projects without app.config.json to reuse build tooling", () => {
+    const root = createProject();
+    rmSync(join(root, "app.config.json"));
+
+    expect(() =>
+      runPrepare(root, { npm_config_user_agent: "yarn/4.14.1 npm/? node/?" }),
+    ).not.toThrow();
   });
 });
 
