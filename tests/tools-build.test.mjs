@@ -8,6 +8,7 @@ import {
   nativeBuildEnv,
   parsePort,
   pickBundleFile,
+  resolveToolCommand,
   viteDevArgs,
 } from "@lilia/build";
 import {
@@ -65,6 +66,51 @@ describe("@lilia/tools", () => {
 
     expect(report.status).toBe("ready");
     expect(report.checks.every((check) => check.ok)).toBe(true);
+  });
+
+  it("checks only Lilia package boundaries for shared dependencies", () => {
+    const root = createProject({
+      dependencies: {
+        "@lilia/build": "workspace:*",
+        "@lilia/config": "workspace:*",
+        "@lilia/tools": "workspace:*",
+        "@lilia/ui": "workspace:*",
+      },
+    });
+    mkdirSync(join(root, "src", "features", "home"), { recursive: true });
+    mkdirSync(join(root, "tests"), { recursive: true });
+    mkdirSync(join(root, "docs", "guide"), { recursive: true });
+    writeFileSync(join(root, "src/main.ts"), "");
+    writeFileSync(join(root, "src/app.config.ts"), "");
+    writeFileSync(join(root, "src/app.ts"), "");
+    writeFileSync(join(root, "src/routes.ts"), "");
+    writeFileSync(join(root, "src/commands.ts"), "");
+    writeFileSync(join(root, "src/features/home/HomePage.vue"), "home.page home.header home.start-card");
+    writeFileSync(join(root, "tests/tooling.test.ts"), "");
+    writeFileSync(join(root, "docs/guide/development.md"), "");
+
+    const report = createTemplateReport(root, {
+      profile: {
+        importantFiles: [
+          ["src/main.ts", "entry"],
+          ["src/app.config.ts", "config"],
+          ["src/app.ts", "app"],
+          ["src/routes.ts", "routes"],
+          ["src/commands.ts", "commands"],
+          ["src/features/home/HomePage.vue", "home"],
+          ["tests/tooling.test.ts", "tests"],
+          ["docs/guide/development.md", "docs"],
+        ],
+        agentTargetFiles: {
+          "src/features/home/HomePage.vue": [["home.page"], ["home.header"], ["home.start-card"]],
+        },
+      },
+    });
+
+    const dependencyCheck = report.checks.find((check) => check.id === "lilia-dependencies-present");
+    expect(dependencyCheck.ok).toBe(true);
+    expect(dependencyCheck.detail).not.toContain("vue=");
+    expect(dependencyCheck.detail).not.toContain("vite=");
   });
 
   it("reports Agent debug readiness without requiring desktop replay tools", () => {
@@ -127,9 +173,26 @@ describe("@lilia/build", () => {
 
     expect(pickBundleFile(root, "win32")).toBe(msi);
   });
+
+  it("resolves shared build tools from @lilia/build dependencies", () => {
+    const tools = [
+      ["vite", "vite"],
+      ["vitepress", "vitepress"],
+      ["vitest", "vitest"],
+      ["vue-tsc", "vue-tsc"],
+      ["@tauri-apps/cli", "tauri"],
+    ];
+
+    for (const [packageName, binName] of tools) {
+      const command = resolveToolCommand(packageName, binName, ["--version"]);
+      expect(command.command).toBe(process.execPath);
+      expect(command.args[0]).toContain("node_modules");
+      expect(command.args.at(-1)).toBe("--version");
+    }
+  });
 });
 
-function createProject() {
+function createProject(overrides = {}) {
   const root = mkdtempSync(join(tmpdir(), "lilia-tools-"));
   mkdirSync(join(root, "src-tauri"), { recursive: true });
   writeFileSync(
@@ -140,6 +203,7 @@ function createProject() {
       packageManager: "yarn@4.14.1",
       dependencies: {
         "@lilia/ui": "workspace:*",
+        ...(overrides.dependencies ?? {}),
       },
     }, null, 2)}\n`,
   );

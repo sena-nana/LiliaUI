@@ -17,7 +17,7 @@
   "scripts": {
     "typecheck": "node --check src/index.mjs && node --check bin/lilia-tools.mjs"
   },
-  "peerDependencies": {
+  "dependencies": {
     "@lilia/config": "0.1.0"
   },
   "devDependencies": {

@@ -15,9 +15,23 @@
   "scripts": {
     "typecheck": "node --check src/index.mjs && node --check bin/lilia-build.mjs"
   },
-  "peerDependencies": {
+  "dependencies": {
     "@lilia/config": "0.1.0",
-    "@lilia/tools": "0.1.0"
+    "@lilia/tools": "0.1.0",
+    "@tauri-apps/cli": "^2.11.4",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/vue": "^8.1.0",
+    "@vue/compiler-dom": "^3.5.39",
+    "@vue/compiler-sfc": "^3.5.39",
+    "@vue/server-renderer": "^3.5.39",
+    "jsdom": "^29.1.1",
+    "typescript": "^6.0.3",
+    "vite": "^8.1.0",
+    "vitepress": "^1.6.4",
+    "vitest": "^4.1.9",
+    "vue": "^3.5.39",
+    "vue-tsc": "^3.3.5"
   },
   "devDependencies": {
     "@lilia/config": "workspace:*",

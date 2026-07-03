@@ -1,13 +1,15 @@
 import { spawn, spawnSync } from "node:child_process";
-import { existsSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { createRequire } from "node:module";
 import net from "node:net";
-import { extname, join, resolve } from "node:path";
+import { dirname, extname, join, resolve } from "node:path";
 import { readAppConfig } from "@lilia/config";
 import { checkPackageManager, copyLiliaAssets, syncAppConfig } from "@lilia/tools";
 
 const DEFAULT_PORT = 1420;
 const LOCALHOST_CHECK_HOSTS = ["127.0.0.1", "::1"];
 const NATIVE_CPU_FLAG = "-C target-cpu=native";
+const require = createRequire(import.meta.url);
 const PRIORITY_EXTS = {
   win32: [".msi", ".exe"],
   darwin: [".dmg", ".pkg"],
@@ -87,6 +89,13 @@ export function yarnSpawn(platform = process.platform, env = process.env) {
   };
 }
 
+export function resolveToolCommand(packageName, binName, args = []) {
+  return {
+    command: process.execPath,
+    args: [resolvePackageBin(packageName, binName), ...args],
+  };
+}
+
 export function nativeBuildEnv(env = process.env) {
   const next = { ...env };
   const rustflags = next.RUSTFLAGS?.trim();
@@ -134,9 +143,8 @@ export async function runTauriDev(projectRoot = process.cwd(), argv = [], env = 
     beforeDevCommand: options.beforeDevCommand,
   });
   const config = JSON.stringify({ build });
-  const args = [
+  const cliArgs = [
     ...(options.appDir ? ["--cwd", options.appDir] : []),
-    "tauri",
     "dev",
     "--config",
     config,
@@ -148,14 +156,14 @@ export async function runTauriDev(projectRoot = process.cwd(), argv = [], env = 
     [`${envPrefix}_DEV_STRICT_PORT`]: "1",
     ...resolveExtraEnv(options.extraEnv, env, appConfig),
   };
-  const spawnConfig = yarnSpawn(process.platform, env);
+  const tauriCommand = resolveToolCommand("@tauri-apps/cli", "tauri", cliArgs);
 
   const dryRunKey = options.dryRunEnvKey ?? `${envPrefix}_DEV_DRY_RUN`;
   if (env[dryRunKey] === "1") {
     process.stdout.write(`${JSON.stringify({
-      command: spawnConfig.command,
-      spawnArgs: [...spawnConfig.argsPrefix, ...args],
-      args,
+      command: tauriCommand.command,
+      spawnArgs: tauriCommand.args,
+      args: cliArgs,
       devUrl: build.devUrl,
       env: {
         [`${envPrefix}_DEV_PORT`]: nextEnv[`${envPrefix}_DEV_PORT`],
@@ -167,7 +175,7 @@ export async function runTauriDev(projectRoot = process.cwd(), argv = [], env = 
   }
 
   console.log(`[${appConfig.appName}] Starting Tauri dev server at ${build.devUrl}`);
-  await spawnInherited(spawnConfig.command, [...spawnConfig.argsPrefix, ...args], {
+  await spawnInherited(tauriCommand.command, tauriCommand.args, {
     cwd: projectRoot,
     env: nextEnv,
   });
@@ -207,19 +215,33 @@ export async function runBuildCli(argv, options = {}) {
     }
     if (command === "dev") {
       runPrepare(projectRoot, env);
-      runYarn(viteDevArgs(projectRoot, args, env), { cwd: projectRoot, env });
+      runVite(viteDevArgs(projectRoot, args, env).slice(1), { cwd: projectRoot, env });
       return;
     }
     if (command === "build") {
       runPrepare(projectRoot, env);
-      runYarn(["vue-tsc", "--noEmit"], { cwd: projectRoot, env });
-      runYarn(["vite", "build", ...args], { cwd: projectRoot, env });
+      runVueTsc(["--noEmit"], { cwd: projectRoot, env });
+      runVite(["build", ...args], { cwd: projectRoot, env });
+      return;
+    }
+    if (command === "test") {
+      runPrepare(projectRoot, env);
+      runVitest(["run", ...args], { cwd: projectRoot, env });
       return;
     }
     if (command === "docs") {
       runPrepare(projectRoot, env);
       const [docsCommand = "dev", ...docsArgs] = args;
-      runYarn(["vitepress", docsCommand, "docs", ...docsArgs], { cwd: projectRoot, env });
+      runVitePress([docsCommand, "docs", ...docsArgs], { cwd: projectRoot, env });
+      return;
+    }
+    if (command === "preview") {
+      runPrepare(projectRoot, env);
+      runVite(["preview", ...args], { cwd: projectRoot, env });
+      return;
+    }
+    if (command === "tauri") {
+      runTauri(args, { cwd: projectRoot, env });
       return;
     }
     if (command === "tauri-dev") {
@@ -229,7 +251,7 @@ export async function runBuildCli(argv, options = {}) {
     }
     if (command === "tauri-build") {
       runPrepare(projectRoot, env);
-      runYarn(["tauri", "build", ...args], { cwd: projectRoot, env });
+      runTauri(["build", ...args], { cwd: projectRoot, env });
       return;
     }
     if (command === "tauri-install") {
@@ -238,8 +260,10 @@ export async function runBuildCli(argv, options = {}) {
       return;
     }
     if (command === "verify") {
-      runYarn(["test"], { cwd: projectRoot, env });
-      runYarn(["build"], { cwd: projectRoot, env });
+      runPrepare(projectRoot, env);
+      runVitest(["run"], { cwd: projectRoot, env });
+      runVueTsc(["--noEmit"], { cwd: projectRoot, env });
+      runVite(["build"], { cwd: projectRoot, env });
       runSync("cargo", ["check", "--manifest-path", "src-tauri/Cargo.toml"], { cwd: projectRoot, env });
       return;
     }
@@ -253,14 +277,8 @@ export async function runBuildCli(argv, options = {}) {
 }
 
 function yarnBuildCommand(platform = process.platform, env = process.env, appDir = "") {
-  const yarnArgs = appDir ? ["--cwd", appDir, "tauri", "build"] : ["tauri", "build"];
-  if (platform === "win32") {
-    return {
-      command: env.ComSpec || "cmd.exe",
-      args: ["/d", "/s", "/c", ["yarn.cmd", ...yarnArgs].join(" ")],
-    };
-  }
-  return { command: "yarn", args: yarnArgs };
+  const args = appDir ? ["--cwd", appDir, "build"] : ["build"];
+  return resolveToolCommand("@tauri-apps/cli", "tauri", args);
 }
 
 function resolveRuntimeAppConfig(projectRoot, options = {}) {
@@ -317,9 +335,40 @@ function runSync(command, args = [], options = {}) {
   }
 }
 
-function runYarn(args = [], options = {}) {
-  const spawnConfig = yarnSpawn(process.platform, options.env ?? process.env);
-  runSync(spawnConfig.command, [...spawnConfig.argsPrefix, ...args], options);
+function runTool(packageName, binName, args = [], options = {}) {
+  const command = resolveToolCommand(packageName, binName, args);
+  runSync(command.command, command.args, options);
+}
+
+function runVite(args = [], options = {}) {
+  runTool("vite", "vite", args, options);
+}
+
+function runVitePress(args = [], options = {}) {
+  runTool("vitepress", "vitepress", args, options);
+}
+
+function runVitest(args = [], options = {}) {
+  runTool("vitest", "vitest", args, options);
+}
+
+function runVueTsc(args = [], options = {}) {
+  runTool("vue-tsc", "vue-tsc", args, options);
+}
+
+function runTauri(args = [], options = {}) {
+  runTool("@tauri-apps/cli", "tauri", args, options);
+}
+
+function resolvePackageBin(packageName, binName) {
+  const packageJsonPath = require.resolve(`${packageName}/package.json`);
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
+  const bin = packageJson.bin;
+  const relativeBin = typeof bin === "string" ? bin : bin?.[binName];
+  if (!relativeBin) {
+    throw new Error(`Package ${packageName} does not expose bin ${binName}.`);
+  }
+  return resolve(dirname(packageJsonPath), relativeBin);
 }
 
 function hasViteOption(args, name) {
@@ -373,7 +422,10 @@ function printBuildUsage() {
     "  prepare",
     "  dev",
     "  build",
+    "  test",
     "  docs <dev|build|preview>",
+    "  preview",
+    "  tauri",
     "  tauri-dev",
     "  tauri-build [--no-bundle]",
     "  tauri-install",
