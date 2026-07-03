@@ -13,6 +13,7 @@ import {
   UiSpinner,
   UiSwitch,
   UiTextarea,
+  ViewTabs,
   type UiSegmentedOption,
 } from "@lilia/ui";
 
@@ -169,5 +170,16 @@ describe("common UI components", () => {
     expect(screen.getByRole("radio", { name: "B" })).toHaveAttribute("aria-checked", "true");
     expect(view.container.querySelector("[data-agent-id='size.range']")).toBeInTheDocument();
     expect(view.getByTestId("values")).toHaveTextContent("b|7");
+  });
+
+  it("renders shared view tabs with the active tab exposed", () => {
+    render(defineComponent({
+      components: { ViewTabs },
+      template: `<ViewTabs active="overview" />`,
+    }));
+
+    expect(screen.getByRole("tab", { name: "概览" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "看板" })).toBeDisabled();
+    expect(screen.getByRole("tab", { name: "Todo" })).toBeDisabled();
   });
 });
