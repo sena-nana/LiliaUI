@@ -18,7 +18,7 @@
     "typecheck": "node --check src/index.mjs && node --check bin/lilia-tools.mjs"
   },
   "dependencies": {
-    "@lilia/config": "0.1.0"
+    "@lilia/config": "workspace:*"
   },
   "devDependencies": {
     "@lilia/config": "workspace:*"
