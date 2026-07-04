@@ -4,7 +4,7 @@ import ChevronRight from "@lucide/vue/dist/esm/icons/chevron-right.mjs";
 import { computed } from "vue";
 import UiCard from "./UiCard.vue";
 
-const props = withDefaults(defineProps<{
+export interface SettingsCollapsibleCardProps {
   expanded: boolean;
   controlsId: string;
   toggleAgentId: string;
@@ -14,14 +14,18 @@ const props = withDefaults(defineProps<{
   "aria-label"?: string;
   disabled?: boolean;
   withSwitch?: boolean;
-}>(), {
+}
+
+export interface SettingsCollapsibleCardEmits {
+  "update:expanded": [expanded: boolean];
+}
+
+const props = withDefaults(defineProps<SettingsCollapsibleCardProps>(), {
   disabled: false,
   withSwitch: false,
 });
 
-const emit = defineEmits<{
-  "update:expanded": [expanded: boolean];
-}>();
+const emit = defineEmits<SettingsCollapsibleCardEmits>();
 
 const resolvedAriaLabel = computed(() => props.ariaLabel ?? props["aria-label"] ?? "");
 

@@ -1,11 +1,13 @@
 <script setup lang="ts">
-withDefaults(defineProps<{
+export interface SettingsRowProps {
   label?: string;
   hint?: string;
   stacked?: boolean;
   loose?: boolean;
   agentId?: string;
-}>(), {
+}
+
+withDefaults(defineProps<SettingsRowProps>(), {
   label: undefined,
   hint: undefined,
   stacked: false,

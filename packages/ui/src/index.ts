@@ -28,6 +28,8 @@ export { default as UiSwitch } from "./components/UiSwitch.vue";
 export { default as UiTextarea } from "./components/UiTextarea.vue";
 export { default as ViewTabs } from "./components/ViewTabs.vue";
 export { default as PopupShell } from "./layouts/PopupShell.vue";
+export type { SettingsCollapsibleCardEmits, SettingsCollapsibleCardProps } from "./components/SettingsCollapsibleCard.vue";
+export type { SettingsRowProps } from "./components/SettingsRow.vue";
 export type { UiButtonSize, UiButtonType, UiButtonVariant } from "./components/UiButton.vue";
 export type { UiSegmentedOption } from "./components/UiSegmentedControl.vue";
 export type { UiSwitchControlPosition } from "./components/UiSwitch.vue";
