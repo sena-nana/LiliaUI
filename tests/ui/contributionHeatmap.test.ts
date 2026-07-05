@@ -24,7 +24,11 @@ describe("ContributionHeatmap", () => {
     expect(model.dayLabels.map((label) => label.label)).toEqual(["Mon", "Wed", "Fri"]);
     expect(model.monthLabels.find((label) => label.label === "M06")).toMatchObject({
       key: "2026-05-31",
+      x: model.labelWidth + model.cellSize / 2,
     });
+    const lastCell = model.cells[model.cells.length - 1]!;
+    expect(model.width).toBeGreaterThan(lastCell.x + model.cellSize);
+    expect(model.height).toBeGreaterThan(lastCell.y + model.cellSize);
     expect(model.levelPaths.map((path) => path.level)).toEqual([0, 1, 4]);
     expect(model.levelPaths.every((path) => path.d.length > 0)).toBe(true);
     expect(model.cells.filter((cell) => cell.count > 0).map((cell) => cell.title)).toEqual([
@@ -91,6 +95,7 @@ describe("ContributionHeatmap", () => {
     expect(moved).toHaveBeenCalledTimes(1);
     expect(left).toHaveBeenCalledTimes(1);
     expect((entered.mock.calls[0][0] as ContributionHeatmapActiveCell).date).toBe("2026-06-01");
+    expect(view.container.querySelector(".contribution-heatmap__month")?.getAttribute("text-anchor")).toBe("middle");
     expect(view.container.querySelectorAll(".contribution-heatmap__level").length).toBeLessThanOrEqual(5);
     expect(view.container.querySelectorAll(".contribution-heatmap__active-cell")).toHaveLength(0);
   });

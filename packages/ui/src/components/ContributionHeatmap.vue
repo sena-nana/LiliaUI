@@ -81,6 +81,7 @@ function onPointerLeave(event: PointerEvent) {
       class="contribution-heatmap__month"
       :x="month.x"
       y="10"
+      text-anchor="middle"
     >
       {{ month.label }}
     </text>

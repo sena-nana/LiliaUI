@@ -70,6 +70,8 @@ const CELL_GAP = 3;
 const CELL_RADIUS = 2;
 const LABEL_WIDTH = 42;
 const MONTH_LABEL_HEIGHT = 14;
+const CHART_PADDING_RIGHT = 18;
+const CHART_PADDING_BOTTOM = 2;
 const DEFAULT_WEEKDAY_LABELS: readonly ContributionHeatmapWeekdayLabel[] = [
   { label: "Mon", dayIndex: 1 },
   { label: "Wed", dayIndex: 3 },
@@ -181,7 +183,7 @@ function buildContributionMonthLabels(
     labels.push({
       key: weekStart,
       label,
-      x: contributionCellX(weekIndex),
+      x: contributionCellX(weekIndex) + CELL_SIZE / 2,
     });
   }
   return labels;
@@ -228,11 +230,11 @@ function contributionCellY(dayIndex: number) {
 }
 
 function chartWidth(weekCount: number) {
-  return LABEL_WIDTH + Math.max(0, weekCount * (CELL_SIZE + CELL_GAP) - CELL_GAP);
+  return LABEL_WIDTH + Math.max(0, weekCount * (CELL_SIZE + CELL_GAP) - CELL_GAP) + CHART_PADDING_RIGHT;
 }
 
 function chartHeight() {
-  return MONTH_LABEL_HEIGHT + 7 * CELL_SIZE + 6 * CELL_GAP;
+  return MONTH_LABEL_HEIGHT + 7 * CELL_SIZE + 6 * CELL_GAP + CHART_PADDING_BOTTOM;
 }
 
 function roundedRectPath(x: number, y: number, width: number, height: number, radius: number) {
