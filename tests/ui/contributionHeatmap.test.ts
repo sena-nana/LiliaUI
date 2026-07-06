@@ -27,8 +27,8 @@ describe("ContributionHeatmap", () => {
       x: model.labelWidth + model.cellSize / 2,
     });
     const lastCell = model.cells[model.cells.length - 1]!;
-    expect(model.width).toBeGreaterThan(lastCell.x + model.cellSize);
-    expect(model.height).toBeGreaterThan(lastCell.y + model.cellSize);
+    expect(model.width).toBe(lastCell.x + model.cellSize);
+    expect(model.height).toBe(lastCell.y + model.cellSize);
     expect(model.levelPaths.map((path) => path.level)).toEqual([0, 1, 4]);
     expect(model.levelPaths.every((path) => path.d.length > 0)).toBe(true);
     expect(model.cells.filter((cell) => cell.count > 0).map((cell) => cell.title)).toEqual([
@@ -59,6 +59,31 @@ describe("ContributionHeatmap", () => {
       x: cell!.x + model.cellSize + 1,
       y: cell!.y + 1,
     })).toBeNull();
+  });
+
+  it("applies custom cell metrics to geometry and hit testing", () => {
+    const model = buildContributionHeatmapModel([{ date: "2026-06-01", count: 1 }], {
+      cellSize: 13,
+      cellGap: 4,
+      cellRadius: 3,
+    });
+    const cell = model.cells.find((item) => item.date === "2026-06-01");
+    expect(cell).toBeDefined();
+
+    expect(model.cellSize).toBe(13);
+    expect(model.cellGap).toBe(4);
+    expect(model.width).toBe(55);
+    expect(model.height).toBe(129);
+    expect(cell).toMatchObject({ x: 42, y: 31 });
+
+    const pathNumbers = model.levelPaths
+      .flatMap((path) => path.d.match(/-?\d+(?:\.\d+)?/g) ?? [])
+      .map(Number);
+    expect(Math.max(...pathNumbers)).toBe(129);
+    expect(contributionHeatmapCellAtPoint(model, { x: cell!.x + 12, y: cell!.y + 12 })).toMatchObject({
+      date: "2026-06-01",
+    });
+    expect(contributionHeatmapCellAtPoint(model, { x: cell!.x + 13.5, y: cell!.y + 1 })).toBeNull();
   });
 
   it("emits pointer cell transitions and draws one active highlight", async () => {

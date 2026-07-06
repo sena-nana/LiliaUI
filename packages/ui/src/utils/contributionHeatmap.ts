@@ -53,6 +53,9 @@ export interface ContributionHeatmapBuildOptions {
   formatTitle?: (day: ContributionHeatmapDay) => string;
   monthLabelFormatter?: (month: string) => string;
   weekdayLabels?: readonly ContributionHeatmapWeekdayLabel[];
+  cellSize?: number;
+  cellGap?: number;
+  cellRadius?: number;
 }
 
 export interface ContributionHeatmapWeekdayLabel {
@@ -70,32 +73,37 @@ const CELL_GAP = 3;
 const CELL_RADIUS = 2;
 const LABEL_WIDTH = 42;
 const MONTH_LABEL_HEIGHT = 14;
-const CHART_PADDING_RIGHT = 18;
-const CHART_PADDING_BOTTOM = 2;
 const DEFAULT_WEEKDAY_LABELS: readonly ContributionHeatmapWeekdayLabel[] = [
   { label: "Mon", dayIndex: 1 },
   { label: "Wed", dayIndex: 3 },
   { label: "Fri", dayIndex: 5 },
 ];
 
+interface ContributionHeatmapLayout {
+  cellSize: number;
+  cellGap: number;
+  cellRadius: number;
+}
+
 export function buildContributionHeatmapModel(
   days: readonly ContributionHeatmapDay[],
   options: ContributionHeatmapBuildOptions = {},
 ): ContributionHeatmapModel {
-  const cells = buildContributionCells(days, options);
+  const layout = contributionHeatmapLayout(options);
+  const cells = buildContributionCells(days, options, layout);
   const weekCount = Math.ceil(cells.length / 7);
-  const width = chartWidth(weekCount);
-  const height = chartHeight();
+  const width = chartWidth(weekCount, layout);
+  const height = chartHeight(layout);
   return {
     cells,
-    monthLabels: buildContributionMonthLabels(cells, days, options),
-    dayLabels: buildDayLabels(options.weekdayLabels ?? DEFAULT_WEEKDAY_LABELS),
-    levelPaths: buildContributionLevelPaths(cells),
+    monthLabels: buildContributionMonthLabels(cells, days, options, layout),
+    dayLabels: buildDayLabels(options.weekdayLabels ?? DEFAULT_WEEKDAY_LABELS, layout),
+    levelPaths: buildContributionLevelPaths(cells, layout),
     width,
     height,
     viewBox: `0 0 ${width} ${height}`,
-    cellSize: CELL_SIZE,
-    cellGap: CELL_GAP,
+    cellSize: layout.cellSize,
+    cellGap: layout.cellGap,
     labelWidth: LABEL_WIDTH,
     monthLabelHeight: MONTH_LABEL_HEIGHT,
   };
@@ -126,6 +134,7 @@ export function contributionHeatmapCellAtPoint(
 function buildContributionCells(
   days: readonly ContributionHeatmapDay[],
   options: ContributionHeatmapBuildOptions,
+  layout: ContributionHeatmapLayout,
 ) {
   if (!days.length) return [];
   const sorted = [...days].sort((a, b) => a.date.localeCompare(b.date));
@@ -149,8 +158,8 @@ function buildContributionCells(
         level: contributionLevel(day.count, maxCount),
         weekStart: cursor.toISOString().slice(0, 10),
         title: contributionTitle(day, options),
-        x: contributionCellX(weekIndex),
-        y: contributionCellY(offset),
+        x: contributionCellX(weekIndex, layout),
+        y: contributionCellY(offset, layout),
       });
     }
     weekIndex += 1;
@@ -162,6 +171,7 @@ function buildContributionMonthLabels(
   cells: readonly ContributionHeatmapCell[],
   days: readonly ContributionHeatmapDay[],
   options: ContributionHeatmapBuildOptions,
+  layout: ContributionHeatmapLayout,
 ): ContributionHeatmapMonthLabel[] {
   let lastMonth = "";
   const sortedDays = [...days].sort((a, b) => a.date.localeCompare(b.date));
@@ -183,26 +193,32 @@ function buildContributionMonthLabels(
     labels.push({
       key: weekStart,
       label,
-      x: contributionCellX(weekIndex) + CELL_SIZE / 2,
+      x: contributionCellX(weekIndex, layout) + layout.cellSize / 2,
     });
   }
   return labels;
 }
 
-function buildDayLabels(labels: readonly ContributionHeatmapWeekdayLabel[]): ContributionHeatmapDayLabel[] {
+function buildDayLabels(
+  labels: readonly ContributionHeatmapWeekdayLabel[],
+  layout: ContributionHeatmapLayout,
+): ContributionHeatmapDayLabel[] {
   return labels.map(({ label, dayIndex }) => ({
     label,
     x: 0,
-    y: contributionCellY(dayIndex) + CELL_SIZE - 1,
+    y: contributionCellY(dayIndex, layout) + layout.cellSize - 1,
   }));
 }
 
-function buildContributionLevelPaths(cells: readonly ContributionHeatmapCell[]): ContributionHeatmapLevelPath[] {
+function buildContributionLevelPaths(
+  cells: readonly ContributionHeatmapCell[],
+  layout: ContributionHeatmapLayout,
+): ContributionHeatmapLevelPath[] {
   const pathsByLevel = new Map<number, string[]>();
   for (const cell of cells) {
     const level = Math.min(4, Math.max(0, Math.floor(cell.level)));
     const paths = pathsByLevel.get(level) ?? [];
-    paths.push(roundedRectPath(cell.x, cell.y, CELL_SIZE, CELL_SIZE, CELL_RADIUS));
+    paths.push(roundedRectPath(cell.x, cell.y, layout.cellSize, layout.cellSize, layout.cellRadius));
     pathsByLevel.set(level, paths);
   }
   return [...pathsByLevel.entries()]
@@ -221,20 +237,38 @@ function toActiveCell(cell: ContributionHeatmapCell): ContributionHeatmapActiveC
   };
 }
 
-function contributionCellX(weekIndex: number) {
-  return LABEL_WIDTH + weekIndex * (CELL_SIZE + CELL_GAP);
+function contributionCellX(weekIndex: number, layout: ContributionHeatmapLayout) {
+  return LABEL_WIDTH + weekIndex * (layout.cellSize + layout.cellGap);
 }
 
-function contributionCellY(dayIndex: number) {
-  return MONTH_LABEL_HEIGHT + dayIndex * (CELL_SIZE + CELL_GAP);
+function contributionCellY(dayIndex: number, layout: ContributionHeatmapLayout) {
+  return MONTH_LABEL_HEIGHT + dayIndex * (layout.cellSize + layout.cellGap);
 }
 
-function chartWidth(weekCount: number) {
-  return LABEL_WIDTH + Math.max(0, weekCount * (CELL_SIZE + CELL_GAP) - CELL_GAP) + CHART_PADDING_RIGHT;
+function chartWidth(weekCount: number, layout: ContributionHeatmapLayout) {
+  return LABEL_WIDTH + Math.max(0, weekCount * (layout.cellSize + layout.cellGap) - layout.cellGap);
 }
 
-function chartHeight() {
-  return MONTH_LABEL_HEIGHT + 7 * CELL_SIZE + 6 * CELL_GAP + CHART_PADDING_BOTTOM;
+function chartHeight(layout: ContributionHeatmapLayout) {
+  return MONTH_LABEL_HEIGHT + 7 * layout.cellSize + 6 * layout.cellGap;
+}
+
+function contributionHeatmapLayout(options: ContributionHeatmapBuildOptions): ContributionHeatmapLayout {
+  const cellSize = positiveNumber(options.cellSize, CELL_SIZE);
+  const cellGap = nonNegativeNumber(options.cellGap, CELL_GAP);
+  return {
+    cellSize,
+    cellGap,
+    cellRadius: Math.min(nonNegativeNumber(options.cellRadius, CELL_RADIUS), cellSize / 2),
+  };
+}
+
+function positiveNumber(value: number | undefined, fallback: number) {
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : fallback;
+}
+
+function nonNegativeNumber(value: number | undefined, fallback: number) {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : fallback;
 }
 
 function roundedRectPath(x: number, y: number, width: number, height: number, radius: number) {
