@@ -66,6 +66,7 @@ function onPointerLeave(event: PointerEvent) {
     @pointermove="onPointerMove"
     @pointerleave="onPointerLeave"
   >
+    <title v-if="displayActiveCell">{{ displayActiveCell.title }}</title>
     <text
       v-for="label in model.dayLabels"
       :key="label.label"
@@ -101,9 +102,7 @@ function onPointerLeave(event: PointerEvent) {
       :height="model.cellSize + 2"
       rx="3"
       ry="3"
-    >
-      <title>{{ displayActiveCell.title }}</title>
-    </rect>
+    />
   </svg>
 </template>
 

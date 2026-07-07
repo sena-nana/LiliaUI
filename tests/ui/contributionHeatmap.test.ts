@@ -109,6 +109,7 @@ describe("ContributionHeatmap", () => {
     const svg = screen.getByRole("img", { name: "Activity" });
     await pointerMove(svg, firstCell.x + 1, firstCell.y + 1);
     expect(view.container.querySelectorAll(".contribution-heatmap__active-cell")).toHaveLength(1);
+    expect(svg.querySelector("title")?.textContent).toBe(firstCell.title);
     await pointerMove(svg, firstCell.x + 2, firstCell.y + 2);
     expect(view.container.querySelectorAll(".contribution-heatmap__active-cell")).toHaveLength(1);
     await fireEvent.pointerLeave(svg);
@@ -120,6 +121,7 @@ describe("ContributionHeatmap", () => {
     expect(view.container.querySelector(".contribution-heatmap__month")?.getAttribute("text-anchor")).toBe("middle");
     expect(view.container.querySelectorAll(".contribution-heatmap__level").length).toBeLessThanOrEqual(5);
     expect(view.container.querySelectorAll(".contribution-heatmap__active-cell")).toHaveLength(0);
+    expect(svg.querySelector("title")).toBeNull();
   });
 });
 
