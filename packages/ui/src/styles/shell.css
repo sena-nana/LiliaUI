@@ -12,6 +12,7 @@
   overflow: hidden;
   background: var(--bg-elev);
   position: relative;
+  transition: grid-template-columns 0.24s var(--sidebar-easing);
 }
 
 .shell > .titlebar {
