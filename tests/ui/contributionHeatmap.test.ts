@@ -26,9 +26,7 @@ describe("ContributionHeatmap", () => {
       key: "2026-05-31",
       x: model.labelWidth + model.cellSize / 2,
     });
-    const lastCell = model.cells[model.cells.length - 1]!;
-    expect(model.width).toBe(lastCell.x + model.cellSize);
-    expect(model.height).toBe(lastCell.y + model.cellSize);
+    expectActiveHighlightToFit(model);
     expect(model.levelPaths.map((path) => path.level)).toEqual([0, 1, 4]);
     expect(model.levelPaths.every((path) => path.d.length > 0)).toBe(true);
     expect(model.cells.filter((cell) => cell.count > 0).map((cell) => cell.title)).toEqual([
@@ -72,9 +70,8 @@ describe("ContributionHeatmap", () => {
 
     expect(model.cellSize).toBe(13);
     expect(model.cellGap).toBe(4);
-    expect(model.width).toBe(55);
-    expect(model.height).toBe(129);
     expect(cell).toMatchObject({ x: 42, y: 31 });
+    expectActiveHighlightToFit(model);
 
     const pathNumbers = model.levelPaths
       .flatMap((path) => path.d.match(/-?\d+(?:\.\d+)?/g) ?? [])
@@ -133,4 +130,11 @@ async function pointerMove(element: Element, offsetX: number, offsetY: number) {
     offsetY: { value: offsetY },
   });
   await fireEvent(element, event);
+}
+
+function expectActiveHighlightToFit(model: ReturnType<typeof buildContributionHeatmapModel>) {
+  const lastCell = model.cells[model.cells.length - 1];
+  expect(lastCell).toBeDefined();
+  expect(lastCell!.x + model.cellSize + 1).toBeLessThanOrEqual(model.width);
+  expect(lastCell!.y + model.cellSize + 1).toBeLessThanOrEqual(model.height);
 }

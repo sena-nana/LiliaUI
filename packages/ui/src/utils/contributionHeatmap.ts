@@ -73,6 +73,7 @@ const CELL_GAP = 3;
 const CELL_RADIUS = 2;
 const LABEL_WIDTH = 42;
 const MONTH_LABEL_HEIGHT = 14;
+const PAINT_PADDING = 2;
 const DEFAULT_WEEKDAY_LABELS: readonly ContributionHeatmapWeekdayLabel[] = [
   { label: "Mon", dayIndex: 1 },
   { label: "Wed", dayIndex: 3 },
@@ -246,11 +247,11 @@ function contributionCellY(dayIndex: number, layout: ContributionHeatmapLayout) 
 }
 
 function chartWidth(weekCount: number, layout: ContributionHeatmapLayout) {
-  return LABEL_WIDTH + Math.max(0, weekCount * (layout.cellSize + layout.cellGap) - layout.cellGap);
+  return LABEL_WIDTH + Math.max(0, weekCount * (layout.cellSize + layout.cellGap) - layout.cellGap) + PAINT_PADDING;
 }
 
 function chartHeight(layout: ContributionHeatmapLayout) {
-  return MONTH_LABEL_HEIGHT + 7 * layout.cellSize + 6 * layout.cellGap;
+  return MONTH_LABEL_HEIGHT + 7 * layout.cellSize + 6 * layout.cellGap + PAINT_PADDING;
 }
 
 function contributionHeatmapLayout(options: ContributionHeatmapBuildOptions): ContributionHeatmapLayout {
