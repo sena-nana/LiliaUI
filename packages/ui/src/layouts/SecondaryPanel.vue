@@ -271,8 +271,7 @@ function selectNavItem(item: { disabled?: boolean; onSelect?: () => void | Promi
 }
 
 .sb-tree__row:hover .sb-tree__hover-tools,
-.sb-tree__row:focus-within .sb-tree__hover-tools,
-.sb-tree__row.is-active .sb-tree__hover-tools {
+.sb-tree__row:focus-within .sb-tree__hover-tools {
   opacity: 1;
   pointer-events: auto;
 }
