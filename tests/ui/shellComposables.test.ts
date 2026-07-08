@@ -5,6 +5,7 @@ import { SIDEBAR_CONFIG, setLiliaAppConfig } from "@lilia/ui";
 import {
   usePersistentBoolean,
   usePersistentNumber,
+  usePersistentString,
   useResizablePane,
   useShellSidebar,
 } from "@lilia/ui";
@@ -56,6 +57,24 @@ describe("persistent state composables", () => {
 
     expect(view.getByRole("button")).toHaveTextContent("4");
     expect(localStorage.getItem("test.number")).toBe("4");
+  });
+
+  it("持久化 string 会读取默认值并写回更新", async () => {
+    const Probe = defineComponent({
+      setup() {
+        const value = usePersistentString("test.string", "codex");
+        return { value };
+      },
+      template: `<button @click="value = 'claude'">{{ value }}</button>`,
+    });
+
+    const view = render(Probe);
+    expect(view.getByRole("button")).toHaveTextContent("codex");
+
+    await fireEvent.click(view.getByRole("button"));
+
+    expect(view.getByRole("button")).toHaveTextContent("claude");
+    expect(localStorage.getItem("test.string")).toBe("claude");
   });
 });
 

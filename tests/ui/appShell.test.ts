@@ -223,10 +223,13 @@ describe("AppShell sidebar", () => {
     expect(rowToolAction).toHaveBeenCalledOnce();
   });
 
-  it("主侧边栏工具按钮触发配置动作并禁用未接入动作", async () => {
+  it("主侧边栏行和工具按钮触发配置动作并禁用未接入动作", async () => {
     const globalAction = vi.fn();
+    const navAction = vi.fn();
+    const disabledNavAction = vi.fn();
     const navToolAction = vi.fn();
     const groupToolAction = vi.fn();
+    const rowAction = vi.fn();
     const rowToolAction = vi.fn();
     const view = await renderAppShell("/", {
       ...testAppConfig,
@@ -241,7 +244,19 @@ describe("AppShell sidebar", () => {
             ...testAppConfig.sidebar.nav[0],
             tools: [{ key: "pin", label: "固定", icon: "more", onSelect: navToolAction }],
           },
-          testAppConfig.sidebar.nav[1],
+          {
+            key: "scan",
+            label: "扫描",
+            icon: "search",
+            onSelect: navAction,
+          },
+          {
+            key: "disabled-scan",
+            label: "禁用扫描",
+            icon: "search",
+            disabled: true,
+            onSelect: disabledNavAction,
+          },
         ],
         groups: [
           {
@@ -253,6 +268,8 @@ describe("AppShell sidebar", () => {
                 key: "demo",
                 label: "Demo",
                 icon: "folder",
+                active: true,
+                onSelect: rowAction,
                 tools: [{ key: "open", label: "打开仓库", icon: "folder", onSelect: rowToolAction }],
               },
             ],
@@ -262,15 +279,23 @@ describe("AppShell sidebar", () => {
     });
 
     await fireEvent.click(view.getByRole("button", { name: "刷新" }));
+    await fireEvent.click(view.getByRole("button", { name: "扫描" }));
+    await fireEvent.click(view.getByRole("button", { name: "禁用扫描" }));
     await fireEvent.click(view.getByRole("button", { name: "固定" }));
     await fireEvent.click(view.getByRole("button", { name: "添加仓库" }));
+    await fireEvent.click(view.getByRole("button", { name: "Demo" }));
     await fireEvent.click(view.getByRole("button", { name: "打开仓库" }));
 
     expect(globalAction).toHaveBeenCalledOnce();
+    expect(navAction).toHaveBeenCalledOnce();
+    expect(disabledNavAction).not.toHaveBeenCalled();
     expect(navToolAction).toHaveBeenCalledOnce();
     expect(groupToolAction).toHaveBeenCalledOnce();
+    expect(rowAction).toHaveBeenCalledOnce();
     expect(rowToolAction).toHaveBeenCalledOnce();
+    expect(view.getByRole("button", { name: "Demo" })).toHaveClass("is-active");
     expect(view.getByRole("button", { name: "未接入" })).toBeDisabled();
+    expect(view.getByRole("button", { name: "禁用扫描" })).toBeDisabled();
     expect(view.router.currentRoute.value.fullPath).toBe("/");
   });
 

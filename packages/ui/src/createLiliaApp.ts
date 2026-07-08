@@ -12,11 +12,13 @@ import LiliaDesktopShell from "./layouts/AppShell.vue";
 import { installCommandRegistry, type LiliaCommandMap } from "./commands";
 import type { LiliaAppConfig } from "./config/appShell";
 import { installLiliaAppRuntime } from "./runtime";
+import { liliaAppOverlaysKey } from "./appOverlays";
 
 export interface CreateLiliaAppOptions {
   commands?: LiliaCommandMap;
   config: LiliaAppConfig;
   history?: RouterHistory;
+  overlays?: Component[];
   routes: RouteRecordRaw[];
   shell?: Component;
 }
@@ -44,6 +46,7 @@ export function createLiliaApp(options: CreateLiliaAppOptions) {
   const router = createLiliaRouter(options.routes, options.shell, options.history);
   const app = createApp(AppRoot);
   installLiliaAppRuntime({ app, config: options.config });
+  app.provide(liliaAppOverlaysKey, options.overlays ?? []);
   app.use(router);
   installCommandRegistry(app, options.commands);
   void installConfiguredAgentDebug(options.config);

@@ -68,10 +68,12 @@ export interface LiliaSidebarActionInput {
 }
 
 export interface LiliaSidebarNavInput {
+  active?: boolean;
   disabled?: boolean;
   icon: IconInput;
   key: string;
   label: string;
+  onSelect?: () => void | Promise<void>;
   to?: string;
   tools?: LiliaSidebarActionInput[];
 }
@@ -186,10 +188,12 @@ export interface SidebarActionItem {
 }
 
 export interface SidebarNavItem {
+  active?: boolean;
   disabled?: boolean;
   icon: Component;
   key: string;
   label: string;
+  onSelect?: () => void | Promise<void>;
   to?: string;
   tools?: SidebarActionItem[];
 }

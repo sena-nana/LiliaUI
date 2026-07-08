@@ -72,3 +72,21 @@ export function usePersistentNumber(options: PersistentNumberOptions): Ref<numbe
     };
   });
 }
+
+export function usePersistentString(key: string, defaultValue: string): Ref<string> {
+  let value = readStorage(key) ?? defaultValue;
+
+  return customRef<string>((track, trigger) => {
+    return {
+      get() {
+        track();
+        return value;
+      },
+      set(nextValue) {
+        value = nextValue;
+        writeStorage(key, value);
+        trigger();
+      },
+    };
+  });
+}

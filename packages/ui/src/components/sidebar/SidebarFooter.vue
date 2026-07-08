@@ -31,7 +31,6 @@ defineProps<{
       class="sb-conn"
       :class="`sb-conn--${status.tone}`"
       :title="status.title"
-      :aria-label="status.title"
       data-agent-id="sidebar.footer.status"
     >
       <component :is="status.icon" :size="12" aria-hidden="true" />

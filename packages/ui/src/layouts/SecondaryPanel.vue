@@ -21,6 +21,11 @@ function selectAction(action: SidebarActionItem) {
   if (action.disabled || !action.onSelect) return;
   void action.onSelect();
 }
+
+function selectNavItem(item: { disabled?: boolean; onSelect?: () => void | Promise<void> }) {
+  if (item.disabled || !item.onSelect) return;
+  void item.onSelect();
+}
 </script>
 
 <template>
@@ -45,23 +50,41 @@ function selectAction(action: SidebarActionItem) {
           <span class="sb-section__title">{{ APP_SHELL_COPY.workspaceSectionTitle }}</span>
         </div>
         <nav class="sb-tree" aria-label="主导航">
-          <RouterLink
-            v-for="item in SIDEBAR_NAV"
-            :key="item.label"
-            :to="item.to ?? '/'"
-            class="sb-tree__row"
-            exact-active-class="is-active"
-            :aria-disabled="item.disabled ? 'true' : undefined"
-            :data-agent-id="`sidebar.nav.${item.key}`"
-          >
-            <component :is="item.icon" :size="14" aria-hidden="true" />
-            <span class="sb-tree__name">{{ item.label }}</span>
-            <SidebarRowTools
-              v-if="item.tools?.length"
-              :tools="item.tools"
-              :agent-id-base="`sidebar.nav.${item.key}.tool`"
-            />
-          </RouterLink>
+          <template v-for="item in SIDEBAR_NAV" :key="item.label">
+            <RouterLink
+              v-if="item.to && !item.disabled"
+              :to="item.to"
+              class="sb-tree__row"
+              :class="{ 'is-active': item.active }"
+              exact-active-class="is-active"
+              :data-agent-id="`sidebar.nav.${item.key}`"
+            >
+              <component :is="item.icon" :size="14" aria-hidden="true" />
+              <span class="sb-tree__name">{{ item.label }}</span>
+              <SidebarRowTools
+                v-if="item.tools?.length"
+                :tools="item.tools"
+                :agent-id-base="`sidebar.nav.${item.key}.tool`"
+              />
+            </RouterLink>
+            <button
+              v-else
+              type="button"
+              class="sb-tree__row sb-tree__row--button"
+              :class="{ 'is-active': item.active }"
+              :disabled="item.disabled || !item.onSelect"
+              :data-agent-id="`sidebar.nav.${item.key}`"
+              @click="selectNavItem(item)"
+            >
+              <component :is="item.icon" :size="14" aria-hidden="true" />
+              <span class="sb-tree__name">{{ item.label }}</span>
+              <SidebarRowTools
+                v-if="item.tools?.length"
+                :tools="item.tools"
+                :agent-id-base="`sidebar.nav.${item.key}.tool`"
+              />
+            </button>
+          </template>
         </nav>
       </div>
     </div>
@@ -90,21 +113,41 @@ function selectAction(action: SidebarActionItem) {
           </div>
         </div>
         <div class="sb-tree">
-          <div
-            v-for="item in group.items"
-            :key="item.label"
-            class="sb-tree__row sb-tree__row--project"
-            :aria-disabled="item.disabled ? 'true' : undefined"
-            :data-agent-id="`sidebar.group.${group.key}.item.${item.key}`"
-          >
-            <component :is="item.icon" :size="14" aria-hidden="true" />
-            <span class="sb-tree__name">{{ item.label }}</span>
-            <SidebarRowTools
-              v-if="item.tools?.length"
-              :tools="item.tools"
-              :agent-id-base="`sidebar.group.${group.key}.item.${item.key}.tool`"
-            />
-          </div>
+          <template v-for="item in group.items" :key="item.label">
+            <RouterLink
+              v-if="item.to && !item.disabled"
+              class="sb-tree__row sb-tree__row--project"
+              :class="{ 'is-active': item.active }"
+              :to="item.to"
+              exact-active-class="is-active"
+              :data-agent-id="`sidebar.group.${group.key}.item.${item.key}`"
+            >
+              <component :is="item.icon" :size="14" aria-hidden="true" />
+              <span class="sb-tree__name">{{ item.label }}</span>
+              <SidebarRowTools
+                v-if="item.tools?.length"
+                :tools="item.tools"
+                :agent-id-base="`sidebar.group.${group.key}.item.${item.key}.tool`"
+              />
+            </RouterLink>
+            <button
+              v-else
+              type="button"
+              class="sb-tree__row sb-tree__row--project sb-tree__row--button"
+              :class="{ 'is-active': item.active }"
+              :disabled="item.disabled || !item.onSelect"
+              :data-agent-id="`sidebar.group.${group.key}.item.${item.key}`"
+              @click="selectNavItem(item)"
+            >
+              <component :is="item.icon" :size="14" aria-hidden="true" />
+              <span class="sb-tree__name">{{ item.label }}</span>
+              <SidebarRowTools
+                v-if="item.tools?.length"
+                :tools="item.tools"
+                :agent-id-base="`sidebar.group.${group.key}.item.${item.key}.tool`"
+              />
+            </button>
+          </template>
           <p v-if="group.emptyText" class="sb-tree__empty">{{ group.emptyText }}</p>
         </div>
       </div>
@@ -191,21 +234,35 @@ function selectAction(action: SidebarActionItem) {
 }
 
 .sb-tree__row {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 6px;
   height: 28px;
   padding: 0 10px;
+  border: 0;
   border-radius: var(--radius-sm);
+  background: transparent;
   color: var(--text);
+  cursor: pointer;
   text-decoration: none;
   font-size: 13px;
   font-weight: 500;
   min-width: 0;
+  text-align: left;
 }
 
 .sb-tree__row:hover {
   background: var(--bg-hover);
+}
+
+.sb-tree__row:disabled {
+  color: var(--text-faint);
+  cursor: default;
+}
+
+.sb-tree__row:disabled:hover {
+  background: transparent;
 }
 
 .sb-tree__row.is-active {
