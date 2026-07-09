@@ -20,7 +20,7 @@
   z-index: 1100;
   min-width: 180px;
   background: var(--bg-elev);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   padding: 4px;
   display: flex;

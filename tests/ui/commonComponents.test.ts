@@ -91,10 +91,16 @@ describe("common UI components", () => {
           </UiEmptyState>
           <UiSpinner label="Working" />
         </UiCard>
+        <UiCard variant="outlined" agent-id="panel.outlined">Outlined</UiCard>
+        <UiCard variant="raised" agent-id="panel.raised">Raised</UiCard>
+        <UiCard variant="flat" agent-id="panel.flat">Flat</UiCard>
       `,
     }));
 
-    expect(view.container.querySelector("[data-agent-id='panel']")?.classList.contains("card")).toBe(true);
+    expect(view.container.querySelector("[data-agent-id='panel']")).toHaveClass("card", "card--surface");
+    expect(view.container.querySelector("[data-agent-id='panel.outlined']")).toHaveClass("card--outlined");
+    expect(view.container.querySelector("[data-agent-id='panel.raised']")).toHaveClass("card--raised");
+    expect(view.container.querySelector("[data-agent-id='panel.flat']")).toHaveClass("card--flat");
     expect(screen.getAllByRole("status")).toHaveLength(2);
     expect(screen.getByText("Nothing to show.")).toBeInTheDocument();
   });
@@ -148,7 +154,7 @@ describe("common UI components", () => {
         <SettingsRow label="Mode" hint="Choose one">
           <UiSegmentedControl v-model="mode" :options="options" aria-label="Mode" />
         </SettingsRow>
-        <SettingsRow label="Size">
+        <SettingsRow label="Size" divided agent-id="size.row">
           <UiRangeField
             v-model="size"
             :min="1"
@@ -168,6 +174,8 @@ describe("common UI components", () => {
     await fireEvent.update(screen.getByRole("slider", { name: "Size" }), "7");
 
     expect(screen.getByRole("radio", { name: "B" })).toHaveAttribute("aria-checked", "true");
+    expect(view.container.querySelector(".settings-row:not(.settings-row--divided)")).toBeInTheDocument();
+    expect(view.container.querySelector("[data-agent-id='size.row']")).toHaveClass("settings-row--divided");
     expect(view.container.querySelector("[data-agent-id='size.range']")).toBeInTheDocument();
     expect(view.getByTestId("values")).toHaveTextContent("b|7");
   });

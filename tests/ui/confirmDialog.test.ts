@@ -20,6 +20,10 @@ describe("ConfirmDialog", () => {
       },
     });
 
+    const dialog = screen.getByRole("dialog", { name: "Delete item" });
+    expect(dialog).toHaveAttribute("aria-modal", "true");
+    expect(screen.getByText("This cannot be undone.")).toBeInTheDocument();
+
     await fireEvent.click(screen.getByRole("button", { name: "Keep" }));
     await fireEvent.click(screen.getByRole("button", { name: "Delete" }));
 

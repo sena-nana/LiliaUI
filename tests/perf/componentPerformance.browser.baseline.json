@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-01T09:09:49.834Z",
+  "generatedAt": "2026-07-09T03:01:00.753Z",
   "iterations": 7,
   "runner": "browser",
   "schemaVersion": 1,
@@ -544,6 +544,72 @@
       "mount": {
         "median": 0.1,
         "p95": 0.1
+      },
+      "unmount": {
+        "median": 0,
+        "p95": 0
+      },
+      "update": {
+        "median": 0.1,
+        "p95": 0.1
+      }
+    },
+    "ContributionHeatmap": {
+      "domNodes": {
+        "median": 14,
+        "p95": 14
+      },
+      "interaction": {
+        "median": 0.1,
+        "p95": 0.1
+      },
+      "mount": {
+        "median": 0.4,
+        "p95": 0.4
+      },
+      "unmount": {
+        "median": 0,
+        "p95": 0.1
+      },
+      "update": {
+        "median": 0.3,
+        "p95": 0.4
+      }
+    },
+    "SidebarCollapse": {
+      "domNodes": {
+        "median": 4,
+        "p95": 4
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0
+      },
+      "mount": {
+        "median": 0,
+        "p95": 0
+      },
+      "unmount": {
+        "median": 0,
+        "p95": 0
+      },
+      "update": {
+        "median": 0,
+        "p95": 0.1
+      }
+    },
+    "ViewTabs": {
+      "domNodes": {
+        "median": 19,
+        "p95": 19
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0
+      },
+      "mount": {
+        "median": 0.1,
+        "p95": 0.2
       },
       "unmount": {
         "median": 0,

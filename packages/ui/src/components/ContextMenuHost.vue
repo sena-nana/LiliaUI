@@ -169,7 +169,7 @@ watch(
   padding: 4px;
   background: var(--bg-elev);
   color: var(--text);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-menu);
   display: flex;
@@ -260,7 +260,7 @@ watch(
   padding: 4px;
   background: var(--bg-elev);
   color: var(--text);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-menu);
   display: flex;

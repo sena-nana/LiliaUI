@@ -255,7 +255,7 @@ watch(open, (value) => {
   min-width: 180px;
   max-width: 280px;
   background: var(--bg-elev);
-  border: 0;
+  border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   padding: 3px;
   display: flex;

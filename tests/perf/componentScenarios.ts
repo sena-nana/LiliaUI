@@ -3,6 +3,7 @@ import Settings from "@lucide/vue/dist/esm/icons/settings.mjs";
 import {
   ActionMenuItem,
   AnchoredActionMenu,
+  ContributionHeatmap,
   ConfirmDialog,
   ContextMenuHost,
   Dropdown,
@@ -14,6 +15,7 @@ import {
   SearchDropdown,
   SettingsCollapsibleCard,
   SettingsRow,
+  SidebarCollapse,
   TitleBar,
   UiButton,
   UiCard,
@@ -26,9 +28,11 @@ import {
   UiSwitch,
   UiTextarea,
   installGlobalScrollbarVisibility,
+  buildContributionHeatmapModel,
   openContextMenuAt,
   setLiliaAppConfig,
   uninstallGlobalScrollbarVisibility,
+  ViewTabs,
 } from "@lilia/ui";
 import { defineComponent, h, nextTick, type Plugin, type Ref, type VNode } from "vue";
 import { createMemoryHistory, createRouter } from "vue-router";
@@ -140,6 +144,21 @@ function changeChecked(root: ParentNode, selector: string, checked: boolean) {
   element.dispatchEvent(new Event("change", { bubbles: true, cancelable: true }));
 }
 
+function pointerOffset(root: ParentNode, selector: string, type: string, offsetX: number, offsetY: number) {
+  const element = documentFor(root).querySelector(selector);
+  if (!(element instanceof Element)) {
+    throw new Error(`Missing perf pointer target: ${selector}`);
+  }
+  const event = new Event(type, { bubbles: true, cancelable: true });
+  Object.defineProperties(event, {
+    offsetX: { value: offsetX },
+    offsetY: { value: offsetY },
+    pointerId: { value: 3 },
+    pointerType: { value: "mouse" },
+  });
+  element.dispatchEvent(event);
+}
+
 function animationFrame() {
   return new Promise<void>((resolve) => {
     requestAnimationFrame(() => resolve());
@@ -160,6 +179,17 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
       ariaLabel: "Actions",
     }, () => h(ActionMenuItem, { icon: Settings }, () => "Settings")),
     interact: (root) => click(root, ".sb-menu__item"),
+  },
+  {
+    name: "ContributionHeatmap",
+    render: (step) => h(ContributionHeatmap, {
+      model: buildContributionHeatmapModel(Array.from({ length: 35 }, (_, index) => ({
+        date: new Date(Date.UTC(2026, 5, index + 1)).toISOString().slice(0, 10),
+        count: (index + step.value) % 9,
+      }))),
+      ariaLabel: "Contribution activity",
+    }),
+    interact: (root) => pointerOffset(root, ".contribution-heatmap", "pointermove", 52, 18),
   },
   {
     name: "ConfirmDialog",
@@ -309,6 +339,10 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
     interact: (root) => input(root, ".search-dropdown__input", "shell"),
   },
   {
+    name: "SidebarCollapse",
+    render: (step) => h(SidebarCollapse, { open: step.value % 2 === 0 }, () => h("button", "Nested action")),
+  },
+  {
     name: "SettingsCollapsibleCard",
     render: (step) => h(SettingsCollapsibleCard, {
       expanded: step.value % 2 === 0,
@@ -327,6 +361,7 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
     render: (step) => h(SettingsRow, {
       label: "主题",
       hint: `当前批次 ${step.value}`,
+      divided: step.value % 2 === 0,
       loose: step.value % 2 === 1,
     }, () => h(UiSwitch, { modelValue: step.value % 2 === 0, label: "启用" })),
   },
@@ -347,7 +382,11 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
   },
   {
     name: "UiCard",
-    render: (step) => h(UiCard, { title: "状态", loading: step.value % 2 === 1 }, () => h("p", "Card body")),
+    render: (step) => h(UiCard, {
+      title: "状态",
+      loading: step.value % 2 === 1,
+      variant: step.value % 3 === 0 ? "outlined" : step.value % 3 === 1 ? "raised" : "surface",
+    }, () => h("p", "Card body")),
   },
   {
     name: "UiEmptyState",
@@ -418,5 +457,9 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
       agentId: "perf.textarea",
     }),
     interact: (root) => input(root, "[data-agent-id='perf.textarea']", "updated\ncontent"),
+  },
+  {
+    name: "ViewTabs",
+    render: (step) => h(ViewTabs, { active: step.value % 2 === 0 ? "overview" : "board" }),
   },
 ];

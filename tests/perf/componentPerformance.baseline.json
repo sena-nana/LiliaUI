@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-01T09:09:39.601Z",
+  "generatedAt": "2026-07-09T03:00:50.319Z",
   "iterations": 9,
   "runner": "vitest-jsdom",
   "schemaVersion": 1,
@@ -530,6 +530,72 @@
       "update": {
         "median": 0.066,
         "p95": 0.098
+      }
+    },
+    "ContributionHeatmap": {
+      "domNodes": {
+        "median": 14,
+        "p95": 14
+      },
+      "interaction": {
+        "median": 0.45,
+        "p95": 0.573
+      },
+      "mount": {
+        "median": 0.916,
+        "p95": 1.36
+      },
+      "unmount": {
+        "median": 0.086,
+        "p95": 0.113
+      },
+      "update": {
+        "median": 0.431,
+        "p95": 0.507
+      }
+    },
+    "SidebarCollapse": {
+      "domNodes": {
+        "median": 4,
+        "p95": 4
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0
+      },
+      "mount": {
+        "median": 0.239,
+        "p95": 0.354
+      },
+      "unmount": {
+        "median": 0.045,
+        "p95": 0.052
+      },
+      "update": {
+        "median": 0.109,
+        "p95": 0.123
+      }
+    },
+    "ViewTabs": {
+      "domNodes": {
+        "median": 19,
+        "p95": 19
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0
+      },
+      "mount": {
+        "median": 1.076,
+        "p95": 1.891
+      },
+      "unmount": {
+        "median": 0.1,
+        "p95": 0.107
+      },
+      "update": {
+        "median": 0.151,
+        "p95": 0.249
       }
     }
   },

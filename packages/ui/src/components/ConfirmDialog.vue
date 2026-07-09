@@ -90,7 +90,7 @@ function onKeydown(event: KeyboardEvent) {
   max-height: 72vh;
   overflow: hidden;
   background: var(--bg-elev);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border-soft);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-dialog);
 }
@@ -126,8 +126,7 @@ function onKeydown(event: KeyboardEvent) {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--border-soft);
+  padding: 14px 16px 8px;
   font-weight: 600;
 }
 
@@ -136,7 +135,7 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 .dialog-card__body {
-  padding: 12px 14px;
+  padding: 4px 16px 12px;
 }
 
 .dialog-card__body p {
@@ -150,8 +149,7 @@ function onKeydown(event: KeyboardEvent) {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  padding: 10px 14px;
-  border-top: 1px solid var(--border-soft);
+  padding: 0 16px 14px;
 }
 
 @media (prefers-reduced-motion: reduce) {
