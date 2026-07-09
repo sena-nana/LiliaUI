@@ -187,8 +187,16 @@ export interface SidebarActionItem {
   onSelect?: () => void | Promise<void>;
 }
 
+export interface SidebarNavItemBadge {
+  key: string;
+  label: string;
+  title?: string;
+  tone?: "accent" | "ok" | "warn" | "error" | "muted";
+}
+
 export interface SidebarNavItem {
   active?: boolean;
+  badges?: SidebarNavItemBadge[];
   disabled?: boolean;
   icon: Component;
   key: string;
