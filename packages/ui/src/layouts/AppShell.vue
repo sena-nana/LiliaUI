@@ -1,20 +1,25 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import { RouterView } from "vue-router";
 import { APP_METADATA, SETTINGS_TABS, normalizeSettingsTab } from "../config/appShell";
 import { useRouteReturnTarget } from "../composables/useRouteReturnTarget";
 import { useShellSidebar } from "../composables/useShellSidebar";
+import { liliaShellOptionsKey, resolveShellBoolean } from "../shellOptions";
 import TitleBar from "../components/TitleBar.vue";
 import SecondaryPanel from "./SecondaryPanel.vue";
 import SettingsSidebar from "./SettingsSidebar.vue";
 import "../styles/shell.css";
 
+const shellOptions = inject(liliaShellOptionsKey, {});
 const { route, returnTo } = useRouteReturnTarget();
 const sidebarLocked = computed(() => route.meta.lockSidebar === true);
 const sidebarVariant = computed(() => route.meta.sidebar ?? "main");
 const isSettingsMode = computed(() => sidebarVariant.value === "settings");
 const activeSettingsTab = computed(() => normalizeSettingsTab(route.query.tab));
-const sidebar = useShellSidebar(sidebarLocked);
+const setupOverlayActive = computed(() => resolveShellBoolean(shellOptions.setupOverlayActive));
+const sidebarDisabled = computed(() => sidebarLocked.value || setupOverlayActive.value);
+const mainSidebar = computed(() => shellOptions.mainSidebar ?? SecondaryPanel);
+const sidebar = useShellSidebar(sidebarDisabled);
 </script>
 
 <template>
@@ -25,23 +30,25 @@ const sidebar = useShellSidebar(sidebarLocked);
       'is-resizing': sidebar.isResizing.value,
       'is-sidebar-collapsed': sidebar.effectiveCollapsed.value,
       'is-settings-mode': isSettingsMode,
+      'is-setup-overlay': setupOverlayActive,
     }"
     :style="{ '--sidebar-width': sidebar.widthStyle.value }"
   >
     <TitleBar
       :title="APP_METADATA.productTitle"
       :left-sidebar-collapsed="sidebar.effectiveCollapsed.value"
-      :sidebar-toggles-disabled="sidebarLocked"
+      :sidebar-toggles-disabled="sidebarDisabled"
       @toggle-left-sidebar="sidebar.toggleCollapsed"
     />
     <SettingsSidebar
-      v-if="isSettingsMode"
+      v-if="isSettingsMode && !setupOverlayActive"
       :tabs="SETTINGS_TABS"
       :active-key="activeSettingsTab"
       :return-to="returnTo"
     />
-    <SecondaryPanel v-else />
+    <component :is="mainSidebar" v-else-if="!setupOverlayActive" />
     <div
+      v-if="!setupOverlayActive"
       data-agent-id="shell.sidebar.resizer"
       class="shell__resizer"
       role="separator"

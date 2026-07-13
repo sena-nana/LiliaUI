@@ -6,6 +6,8 @@ export interface AgentDebugLogStore {
   entries(): AgentDebugLogEntry[];
 }
 
+let activeAppender: AppendAgentDebugLog | null = null;
+
 export function createAgentDebugLogStore(maxEntries: number): AgentDebugLogStore {
   let entries: AgentDebugLogEntry[] = [];
   return {
@@ -19,6 +21,16 @@ export function createAgentDebugLogStore(maxEntries: number): AgentDebugLogStore
       return [...entries];
     },
   };
+}
+
+export function setActiveAgentDebugLogAppender(appender: AppendAgentDebugLog | null) {
+  activeAppender = appender;
+}
+
+export function recordAgentDebugLog(entry: Omit<AgentDebugLogEntry, "timestamp">): boolean {
+  if (!activeAppender) return false;
+  activeAppender(entry);
+  return true;
 }
 
 export function reasonMessage(reason: unknown): string {

@@ -1,8 +1,15 @@
 import { fireEvent, render, waitFor } from "@testing-library/vue";
-import { defineComponent } from "vue";
+import { defineComponent, ref, type Component } from "vue";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { LiliaDesktopShell, SIDEBAR_CONFIG, setLiliaAppConfig, type LiliaAppConfig } from "@lilia/ui";
+import {
+  LiliaDesktopShell,
+  SIDEBAR_CONFIG,
+  liliaShellOptionsKey,
+  setLiliaAppConfig,
+  type LiliaAppConfig,
+  type LiliaShellOptions,
+} from "@lilia/ui";
 import { testAppConfig } from "./fixtures/appConfig";
 
 vi.mock("@tauri-apps/api/window", () => ({
@@ -15,7 +22,11 @@ vi.mock("@tauri-apps/api/window", () => ({
   }),
 }));
 
-async function renderAppShell(initialRoute = "/", config: LiliaAppConfig = testAppConfig) {
+async function renderAppShell(
+  initialRoute = "/",
+  config: LiliaAppConfig = testAppConfig,
+  shellOptions: LiliaShellOptions = {},
+) {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
@@ -44,6 +55,9 @@ async function renderAppShell(initialRoute = "/", config: LiliaAppConfig = testA
   const view = render(LiliaDesktopShell, {
     global: {
       plugins: [router],
+      provide: {
+        [liliaShellOptionsKey as symbol]: shellOptions,
+      },
     },
   });
 
@@ -144,6 +158,40 @@ describe("AppShell sidebar", () => {
     expect(view.queryByRole("button", { name: "更多" })).not.toBeInTheDocument();
 
     expect(view.router.currentRoute.value.fullPath).toBe("/");
+  });
+
+  it("主侧边栏支持由应用注入业务侧栏", async () => {
+    const BusinessSidebar: Component = defineComponent({
+      template: `<aside class="secondary-panel" data-agent-id="business.sidebar">业务侧栏</aside>`,
+    });
+    const view = await renderAppShell("/", testAppConfig, {
+      mainSidebar: BusinessSidebar,
+    });
+
+    expect(agentTarget(view.container, "business.sidebar")).toHaveTextContent("业务侧栏");
+    expect(view.queryByRole("navigation", { name: "主导航" })).not.toBeInTheDocument();
+  });
+
+  it("setup overlay 激活时隐藏侧栏和拖拽线并禁用左侧栏按钮", async () => {
+    const setupOverlayActive = ref(true);
+    const view = await renderAppShell("/", testAppConfig, {
+      setupOverlayActive,
+    });
+    const shell = shellElement(view.container);
+    const leftToggle = view.getByRole("button", { name: "折叠左侧栏" });
+
+    expect(shell).toHaveClass("is-setup-overlay");
+    expect(leftToggle).toBeDisabled();
+    expect(view.container.querySelector(".secondary-panel")).not.toBeInTheDocument();
+    expect(view.container.querySelector(".shell__resizer")).not.toBeInTheDocument();
+
+    setupOverlayActive.value = false;
+    await waitFor(() => {
+      expect(shell).not.toHaveClass("is-setup-overlay");
+    });
+    expect(leftToggle).not.toBeDisabled();
+    expect(view.container.querySelector(".secondary-panel")).toBeInTheDocument();
+    expect(view.container.querySelector(".shell__resizer")).toBeInTheDocument();
   });
 
   it("主侧边栏支持字符串图标和自定义组件图标配置", async () => {

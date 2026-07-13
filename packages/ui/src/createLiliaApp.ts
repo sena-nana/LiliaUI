@@ -13,6 +13,7 @@ import { installCommandRegistry, type LiliaCommandMap } from "./commands";
 import type { LiliaAppConfig } from "./config/appShell";
 import { installLiliaAppRuntime } from "./runtime";
 import { liliaAppOverlaysKey } from "./appOverlays";
+import { liliaShellOptionsKey, type LiliaShellOptions } from "./shellOptions";
 
 export interface CreateLiliaAppOptions {
   commands?: LiliaCommandMap;
@@ -21,6 +22,7 @@ export interface CreateLiliaAppOptions {
   overlays?: Component[];
   routes: RouteRecordRaw[];
   shell?: Component;
+  shellOptions?: LiliaShellOptions;
 }
 
 export function createLiliaRouter(
@@ -47,6 +49,7 @@ export function createLiliaApp(options: CreateLiliaAppOptions) {
   const app = createApp(AppRoot);
   installLiliaAppRuntime({ app, config: options.config });
   app.provide(liliaAppOverlaysKey, options.overlays ?? []);
+  app.provide(liliaShellOptionsKey, options.shellOptions ?? {});
   app.use(router);
   installCommandRegistry(app, options.commands);
   void installConfiguredAgentDebug(options.config);

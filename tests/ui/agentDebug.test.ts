@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   installAgentDebugHarness,
+  recordAgentDebugLog,
   uninstallAgentDebugHarness,
 } from "@lilia/ui";
 
@@ -35,5 +36,23 @@ describe("Agent debug harness", () => {
 
     uninstallAgentDebugHarness();
     expect(window.__liliaAgentDebug).toBeUndefined();
+  });
+
+  it("records application debug log entries through the shared harness", () => {
+    const api = installAgentDebugHarness({ enabled: true });
+
+    expect(recordAgentDebugLog({
+      data: { command: "workspace_status" },
+      message: "invoke:workspace_status:start",
+      type: "action",
+    })).toBe(true);
+
+    expect(api?.getRecentErrors().some((entry) => entry.message === "invoke:workspace_status:start")).toBe(true);
+
+    uninstallAgentDebugHarness();
+    expect(recordAgentDebugLog({
+      message: "invoke:workspace_status:after-uninstall",
+      type: "action",
+    })).toBe(false);
   });
 });
