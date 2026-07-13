@@ -1,6 +1,10 @@
 import { performAgentDebugAction } from "./actions";
 import { isLiliaAgentDebugEnabled } from "./env";
-import { createAgentDebugLogStore, reasonMessage } from "./log";
+import {
+  createAgentDebugLogStore,
+  reasonMessage,
+  setActiveAgentDebugLogAppender,
+} from "./log";
 import { createAgentDebugSnapshot } from "./snapshot";
 import type {
   AppendAgentDebugLog,
@@ -24,6 +28,7 @@ export function installAgentDebugHarness(options: InstallAgentDebugHarnessOption
   if (installed && debugWindow.__liliaAgentDebug) return debugWindow.__liliaAgentDebug;
 
   const log = createAgentDebugLogStore(options.maxLogEntries ?? DEFAULT_MAX_LOG_ENTRIES);
+  setActiveAgentDebugLogAppender(log.append);
   const observe = () => createAgentDebugSnapshot(log.entries());
   const api: LiliaAgentDebugApi = {
     async act(action) {
@@ -67,6 +72,7 @@ export function uninstallAgentDebugHarness() {
   }
   removeWindowListeners?.();
   clearLogStore?.();
+  setActiveAgentDebugLogAppender(null);
   clearLogStore = null;
   removeWindowListeners = null;
   installed = false;

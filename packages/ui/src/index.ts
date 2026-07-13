@@ -54,6 +54,7 @@ export {
 export {
   installAgentDebugHarness,
   isLiliaAgentDebugEnabled,
+  recordAgentDebugLog,
   uninstallAgentDebugHarness,
   type AgentDebugAction,
   type AgentDebugElementSnapshot,
@@ -62,6 +63,12 @@ export {
   type InstallAgentDebugHarnessOptions,
   type LiliaAgentDebugApi,
 } from "./agentDebug/index";
+export {
+  liliaShellOptionsKey,
+  resolveShellBoolean,
+  type LiliaShellOptions,
+  type LiliaShellSetupOverlaySource,
+} from "./shellOptions";
 export {
   APP_METADATA,
   APP_SHELL_COPY,
