@@ -1,5 +1,15 @@
 // @vitest-environment node
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  lstatSync,
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  readlinkSync,
+  rmSync,
+  symlinkSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -19,6 +29,14 @@ import {
   copyLiliaAssets,
   createTemplateReport,
 } from "@lilia/tools";
+import {
+  createDesktopShortcut,
+  createTauriInstallPlan,
+  linuxDesktopEntry,
+  selectCargoAppLayout,
+  tauriInstallBuildArgs,
+  windowsShortcutCommand,
+} from "../packages/build/src/tauriInstall.mjs";
 
 describe("@lilia/tools", () => {
   it("checks the pinned Yarn line from package metadata", () => {
@@ -200,7 +218,178 @@ describe("@lilia/build", () => {
       runPrepare(root, { npm_config_user_agent: "yarn/4.14.1 npm/? node/?" }),
     ).not.toThrow();
   });
+
+  it("plans native application builds without installer bundles", () => {
+    expect(tauriInstallBuildArgs("win32")).toEqual(["build", "--no-bundle"]);
+    expect(tauriInstallBuildArgs("linux", "desktop")).toEqual([
+      "--cwd",
+      "desktop",
+      "build",
+      "--no-bundle",
+    ]);
+    expect(tauriInstallBuildArgs("darwin")).toEqual(["build", "--bundles", "app"]);
+    expect(() => tauriInstallBuildArgs("freebsd")).toThrow("Unsupported platform");
+  });
+
+  it("locates the app binary from exact Cargo metadata", () => {
+    const root = mkdtempSync(join(tmpdir(), "lilia-cargo-layout-"));
+    const manifest = join(root, "src-tauri", "Cargo.toml");
+    const targetDirectory = join(root, "custom-target");
+    mkdirSync(join(root, "src-tauri"), { recursive: true });
+    writeFileSync(manifest, "[package]\nname='app'\n");
+    const metadata = {
+      target_directory: targetDirectory,
+      packages: [
+        cargoPackage(join(root, "other", "Cargo.toml"), [cargoTarget("sidecar")]),
+        {
+          ...cargoPackage(manifest, [cargoTarget("first"), cargoTarget("desktop")]),
+          default_run: "desktop",
+        },
+      ],
+    };
+
+    expect(selectCargoAppLayout(metadata, manifest)).toEqual({
+      binName: "desktop",
+      targetDirectory,
+    });
+    expect(() =>
+      selectCargoAppLayout({
+        ...metadata,
+        packages: [cargoPackage(manifest, [cargoTarget("one"), cargoTarget("two")])],
+      }, manifest),
+    ).toThrow("set package.default-run");
+  });
+
+  it("derives platform artifacts and desktop shortcut targets", () => {
+    const root = mkdtempSync(join(tmpdir(), "lilia-install-plan-"));
+    const desktop = join(root, "Desktop");
+    const targetDirectory = join(root, "target");
+    const common = {
+      projectRoot: root,
+      appConfig: createAppConfig(),
+      build: { command: process.execPath, argsPrefix: ["/tools/tauri.js"] },
+      cargoLayout: { binName: "lilia_test", targetDirectory },
+      desktopDir: desktop,
+    };
+
+    const windows = createTauriInstallPlan({ ...common, platform: "win32" });
+    expect(windows.build.args.slice(-2)).toEqual(["build", "--no-bundle"]);
+    expect(windows.artifact.path).toBe(join(targetDirectory, "release", "lilia_test.exe"));
+    expect(windows.shortcut).toEqual({
+      kind: "windows-lnk",
+      path: join(desktop, "Lilia Test.lnk"),
+      target: windows.artifact.path,
+    });
+
+    const mac = createTauriInstallPlan({ ...common, platform: "darwin" });
+    expect(mac.build.args.slice(-3)).toEqual(["build", "--bundles", "app"]);
+    expect(mac.artifact.path).toBe(
+      join(targetDirectory, "release", "bundle", "macos", "Lilia Test.app"),
+    );
+    expect(mac.shortcut.kind).toBe("macos-app-symlink");
+
+    const linux = createTauriInstallPlan({ ...common, platform: "linux" });
+    expect(linux.artifact.path).toBe(join(targetDirectory, "release", "lilia_test"));
+    expect(linux.shortcut.path).toBe(join(desktop, "Lilia Test.desktop"));
+  });
+
+  it("passes Windows shortcut paths outside the PowerShell source", () => {
+    const plan = shortcutPlan(
+      "win32",
+      "windows-lnk",
+      "/Users/A User/Desktop/App.lnk",
+      "/repo $x/app.exe",
+    );
+    const command = windowsShortcutCommand(plan, createAppConfig(), { SystemRoot: "C:\\Windows" });
+
+    expect(command.command).toBe("powershell.exe");
+    expect(command.args.join(" ")).not.toContain(plan.artifact.path);
+    expect(command.env).toMatchObject({
+      LILIA_SHORTCUT_PATH: plan.shortcut.path,
+      LILIA_SHORTCUT_TARGET: plan.artifact.path,
+      LILIA_SHORTCUT_WORKDIR: "/repo $x",
+    });
+  });
+
+  it("refreshes macOS symlinks without replacing real desktop items", () => {
+    const root = mkdtempSync(join(tmpdir(), "lilia-mac-shortcut-"));
+    const artifact = join(root, "target", "Lilia Test.app");
+    const shortcut = join(root, "Desktop", "Lilia Test.app");
+    mkdirSync(artifact, { recursive: true });
+    mkdirSync(join(root, "Desktop"));
+    const plan = shortcutPlan("darwin", "macos-app-symlink", shortcut, artifact, "app");
+
+    createDesktopShortcut(plan, createAppConfig());
+    expect(lstatSync(shortcut).isSymbolicLink()).toBe(true);
+    expect(readlinkSync(shortcut)).toBe(artifact);
+    createDesktopShortcut(plan, createAppConfig());
+    expect(readlinkSync(shortcut)).toBe(artifact);
+
+    unlinkSync(shortcut);
+    symlinkSync(join(root, "old-repo", "Lilia Test.app"), shortcut, "dir");
+    createDesktopShortcut(plan, createAppConfig());
+    expect(readlinkSync(shortcut)).toBe(artifact);
+
+    unlinkSync(shortcut);
+    mkdirSync(shortcut);
+    expect(() => createDesktopShortcut(plan, createAppConfig())).toThrow(
+      "Refusing to replace non-symlink desktop item",
+    );
+  });
+
+  it("writes an executable Linux desktop entry with escaped Exec fields", () => {
+    const root = mkdtempSync(join(tmpdir(), "lilia-linux-shortcut-"));
+    const artifact = join(root, "release", "app %$`\\name");
+    const shortcut = join(root, "Desktop", "Lilia Test.desktop");
+    const iconPath = join(root, "icon.png");
+    mkdirSync(join(root, "release"), { recursive: true });
+    mkdirSync(join(root, "Desktop"));
+    writeFileSync(artifact, "binary");
+    writeFileSync(iconPath, "icon");
+    const plan = {
+      ...shortcutPlan("linux", "linux-desktop-entry", shortcut, artifact),
+      iconPath,
+    };
+
+    createDesktopShortcut(plan, createAppConfig());
+    const entry = readFileSync(shortcut, "utf-8");
+    expect(entry).toBe(linuxDesktopEntry(plan, createAppConfig()));
+    expect(entry).toContain("app %%");
+    expect(entry).toContain("\\\\$");
+    expect(entry).toContain("\\\\`");
+    expect(entry).toContain(`Icon=${iconPath}`);
+    expect(lstatSync(shortcut).mode & 0o777).toBe(0o755);
+
+    const protectedFile = join(root, "protected.txt");
+    writeFileSync(protectedFile, "keep");
+    unlinkSync(shortcut);
+    symlinkSync(protectedFile, shortcut);
+    expect(() => createDesktopShortcut(plan, createAppConfig())).toThrow(
+      "Refusing to replace non-file desktop item",
+    );
+    expect(readFileSync(protectedFile, "utf-8")).toBe("keep");
+    expect(() => linuxDesktopEntry({
+      ...plan,
+      artifact: { ...plan.artifact, path: "/repo/bad=name" },
+    }, createAppConfig())).toThrow("unsupported characters");
+  });
 });
+
+function cargoTarget(name) {
+  return { name, kind: ["bin"] };
+}
+
+function cargoPackage(manifestPath, targets) {
+  return { manifest_path: manifestPath, default_run: null, targets };
+}
+
+function shortcutPlan(platform, kind, shortcutPath, artifactPath, artifactKind = "executable") {
+  return {
+    platform,
+    artifact: { kind: artifactKind, path: artifactPath },
+    shortcut: { kind, path: shortcutPath, target: artifactPath },
+  };
+}
 
 function createProject(overrides = {}) {
   const root = mkdtempSync(join(tmpdir(), "lilia-tools-"));

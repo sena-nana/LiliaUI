@@ -13,7 +13,7 @@
     "src"
   ],
   "scripts": {
-    "typecheck": "node --check src/index.mjs && node --check bin/lilia-build.mjs"
+    "typecheck": "node --check src/index.mjs && node --check src/tauriInstall.mjs && node --check bin/lilia-build.mjs"
   },
   "dependencies": {
     "@tauri-apps/cli": "^2.11.4",
