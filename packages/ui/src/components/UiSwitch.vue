@@ -91,11 +91,13 @@ function onChange(event: Event) {
   order: 1;
 }
 
-.ui-switch__input {
+.ui-switch > .ui-switch__input {
+  all: unset;
   position: absolute;
   width: 1px;
   height: 1px;
-  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
   opacity: 0;
   pointer-events: none;
 }
