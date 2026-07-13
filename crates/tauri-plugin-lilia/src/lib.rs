@@ -15,6 +15,24 @@ const DEFAULT_MIN_MAIN_WINDOW_WIDTH: u32 = 960;
 const DEFAULT_MIN_MAIN_WINDOW_HEIGHT: u32 = 600;
 const DEFAULT_BACKGROUND_COLOR: Color = Color(0x18, 0x18, 0x18, 0xFF);
 
+#[cfg(target_os = "macos")]
+const WINDOW_CHROME_INIT_SCRIPT: &str = r#"
+window.__LILIA_WINDOW_CHROME__ = Object.freeze({
+  controls: "native-leading",
+  leadingInset: 78,
+  trailingInset: 0
+});
+"#;
+
+#[cfg(not(target_os = "macos"))]
+const WINDOW_CHROME_INIT_SCRIPT: &str = r#"
+window.__LILIA_WINDOW_CHROME__ = Object.freeze({
+  controls: "custom",
+  leadingInset: 0,
+  trailingInset: 0
+});
+"#;
+
 #[derive(Debug, Clone)]
 pub struct Builder {
     main_window_label: String,
@@ -57,6 +75,7 @@ impl Builder {
         let event_options = self;
 
         PluginBuilder::new(PLUGIN_NAME)
+            .js_init_script(WINDOW_CHROME_INIT_SCRIPT)
             .setup(move |app, _api| {
                 configure_main_window(app, &setup_options);
                 Ok(())

@@ -27,12 +27,17 @@ describe("@lilia/config", () => {
 
     const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf-8"));
     const tauri = JSON.parse(readFileSync(join(root, "src-tauri/tauri.conf.json"), "utf-8"));
+    const tauriMacos = JSON.parse(
+      readFileSync(join(root, "src-tauri/tauri.macos.conf.json"), "utf-8"),
+    );
     const cargo = readFileSync(join(root, "src-tauri/Cargo.toml"), "utf-8");
 
     expect(pkg.name).toBe(config.appName);
     expect(pkg.version).toBe(config.version);
     expect(tauri.productName).toBe(config.productTitle);
     expect(tauri.app.windows[0].title).toBe(config.productTitle);
+    expect(tauriMacos.productName).toBe(config.productTitle);
+    expect(tauriMacos.app.windows[0].title).toBe(config.productTitle);
     expect(cargo).toContain('version = "0.2.0"');
   });
 
@@ -82,6 +87,15 @@ function createProject() {
       version: "0.1.0",
       identifier: "old",
       app: { windows: [{ label: "main", title: "Old" }] },
+    }),
+  );
+  writeFileSync(
+    join(tauriDir, "tauri.macos.conf.json"),
+    JSON.stringify({
+      productName: "Old",
+      version: "0.1.0",
+      identifier: "old",
+      app: { windows: [{ label: "main", title: "Old", titleBarStyle: "Overlay" }] },
     }),
   );
   writeFileSync(join(tauriDir, "Cargo.toml"), '[package]\nversion = "0.1.0"\n');

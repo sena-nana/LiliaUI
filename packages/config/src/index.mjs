@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import vue from "@vitejs/plugin-vue";
 import { defineConfig as defineViteConfig } from "vite";
@@ -50,7 +50,7 @@ export function syncFromAppConfig(appConfig, projectRoot = process.cwd()) {
     pkg.version = appConfig.version;
   }, projectRoot);
 
-  syncJson("src-tauri/tauri.conf.json", (tauriConfig) => {
+  const syncTauriConfig = (tauriConfig) => {
     tauriConfig.productName = appConfig.productTitle;
     tauriConfig.version = appConfig.version;
     tauriConfig.identifier = appConfig.identifier;
@@ -60,7 +60,10 @@ export function syncFromAppConfig(appConfig, projectRoot = process.cwd()) {
       }
       return windowConfig;
     });
-  }, projectRoot);
+  };
+
+  syncJson("src-tauri/tauri.conf.json", syncTauriConfig, projectRoot);
+  syncJsonIfPresent("src-tauri/tauri.macos.conf.json", syncTauriConfig, projectRoot);
 
   syncTomlValue("src-tauri/Cargo.toml", "version", appConfig.version, projectRoot);
 }
@@ -151,6 +154,11 @@ function syncJson(relativePath, update, projectRoot) {
   const data = readJson(path);
   update(data);
   writeIfChanged(path, `${JSON.stringify(data, null, 2)}\n`);
+}
+
+function syncJsonIfPresent(relativePath, update, projectRoot) {
+  if (!existsSync(resolve(projectRoot, relativePath))) return;
+  syncJson(relativePath, update, projectRoot);
 }
 
 function syncTomlValue(relativePath, key, value, projectRoot) {

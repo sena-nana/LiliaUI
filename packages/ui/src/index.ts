@@ -111,6 +111,7 @@ export * from "./composables/useAnchoredActionMenu";
 export * from "./composables/useAnchoredMenuMotion";
 export * from "./composables/useDismissableOverlay";
 export * from "./composables/useTauriWindowControls";
+export * from "./composables/useNativeWindowChrome";
 export * from "./composables/menuMotion";
 export * from "./composables/usePersistentState";
 export * from "./composables/useResizablePane";
