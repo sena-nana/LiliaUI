@@ -5,6 +5,12 @@ import net from "node:net";
 import { dirname, extname, join, resolve } from "node:path";
 import { readAppConfig } from "@lilia/config";
 import { checkPackageManager, copyLiliaAssets, syncAppConfig } from "@lilia/tools";
+import {
+  createDesktopShortcut,
+  createTauriInstallPlan,
+  readCargoAppLayout,
+  resolveDesktopDirectory,
+} from "./tauriInstall.mjs";
 
 const DEFAULT_PORT = 1420;
 const LOCALHOST_CHECK_HOSTS = ["127.0.0.1", "::1"];
@@ -188,22 +194,38 @@ export function runTauriInstall(projectRoot = process.cwd(), env = process.env, 
   const appConfig = resolveRuntimeAppConfig(projectRoot, options);
   const envPrefix = toEnvPrefix(appConfig.appName);
   const buildEnv = nativeBuildEnv(env);
-  const build = yarnBuildCommand(process.platform, env, options.appDir);
+  const platform = options.platform ?? process.platform;
+  const tauri = resolveToolCommand("@tauri-apps/cli", "tauri");
+  const cargoLayout = readCargoAppLayout(projectRoot, options.appDir, buildEnv);
+  const desktopDir = options.desktopDir ?? resolveDesktopDirectory(platform, env);
+  const plan = createTauriInstallPlan({
+    platform,
+    projectRoot,
+    appDir: options.appDir,
+    appConfig,
+    build: { command: tauri.command, argsPrefix: tauri.args },
+    cargoLayout,
+    desktopDir,
+  });
   const dryRunKey = options.dryRunEnvKey ?? `${envPrefix}_INSTALL_DRY_RUN`;
 
   if (env[dryRunKey] === "1") {
-    process.stdout.write(`${JSON.stringify({ command: build.command, args: build.args, env: { RUSTFLAGS: buildEnv.RUSTFLAGS } }, null, 2)}\n`);
+    process.stdout.write(`${JSON.stringify({
+      platform: plan.platform,
+      build: {
+        ...plan.build,
+        env: { RUSTFLAGS: buildEnv.RUSTFLAGS },
+      },
+      artifact: plan.artifact,
+      shortcut: plan.shortcut,
+    }, null, 2)}\n`);
     return;
   }
 
-  runSync(build.command, build.args, { cwd: projectRoot, env: buildEnv });
-  const bundleRoot = options.appDir
-    ? resolve(projectRoot, options.appDir, "src-tauri/target/release/bundle")
-    : resolve(projectRoot, "src-tauri/target/release/bundle");
-  const bundle = pickBundleFile(bundleRoot);
-  console.log(`[tauri:install] found installer: ${bundle}`);
-  installBundle(bundle, process.platform, env);
-  console.log(`[tauri:install] installer launched: ${bundle}`);
+  runSync(plan.build.command, plan.build.args, { cwd: projectRoot, env: buildEnv });
+  createDesktopShortcut(plan, appConfig, env);
+  console.log(`[tauri:install] application: ${plan.artifact.path}`);
+  console.log(`[tauri:install] desktop shortcut: ${plan.shortcut.path}`);
 }
 
 export async function runBuildCli(argv, options = {}) {
@@ -279,11 +301,6 @@ export async function runBuildCli(argv, options = {}) {
   }
 }
 
-function yarnBuildCommand(platform = process.platform, env = process.env, appDir = "") {
-  const args = appDir ? ["--cwd", appDir, "build"] : ["build"];
-  return resolveToolCommand("@tauri-apps/cli", "tauri", args);
-}
-
 function resolveRuntimeAppConfig(projectRoot, options = {}) {
   if (options.appConfig) return options.appConfig;
   try {
@@ -308,22 +325,6 @@ function pickEnv(env, keys) {
       .filter((key) => env[key] !== undefined)
       .map((key) => [key, env[key]]),
   );
-}
-
-function installBundle(path, platform = process.platform, env = process.env) {
-  const ext = extname(path).toLowerCase();
-
-  if (platform === "win32") {
-    if (ext === ".msi") return runSync("msiexec", ["/i", path, "/qn", "/norestart"]);
-    return runSync(env.ComSpec || "cmd.exe", ["/d", "/s", "/c", `start "" "${path}"`]);
-  }
-  if (platform === "darwin") return runSync("open", [path]);
-  if (platform === "linux") {
-    if (ext === ".deb") return runSync("sudo", ["dpkg", "-i", path]);
-    if (ext === ".rpm") return runSync("sudo", ["rpm", "-i", path]);
-    return runSync("xdg-open", [path]);
-  }
-  throw new Error(`Unsupported platform: ${platform}`);
 }
 
 function runSync(command, args = [], options = {}) {
