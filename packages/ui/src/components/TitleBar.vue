@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { onUnmounted } from "vue";
+import { computed, onUnmounted } from "vue";
 import Copy from "@lucide/vue/dist/esm/icons/copy.mjs";
 import Minus from "@lucide/vue/dist/esm/icons/minus.mjs";
 import PanelLeftClose from "@lucide/vue/dist/esm/icons/panel-left-close.mjs";
 import PanelLeftOpen from "@lucide/vue/dist/esm/icons/panel-left-open.mjs";
 import Square from "@lucide/vue/dist/esm/icons/square.mjs";
 import X from "@lucide/vue/dist/esm/icons/x.mjs";
+import { useNativeWindowChrome } from "../composables/useNativeWindowChrome";
 import { useTauriWindowControls } from "../composables/useTauriWindowControls";
 
 interface Props {
@@ -27,6 +28,12 @@ const {
   startDragging: startNativeDrag,
   toggleMaximize: onToggleMaximize,
 } = useTauriWindowControls({ trackMaximized: true });
+const { chrome } = useNativeWindowChrome();
+const usesCustomWindowControls = computed(() => chrome.value.controls === "custom");
+const chromeInsets = computed(() => ({
+  "--lilia-titlebar-leading-inset": `${chrome.value.leadingInset}px`,
+  "--lilia-titlebar-trailing-inset": `${chrome.value.trailingInset}px`,
+}));
 const DRAG_THRESHOLD = 4;
 let pendingDrag: {
   pointerId: number;
@@ -85,6 +92,7 @@ function onTitlebarPointerDown(event: PointerEvent) {
   <header
     data-agent-id="titlebar"
     class="titlebar"
+    :style="chromeInsets"
     @pointerdown="onTitlebarPointerDown"
     @pointermove="onTitlebarPointerMove"
     @pointerup="clearPendingDrag"
@@ -121,6 +129,7 @@ function onTitlebarPointerDown(event: PointerEvent) {
     <div class="titlebar__controls" data-agent-id="titlebar.window-controls">
       <slot name="right-actions" />
       <button
+        v-if="usesCustomWindowControls"
         data-agent-id="titlebar.window.minimize"
         type="button"
         class="titlebar__btn"
@@ -130,6 +139,7 @@ function onTitlebarPointerDown(event: PointerEvent) {
         <Minus :size="14" aria-hidden="true" />
       </button>
       <button
+        v-if="usesCustomWindowControls"
         data-agent-id="titlebar.window.maximize"
         type="button"
         class="titlebar__btn"
@@ -140,6 +150,7 @@ function onTitlebarPointerDown(event: PointerEvent) {
         <Square v-else :size="13" aria-hidden="true" />
       </button>
       <button
+        v-if="usesCustomWindowControls"
         data-agent-id="titlebar.window.close"
         type="button"
         class="titlebar__btn titlebar__btn--danger"
@@ -155,9 +166,9 @@ function onTitlebarPointerDown(event: PointerEvent) {
 <style scoped>
 .titlebar {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: stretch;
-  height: 36px;
+  height: var(--lilia-titlebar-height, 36px);
   background: var(--bg-elev);
   user-select: none;
   -webkit-user-select: none;
@@ -168,7 +179,7 @@ function onTitlebarPointerDown(event: PointerEvent) {
   align-items: center;
   justify-self: start;
   gap: 2px;
-  padding: 0 6px;
+  padding: 0 6px 0 calc(6px + var(--lilia-titlebar-leading-inset, 0px));
   -webkit-app-region: no-drag;
 }
 
@@ -197,7 +208,7 @@ function onTitlebarPointerDown(event: PointerEvent) {
   align-items: center;
   justify-self: end;
   gap: 2px;
-  padding: 0 6px;
+  padding: 0 calc(6px + var(--lilia-titlebar-trailing-inset, 0px)) 0 6px;
   -webkit-app-region: no-drag;
 }
 

@@ -3,6 +3,7 @@ import { defineComponent } from "vue";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import PopupTitleBarFrame from "@lilia/ui/components/PopupTitleBarFrame";
 import TitleBar from "@lilia/ui/components/TitleBar";
+import { WINDOW_CHROME_CHANGED_EVENT } from "@lilia/ui/composables/useNativeWindowChrome";
 import { testAppConfig } from "./fixtures/appConfig";
 
 const tauriWindow = vi.hoisted(() => {
@@ -69,6 +70,7 @@ describe("TitleBar dragging", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     tauriWindow.reset();
+    delete window.__LILIA_WINDOW_CHROME__;
   });
 
   it("does not start dragging from a title click without movement", async () => {
@@ -135,6 +137,43 @@ describe("TitleBar dragging", () => {
     expect(tauriWindow.appWindow.minimize).toHaveBeenCalledOnce();
     expect(tauriWindow.appWindow.toggleMaximize).toHaveBeenCalledOnce();
     expect(tauriWindow.appWindow.close).toHaveBeenCalledOnce();
+  });
+
+  it("uses native leading controls and follows chrome inset updates", async () => {
+    window.__LILIA_WINDOW_CHROME__ = {
+      controls: "native-leading",
+      leadingInset: 72,
+      trailingInset: 0,
+    };
+    const view = render(TitleBar, {
+      props: {
+        title: testAppConfig.productTitle,
+        leftSidebarCollapsed: false,
+      },
+    });
+    const titlebar = view.container.querySelector<HTMLElement>("[data-agent-id='titlebar']");
+
+    expect(titlebar).not.toBeNull();
+
+    expect(view.queryByLabelText("最小化")).not.toBeInTheDocument();
+    expect(view.queryByLabelText("最大化")).not.toBeInTheDocument();
+    expect(view.queryByLabelText("关闭")).not.toBeInTheDocument();
+    expect(view.getByLabelText("折叠左侧栏")).toBeInTheDocument();
+    expect(titlebar?.style.getPropertyValue("--lilia-titlebar-leading-inset")).toBe("72px");
+
+    window.dispatchEvent(
+      new CustomEvent(WINDOW_CHROME_CHANGED_EVENT, {
+        detail: {
+          controls: "native-leading",
+          leadingInset: 84,
+          trailingInset: 0,
+        },
+      }),
+    );
+
+    await waitFor(() => {
+      expect(titlebar?.style.getPropertyValue("--lilia-titlebar-leading-inset")).toBe("84px");
+    });
   });
 
   it("renders app-provided center and right action slots", async () => {

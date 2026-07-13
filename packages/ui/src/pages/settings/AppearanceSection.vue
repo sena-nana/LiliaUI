@@ -71,7 +71,7 @@ function onCornerStyleChange(value: string | number) {
     <SettingsRow label="语言" hint="模板默认使用简体中文界面文案。">
       <span class="muted">简体中文</span>
     </SettingsRow>
-    <SettingsRow label="圆角" hint="选择平滑超椭圆或普通圆角，立即全局生效。">
+    <SettingsRow label="组件圆角" hint="选择卡片与控件使用的平滑或普通圆角。">
       <UiSegmentedControl
         :model-value="cornerStyle"
         :options="cornerOptions"
@@ -79,7 +79,7 @@ function onCornerStyleChange(value: string | number) {
         @update:model-value="onCornerStyleChange"
       />
     </SettingsRow>
-    <SettingsRow label="圆角半径" hint="调节普通与平滑圆角的全局半径。">
+    <SettingsRow label="组件圆角半径" hint="调节卡片与控件的圆角半径。">
       <UiRangeField
         :model-value="cornerRadius"
         :min="CORNER_RADIUS_MIN"

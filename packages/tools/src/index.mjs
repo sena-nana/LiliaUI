@@ -369,10 +369,8 @@ function createTemplateProfile(overrides = {}) {
       ],
       "node_modules/@lilia/ui/src/layouts/AppShell.vue": [["shell.sidebar.resizer"]],
       "node_modules/@lilia/ui/src/components/TitleBar.vue": [
+        ["titlebar"],
         ["titlebar.left-sidebar.toggle"],
-        ["titlebar.window.minimize"],
-        ["titlebar.window.maximize"],
-        ["titlebar.window.close"],
       ],
       "node_modules/@lilia/ui/src/layouts/SecondaryPanel.vue": [
         ["sidebar.nav.overview", "sidebar.nav.${item.key}"],

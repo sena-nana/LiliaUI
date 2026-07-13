@@ -1,9 +1,10 @@
 .shell {
+  --lilia-titlebar-height: 36px;
   --sidebar-width: 220px;
   --sidebar-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr;
-  grid-template-rows: 36px minmax(0, 1fr);
+  grid-template-rows: var(--lilia-titlebar-height) minmax(0, 1fr);
   grid-template-areas:
     "titlebar titlebar"
     "secondary main";
@@ -31,7 +32,7 @@
 
 .shell__resizer {
   position: absolute;
-  top: 36px;
+  top: var(--lilia-titlebar-height);
   bottom: 0;
   left: 0;
   translate: var(--sidebar-width) 0;
