@@ -92,6 +92,7 @@ export {
   type LiliaAppearanceConfigInput,
   type LiliaPlatformAppearanceDefaults,
   type BackdropMode,
+  type BackdropTarget,
   type NativePlatform,
   type LiliaRuntimeConfigInput,
   type LiliaSettingsConfigInput,

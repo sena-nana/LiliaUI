@@ -394,6 +394,8 @@ function createTemplateProfile(overrides = {}) {
         ["settings.appearance.backdrop.mica"],
         ["settings.appearance.backdrop.acrylic"],
         ["settings.appearance.backdrop.solid"],
+        ["settings.appearance.backdrop-target.sidebar"],
+        ["settings.appearance.backdrop-target.main"],
         ["settings.appearance.backdrop-opacity"],
       ],
       "node_modules/@lilia/ui/src/components/ContextMenuHost.vue": [["context-menu"]],

@@ -169,7 +169,7 @@ function onTitlebarPointerDown(event: PointerEvent) {
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: stretch;
   height: var(--lilia-titlebar-height, 36px);
-  background: transparent;
+  background: var(--lilia-titlebar-surface, transparent);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   user-select: none;

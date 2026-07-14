@@ -2,6 +2,9 @@
   --lilia-titlebar-height: 36px;
   --sidebar-width: 220px;
   --sidebar-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --lilia-titlebar-surface: transparent;
+  --lilia-sidebar-surface: transparent;
+  --lilia-main-surface: var(--bg);
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr;
   grid-template-rows: var(--lilia-titlebar-height) minmax(0, 1fr);
@@ -18,6 +21,18 @@
   transition: grid-template-columns 0.24s var(--sidebar-easing);
 }
 
+:root[data-backdrop-target="main"] .shell {
+  --lilia-titlebar-surface: var(--bg);
+  --lilia-sidebar-surface: var(--bg);
+  --lilia-main-surface: transparent;
+}
+
+:root[data-backdrop="solid"] .shell {
+  --lilia-titlebar-surface: var(--bg);
+  --lilia-sidebar-surface: var(--bg);
+  --lilia-main-surface: var(--bg);
+}
+
 .shell > .titlebar {
   grid-area: titlebar;
 }
@@ -28,7 +43,7 @@
   min-height: 0;
   overflow: auto;
   padding: 20px 24px;
-  background: var(--bg);
+  background: var(--lilia-main-surface);
   border-top-left-radius: var(--radius-lg);
 }
 
@@ -95,7 +110,7 @@
 
 .secondary-panel {
   grid-area: secondary;
-  background: transparent;
+  background: var(--lilia-sidebar-surface);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   display: flex;
