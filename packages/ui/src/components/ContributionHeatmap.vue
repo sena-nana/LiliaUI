@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, useId } from "vue";
 import {
   contributionHeatmapCellAtPoint,
   type ContributionHeatmapActiveCell,
@@ -14,6 +14,8 @@ const props = withDefaults(defineProps<{
   ariaLabel: "Contribution heatmap",
 });
 
+defineOptions({ inheritAttrs: false });
+
 const emit = defineEmits<{
   "cell-enter": [cell: ContributionHeatmapActiveCell, event: PointerEvent];
   "cell-move": [cell: ContributionHeatmapActiveCell, event: PointerEvent];
@@ -21,9 +23,34 @@ const emit = defineEmits<{
 }>();
 
 const internalActiveCell = ref<ContributionHeatmapActiveCell | null>(null);
+const tooltipId = useId();
 const displayActiveCell = computed(() =>
   props.activeCell === undefined ? internalActiveCell.value : props.activeCell
 );
+const tooltipStyle = computed(() => {
+  const cell = displayActiveCell.value;
+  if (!cell) return undefined;
+
+  const inset = 4;
+  const cellCenter = cell.x + props.model.cellSize / 2;
+  const showBelow = cell.y < 34;
+  let left = cellCenter;
+  let translateX = "-50%";
+
+  if (cellCenter < props.model.width / 3) {
+    left = Math.max(inset, cell.x);
+    translateX = "0";
+  } else if (cellCenter > props.model.width * 2 / 3) {
+    left = Math.min(props.model.width - inset, cell.x + props.model.cellSize);
+    translateX = "-100%";
+  }
+
+  return {
+    left: `${left}px`,
+    top: `${showBelow ? cell.y + props.model.cellSize + 6 : cell.y - 6}px`,
+    transform: `translate(${translateX}, ${showBelow ? "0" : "-100%"})`,
+  };
+});
 
 function onPointerMove(event: PointerEvent) {
   const cell = contributionHeatmapCellAtPoint(props.model, {
@@ -56,62 +83,83 @@ function onPointerLeave(event: PointerEvent) {
 </script>
 
 <template>
-  <svg
-    class="contribution-heatmap"
-    role="img"
-    :aria-label="ariaLabel"
-    :viewBox="model.viewBox"
-    :width="model.width"
-    :height="model.height"
-    @pointermove="onPointerMove"
-    @pointerleave="onPointerLeave"
+  <div
+    class="contribution-heatmap-wrap"
+    :style="{ width: `${model.width}px`, height: `${model.height}px` }"
   >
-    <title v-if="displayActiveCell">{{ displayActiveCell.title }}</title>
-    <text
-      v-for="label in model.dayLabels"
-      :key="label.label"
-      class="contribution-heatmap__day-label"
-      :x="label.x"
-      :y="label.y"
+    <svg
+      class="contribution-heatmap"
+      role="img"
+      :aria-label="ariaLabel"
+      :aria-describedby="displayActiveCell ? tooltipId : undefined"
+      :viewBox="model.viewBox"
+      :width="model.width"
+      :height="model.height"
+      v-bind="$attrs"
+      @pointerenter="onPointerMove"
+      @pointermove="onPointerMove"
+      @pointerleave="onPointerLeave"
     >
-      {{ label.label }}
-    </text>
-    <text
-      v-for="month in model.monthLabels"
-      :key="month.key"
-      class="contribution-heatmap__month"
-      :x="month.x"
-      y="10"
-      text-anchor="middle"
-    >
-      {{ month.label }}
-    </text>
-    <path
-      v-for="path in model.levelPaths"
-      :key="path.level"
-      class="contribution-heatmap__level"
-      :class="`contribution-heatmap__level--${path.level}`"
-      :d="path.d"
-    />
-    <rect
+      <text
+        v-for="label in model.dayLabels"
+        :key="label.label"
+        class="contribution-heatmap__day-label"
+        :x="label.x"
+        :y="label.y"
+      >
+        {{ label.label }}
+      </text>
+      <text
+        v-for="month in model.monthLabels"
+        :key="month.key"
+        class="contribution-heatmap__month"
+        :x="month.x"
+        y="10"
+        text-anchor="middle"
+      >
+        {{ month.label }}
+      </text>
+      <path
+        v-for="path in model.levelPaths"
+        :key="path.level"
+        class="contribution-heatmap__level"
+        :class="`contribution-heatmap__level--${path.level}`"
+        :d="path.d"
+      />
+      <rect
+        v-if="displayActiveCell"
+        class="contribution-heatmap__active-cell"
+        :x="displayActiveCell.x - 1"
+        :y="displayActiveCell.y - 1"
+        :width="model.cellSize + 2"
+        :height="model.cellSize + 2"
+        rx="3"
+        ry="3"
+      />
+    </svg>
+    <div
       v-if="displayActiveCell"
-      class="contribution-heatmap__active-cell"
-      :x="displayActiveCell.x - 1"
-      :y="displayActiveCell.y - 1"
-      :width="model.cellSize + 2"
-      :height="model.cellSize + 2"
-      rx="3"
-      ry="3"
-    />
-  </svg>
+      :id="tooltipId"
+      class="contribution-heatmap__tooltip"
+      role="tooltip"
+      :style="tooltipStyle"
+    >
+      {{ displayActiveCell.title }}
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.contribution-heatmap {
+.contribution-heatmap-wrap {
+  position: relative;
   display: block;
   flex: 0 0 auto;
   min-width: max-content;
   contain: layout paint style;
+}
+
+.contribution-heatmap {
+  display: block;
 }
 
 .contribution-heatmap__month,
@@ -161,5 +209,24 @@ function onPointerLeave(event: PointerEvent) {
   stroke: var(--text);
   stroke-width: 1.5;
   pointer-events: none;
+}
+
+.contribution-heatmap__tooltip {
+  position: absolute;
+  z-index: 1;
+  box-sizing: border-box;
+  max-width: calc(100% - 8px);
+  padding: 4px 7px;
+  overflow: hidden;
+  color: var(--bg);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+  background: var(--text);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--text) 18%, transparent);
 }
 </style>

@@ -83,7 +83,7 @@ describe("ContributionHeatmap", () => {
     expect(contributionHeatmapCellAtPoint(model, { x: cell!.x + 13.5, y: cell!.y + 1 })).toBeNull();
   });
 
-  it("emits pointer cell transitions and draws one active highlight", async () => {
+  it("shows a tooltip immediately and emits pointer cell transitions", async () => {
     const entered = vi.fn();
     const moved = vi.fn();
     const left = vi.fn();
@@ -107,9 +107,11 @@ describe("ContributionHeatmap", () => {
     }));
 
     const svg = screen.getByRole("img", { name: "Activity" });
-    await pointerMove(svg, firstCell.x + 1, firstCell.y + 1);
+    await pointerEnter(svg, firstCell.x + 1, firstCell.y + 1);
     expect(view.container.querySelectorAll(".contribution-heatmap__active-cell")).toHaveLength(1);
-    expect(svg.querySelector("title")?.textContent).toBe(firstCell.title);
+    const tooltip = screen.getByRole("tooltip");
+    expect(tooltip).toHaveTextContent(firstCell.title);
+    expect(svg).toHaveAttribute("aria-describedby", tooltip.id);
     await pointerMove(svg, firstCell.x + 2, firstCell.y + 2);
     expect(view.container.querySelectorAll(".contribution-heatmap__active-cell")).toHaveLength(1);
     await fireEvent.pointerLeave(svg);
@@ -121,9 +123,18 @@ describe("ContributionHeatmap", () => {
     expect(view.container.querySelector(".contribution-heatmap__month")?.getAttribute("text-anchor")).toBe("middle");
     expect(view.container.querySelectorAll(".contribution-heatmap__level").length).toBeLessThanOrEqual(5);
     expect(view.container.querySelectorAll(".contribution-heatmap__active-cell")).toHaveLength(0);
-    expect(svg.querySelector("title")).toBeNull();
+    expect(screen.queryByRole("tooltip")).toBeNull();
   });
 });
+
+async function pointerEnter(element: Element, offsetX: number, offsetY: number) {
+  const event = new Event("pointerenter", { bubbles: true, cancelable: true });
+  Object.defineProperties(event, {
+    offsetX: { value: offsetX },
+    offsetY: { value: offsetY },
+  });
+  await fireEvent(element, event);
+}
 
 async function pointerMove(element: Element, offsetX: number, offsetY: number) {
   const event = new Event("pointermove", { bubbles: true, cancelable: true });
