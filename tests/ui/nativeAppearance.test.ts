@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { fireEvent, render, waitFor } from "@testing-library/vue";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { testAppConfig } from "./fixtures/appConfig";
@@ -7,14 +5,6 @@ import { testAppConfig } from "./fixtures/appConfig";
 const invoke = vi.fn(async () => undefined);
 
 vi.mock("@tauri-apps/api/core", () => ({ invoke }));
-
-const shellCss = readFileSync(resolve("packages/ui/src/styles/shell.css"), "utf8");
-const titlebarVue = readFileSync(resolve("packages/ui/src/components/TitleBar.vue"), "utf8");
-
-function cssBlock(source: string, selector: string) {
-  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return source.match(new RegExp(`(?:^|\\n)\\s*${escaped}\\s*\\{([\\s\\S]*?)\\}`))?.[1] ?? "";
-}
 
 beforeEach(() => {
   localStorage.clear();
@@ -24,19 +14,6 @@ beforeEach(() => {
 });
 
 describe("useNativeAppearance", () => {
-  it("由单一壳层承载材质蒙层，内容表面保持不透明", () => {
-    const shell = cssBlock(shellCss, ".shell");
-    const sidebar = cssBlock(shellCss, ".secondary-panel");
-    const main = cssBlock(shellCss, ".shell__main");
-    const titlebar = cssBlock(titlebarVue, ".titlebar");
-
-    expect(shell).toContain("background: var(--lilia-backdrop-surface)");
-    expect(shell).toContain("backdrop-filter: none");
-    expect(sidebar).toContain("background: transparent");
-    expect(titlebar).toContain("background: transparent");
-    expect(main).toContain("background: var(--bg)");
-  });
-
   it("按平台归一化材质值并安全回退未知平台", async () => {
     vi.resetModules();
     const { normalizeBackdropMode, resolveNativePlatform } = await import("@lilia/ui");

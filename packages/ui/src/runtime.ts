@@ -5,7 +5,6 @@ import {
   installGlobalScrollbarVisibility,
   uninstallGlobalScrollbarVisibility,
 } from "./composables/useGlobalScrollbarVisibility";
-import { useTheme } from "./composables/useTheme";
 import { useNativeAppearance } from "./composables/useNativeAppearance";
 import { setLiliaAppConfig, type LiliaAppConfig } from "./config/appShell";
 import { vContextMenu } from "./directives/contextMenu";
@@ -30,7 +29,6 @@ export function installLiliaAppRuntime(options: InstallLiliaAppRuntimeOptions) {
   } else {
     uninstallGlobalScrollbarVisibility();
   }
-  useTheme();
   useCornerStyle();
   useNativeAppearance();
 }

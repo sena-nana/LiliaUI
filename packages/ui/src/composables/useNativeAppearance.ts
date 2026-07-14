@@ -29,9 +29,13 @@ const DEFAULT_BACKDROP_BY_PLATFORM: Record<NativePlatform, BackdropMode> = {
   linux: "solid",
 };
 
-let platform: NativePlatform | null = null;
-let backdropMode: Ref<BackdropMode> | null = null;
-let backdropOpacity: Ref<number> | null = null;
+interface NativeAppearanceState {
+  platform: NativePlatform;
+  backdropMode: Ref<BackdropMode>;
+  backdropOpacity: Ref<number>;
+}
+
+let appearanceState: NativeAppearanceState | null = null;
 let nativeSyncInFlight = false;
 let pendingNativeState: { mode: BackdropMode; dark: boolean } | null = null;
 
@@ -113,14 +117,14 @@ function applyDom(nativePlatform: NativePlatform, mode: BackdropMode, opacity: n
   document.documentElement.dataset.backdrop = mode;
   document.documentElement.style.setProperty(
     "--lilia-backdrop-opacity",
-    String(clampBackdropOpacity(opacity)),
+    String(opacity),
   );
 }
 
 function persist(mode: BackdropMode, opacity: number) {
   try {
     localStorage.setItem(modeStorageKey(), mode);
-    localStorage.setItem(opacityStorageKey(), String(clampBackdropOpacity(opacity)));
+    localStorage.setItem(opacityStorageKey(), String(opacity));
   } catch {
     // ignore
   }
@@ -154,45 +158,44 @@ function scheduleNativeBackdrop(
   void flushNativeBackdrop();
 }
 
-function ensureNativeAppearance() {
-  if (platform && backdropMode && backdropOpacity) {
-    return { platform, backdropMode, backdropOpacity };
-  }
+function ensureNativeAppearance(): NativeAppearanceState {
+  if (appearanceState) return appearanceState;
 
-  platform = readNativePlatform();
-  backdropMode = ref(loadMode(platform));
-  backdropOpacity = ref(loadOpacity());
+  const platform = readNativePlatform();
+  const backdropMode = ref(loadMode(platform));
+  const backdropOpacity = ref(loadOpacity());
   const { theme } = useTheme();
+
+  appearanceState = { platform, backdropMode, backdropOpacity };
 
   watch(
     [backdropMode, backdropOpacity],
     ([mode, opacity]) => {
-      applyDom(platform!, mode, opacity);
+      applyDom(platform, mode, opacity);
       persist(mode, opacity);
     },
     { flush: "sync", immediate: true },
   );
   watch(
     backdropMode,
-    (mode) => scheduleNativeBackdrop(platform!, mode, theme.value === "dark"),
+    (mode) => scheduleNativeBackdrop(platform, mode, theme.value === "dark"),
     { flush: "sync", immediate: true },
   );
   watch(
     theme,
     (nextTheme) => {
-      if (platform === "windows" && backdropMode?.value === "mica") {
+      if (platform === "windows" && backdropMode.value === "mica") {
         scheduleNativeBackdrop(platform, backdropMode.value, nextTheme === "dark");
       }
     },
     { flush: "sync" },
   );
 
-  return { platform, backdropMode, backdropOpacity };
+  return appearanceState;
 }
 
 export function useNativeAppearance() {
   const state = ensureNativeAppearance();
-  applyDom(state.platform, state.backdropMode.value, state.backdropOpacity.value);
 
   return {
     platform: state.platform,
