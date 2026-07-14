@@ -107,7 +107,7 @@ describe("ContributionHeatmap", () => {
     }));
 
     const svg = screen.getByRole("img", { name: "Activity" });
-    await pointerEnter(svg, firstCell.x + 1, firstCell.y + 1);
+    await pointerMove(svg, firstCell.x + 1, firstCell.y + 1);
     expect(view.container.querySelectorAll(".contribution-heatmap__active-cell")).toHaveLength(1);
     const tooltip = screen.getByRole("tooltip");
     expect(tooltip).toHaveTextContent(firstCell.title);
@@ -126,15 +126,6 @@ describe("ContributionHeatmap", () => {
     expect(screen.queryByRole("tooltip")).toBeNull();
   });
 });
-
-async function pointerEnter(element: Element, offsetX: number, offsetY: number) {
-  const event = new Event("pointerenter", { bubbles: true, cancelable: true });
-  Object.defineProperties(event, {
-    offsetX: { value: offsetX },
-    offsetY: { value: offsetY },
-  });
-  await fireEvent(element, event);
-}
 
 async function pointerMove(element: Element, offsetX: number, offsetY: number) {
   const event = new Event("pointermove", { bubbles: true, cancelable: true });

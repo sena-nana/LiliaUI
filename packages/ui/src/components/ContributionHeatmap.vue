@@ -30,25 +30,14 @@ const displayActiveCell = computed(() =>
 const tooltipStyle = computed(() => {
   const cell = displayActiveCell.value;
   if (!cell) return undefined;
-
-  const inset = 4;
-  const cellCenter = cell.x + props.model.cellSize / 2;
-  const showBelow = cell.y < 34;
-  let left = cellCenter;
-  let translateX = "-50%";
-
-  if (cellCenter < props.model.width / 3) {
-    left = Math.max(inset, cell.x);
-    translateX = "0";
-  } else if (cellCenter > props.model.width * 2 / 3) {
-    left = Math.min(props.model.width - inset, cell.x + props.model.cellSize);
-    translateX = "-100%";
-  }
-
+  const alignRight = cell.x > props.model.width / 2;
   return {
-    left: `${left}px`,
-    top: `${showBelow ? cell.y + props.model.cellSize + 6 : cell.y - 6}px`,
-    transform: `translate(${translateX}, ${showBelow ? "0" : "-100%"})`,
+    [alignRight ? "right" : "left"]: `${alignRight
+      ? props.model.width - cell.x - props.model.cellSize
+      : cell.x}px`,
+    top: `${cell.y < props.model.height / 2
+      ? cell.y + props.model.cellSize + 6
+      : cell.y - 30}px`,
   };
 });
 
@@ -85,7 +74,7 @@ function onPointerLeave(event: PointerEvent) {
 <template>
   <div
     class="contribution-heatmap-wrap"
-    :style="{ width: `${model.width}px`, height: `${model.height}px` }"
+    :style="{ width: `${model.width}px` }"
   >
     <svg
       class="contribution-heatmap"
@@ -154,7 +143,6 @@ function onPointerLeave(event: PointerEvent) {
   position: relative;
   display: block;
   flex: 0 0 auto;
-  min-width: max-content;
   contain: layout paint style;
 }
 
@@ -213,20 +201,17 @@ function onPointerLeave(event: PointerEvent) {
 
 .contribution-heatmap__tooltip {
   position: absolute;
-  z-index: 1;
   box-sizing: border-box;
   max-width: calc(100% - 8px);
   padding: 4px 7px;
   overflow: hidden;
   color: var(--bg);
   font-size: 11px;
-  font-weight: 600;
   line-height: 16px;
   text-overflow: ellipsis;
   white-space: nowrap;
   pointer-events: none;
   background: var(--text);
   border-radius: 4px;
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--text) 18%, transparent);
 }
 </style>
