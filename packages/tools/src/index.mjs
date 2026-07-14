@@ -390,6 +390,11 @@ function createTemplateProfile(overrides = {}) {
         ["settings.appearance.corner.smooth"],
         ["settings.appearance.corner.round"],
         ["settings.appearance.corner-radius"],
+        ["settings.appearance.backdrop.system"],
+        ["settings.appearance.backdrop.mica"],
+        ["settings.appearance.backdrop.acrylic"],
+        ["settings.appearance.backdrop.solid"],
+        ["settings.appearance.backdrop-opacity"],
       ],
       "node_modules/@lilia/ui/src/components/ContextMenuHost.vue": [["context-menu"]],
       "node_modules/@lilia/ui/src/components/ConfirmDialog.vue": [
@@ -402,7 +407,7 @@ function createTemplateProfile(overrides = {}) {
         "thin Tauri 2 + Vue 3 scaffold",
         "@lilia/ui powered theme, titlebar, context menu, shell, and settings UI",
         "@lilia/config, @lilia/tools, and @lilia/build powered shared project tooling",
-        "tauri-plugin-lilia powered window-state persistence and app metadata sync",
+        "tauri-plugin-lilia powered window-state persistence, native backdrop, and app metadata sync",
       ],
       excludes: [
         "application-specific business flows",

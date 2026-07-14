@@ -4,6 +4,7 @@ import { defineAsyncComponent } from "vue";
 
 export { default as LiliaAppRoot } from "./AppRoot.vue";
 export { default as LiliaDesktopShell } from "./layouts/AppShell.vue";
+export { default as LiliaAppearanceSection } from "./pages/settings/AppearanceSection.vue";
 export { default as ActionMenuItem } from "./components/ActionMenuItem.vue";
 export { default as AnchoredActionMenu } from "./components/AnchoredActionMenu.vue";
 export { default as ConfirmDialog } from "./components/ConfirmDialog.vue";
@@ -88,6 +89,10 @@ export {
   normalizeSettingsTab,
   setLiliaAppConfig,
   type LiliaAppConfig,
+  type LiliaAppearanceConfigInput,
+  type LiliaPlatformAppearanceDefaults,
+  type BackdropMode,
+  type NativePlatform,
   type LiliaRuntimeConfigInput,
   type LiliaSettingsConfigInput,
   type LiliaSettingsSectionInput,
@@ -118,6 +123,7 @@ export * from "./composables/useResizablePane";
 export * from "./composables/useRouteReturnTarget";
 export * from "./composables/useShellSidebar";
 export * from "./composables/useTheme";
+export * from "./composables/useNativeAppearance";
 export * from "./composables/useComponentEpoch";
 export * from "./composables/useFocusOnActivation";
 export * from "./utils/eventListeners";

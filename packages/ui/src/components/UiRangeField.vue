@@ -8,10 +8,12 @@ const props = withDefaults(defineProps<{
   ariaLabel?: string;
   "aria-label"?: string;
   agentId?: string;
+  disabled?: boolean;
 }>(), {
   step: 1,
   unit: "",
   agentId: undefined,
+  disabled: false,
 });
 
 const emit = defineEmits<{
@@ -35,6 +37,7 @@ function onInput(event: Event) {
       :value="modelValue"
       :aria-label="props.ariaLabel ?? props['aria-label']"
       :data-agent-id="agentId"
+      :disabled="disabled"
       @input="onInput"
     />
     <output>{{ modelValue }}{{ unit }}</output>

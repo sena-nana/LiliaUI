@@ -63,6 +63,11 @@
   --radius-lg: calc(var(--app-corner-radius) * 1.25);
   --radius: var(--radius-md);
   --radius-pill: 999px;
+  --lilia-backdrop-opacity: 0.64;
+  --lilia-backdrop-tint: 24.35% 0 89.9;
+  --lilia-backdrop-surface: oklch(
+    var(--lilia-backdrop-tint) / var(--lilia-backdrop-opacity)
+  );
 }
 
 :root[data-theme="light"] {
@@ -98,6 +103,11 @@
   --shadow-surface: 0 10px 26px -24px oklch(21.01% 0.0318 264.7 / 0.24);
   --shadow-dialog: 0 14px 40px oklch(21.01% 0.0318 264.7 / 0.28);
   --shadow-menu: 0 10px 28px -14px oklch(21.01% 0.0318 264.7 / 0.3);
+  --lilia-backdrop-tint: 96.7% 0.0029 264.5;
+}
+
+:root[data-backdrop="solid"] {
+  --lilia-backdrop-surface: var(--bg-elev);
 }
 
 :root[data-corners="round"] {
