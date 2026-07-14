@@ -139,7 +139,20 @@ export interface LiliaRuntimeConfigInput {
   globalScrollbar?: boolean;
 }
 
+export type NativePlatform = "macos" | "windows" | "linux";
+export type BackdropMode = "system" | "mica" | "acrylic" | "solid";
+
+export interface LiliaPlatformAppearanceDefaults {
+  backdropMode: BackdropMode;
+}
+
+export interface LiliaAppearanceConfigInput {
+  backdropOpacity?: number;
+  platformDefaults?: Partial<Record<NativePlatform, LiliaPlatformAppearanceDefaults>>;
+}
+
 export interface LiliaAppConfig {
+  appearance?: LiliaAppearanceConfigInput;
   appName: string;
   identifier?: string;
   productTitle: string;

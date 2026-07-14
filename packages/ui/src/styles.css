@@ -59,10 +59,10 @@ body,
   height: 100%;
   margin: 0;
   overflow: hidden;
+  background: transparent;
 }
 
 body {
-  background: var(--bg);
   color: var(--text);
 }
 

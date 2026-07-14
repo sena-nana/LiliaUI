@@ -4,6 +4,7 @@ import { RouterView } from "vue-router";
 import { APP_METADATA, SETTINGS_TABS, normalizeSettingsTab } from "../config/appShell";
 import { useRouteReturnTarget } from "../composables/useRouteReturnTarget";
 import { useShellSidebar } from "../composables/useShellSidebar";
+import { useNativeAppearance } from "../composables/useNativeAppearance";
 import { liliaShellOptionsKey, resolveShellBoolean } from "../shellOptions";
 import TitleBar from "../components/TitleBar.vue";
 import SecondaryPanel from "./SecondaryPanel.vue";
@@ -20,6 +21,7 @@ const setupOverlayActive = computed(() => resolveShellBoolean(shellOptions.setup
 const sidebarDisabled = computed(() => sidebarLocked.value || setupOverlayActive.value);
 const mainSidebar = computed(() => shellOptions.mainSidebar ?? SecondaryPanel);
 const sidebar = useShellSidebar(sidebarDisabled);
+useNativeAppearance();
 </script>
 
 <template>
