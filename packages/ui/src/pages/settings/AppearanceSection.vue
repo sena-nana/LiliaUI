@@ -27,9 +27,11 @@ const { cornerStyle, cornerRadius, setCornerRadius, setCornerStyle } = useCorner
 const {
   backdropMode,
   backdropOpacity,
+  backdropTarget,
   platform,
   setBackdropMode,
   setBackdropOpacity,
+  setBackdropTarget,
 } = useNativeAppearance();
 
 const themeOptions: UiSegmentedOption[] = [
@@ -99,13 +101,32 @@ const backdropOptions: UiSegmentedOption[] = (() => {
   return [];
 })();
 
+const backdropTargetOptions = computed<UiSegmentedOption[]>(() => [
+  {
+    value: "sidebar",
+    label: "侧边栏",
+    disabled: backdropMode.value === "solid",
+    agentId: "settings.appearance.backdrop-target.sidebar",
+  },
+  {
+    value: "main",
+    label: "主内容区",
+    disabled: backdropMode.value === "solid",
+    agentId: "settings.appearance.backdrop-target.main",
+  },
+]);
+
 const backdropOpacityPercent = computed({
   get: () => Math.round(backdropOpacity.value * 100),
   set: (value: number) => setBackdropOpacity(value / 100),
 });
 const backdropOpacityHint = computed(() => backdropMode.value === "solid"
   ? "实色模式不使用透明度；切回透明材质后会恢复当前数值。"
-  : "调节标题栏与侧栏材质的前景色覆盖程度。",
+  : "调节透明区域材质的前景色覆盖程度。",
+);
+const backdropTargetHint = computed(() => backdropMode.value === "solid"
+  ? "实色模式不显示透明区域；切回透明材质后会恢复当前选择。"
+  : "选择侧边栏或主内容区显示透明材质。",
 );
 
 function onThemeChange(value: string | number) {
@@ -120,6 +141,10 @@ function onBackdropChange(value: string | number) {
   if (value === "system" || value === "mica" || value === "acrylic" || value === "solid") {
     setBackdropMode(value);
   }
+}
+
+function onBackdropTargetChange(value: string | number) {
+  if (value === "sidebar" || value === "main") setBackdropTarget(value);
 }
 
 </script>
@@ -140,7 +165,7 @@ function onBackdropChange(value: string | number) {
     <SettingsRow
       v-if="platform !== 'linux'"
       label="窗口材质"
-      hint="选择标题栏与侧栏使用的原生背景材质。"
+      hint="选择窗口使用的透明材质或实色背景。"
       agent-id="settings.appearance.backdrop"
     >
       <UiSegmentedControl
@@ -148,6 +173,19 @@ function onBackdropChange(value: string | number) {
         :options="backdropOptions"
         aria-label="窗口材质"
         @update:model-value="onBackdropChange"
+      />
+    </SettingsRow>
+    <SettingsRow
+      v-if="platform !== 'linux'"
+      label="透明区域"
+      :hint="backdropTargetHint"
+      agent-id="settings.appearance.backdrop-target"
+    >
+      <UiSegmentedControl
+        :model-value="backdropTarget"
+        :options="backdropTargetOptions"
+        aria-label="透明区域"
+        @update:model-value="onBackdropTargetChange"
       />
     </SettingsRow>
     <SettingsRow

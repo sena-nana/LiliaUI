@@ -141,6 +141,7 @@ export interface LiliaRuntimeConfigInput {
 
 export type NativePlatform = "macos" | "windows" | "linux";
 export type BackdropMode = "system" | "mica" | "acrylic" | "solid";
+export type BackdropTarget = "sidebar" | "main";
 
 export interface LiliaPlatformAppearanceDefaults {
   backdropMode: BackdropMode;
@@ -148,6 +149,7 @@ export interface LiliaPlatformAppearanceDefaults {
 
 export interface LiliaAppearanceConfigInput {
   backdropOpacity?: number;
+  backdropTarget?: BackdropTarget;
   platformDefaults?: Partial<Record<NativePlatform, LiliaPlatformAppearanceDefaults>>;
 }
 

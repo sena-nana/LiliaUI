@@ -34,6 +34,7 @@ describe("useNativeAppearance", () => {
       ...testAppConfig,
       appearance: {
         backdropOpacity: 0.7,
+        backdropTarget: "main",
         platformDefaults: { windows: { backdropMode: "acrylic" } },
       },
     });
@@ -43,11 +44,14 @@ describe("useNativeAppearance", () => {
     expect(appearance.platform).toBe("windows");
     expect(appearance.backdropMode.value).toBe("acrylic");
     expect(appearance.backdropOpacity.value).toBe(0.7);
+    expect(appearance.backdropTarget.value).toBe("main");
     expect(document.documentElement.dataset.platform).toBe("windows");
     expect(document.documentElement.dataset.backdrop).toBe("acrylic");
+    expect(document.documentElement.dataset.backdropTarget).toBe("main");
     expect(document.documentElement.style.getPropertyValue("--lilia-backdrop-opacity")).toBe("0.7");
     expect(localStorage.getItem("lilia-ui-test.backdropMode")).toBe("acrylic");
     expect(localStorage.getItem("lilia-ui-test.backdropOpacity")).toBe("0.7");
+    expect(localStorage.getItem("lilia-ui-test.backdropTarget")).toBe("main");
     await waitFor(() => {
       expect(invoke).toHaveBeenCalledWith("plugin:lilia|set_window_backdrop", {
         mode: "acrylic",
@@ -60,6 +64,7 @@ describe("useNativeAppearance", () => {
     window.__LILIA_NATIVE_PLATFORM__ = "macos";
     localStorage.setItem("lilia-ui-test.backdropMode", "mica");
     localStorage.setItem("lilia-ui-test.backdropOpacity", "2");
+    localStorage.setItem("lilia-ui-test.backdropTarget", "main");
     vi.resetModules();
     const { setLiliaAppConfig, useNativeAppearance } = await import("@lilia/ui");
     setLiliaAppConfig(testAppConfig);
@@ -67,10 +72,45 @@ describe("useNativeAppearance", () => {
 
     expect(appearance.backdropMode.value).toBe("system");
     expect(appearance.backdropOpacity.value).toBe(0.92);
+    expect(appearance.backdropTarget.value).toBe("main");
 
     appearance.setBackdropOpacity(0);
     expect(appearance.backdropOpacity.value).toBe(0.28);
     expect(document.documentElement.style.getPropertyValue("--lilia-backdrop-opacity")).toBe("0.28");
+  });
+
+  it("缺少或非法目标值时使用应用默认值，切换目标不会重新调用原生材质", async () => {
+    window.__LILIA_NATIVE_PLATFORM__ = "windows";
+    localStorage.setItem("lilia-ui-test.backdropTarget", "invalid");
+    vi.resetModules();
+    const { setLiliaAppConfig, useNativeAppearance } = await import("@lilia/ui");
+    setLiliaAppConfig({
+      ...testAppConfig,
+      appearance: { backdropTarget: "main" },
+    });
+    const appearance = useNativeAppearance();
+    await waitFor(() => expect(invoke).toHaveBeenCalledTimes(1));
+
+    expect(appearance.backdropTarget.value).toBe("main");
+    appearance.setBackdropTarget("sidebar");
+
+    expect(appearance.backdropTarget.value).toBe("sidebar");
+    expect(document.documentElement.dataset.backdropTarget).toBe("sidebar");
+    expect(localStorage.getItem("lilia-ui-test.backdropTarget")).toBe("sidebar");
+    await Promise.resolve();
+    expect(invoke).toHaveBeenCalledTimes(1);
+  });
+
+  it("应用未配置透明区域时默认使用侧边栏", async () => {
+    vi.resetModules();
+    const { setLiliaAppConfig, useNativeAppearance } = await import("@lilia/ui");
+    setLiliaAppConfig(testAppConfig);
+
+    const appearance = useNativeAppearance();
+
+    expect(appearance.backdropTarget.value).toBe("sidebar");
+    expect(document.documentElement.dataset.backdropTarget).toBe("sidebar");
+    expect(localStorage.getItem("lilia-ui-test.backdropTarget")).toBe("sidebar");
   });
 
   it("仅在 Windows Mica 下随主题重新应用深浅效果", async () => {
@@ -135,6 +175,19 @@ describe("LiliaAppearanceSection", () => {
       "settings.appearance.backdrop.mica",
     );
     expect(view.getByRole("radio", { name: "Acrylic" })).toBeInTheDocument();
+    const sidebarTarget = view.getByRole("radio", { name: "侧边栏" });
+    const mainTarget = view.getByRole("radio", { name: "主内容区" });
+    expect(sidebarTarget).toHaveAttribute(
+      "data-agent-id",
+      "settings.appearance.backdrop-target.sidebar",
+    );
+    expect(mainTarget).toHaveAttribute(
+      "data-agent-id",
+      "settings.appearance.backdrop-target.main",
+    );
+    await fireEvent.click(mainTarget);
+    expect(mainTarget).toHaveAttribute("aria-checked", "true");
+    expect(document.documentElement.dataset.backdropTarget).toBe("main");
     const opacity = view.getByRole("slider", { name: "材质不透明度" });
     expect(opacity).toHaveValue("64");
     expect(opacity).toHaveAttribute("data-agent-id", "settings.appearance.backdrop-opacity");
@@ -145,7 +198,10 @@ describe("LiliaAppearanceSection", () => {
 
     await fireEvent.click(view.getByRole("radio", { name: "实色" }));
     expect(opacity).toBeDisabled();
-    expect(view.getByText(/切回透明材质后会恢复/)).toBeInTheDocument();
+    expect(sidebarTarget).toBeDisabled();
+    expect(mainTarget).toBeDisabled();
+    expect(view.getByText(/切回透明材质后会恢复当前数值/)).toBeInTheDocument();
+    expect(view.getByText(/切回透明材质后会恢复当前选择/)).toBeInTheDocument();
   });
 
   it("macOS 不暴露 Windows 材质名称，Linux 隐藏原生材质设置", async () => {
@@ -156,6 +212,7 @@ describe("LiliaAppearanceSection", () => {
     const macView = render(ui.LiliaAppearanceSection);
 
     expect(macView.getByRole("radio", { name: "系统透明" })).toBeInTheDocument();
+    expect(macView.getByRole("radiogroup", { name: "透明区域" })).toBeInTheDocument();
     expect(macView.queryByRole("radio", { name: "Mica" })).not.toBeInTheDocument();
     macView.unmount();
 
@@ -166,6 +223,7 @@ describe("LiliaAppearanceSection", () => {
     const linuxView = render(ui.LiliaAppearanceSection);
 
     expect(linuxView.queryByRole("radiogroup", { name: "窗口材质" })).not.toBeInTheDocument();
+    expect(linuxView.queryByRole("radiogroup", { name: "透明区域" })).not.toBeInTheDocument();
     expect(linuxView.queryByRole("slider", { name: "材质不透明度" })).not.toBeInTheDocument();
   });
 });

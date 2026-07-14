@@ -4,6 +4,7 @@ import {
   APP_METADATA,
   getLiliaAppConfig,
   type BackdropMode,
+  type BackdropTarget,
   type NativePlatform,
 } from "../config/appShell";
 import { useTheme } from "./useTheme";
@@ -11,6 +12,7 @@ import { useTheme } from "./useTheme";
 export interface NativeAppearanceSettings {
   backdropMode: BackdropMode;
   backdropOpacity: number;
+  backdropTarget: BackdropTarget;
 }
 
 declare global {
@@ -33,6 +35,7 @@ interface NativeAppearanceState {
   platform: NativePlatform;
   backdropMode: Ref<BackdropMode>;
   backdropOpacity: Ref<number>;
+  backdropTarget: Ref<BackdropTarget>;
 }
 
 let appearanceState: NativeAppearanceState | null = null;
@@ -47,8 +50,16 @@ function opacityStorageKey() {
   return `${APP_METADATA.storageKeyPrefix}.backdropOpacity`;
 }
 
+function targetStorageKey() {
+  return `${APP_METADATA.storageKeyPrefix}.backdropTarget`;
+}
+
 function isBackdropMode(value: unknown): value is BackdropMode {
   return value === "system" || value === "mica" || value === "acrylic" || value === "solid";
+}
+
+function isBackdropTarget(value: unknown): value is BackdropTarget {
+  return value === "sidebar" || value === "main";
 }
 
 export function resolveNativePlatform(value: unknown): NativePlatform {
@@ -91,6 +102,11 @@ function configuredDefaultOpacity(): number {
   );
 }
 
+function configuredDefaultTarget(): BackdropTarget {
+  const configured = getLiliaAppConfig().appearance?.backdropTarget;
+  return isBackdropTarget(configured) ? configured : "sidebar";
+}
+
 function loadMode(nativePlatform: NativePlatform): BackdropMode {
   try {
     const stored = localStorage.getItem(modeStorageKey());
@@ -112,19 +128,35 @@ function loadOpacity(): number {
   return configuredDefaultOpacity();
 }
 
-function applyDom(nativePlatform: NativePlatform, mode: BackdropMode, opacity: number) {
+function loadTarget(): BackdropTarget {
+  try {
+    const stored = localStorage.getItem(targetStorageKey());
+    return isBackdropTarget(stored) ? stored : configuredDefaultTarget();
+  } catch {
+    return configuredDefaultTarget();
+  }
+}
+
+function applyDom(
+  nativePlatform: NativePlatform,
+  mode: BackdropMode,
+  opacity: number,
+  target: BackdropTarget,
+) {
   document.documentElement.dataset.platform = nativePlatform;
   document.documentElement.dataset.backdrop = mode;
+  document.documentElement.dataset.backdropTarget = target;
   document.documentElement.style.setProperty(
     "--lilia-backdrop-opacity",
     String(opacity),
   );
 }
 
-function persist(mode: BackdropMode, opacity: number) {
+function persist(mode: BackdropMode, opacity: number, target: BackdropTarget) {
   try {
     localStorage.setItem(modeStorageKey(), mode);
     localStorage.setItem(opacityStorageKey(), String(opacity));
+    localStorage.setItem(targetStorageKey(), target);
   } catch {
     // ignore
   }
@@ -164,15 +196,16 @@ function ensureNativeAppearance(): NativeAppearanceState {
   const platform = readNativePlatform();
   const backdropMode = ref(loadMode(platform));
   const backdropOpacity = ref(loadOpacity());
+  const backdropTarget = ref(loadTarget());
   const { theme } = useTheme();
 
-  appearanceState = { platform, backdropMode, backdropOpacity };
+  appearanceState = { platform, backdropMode, backdropOpacity, backdropTarget };
 
   watch(
-    [backdropMode, backdropOpacity],
-    ([mode, opacity]) => {
-      applyDom(platform, mode, opacity);
-      persist(mode, opacity);
+    [backdropMode, backdropOpacity, backdropTarget],
+    ([mode, opacity, target]) => {
+      applyDom(platform, mode, opacity, target);
+      persist(mode, opacity, target);
     },
     { flush: "sync", immediate: true },
   );
@@ -201,11 +234,15 @@ export function useNativeAppearance() {
     platform: state.platform,
     backdropMode: readonly(state.backdropMode),
     backdropOpacity: readonly(state.backdropOpacity),
+    backdropTarget: readonly(state.backdropTarget),
     setBackdropMode(next: BackdropMode) {
       state.backdropMode.value = normalizeBackdropMode(next, state.platform);
     },
     setBackdropOpacity(next: number) {
       state.backdropOpacity.value = clampBackdropOpacity(next);
+    },
+    setBackdropTarget(next: BackdropTarget) {
+      state.backdropTarget.value = next;
     },
   };
 }
