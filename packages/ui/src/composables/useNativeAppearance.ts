@@ -71,7 +71,7 @@ export function clampBackdropOpacity(value: number): number {
   return Math.min(BACKDROP_OPACITY_MAX, Math.max(BACKDROP_OPACITY_MIN, finiteValue));
 }
 
-function readNativePlatform(): NativePlatform {
+export function readNativePlatform(): NativePlatform {
   if (typeof window === "undefined") return "linux";
   return resolveNativePlatform(window.__LILIA_NATIVE_PLATFORM__);
 }

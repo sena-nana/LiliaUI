@@ -5,19 +5,24 @@ const cornerStorageKey = `${testAppConfig.storageKeyPrefix}.corners`;
 const cornerRadiusStorageKey = `${testAppConfig.storageKeyPrefix}.cornerRadius`;
 
 describe("useCornerStyle", () => {
-  it("默认启用平滑圆角和 16px 半径并写入 html 与 localStorage", async () => {
+  it.each([
+    { platform: "macos", style: "round", radius: 8 },
+    { platform: "windows", style: "smooth", radius: 16 },
+    { platform: "linux", style: "smooth", radius: 16 },
+  ] as const)("$platform 使用对应平台的默认圆角", async ({ platform, style, radius }) => {
+    window.__LILIA_NATIVE_PLATFORM__ = platform;
     vi.resetModules();
 
     const { setLiliaAppConfig, useCornerStyle } = await import("@lilia/ui");
     setLiliaAppConfig(testAppConfig);
     const { cornerRadius, cornerStyle } = useCornerStyle();
 
-    expect(cornerStyle.value).toBe("smooth");
-    expect(cornerRadius.value).toBe(16);
-    expect(document.documentElement.dataset.corners).toBe("smooth");
-    expect(document.documentElement.style.getPropertyValue("--app-corner-radius")).toBe("16px");
-    expect(localStorage.getItem(cornerStorageKey)).toBe("smooth");
-    expect(localStorage.getItem(cornerRadiusStorageKey)).toBe("16");
+    expect(cornerStyle.value).toBe(style);
+    expect(cornerRadius.value).toBe(radius);
+    expect(document.documentElement.dataset.corners).toBe(style);
+    expect(document.documentElement.style.getPropertyValue("--app-corner-radius")).toBe(`${radius}px`);
+    expect(localStorage.getItem(cornerStorageKey)).toBe(style);
+    expect(localStorage.getItem(cornerRadiusStorageKey)).toBe(String(radius));
   });
 
   it("从 localStorage 恢复普通圆角和半径并写入 html", async () => {
