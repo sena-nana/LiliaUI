@@ -62,7 +62,7 @@ const cornerOptions: UiSegmentedOption[] = [
   },
 ];
 
-const backdropOptions = computed<UiSegmentedOption[]>(() => {
+const backdropOptions: UiSegmentedOption[] = (() => {
   if (platform === "macos") {
     return [
       {
@@ -97,9 +97,12 @@ const backdropOptions = computed<UiSegmentedOption[]>(() => {
     ];
   }
   return [];
-});
+})();
 
-const backdropOpacityPercent = computed(() => Math.round(backdropOpacity.value * 100));
+const backdropOpacityPercent = computed({
+  get: () => Math.round(backdropOpacity.value * 100),
+  set: (value: number) => setBackdropOpacity(value / 100),
+});
 const backdropOpacityHint = computed(() => backdropMode.value === "solid"
   ? "实色模式不使用透明度；切回透明材质后会恢复当前数值。"
   : "调节标题栏与侧栏材质的前景色覆盖程度。",
@@ -119,9 +122,6 @@ function onBackdropChange(value: string | number) {
   }
 }
 
-function onBackdropOpacityChange(value: number) {
-  setBackdropOpacity(value / 100);
-}
 </script>
 
 <template>
@@ -157,7 +157,7 @@ function onBackdropOpacityChange(value: number) {
       agent-id="settings.appearance.backdrop-opacity-row"
     >
       <UiRangeField
-        :model-value="backdropOpacityPercent"
+        v-model="backdropOpacityPercent"
         :min="BACKDROP_OPACITY_MIN * 100"
         :max="BACKDROP_OPACITY_MAX * 100"
         :step="1"
@@ -165,7 +165,6 @@ function onBackdropOpacityChange(value: number) {
         aria-label="材质不透明度"
         agent-id="settings.appearance.backdrop-opacity"
         :disabled="backdropMode === 'solid'"
-        @update:model-value="onBackdropOpacityChange"
       />
     </SettingsRow>
     <SettingsRow label="组件圆角" hint="选择卡片与控件使用的平滑或普通圆角。">

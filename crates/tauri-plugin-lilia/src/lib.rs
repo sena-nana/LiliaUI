@@ -1,9 +1,11 @@
 use serde::{Deserialize, Serialize};
 use std::sync::Mutex;
+#[cfg(target_os = "macos")]
+use tauri::window::EffectState;
 use tauri::{
     plugin::{Builder as PluginBuilder, TauriPlugin},
     utils::config::Color,
-    window::{Effect, EffectState, EffectsBuilder},
+    window::{Effect, EffectsBuilder},
     AppHandle, Manager, PhysicalPosition, PhysicalSize, RunEvent, Runtime, State, WebviewWindow,
     WindowEvent,
 };
@@ -134,23 +136,14 @@ enum NativePlatform {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum NativeBackdropEffect {
-    Sidebar,
-    MicaDark,
-    MicaLight,
-    Acrylic,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum BackdropAction {
-    Apply(NativeBackdropEffect),
-    Clear,
-    Noop,
+    Set(Option<Effect>),
+    Keep,
 }
 
 #[derive(Debug, Default)]
 struct BackdropRuntimeState {
-    effect: Mutex<Option<NativeBackdropEffect>>,
+    effect: Mutex<Option<Effect>>,
 }
 
 const fn current_native_platform() -> NativePlatform {
@@ -172,9 +165,9 @@ const fn current_native_platform() -> NativePlatform {
 
 const fn default_backdrop_action(platform: NativePlatform) -> BackdropAction {
     match platform {
-        NativePlatform::Macos => BackdropAction::Apply(NativeBackdropEffect::Sidebar),
-        NativePlatform::Windows => BackdropAction::Apply(NativeBackdropEffect::MicaDark),
-        NativePlatform::Linux => BackdropAction::Noop,
+        NativePlatform::Macos => BackdropAction::Set(Some(Effect::Sidebar)),
+        NativePlatform::Windows => BackdropAction::Set(Some(Effect::MicaDark)),
+        NativePlatform::Linux => BackdropAction::Keep,
     }
 }
 
@@ -185,67 +178,43 @@ const fn backdrop_action(
 ) -> BackdropAction {
     match platform {
         NativePlatform::Macos => match mode {
-            BackdropMode::Solid => BackdropAction::Noop,
+            BackdropMode::Solid => BackdropAction::Keep,
             BackdropMode::System | BackdropMode::Mica | BackdropMode::Acrylic => {
-                BackdropAction::Apply(NativeBackdropEffect::Sidebar)
+                BackdropAction::Set(Some(Effect::Sidebar))
             }
         },
         NativePlatform::Windows => match mode {
             BackdropMode::System | BackdropMode::Mica => {
                 if dark {
-                    BackdropAction::Apply(NativeBackdropEffect::MicaDark)
+                    BackdropAction::Set(Some(Effect::MicaDark))
                 } else {
-                    BackdropAction::Apply(NativeBackdropEffect::MicaLight)
+                    BackdropAction::Set(Some(Effect::MicaLight))
                 }
             }
-            BackdropMode::Acrylic => BackdropAction::Apply(NativeBackdropEffect::Acrylic),
-            BackdropMode::Solid => BackdropAction::Clear,
+            BackdropMode::Acrylic => BackdropAction::Set(Some(Effect::Acrylic)),
+            BackdropMode::Solid => BackdropAction::Set(None),
         },
-        NativePlatform::Linux => BackdropAction::Noop,
+        NativePlatform::Linux => BackdropAction::Keep,
     }
 }
 
-fn apply_backdrop_action<R: Runtime>(
+fn apply_backdrop_effect<R: Runtime>(
     window: &WebviewWindow<R>,
-    action: BackdropAction,
+    effect: Option<Effect>,
 ) -> tauri::Result<()> {
-    if matches!(
-        action,
-        BackdropAction::Apply(
-            NativeBackdropEffect::MicaDark
-                | NativeBackdropEffect::MicaLight
-                | NativeBackdropEffect::Acrylic
-        )
-    ) {
-        window.set_effects(None)?;
-    }
+    #[cfg(target_os = "windows")]
+    window.set_effects(None)?;
 
-    let effects = match action {
-        BackdropAction::Apply(NativeBackdropEffect::Sidebar) => Some(
-            EffectsBuilder::new()
-                .effect(Effect::Sidebar)
-                .state(EffectState::FollowsWindowActiveState)
-                .build(),
-        ),
-        BackdropAction::Apply(NativeBackdropEffect::MicaDark) => {
-            Some(EffectsBuilder::new().effect(Effect::MicaDark).build())
-        }
-        BackdropAction::Apply(NativeBackdropEffect::MicaLight) => {
-            Some(EffectsBuilder::new().effect(Effect::MicaLight).build())
-        }
-        BackdropAction::Apply(NativeBackdropEffect::Acrylic) => {
-            Some(EffectsBuilder::new().effect(Effect::Acrylic).build())
-        }
-        BackdropAction::Clear => {
-            window.set_effects(None)?;
-            None
-        }
-        BackdropAction::Noop => None,
+    let Some(effect) = effect else {
+        #[cfg(not(target_os = "windows"))]
+        window.set_effects(None)?;
+        return Ok(());
     };
 
-    if let Some(effects) = effects {
-        window.set_effects(effects)?;
-    }
+    let effects = EffectsBuilder::new().effect(effect);
+    #[cfg(target_os = "macos")]
+    let effects = effects.state(EffectState::FollowsWindowActiveState);
+    window.set_effects(effects.build())?;
 
     Ok(())
 }
@@ -255,46 +224,22 @@ fn apply_backdrop_action_if_needed<R: Runtime>(
     state: &BackdropRuntimeState,
     action: BackdropAction,
 ) -> Result<(), String> {
-    let current_effect = *state
+    let BackdropAction::Set(effect) = action else {
+        return Ok(());
+    };
+    let mut current_effect = state
         .effect
         .lock()
         .map_err(|error| format!("failed to read backdrop state: {error}"))?;
 
-    if !backdrop_action_is_needed(current_effect, action) {
+    if *current_effect == effect {
         return Ok(());
     }
 
-    apply_backdrop_action(window, action).map_err(|error| error.to_string())?;
-
-    *state
-        .effect
-        .lock()
-        .map_err(|error| format!("failed to update backdrop state: {error}"))? =
-        next_backdrop_effect(current_effect, action);
+    apply_backdrop_effect(window, effect).map_err(|error| error.to_string())?;
+    *current_effect = effect;
 
     Ok(())
-}
-
-fn backdrop_action_is_needed(
-    current_effect: Option<NativeBackdropEffect>,
-    action: BackdropAction,
-) -> bool {
-    match action {
-        BackdropAction::Apply(effect) => current_effect != Some(effect),
-        BackdropAction::Clear => current_effect.is_some(),
-        BackdropAction::Noop => false,
-    }
-}
-
-fn next_backdrop_effect(
-    current_effect: Option<NativeBackdropEffect>,
-    action: BackdropAction,
-) -> Option<NativeBackdropEffect> {
-    match action {
-        BackdropAction::Apply(effect) => Some(effect),
-        BackdropAction::Clear => None,
-        BackdropAction::Noop => current_effect,
-    }
 }
 
 #[tauri::command]
@@ -512,15 +457,15 @@ mod tests {
         assert!(Builder::default().background_color.is_none());
         assert_eq!(
             default_backdrop_action(NativePlatform::Macos),
-            BackdropAction::Apply(NativeBackdropEffect::Sidebar)
+            BackdropAction::Set(Some(Effect::Sidebar))
         );
         assert_eq!(
             default_backdrop_action(NativePlatform::Windows),
-            BackdropAction::Apply(NativeBackdropEffect::MicaDark)
+            BackdropAction::Set(Some(Effect::MicaDark))
         );
         assert_eq!(
             default_backdrop_action(NativePlatform::Linux),
-            BackdropAction::Noop
+            BackdropAction::Keep
         );
     }
 
@@ -533,12 +478,12 @@ mod tests {
         ] {
             assert_eq!(
                 backdrop_action(NativePlatform::Macos, mode, false),
-                BackdropAction::Apply(NativeBackdropEffect::Sidebar)
+                BackdropAction::Set(Some(Effect::Sidebar))
             );
         }
         assert_eq!(
             backdrop_action(NativePlatform::Macos, BackdropMode::Solid, false),
-            BackdropAction::Noop
+            BackdropAction::Keep
         );
     }
 
@@ -546,19 +491,19 @@ mod tests {
     fn windows_maps_modes_and_theme_to_expected_actions() {
         assert_eq!(
             backdrop_action(NativePlatform::Windows, BackdropMode::System, true),
-            BackdropAction::Apply(NativeBackdropEffect::MicaDark)
+            BackdropAction::Set(Some(Effect::MicaDark))
         );
         assert_eq!(
             backdrop_action(NativePlatform::Windows, BackdropMode::Mica, false),
-            BackdropAction::Apply(NativeBackdropEffect::MicaLight)
+            BackdropAction::Set(Some(Effect::MicaLight))
         );
         assert_eq!(
             backdrop_action(NativePlatform::Windows, BackdropMode::Acrylic, true),
-            BackdropAction::Apply(NativeBackdropEffect::Acrylic)
+            BackdropAction::Set(Some(Effect::Acrylic))
         );
         assert_eq!(
             backdrop_action(NativePlatform::Windows, BackdropMode::Solid, false),
-            BackdropAction::Clear
+            BackdropAction::Set(None)
         );
     }
 
@@ -572,21 +517,9 @@ mod tests {
         ] {
             assert_eq!(
                 backdrop_action(NativePlatform::Linux, mode, true),
-                BackdropAction::Noop
+                BackdropAction::Keep
             );
         }
-    }
-
-    #[test]
-    fn runtime_state_reuses_existing_macos_sidebar_effect() {
-        let current = Some(NativeBackdropEffect::Sidebar);
-
-        assert!(!backdrop_action_is_needed(
-            current,
-            BackdropAction::Apply(NativeBackdropEffect::Sidebar)
-        ));
-        assert!(!backdrop_action_is_needed(current, BackdropAction::Noop));
-        assert_eq!(next_backdrop_effect(current, BackdropAction::Noop), current);
     }
 
     #[test]
