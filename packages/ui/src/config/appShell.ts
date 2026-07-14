@@ -10,9 +10,11 @@ import Gauge from "@lucide/vue/dist/esm/icons/gauge.mjs";
 import House from "@lucide/vue/dist/esm/icons/house.mjs";
 import Info from "@lucide/vue/dist/esm/icons/info.mjs";
 import MonitorSmartphone from "@lucide/vue/dist/esm/icons/monitor-smartphone.mjs";
+import MessageSquare from "@lucide/vue/dist/esm/icons/message-square.mjs";
 import Network from "@lucide/vue/dist/esm/icons/network.mjs";
 import Palette from "@lucide/vue/dist/esm/icons/palette.mjs";
 import PanelTop from "@lucide/vue/dist/esm/icons/panel-top.mjs";
+import Plus from "@lucide/vue/dist/esm/icons/plus.mjs";
 import Puzzle from "@lucide/vue/dist/esm/icons/puzzle.mjs";
 import Search from "@lucide/vue/dist/esm/icons/search.mjs";
 import Server from "@lucide/vue/dist/esm/icons/server.mjs";
@@ -31,11 +33,13 @@ type IconName =
   | "gauge"
   | "home"
   | "info"
+  | "message-square"
   | "monitor-smartphone"
   | "more"
   | "network"
   | "panel-top"
   | "palette"
+  | "plus"
   | "puzzle"
   | "search"
   | "server"
@@ -255,11 +259,13 @@ const lucideIcons = {
   gauge: Gauge,
   home: House,
   info: Info,
+  "message-square": MessageSquare,
   "monitor-smartphone": MonitorSmartphone,
   more: Ellipsis,
   network: Network,
   "panel-top": PanelTop,
   palette: Palette,
+  plus: Plus,
   puzzle: Puzzle,
   search: Search,
   server: Server,
