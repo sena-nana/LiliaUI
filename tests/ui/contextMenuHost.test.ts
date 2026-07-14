@@ -246,6 +246,46 @@ describe("ContextMenuHost", () => {
     await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
   });
 
+  it("父项悬浮或聚焦时显示子菜单并执行子项", async () => {
+    const action = vi.fn();
+    renderWithTemplate(
+      `<button data-testid="target" v-context-menu="items">目标</button>`,
+      () => ({
+        items: [
+          {
+            id: "move",
+            label: "移动到分组",
+            children: [{ id: "frontend", label: "前端", onSelect: action }],
+          },
+          { id: "hide", label: "隐藏仓库", onSelect: vi.fn() },
+        ],
+      }),
+    );
+
+    await fireEvent.contextMenu(screen.getByTestId("target"));
+    const rootMenu = await screen.findByRole("menu");
+    const parentItem = screen.getByRole("menuitem", { name: "移动到分组" });
+
+    expect(parentItem).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("menuitem", { name: "前端" })).toBeNull();
+
+    await fireEvent.mouseEnter(parentItem);
+    expect(parentItem).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getAllByRole("menu")).toHaveLength(2);
+    expect(screen.getByRole("menuitem", { name: "前端" })).toBeInTheDocument();
+
+    await fireEvent.mouseLeave(rootMenu);
+    expect(parentItem).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("menuitem", { name: "前端" })).toBeNull();
+
+    await fireEvent.focus(parentItem);
+    expect(parentItem).toHaveAttribute("aria-expanded", "true");
+
+    await fireEvent.click(screen.getByRole("menuitem", { name: "前端" }));
+    expect(action).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+  });
+
   it("Esc 会关闭菜单", async () => {
     vi.useFakeTimers();
     renderWithTemplate(

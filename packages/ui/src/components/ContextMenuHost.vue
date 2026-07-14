@@ -176,7 +176,7 @@ watch(
   flex-direction: column;
   gap: 1px;
   user-select: none;
-  contain: layout paint style;
+  contain: layout style;
   transform-origin: var(--sb-menu-origin-x, 0px) var(--sb-menu-origin-y, 0px);
   will-change: transform, opacity, translate;
 }
