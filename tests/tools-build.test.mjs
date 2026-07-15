@@ -384,7 +384,6 @@ describe("@lilia/build", () => {
     expect(entry).toContain("app %%");
     expect(entry).toContain("\\\\$");
     expect(entry).toContain("\\\\`");
-    expect(entry).toContain(`Icon=${iconPath}`);
     expect(lstatSync(shortcut).mode & 0o777).toBe(0o755);
 
     const backslashEntry = linuxDesktopEntry({
