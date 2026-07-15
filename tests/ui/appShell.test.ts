@@ -172,6 +172,32 @@ describe("AppShell sidebar", () => {
     expect(view.queryByRole("navigation", { name: "主导航" })).not.toBeInTheDocument();
   });
 
+  it("主侧边栏支持应用注入顶部业务区并保留全局动作回退", async () => {
+    const TopContent = defineComponent({
+      template: `<button type="button" data-agent-id="sidebar.custom-top">搜索会话</button>`,
+    });
+    const custom = await renderAppShell("/", {
+      ...testAppConfig,
+      sidebar: {
+        ...testAppConfig.sidebar,
+        topContent: TopContent,
+        globalActions: [{ key: "fallback", label: "回退动作", icon: "search" }],
+      },
+    });
+
+    expect(agentTarget(custom.container, "sidebar.custom-top")).toHaveTextContent("搜索会话");
+    expect(custom.queryByRole("button", { name: "回退动作" })).not.toBeInTheDocument();
+
+    const fallback = await renderAppShell("/", {
+      ...testAppConfig,
+      sidebar: {
+        ...testAppConfig.sidebar,
+        globalActions: [{ key: "fallback", label: "回退动作", icon: "search" }],
+      },
+    });
+    expect(agentTarget(fallback.container, "sidebar.global.fallback")).toBeInTheDocument();
+  });
+
   it("setup overlay 激活时隐藏侧栏和拖拽线并禁用左侧栏按钮", async () => {
     const setupOverlayActive = ref(true);
     const view = await renderAppShell("/", testAppConfig, {
@@ -290,7 +316,13 @@ describe("AppShell sidebar", () => {
         nav: [
           {
             ...testAppConfig.sidebar.nav[0],
-            tools: [{ key: "pin", label: "固定", icon: "more", onSelect: navToolAction }],
+            tools: [{
+              key: "pin",
+              label: "固定",
+              icon: "more",
+              active: true,
+              onSelect: navToolAction,
+            }],
           },
           {
             key: "scan",
@@ -338,6 +370,7 @@ describe("AppShell sidebar", () => {
     expect(navAction).toHaveBeenCalledOnce();
     expect(disabledNavAction).not.toHaveBeenCalled();
     expect(navToolAction).toHaveBeenCalledOnce();
+    expect(view.getByRole("button", { name: "固定" })).toHaveClass("is-active");
     expect(groupToolAction).toHaveBeenCalledOnce();
     expect(rowAction).toHaveBeenCalledOnce();
     expect(rowToolAction).toHaveBeenCalledOnce();
