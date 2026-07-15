@@ -152,6 +152,10 @@ export function createTemplateReport(projectRoot = process.cwd(), options = {}) 
     }));
   });
   const expectedDependencies = profile.expectedDependencies;
+  const nativeBackdropPermissions = readCapabilityPermissions(projectRoot);
+  const nativeBackdropPermission = profile.nativeBackdropPermissions.find((permission) =>
+    nativeBackdropPermissions.includes(permission),
+  );
   const checks = [
     {
       id: "package-manager",
@@ -169,6 +173,13 @@ export function createTemplateReport(projectRoot = process.cwd(), options = {}) 
       detail: expectedDependencies
         .map((name) => `${name}=${packageJson.dependencies?.[name] ?? "missing"}`)
         .join(", "),
+    },
+    {
+      id: "native-backdrop-permission",
+      ok: nativeBackdropPermission !== undefined,
+      detail: nativeBackdropPermission
+        ? `permission=${nativeBackdropPermission}`
+        : `expected one of ${profile.nativeBackdropPermissions.join(", ")}`,
     },
     {
       id: "important-files-present",
@@ -346,6 +357,7 @@ function createTemplateProfile(overrides = {}) {
   return {
     packageManager: "yarn@4.14.1",
     expectedDependencies: ["@lilia/ui", "@lilia/config", "@lilia/tools", "@lilia/build"],
+    nativeBackdropPermissions: ["lilia:default", "lilia:allow-set-window-backdrop"],
     importantFiles: [
       ["app.config.json", "single source for app name, product title, version, and identifiers"],
       ["src/main.ts", "minimal Vue bootstrap that mounts createLiliaApp"],
@@ -442,6 +454,19 @@ function createTemplateProfile(overrides = {}) {
     ],
     ...overrides,
   };
+}
+
+function readCapabilityPermissions(projectRoot) {
+  const capabilityPath = resolve(projectRoot, "src-tauri/capabilities/default.json");
+  if (!existsSync(capabilityPath)) return [];
+  try {
+    const capability = readJson(capabilityPath);
+    return Array.isArray(capability.permissions)
+      ? capability.permissions.filter((permission) => typeof permission === "string")
+      : [];
+  } catch {
+    return [];
+  }
 }
 
 function walkFiles(dir) {
