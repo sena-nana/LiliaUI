@@ -77,6 +77,7 @@ export function defineLiliaViteConfig(options = {}) {
   const strictPort = process.env[`${envPrefix}_DEV_STRICT_PORT`] === "1";
   const port = Number.isInteger(devPort) ? devPort : (options.defaultPort ?? 1420);
   const { optimizeDeps, resolve, ...viteOptions } = options.vite ?? {};
+  const testOptions = options.test ?? {};
 
   return defineViteConfig(() => ({
     plugins: [
@@ -119,7 +120,11 @@ export function defineLiliaViteConfig(options = {}) {
     test: {
       environment: "jsdom",
       setupFiles: ["./tests/setupTests.ts"],
-      ...(options.test ?? {}),
+      ...testOptions,
+      execArgv: unique([
+        "--no-experimental-webstorage",
+        ...(testOptions.execArgv ?? []),
+      ]),
     },
     ...viteOptions,
   }));

@@ -43,8 +43,11 @@ describe("@lilia/tools", () => {
     const root = createProject();
 
     expect(
-      checkPackageManager(root, { npm_config_user_agent: "yarn/4.14.1 npm/? node/?" }).ok,
+      checkPackageManager(root, { npm_config_user_agent: "yarn/4.17.1 npm/? node/?" }).ok,
     ).toBe(true);
+    expect(
+      checkPackageManager(root, { npm_config_user_agent: "yarn/4.14.1 npm/? node/?" }).ok,
+    ).toBe(false);
     expect(
       checkPackageManager(root, { npm_config_user_agent: "npm/11.0.0 node/?" }).ok,
     ).toBe(false);
@@ -239,7 +242,7 @@ describe("@lilia/build", () => {
     rmSync(join(root, "app.config.json"));
 
     expect(() =>
-      runPrepare(root, { npm_config_user_agent: "yarn/4.14.1 npm/? node/?" }),
+      runPrepare(root, { npm_config_user_agent: "yarn/4.17.1 npm/? node/?" }),
     ).not.toThrow();
   });
 
@@ -423,7 +426,7 @@ function createProject(overrides = {}) {
     `${JSON.stringify({
       name: "lilia-test",
       version: "0.1.0",
-      packageManager: "yarn@4.14.1",
+      packageManager: "yarn@4.17.1+sha512.ccbfabf7d7b6b32075088be9386fb9a2e00bb6887ef07fa56effabc890a56d53da1ccc4128d62db245fcbd3961b236d75335bdf7d5320ed6eafb7588b7ad4697",
       dependencies: {
         "@lilia/ui": "workspace:*",
         ...(overrides.dependencies ?? {}),

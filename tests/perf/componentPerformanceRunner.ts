@@ -3,6 +3,23 @@ import {
   componentPerformanceScenarios,
   type ComponentPerfScenario,
 } from "./componentScenarios";
+import type {
+  ComponentPerfPhaseSummary,
+  ComponentPerfRegression,
+  ComponentPerfReport,
+  ComponentPerfRunner,
+  ComponentPerfScenarioSummary,
+  ComponentPerfThresholds,
+} from "./componentPerformanceTypes.ts";
+
+export type {
+  ComponentPerfPhaseSummary,
+  ComponentPerfRegression,
+  ComponentPerfReport,
+  ComponentPerfRunner,
+  ComponentPerfScenarioSummary,
+  ComponentPerfThresholds,
+} from "./componentPerformanceTypes.ts";
 
 export interface ComponentPerfSample {
   domNodes: number;
@@ -10,37 +27,6 @@ export interface ComponentPerfSample {
   mount: number;
   unmount: number;
   update: number;
-}
-
-export type ComponentPerfRunner = "browser" | "vitest-jsdom";
-
-export interface ComponentPerfPhaseSummary {
-  median: number;
-  p95: number;
-}
-
-export interface ComponentPerfScenarioSummary {
-  domNodes: ComponentPerfPhaseSummary;
-  interaction: ComponentPerfPhaseSummary;
-  mount: ComponentPerfPhaseSummary;
-  unmount: ComponentPerfPhaseSummary;
-  update: ComponentPerfPhaseSummary;
-}
-
-export interface ComponentPerfReport {
-  generatedAt: string;
-  iterations: number;
-  runner: ComponentPerfRunner;
-  schemaVersion: 1;
-  scenarios: Record<string, ComponentPerfScenarioSummary>;
-  thresholds: ComponentPerfThresholds;
-}
-
-export interface ComponentPerfThresholds {
-  domNodeRegressionFloor: number;
-  domNodeRegressionRatio: number;
-  durationRegressionFloorMs: number;
-  durationRegressionRatio: number;
 }
 
 export const defaultComponentPerfThresholds: ComponentPerfThresholds = {
@@ -216,13 +202,7 @@ export function compareComponentPerfReport(
   baseline: ComponentPerfReport,
 ) {
   const thresholds = baseline.thresholds ?? defaultComponentPerfThresholds;
-  const regressions: Array<{
-    actual: number;
-    allowed: number;
-    baseline: number;
-    metric: string;
-    scenario: string;
-  }> = [];
+  const regressions: ComponentPerfRegression[] = [];
   for (const [scenarioName, actualSummary] of Object.entries(actual.scenarios)) {
     const baselineSummary = baseline.scenarios[scenarioName];
     if (!baselineSummary) continue;

@@ -28,12 +28,13 @@ export const LILIA_TOOLS_ASSETS_ROOT = fileURLToPath(new URL("../assets/", impor
 export function checkPackageManager(projectRoot = process.cwd(), env = process.env) {
   const packageJson = readJson(resolve(projectRoot, "package.json"));
   const requiredPackageManager = packageJson.packageManager;
+  const requiredYarnVersion = /^yarn@([^+]+)/.exec(requiredPackageManager ?? "")?.[1];
   const userAgent = env.npm_config_user_agent ?? "";
   const yarnMatch = userAgent.match(/\byarn\/([^\s]+)/);
   const yarnVersion = yarnMatch?.[1];
   const yarnMajor = Number.parseInt(yarnVersion?.split(".")[0] ?? "", 10);
 
-  if (yarnMajor >= 4) {
+  if (yarnMajor >= 4 && yarnVersion === requiredYarnVersion) {
     return { ok: true, message: "" };
   }
 
@@ -355,7 +356,7 @@ export async function runToolsCli(argv, options = {}) {
 
 function createTemplateProfile(overrides = {}) {
   return {
-    packageManager: "yarn@4.14.1",
+    packageManager: "yarn@4.17.1+sha512.ccbfabf7d7b6b32075088be9386fb9a2e00bb6887ef07fa56effabc890a56d53da1ccc4128d62db245fcbd3961b236d75335bdf7d5320ed6eafb7588b7ad4697",
     expectedDependencies: ["@lilia/ui", "@lilia/config", "@lilia/tools", "@lilia/build"],
     nativeBackdropPermissions: ["lilia:default", "lilia:allow-set-window-backdrop"],
     importantFiles: [
@@ -493,8 +494,8 @@ function formatPackageManagerMessage({ productTitle, reason, requiredPackageMana
     `Expected package manager: ${requiredPackageManager}`,
     "",
     "Fix:",
-    "  corepack enable",
-    `  corepack prepare ${requiredPackageManager} --activate`,
+    "  npm install --global corepack@0.35.0",
+    "  corepack enable yarn",
     "  yarn install",
     "",
     "If the `yarn` command still resolves to Yarn 1, run the commands through Corepack:",

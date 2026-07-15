@@ -3,16 +3,31 @@ import { dirname, resolve } from "node:path";
 import { chromium } from "@playwright/test";
 import { createServer } from "vite";
 import vue from "@vitejs/plugin-vue";
+import type {
+  ComponentPerfRegression,
+  ComponentPerfReport,
+} from "./componentPerformanceTypes.ts";
+
+interface ComponentPerformanceModule {
+  compareComponentPerfReport(
+    actual: ComponentPerfReport,
+    baseline: ComponentPerfReport,
+  ): ComponentPerfRegression[];
+  validateComponentPerfBaseline(
+    actual: ComponentPerfReport,
+    baseline: ComponentPerfReport,
+  ): string[];
+}
 
 const baselinePath = resolve("tests/perf/componentPerformance.browser.baseline.json");
 const reportPath = resolve("tests/perf/reports/component-performance-browser.json");
 
-function writeJson(path, value) {
+function writeJson(path: string, value: unknown) {
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-function failReport(title, lines) {
+function failReport(title: string, lines: readonly string[]) {
   if (!lines.length) return false;
   console.error(title);
   for (const line of lines) console.error(`- ${line}`);
@@ -35,24 +50,31 @@ const address = server.httpServer?.address();
 if (!address || typeof address === "string") {
   throw new Error("Unable to start Vite performance harness.");
 }
-let browser;
+let browser: Awaited<ReturnType<typeof chromium.launch>> | undefined;
 try {
   const {
     compareComponentPerfReport,
     validateComponentPerfBaseline,
-  } = await server.ssrLoadModule("/tests/perf/componentPerformanceRunner.ts");
+  } = await server.ssrLoadModule(
+    "/tests/perf/componentPerformanceRunner.ts",
+  ) as ComponentPerformanceModule;
 
   browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
   await page.goto(`http://127.0.0.1:${address.port}/tests/perf/browserHarness.html`);
-  const report = await page.evaluate(() => window.__liliaComponentPerfRun());
+  const report = await page.evaluate<ComponentPerfReport>(() => {
+    const perfWindow = window as unknown as Window & {
+      __liliaComponentPerfRun: () => Promise<ComponentPerfReport>;
+    };
+    return perfWindow.__liliaComponentPerfRun();
+  });
   writeJson(reportPath, report);
   console.log(`Wrote ${reportPath}`);
   if (process.env.LILIA_UPDATE_PERF_BASELINE === "1") {
     writeJson(baselinePath, report);
     console.log(`Updated ${baselinePath}`);
   } else {
-    const baseline = JSON.parse(readFileSync(baselinePath, "utf8"));
+    const baseline = JSON.parse(readFileSync(baselinePath, "utf8")) as ComponentPerfReport;
     const mismatches = validateComponentPerfBaseline(report, baseline);
     if (!failReport("Browser component performance baseline mismatch:", mismatches)) {
       const regressions = compareComponentPerfReport(report, baseline);
