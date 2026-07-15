@@ -29,6 +29,10 @@
   --lilia-sidebar-surface: transparent;
 }
 
+:root:not([data-backdrop="solid"])[data-backdrop-target="sidebar"][data-titlebar-follows-sidebar="true"] .shell {
+  --lilia-titlebar-surface: transparent;
+}
+
 :root[data-backdrop="solid"] .shell {
   --lilia-titlebar-surface: var(--bg-elev);
   --lilia-sidebar-surface: var(--bg-elev);

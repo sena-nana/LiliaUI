@@ -13,6 +13,7 @@ export interface NativeAppearanceSettings {
   backdropMode: BackdropMode;
   backdropOpacity: number;
   backdropTarget: BackdropTarget;
+  titlebarFollowsSidebar: boolean;
 }
 
 declare global {
@@ -36,6 +37,7 @@ interface NativeAppearanceState {
   backdropMode: Ref<BackdropMode>;
   backdropOpacity: Ref<number>;
   backdropTarget: Ref<BackdropTarget>;
+  titlebarFollowsSidebar: Ref<boolean>;
 }
 
 let appearanceState: NativeAppearanceState | null = null;
@@ -52,6 +54,10 @@ function opacityStorageKey() {
 
 function targetStorageKey() {
   return `${APP_METADATA.storageKeyPrefix}.backdropTarget`;
+}
+
+function titlebarFollowsSidebarStorageKey() {
+  return `${APP_METADATA.storageKeyPrefix}.titlebarFollowsSidebar`;
 }
 
 function isBackdropMode(value: unknown): value is BackdropMode {
@@ -107,6 +113,11 @@ function configuredDefaultTarget(): BackdropTarget {
   return isBackdropTarget(configured) ? configured : "sidebar";
 }
 
+function configuredTitlebarFollowsSidebar(): boolean {
+  const configured = getLiliaAppConfig().appearance?.titlebarFollowsSidebar;
+  return typeof configured === "boolean" ? configured : true;
+}
+
 function loadMode(nativePlatform: NativePlatform): BackdropMode {
   try {
     const stored = localStorage.getItem(modeStorageKey());
@@ -137,26 +148,48 @@ function loadTarget(): BackdropTarget {
   }
 }
 
+function loadTitlebarFollowsSidebar(): boolean {
+  try {
+    const stored = localStorage.getItem(titlebarFollowsSidebarStorageKey());
+    if (stored === "true") return true;
+    if (stored === "false") return false;
+  } catch {
+    // localStorage 不可用时使用应用默认值。
+  }
+  return configuredTitlebarFollowsSidebar();
+}
+
 function applyDom(
   nativePlatform: NativePlatform,
   mode: BackdropMode,
   opacity: number,
   target: BackdropTarget,
+  titlebarFollowsSidebar: boolean,
 ) {
   document.documentElement.dataset.platform = nativePlatform;
   document.documentElement.dataset.backdrop = mode;
   document.documentElement.dataset.backdropTarget = target;
+  document.documentElement.dataset.titlebarFollowsSidebar = String(titlebarFollowsSidebar);
   document.documentElement.style.setProperty(
     "--lilia-backdrop-opacity",
     String(opacity),
   );
 }
 
-function persist(mode: BackdropMode, opacity: number, target: BackdropTarget) {
+function persist(
+  mode: BackdropMode,
+  opacity: number,
+  target: BackdropTarget,
+  titlebarFollowsSidebar: boolean,
+) {
   try {
     localStorage.setItem(modeStorageKey(), mode);
     localStorage.setItem(opacityStorageKey(), String(opacity));
     localStorage.setItem(targetStorageKey(), target);
+    localStorage.setItem(
+      titlebarFollowsSidebarStorageKey(),
+      String(titlebarFollowsSidebar),
+    );
   } catch {
     // ignore
   }
@@ -197,15 +230,22 @@ function ensureNativeAppearance(): NativeAppearanceState {
   const backdropMode = ref(loadMode(platform));
   const backdropOpacity = ref(loadOpacity());
   const backdropTarget = ref(loadTarget());
+  const titlebarFollowsSidebar = ref(loadTitlebarFollowsSidebar());
   const { theme } = useTheme();
 
-  appearanceState = { platform, backdropMode, backdropOpacity, backdropTarget };
+  appearanceState = {
+    platform,
+    backdropMode,
+    backdropOpacity,
+    backdropTarget,
+    titlebarFollowsSidebar,
+  };
 
   watch(
-    [backdropMode, backdropOpacity, backdropTarget],
-    ([mode, opacity, target]) => {
-      applyDom(platform, mode, opacity, target);
-      persist(mode, opacity, target);
+    [backdropMode, backdropOpacity, backdropTarget, titlebarFollowsSidebar],
+    ([mode, opacity, target, followsSidebar]) => {
+      applyDom(platform, mode, opacity, target, followsSidebar);
+      persist(mode, opacity, target, followsSidebar);
     },
     { flush: "sync", immediate: true },
   );
@@ -235,6 +275,7 @@ export function useNativeAppearance() {
     backdropMode: readonly(state.backdropMode),
     backdropOpacity: readonly(state.backdropOpacity),
     backdropTarget: readonly(state.backdropTarget),
+    titlebarFollowsSidebar: readonly(state.titlebarFollowsSidebar),
     setBackdropMode(next: BackdropMode) {
       state.backdropMode.value = normalizeBackdropMode(next, state.platform);
     },
@@ -243,6 +284,9 @@ export function useNativeAppearance() {
     },
     setBackdropTarget(next: BackdropTarget) {
       state.backdropTarget.value = next;
+    },
+    setTitlebarFollowsSidebar(next: boolean) {
+      state.titlebarFollowsSidebar.value = next;
     },
   };
 }

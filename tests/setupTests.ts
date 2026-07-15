@@ -11,7 +11,9 @@ afterEach(() => {
     document.documentElement.removeAttribute("data-corners");
     document.documentElement.removeAttribute("data-theme");
     document.documentElement.removeAttribute("data-backdrop");
+    document.documentElement.removeAttribute("data-backdrop-target");
     document.documentElement.removeAttribute("data-platform");
+    document.documentElement.removeAttribute("data-titlebar-follows-sidebar");
     document.documentElement.style.removeProperty("--app-corner-radius");
     document.documentElement.style.removeProperty("--lilia-backdrop-opacity");
   }
