@@ -86,7 +86,6 @@ impl Builder {
     }
 
     pub fn build<R: Runtime>(self) -> TauriPlugin<R> {
-        let setup_options = self.clone();
         let event_options = self;
 
         PluginBuilder::new(PLUGIN_NAME)
@@ -94,11 +93,13 @@ impl Builder {
             .invoke_handler(tauri::generate_handler![set_window_backdrop])
             .setup(move |app, _api| {
                 app.manage(BackdropRuntimeState::default());
-                configure_main_window(app, &setup_options);
                 Ok(())
             })
             .on_event(move |app, event| match event {
-                RunEvent::Ready => present_main_window(app, &event_options),
+                RunEvent::Ready => {
+                    configure_main_window(app, &event_options);
+                    present_main_window(app, &event_options);
+                }
                 RunEvent::WindowEvent { label, event, .. }
                     if label == &event_options.main_window_label
                         && matches!(
