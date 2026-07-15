@@ -45,13 +45,16 @@ describe("useNativeAppearance", () => {
     expect(appearance.backdropMode.value).toBe("acrylic");
     expect(appearance.backdropOpacity.value).toBe(0.7);
     expect(appearance.backdropTarget.value).toBe("main");
+    expect(appearance.titlebarFollowsSidebar.value).toBe(true);
     expect(document.documentElement.dataset.platform).toBe("windows");
     expect(document.documentElement.dataset.backdrop).toBe("acrylic");
     expect(document.documentElement.dataset.backdropTarget).toBe("main");
+    expect(document.documentElement.dataset.titlebarFollowsSidebar).toBe("true");
     expect(document.documentElement.style.getPropertyValue("--lilia-backdrop-opacity")).toBe("0.7");
     expect(localStorage.getItem("lilia-ui-test.backdropMode")).toBe("acrylic");
     expect(localStorage.getItem("lilia-ui-test.backdropOpacity")).toBe("0.7");
     expect(localStorage.getItem("lilia-ui-test.backdropTarget")).toBe("main");
+    expect(localStorage.getItem("lilia-ui-test.titlebarFollowsSidebar")).toBe("true");
     await waitFor(() => {
       expect(invoke).toHaveBeenCalledWith("plugin:lilia|set_window_backdrop", {
         mode: "acrylic",
@@ -111,6 +114,38 @@ describe("useNativeAppearance", () => {
     expect(appearance.backdropTarget.value).toBe("sidebar");
     expect(document.documentElement.dataset.backdropTarget).toBe("sidebar");
     expect(localStorage.getItem("lilia-ui-test.backdropTarget")).toBe("sidebar");
+  });
+
+  it("标题栏默认跟随侧边栏并恢复有效的应用或本地偏好", async () => {
+    window.__LILIA_NATIVE_PLATFORM__ = "windows";
+    vi.resetModules();
+    let ui = await import("@lilia/ui");
+    ui.setLiliaAppConfig({
+      ...testAppConfig,
+      appearance: { titlebarFollowsSidebar: false },
+    });
+    let appearance = ui.useNativeAppearance();
+
+    expect(appearance.titlebarFollowsSidebar.value).toBe(false);
+    expect(document.documentElement.dataset.titlebarFollowsSidebar).toBe("false");
+
+    appearance.setTitlebarFollowsSidebar(true);
+    expect(localStorage.getItem("lilia-ui-test.titlebarFollowsSidebar")).toBe("true");
+
+    localStorage.setItem("lilia-ui-test.titlebarFollowsSidebar", "invalid");
+    vi.resetModules();
+    ui = await import("@lilia/ui");
+    ui.setLiliaAppConfig(testAppConfig);
+    appearance = ui.useNativeAppearance();
+    expect(appearance.titlebarFollowsSidebar.value).toBe(true);
+
+    localStorage.setItem("lilia-ui-test.titlebarFollowsSidebar", "false");
+    vi.resetModules();
+    ui = await import("@lilia/ui");
+    ui.setLiliaAppConfig(testAppConfig);
+    appearance = ui.useNativeAppearance();
+    expect(appearance.titlebarFollowsSidebar.value).toBe(false);
+    expect(document.documentElement.dataset.titlebarFollowsSidebar).toBe("false");
   });
 
   it("仅在 Windows Mica 下随主题重新应用深浅效果", async () => {
@@ -177,6 +212,7 @@ describe("LiliaAppearanceSection", () => {
     expect(view.getByRole("radio", { name: "Acrylic" })).toBeInTheDocument();
     const sidebarTarget = view.getByRole("radio", { name: "侧边栏" });
     const mainTarget = view.getByRole("radio", { name: "主内容区" });
+    const titlebarFollow = view.getByRole("switch", { name: "标题栏跟随侧边栏透明" });
     expect(sidebarTarget).toHaveAttribute(
       "data-agent-id",
       "settings.appearance.backdrop-target.sidebar",
@@ -185,9 +221,22 @@ describe("LiliaAppearanceSection", () => {
       "data-agent-id",
       "settings.appearance.backdrop-target.main",
     );
+    expect(titlebarFollow).toHaveAttribute(
+      "data-agent-id",
+      "settings.appearance.titlebar-follow-sidebar",
+    );
+    expect(titlebarFollow).toBeChecked();
+    expect(titlebarFollow).not.toBeDisabled();
+    await fireEvent.click(titlebarFollow);
+    expect(titlebarFollow).not.toBeChecked();
+    expect(document.documentElement.dataset.titlebarFollowsSidebar).toBe("false");
+    expect(localStorage.getItem("lilia-ui-test.titlebarFollowsSidebar")).toBe("false");
+
     await fireEvent.click(mainTarget);
     expect(mainTarget).toHaveAttribute("aria-checked", "true");
     expect(document.documentElement.dataset.backdropTarget).toBe("main");
+    expect(titlebarFollow).toBeDisabled();
+    expect(titlebarFollow).not.toBeChecked();
     const opacity = view.getByRole("slider", { name: "材质不透明度" });
     expect(opacity).toHaveValue("64");
     expect(opacity).toHaveAttribute("data-agent-id", "settings.appearance.backdrop-opacity");
@@ -200,6 +249,8 @@ describe("LiliaAppearanceSection", () => {
     expect(opacity).toBeDisabled();
     expect(sidebarTarget).toBeDisabled();
     expect(mainTarget).toBeDisabled();
+    expect(titlebarFollow).toBeDisabled();
+    expect(titlebarFollow).not.toBeChecked();
     expect(view.getByText(/切回透明材质后会恢复当前数值/)).toBeInTheDocument();
     expect(view.getByText(/切回透明材质后会恢复当前选择/)).toBeInTheDocument();
   });
@@ -213,6 +264,8 @@ describe("LiliaAppearanceSection", () => {
 
     expect(macView.getByRole("radio", { name: "系统透明" })).toBeInTheDocument();
     expect(macView.getByRole("radiogroup", { name: "透明区域" })).toBeInTheDocument();
+    expect(macView.getByRole("switch", { name: "标题栏跟随侧边栏透明" }))
+      .toBeInTheDocument();
     expect(macView.queryByRole("radio", { name: "Mica" })).not.toBeInTheDocument();
     macView.unmount();
 
@@ -225,5 +278,7 @@ describe("LiliaAppearanceSection", () => {
     expect(linuxView.queryByRole("radiogroup", { name: "窗口材质" })).not.toBeInTheDocument();
     expect(linuxView.queryByRole("radiogroup", { name: "透明区域" })).not.toBeInTheDocument();
     expect(linuxView.queryByRole("slider", { name: "材质不透明度" })).not.toBeInTheDocument();
+    expect(linuxView.queryByRole("switch", { name: "标题栏跟随侧边栏透明" }))
+      .not.toBeInTheDocument();
   });
 });

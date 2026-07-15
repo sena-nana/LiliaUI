@@ -7,6 +7,7 @@ import Sun from "@lucide/vue/dist/esm/icons/sun.mjs";
 import SettingsRow from "../../components/SettingsRow.vue";
 import UiCard from "../../components/UiCard.vue";
 import UiRangeField from "../../components/UiRangeField.vue";
+import UiSwitch from "../../components/UiSwitch.vue";
 import UiSegmentedControl, {
   type UiSegmentedOption,
 } from "../../components/UiSegmentedControl.vue";
@@ -29,9 +30,11 @@ const {
   backdropOpacity,
   backdropTarget,
   platform,
+  titlebarFollowsSidebar,
   setBackdropMode,
   setBackdropOpacity,
   setBackdropTarget,
+  setTitlebarFollowsSidebar,
 } = useNativeAppearance();
 
 const themeOptions: UiSegmentedOption[] = [
@@ -128,6 +131,13 @@ const backdropTargetHint = computed(() => backdropMode.value === "solid"
   ? "实色模式不显示透明区域；切回透明材质后会恢复当前选择。"
   : "选择侧边栏或主内容区显示透明材质。",
 );
+const titlebarFollowDisabled = computed(
+  () => backdropMode.value === "solid" || backdropTarget.value !== "sidebar",
+);
+const titlebarFollowHint = computed(() => titlebarFollowDisabled.value
+  ? "仅在侧边栏使用透明材质时生效；当前选择会保留。"
+  : "侧边栏透明时，整个标题栏同步显示透明材质。",
+);
 
 function onThemeChange(value: string | number) {
   if (value === "dark" || value === "light") setTheme(value);
@@ -186,6 +196,20 @@ function onBackdropTargetChange(value: string | number) {
         :options="backdropTargetOptions"
         aria-label="透明区域"
         @update:model-value="onBackdropTargetChange"
+      />
+    </SettingsRow>
+    <SettingsRow
+      v-if="platform !== 'linux'"
+      label="标题栏跟随侧边栏透明"
+      :hint="titlebarFollowHint"
+      agent-id="settings.appearance.titlebar-follow-sidebar-row"
+    >
+      <UiSwitch
+        :model-value="titlebarFollowsSidebar"
+        aria-label="标题栏跟随侧边栏透明"
+        agent-id="settings.appearance.titlebar-follow-sidebar"
+        :disabled="titlebarFollowDisabled"
+        @update:model-value="setTitlebarFollowsSidebar"
       />
     </SettingsRow>
     <SettingsRow

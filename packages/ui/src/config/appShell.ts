@@ -156,6 +156,7 @@ export interface LiliaPlatformAppearanceDefaults {
 export interface LiliaAppearanceConfigInput {
   backdropOpacity?: number;
   backdropTarget?: BackdropTarget;
+  titlebarFollowsSidebar?: boolean;
   platformDefaults?: Partial<Record<NativePlatform, LiliaPlatformAppearanceDefaults>>;
 }
 
