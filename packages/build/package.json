@@ -12,6 +12,9 @@
     "bin",
     "src"
   ],
+  "engines": {
+    "node": ">=26.0.0 <27"
+  },
   "scripts": {
     "typecheck": "node --check src/index.mjs && node --check src/tauriInstall.mjs && node --check bin/lilia-build.mjs"
   },
@@ -25,11 +28,11 @@
     "@vue/server-renderer": "^3.5.39",
     "jsdom": "^29.1.1",
     "typescript": "^6.0.3",
-    "vite": "^8.1.0",
+    "vite": "^8.1.4",
     "vitepress": "^1.6.4",
-    "vitest": "^4.1.9",
+    "vitest": "^4.1.10",
     "vue": "^3.5.39",
-    "vue-tsc": "^3.3.5"
+    "vue-tsc": "^3.3.7"
   },
   "peerDependencies": {
     "@lilia/config": "0.1.0",

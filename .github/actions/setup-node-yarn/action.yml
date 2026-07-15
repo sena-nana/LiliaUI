@@ -1,0 +1,33 @@
+name: Setup Node and Yarn
+description: Install the repository Node baseline, explicit Corepack, and pinned Yarn
+
+inputs:
+  working-directory:
+    description: Directory containing package.json and yarn.lock
+    default: .
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version-file: ${{ inputs.working-directory }}/.node-version
+
+    - name: Install Corepack
+      shell: bash
+      run: npm install --global corepack@0.35.0
+
+    - name: Enable the Node compile cache
+      shell: bash
+      run: |
+        echo "NODE_COMPILE_CACHE=${RUNNER_TEMP}/node-compile-cache" >> "${GITHUB_ENV}"
+        echo "NODE_COMPILE_CACHE_PORTABLE=1" >> "${GITHUB_ENV}"
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        NODE_COMPILE_CACHE: ${{ runner.temp }}/node-compile-cache
+        NODE_COMPILE_CACHE_PORTABLE: "1"
+      run: corepack yarn install --immutable

@@ -251,7 +251,7 @@ export async function runBuildCli(argv, options = {}) {
     }
     if (command === "test") {
       runPrepare(projectRoot, env);
-      runVitest(["run", ...args], { cwd: projectRoot, env });
+      runVitest(["run", ...args], { cwd: projectRoot, env: withoutNodeCompileCache(env) });
       return;
     }
     if (command === "docs") {
@@ -286,7 +286,7 @@ export async function runBuildCli(argv, options = {}) {
     }
     if (command === "verify") {
       runPrepare(projectRoot, env);
-      runVitest(["run"], { cwd: projectRoot, env });
+      runVitest(["run"], { cwd: projectRoot, env: withoutNodeCompileCache(env) });
       runVueTsc(["--noEmit"], { cwd: projectRoot, env });
       runVite(["build"], { cwd: projectRoot, env });
       runSync("cargo", ["check", "--manifest-path", "src-tauri/Cargo.toml"], { cwd: projectRoot, env });
@@ -299,6 +299,13 @@ export async function runBuildCli(argv, options = {}) {
     console.error(error instanceof Error ? error.message : "lilia-build failed.");
     process.exitCode = 1;
   }
+}
+
+function withoutNodeCompileCache(env) {
+  return {
+    ...env,
+    NODE_DISABLE_COMPILE_CACHE: "1",
+  };
 }
 
 function resolveRuntimeAppConfig(projectRoot, options = {}) {

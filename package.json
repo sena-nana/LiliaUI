@@ -7,31 +7,36 @@
     "packages/*"
   ],
   "scripts": {
-    "perf:components:browser": "node tests/perf/componentPerformance.browser.mjs",
-    "perf:components:light": "vitest run --config vitest.perf.config.ts",
+    "perf:components:browser": "node tests/perf/componentPerformance.browser.ts",
+    "perf:components:light": "NODE_DISABLE_COMPILE_CACHE=1 vitest run --config vitest.perf.config.ts",
     "perf:components:update-baseline": "node tests/perf/updateComponentPerformanceBaseline.mjs",
     "test:ui:browser": "node tests/ui/shellAppearance.browser.mjs",
-    "typecheck": "yarn workspaces foreach -Ap run typecheck",
-    "test": "vitest run",
+    "typecheck": "yarn workspaces foreach -Ap run typecheck && yarn typecheck:scripts",
+    "typecheck:scripts": "tsc -p tsconfig.node-scripts.json",
+    "test": "NODE_DISABLE_COMPILE_CACHE=1 vitest run",
     "verify": "yarn typecheck && yarn test && yarn test:ui:browser && yarn perf:components:light"
   },
+  "engines": {
+    "node": ">=26.0.0 <27"
+  },
   "devDependencies": {
-    "@lucide/vue": "^1.17.0",
+    "@lucide/vue": "^1.22.0",
     "@playwright/test": "^1.61.1",
-    "@tauri-apps/api": "^2.11.0",
+    "@tauri-apps/api": "^2.11.1",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/vue": "^8.1.0",
-    "@vitejs/plugin-vue": "^6.0.7",
-    "@vue/compiler-sfc": "^3.5.35",
+    "@types/node": "^26.1.1",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "@vue/compiler-sfc": "^3.5.39",
     "jsdom": "^29.1.1",
     "typescript": "^6.0.3",
-    "vite": "^8.0.16",
+    "vite": "^8.1.4",
     "vitepress": "^1.6.4",
-    "vitest": "^4.1.8",
-    "vue": "^3.5.35",
+    "vitest": "^4.1.10",
+    "vue": "^3.5.39",
     "vue-router": "^5.1.0",
-    "vue-tsc": "^3.3.4"
+    "vue-tsc": "^3.3.7"
   },
-  "packageManager": "yarn@4.14.1"
+  "packageManager": "yarn@4.17.1+sha512.ccbfabf7d7b6b32075088be9386fb9a2e00bb6887ef07fa56effabc890a56d53da1ccc4128d62db245fcbd3961b236d75335bdf7d5320ed6eafb7588b7ad4697"
 }
