@@ -132,6 +132,30 @@ describe("@lilia/tools", () => {
     expect(dependencyCheck.detail).not.toContain("vite=");
   });
 
+  it("requires a native backdrop permission in the default Tauri capability", () => {
+    const root = createProject();
+    const capabilityPath = join(root, "src-tauri", "capabilities", "default.json");
+    const profile = {
+      expectedDependencies: ["@lilia/ui"],
+      importantFiles: [],
+      agentTargetFiles: {},
+    };
+
+    writeFileSync(capabilityPath, `${JSON.stringify({ permissions: ["core:default"] })}\n`);
+    const missing = createTemplateReport(root, { profile });
+    expect(missing.checks.find((check) => check.id === "native-backdrop-permission")?.ok)
+      .toBe(false);
+    expect(missing.status).toBe("needs_attention");
+
+    for (const permission of ["lilia:default", "lilia:allow-set-window-backdrop"]) {
+      writeFileSync(capabilityPath, `${JSON.stringify({ permissions: [permission] })}\n`);
+      const ready = createTemplateReport(root, { profile });
+      expect(ready.checks.find((check) => check.id === "native-backdrop-permission")?.ok)
+        .toBe(true);
+      expect(ready.status).toBe("ready");
+    }
+  });
+
   it("reports Agent debug readiness without requiring desktop replay tools", () => {
     const root = createProject();
     const report = createAgentDebugReport(root, {
@@ -393,7 +417,7 @@ function shortcutPlan(platform, kind, shortcutPath, artifactPath, artifactKind =
 
 function createProject(overrides = {}) {
   const root = mkdtempSync(join(tmpdir(), "lilia-tools-"));
-  mkdirSync(join(root, "src-tauri"), { recursive: true });
+  mkdirSync(join(root, "src-tauri", "capabilities"), { recursive: true });
   writeFileSync(
     join(root, "package.json"),
     `${JSON.stringify({
@@ -417,6 +441,10 @@ function createProject(overrides = {}) {
     }),
   );
   writeFileSync(join(root, "src-tauri/Cargo.toml"), '[package]\nversion = "0.1.0"\n');
+  writeFileSync(
+    join(root, "src-tauri/capabilities/default.json"),
+    `${JSON.stringify({ permissions: ["lilia:default"] }, null, 2)}\n`,
+  );
   return root;
 }
 
