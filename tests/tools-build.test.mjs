@@ -366,7 +366,7 @@ describe("@lilia/build", () => {
 
   it("writes an executable Linux desktop entry with escaped Exec fields", () => {
     const root = mkdtempSync(join(tmpdir(), "lilia-linux-shortcut-"));
-    const artifact = join(root, "release", "app %$`\\name");
+    const artifact = join(root, "release", "app %$`name");
     const shortcut = join(root, "Desktop", "Lilia Test.desktop");
     const iconPath = join(root, "icon.png");
     mkdirSync(join(root, "release"), { recursive: true });
@@ -386,6 +386,12 @@ describe("@lilia/build", () => {
     expect(entry).toContain("\\\\`");
     expect(entry).toContain(`Icon=${iconPath}`);
     expect(lstatSync(shortcut).mode & 0o777).toBe(0o755);
+
+    const backslashEntry = linuxDesktopEntry({
+      ...plan,
+      artifact: { ...plan.artifact, path: `${artifact}\\name` },
+    }, createAppConfig());
+    expect(backslashEntry).toContain(String.raw`\\\\name`);
 
     const protectedFile = join(root, "protected.txt");
     writeFileSync(protectedFile, "keep");
