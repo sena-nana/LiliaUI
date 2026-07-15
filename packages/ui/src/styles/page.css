@@ -95,6 +95,7 @@
 .settings-row,
 .settings-page .settings-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
@@ -121,10 +122,9 @@
 .settings-row__label,
 .settings-page .settings-row__label {
   min-width: 0;
-  flex: 0 0 auto;
+  flex: 1 1 260px;
   font-size: 13px;
   font-weight: 500;
-  white-space: nowrap;
 }
 
 .settings-row__hint,
@@ -148,6 +148,9 @@
 .settings-row__control {
   justify-content: flex-end;
   flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+  margin-left: auto;
   gap: 8px;
 }
 
@@ -243,7 +246,9 @@
 }
 
 .settings-row .ui-input {
-  width: min(360px, 45vw);
+  width: 360px;
+  max-width: 100%;
+  min-width: 0;
   min-height: 34px;
   background: var(--bg);
   border-color: var(--border);
@@ -320,6 +325,13 @@
   .settings-page .settings-row {
     align-items: flex-start;
     flex-direction: column;
+    flex-wrap: nowrap;
+  }
+
+  .settings-row__label,
+  .settings-page .settings-row__label {
+    flex: none;
+    width: 100%;
   }
 
   .settings-row__radius-control,
