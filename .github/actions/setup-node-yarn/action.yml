@@ -16,7 +16,15 @@ runs:
 
     - name: Install Corepack
       shell: bash
-      run: npm install --global corepack@0.35.0
+      run: |
+        corepack_prefix="${RUNNER_TEMP}/corepack-0.35.0"
+        npm install --global --prefix "${corepack_prefix}" corepack@0.35.0
+
+        if [[ "${RUNNER_OS}" == "Windows" ]]; then
+          echo "${corepack_prefix}" >> "${GITHUB_PATH}"
+        else
+          echo "${corepack_prefix}/bin" >> "${GITHUB_PATH}"
+        fi
 
     - name: Enable the Node compile cache
       shell: bash
