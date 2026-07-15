@@ -8,6 +8,7 @@ import {
   SIDEBAR_GLOBAL_ACTIONS,
   SIDEBAR_GROUPS,
   SIDEBAR_NAV,
+  SIDEBAR_TOP_CONTENT,
   type SidebarActionItem,
 } from "../config/appShell";
 import UiIconButton from "../components/UiIconButton.vue";
@@ -15,7 +16,11 @@ import SidebarFooter from "../components/sidebar/SidebarFooter.vue";
 import SidebarRowTools from "../components/sidebar/SidebarRowTools.vue";
 
 const hasNavSection = computed(() => SIDEBAR_NAV.length > 0);
-const hasTopSection = computed(() => SIDEBAR_GLOBAL_ACTIONS.length > 0 || hasNavSection.value);
+const hasTopSection = computed(() => (
+  SIDEBAR_TOP_CONTENT.value !== null
+  || SIDEBAR_GLOBAL_ACTIONS.length > 0
+  || hasNavSection.value
+));
 
 function selectAction(action: SidebarActionItem) {
   if (action.disabled || !action.onSelect) return;
@@ -31,18 +36,25 @@ function selectNavItem(item: { disabled?: boolean; onSelect?: () => void | Promi
 <template>
   <aside class="secondary-panel" data-agent-id="sidebar.main">
     <div v-if="hasTopSection" class="secondary-panel__top">
-      <div v-if="SIDEBAR_GLOBAL_ACTIONS.length" class="sb-section sb-section--actions">
-        <UiIconButton
-          v-for="action in SIDEBAR_GLOBAL_ACTIONS"
-          :key="action.key"
-          class="sb-action"
-          size="md"
-          :icon="action.icon"
-          :label="action.label"
-          :disabled="action.disabled || !action.onSelect"
-          :agent-id="`sidebar.global.${action.key}`"
-          @click="selectAction(action)"
-        />
+      <div
+        v-if="SIDEBAR_TOP_CONTENT || SIDEBAR_GLOBAL_ACTIONS.length"
+        class="sb-section sb-section--actions"
+      >
+        <component v-if="SIDEBAR_TOP_CONTENT" :is="SIDEBAR_TOP_CONTENT" />
+        <template v-else>
+          <UiIconButton
+            v-for="action in SIDEBAR_GLOBAL_ACTIONS"
+            :key="action.key"
+            class="sb-action"
+            size="md"
+            :icon="action.icon"
+            :label="action.label"
+            :active="action.active"
+            :disabled="action.disabled || !action.onSelect"
+            :agent-id="`sidebar.global.${action.key}`"
+            @click="selectAction(action)"
+          />
+        </template>
       </div>
 
       <div v-if="hasNavSection" class="sb-section">
@@ -106,6 +118,7 @@ function selectNavItem(item: { disabled?: boolean; onSelect?: () => void | Promi
               size="sm"
               :icon="tool.icon"
               :label="tool.label"
+              :active="tool.active"
               :disabled="tool.disabled || !tool.onSelect"
               :agent-id="`sidebar.group.${group.key}.tool.${tool.key}`"
               @click="selectAction(tool)"

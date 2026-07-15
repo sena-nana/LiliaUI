@@ -1,4 +1,4 @@
-import { defineAsyncComponent, reactive, type Component } from "vue";
+import { defineAsyncComponent, markRaw, reactive, shallowRef, type Component } from "vue";
 import Bot from "@lucide/vue/dist/esm/icons/bot.mjs";
 import Brain from "@lucide/vue/dist/esm/icons/brain.mjs";
 import Download from "@lucide/vue/dist/esm/icons/download.mjs";
@@ -64,6 +64,7 @@ export interface LiliaShellCopy {
 }
 
 export interface LiliaSidebarActionInput {
+  active?: boolean;
   disabled?: boolean;
   icon: IconInput;
   key: string;
@@ -116,6 +117,7 @@ export interface LiliaSidebarConfigInput {
   maxWidth?: number;
   minWidth?: number;
   nav?: LiliaSidebarNavInput[];
+  topContent?: Component;
   widthStorageKey?: string;
 }
 
@@ -199,6 +201,7 @@ export const SIDEBAR_CONFIG = reactive({
 });
 
 export interface SidebarActionItem {
+  active?: boolean;
   disabled?: boolean;
   icon: Component;
   key: string;
@@ -277,6 +280,7 @@ const lucideIcons = {
 export const SIDEBAR_GLOBAL_ACTIONS = reactive<SidebarActionItem[]>([]);
 export const SIDEBAR_NAV = reactive<SidebarNavItem[]>([]);
 export const SIDEBAR_GROUPS = reactive<SidebarGroup[]>([]);
+export const SIDEBAR_TOP_CONTENT = shallowRef<Component | null>(null);
 export const SIDEBAR_FOOTER_LINKS = reactive<SidebarFooterLink[]>([]);
 export const SIDEBAR_FOOTER_STATUS = reactive<SidebarFooterStatus>({
   to: "/settings",
@@ -428,6 +432,7 @@ export function setLiliaAppConfig(config: LiliaAppConfig) {
   });
 
   replaceArray(SIDEBAR_GLOBAL_ACTIONS, (sidebar.globalActions ?? []).map(resolveAction));
+  SIDEBAR_TOP_CONTENT.value = sidebar.topContent ? markRaw(sidebar.topContent) : null;
   replaceArray(SIDEBAR_NAV, (sidebar.nav ?? []).map(resolveNav));
   replaceArray(
     SIDEBAR_GROUPS,

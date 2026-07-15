@@ -85,6 +85,7 @@ export {
   SIDEBAR_GLOBAL_ACTIONS,
   SIDEBAR_GROUPS,
   SIDEBAR_NAV,
+  SIDEBAR_TOP_CONTENT,
   getLiliaAppConfig,
   normalizeSettingsTab,
   setLiliaAppConfig,

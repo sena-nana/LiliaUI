@@ -22,6 +22,7 @@ function selectTool(tool: SidebarActionItem) {
       size="sm"
       :icon="tool.icon"
       :label="tool.label"
+      :active="tool.active"
       :disabled="tool.disabled || !tool.onSelect"
       :agent-id="agentIdBase ? `${agentIdBase}.${tool.key}` : undefined"
       @click="selectTool(tool)"
