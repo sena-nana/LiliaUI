@@ -384,7 +384,9 @@ describe("@lilia/build", () => {
     expect(entry).toContain("app %%");
     expect(entry).toContain("\\\\$");
     expect(entry).toContain("\\\\`");
-    expect(lstatSync(shortcut).mode & 0o777).toBe(0o755);
+    if (process.platform !== "win32") {
+      expect(lstatSync(shortcut).mode & 0o777).toBe(0o755);
+    }
 
     const backslashEntry = linuxDesktopEntry({
       ...plan,
