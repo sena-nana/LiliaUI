@@ -16,6 +16,7 @@ const { route, returnTo } = useRouteReturnTarget();
 const sidebarLocked = computed(() => route.meta.lockSidebar === true);
 const sidebarVariant = computed(() => route.meta.sidebar ?? "main");
 const isSettingsMode = computed(() => sidebarVariant.value === "settings");
+const isWorkspaceLayout = computed(() => route.meta.contentLayout === "workspace");
 const activeSettingsTab = computed(() => normalizeSettingsTab(route.query.tab));
 const setupOverlayActive = computed(() => resolveShellBoolean(shellOptions.setupOverlayActive));
 const sidebarDisabled = computed(() => sidebarLocked.value || setupOverlayActive.value);
@@ -32,6 +33,7 @@ useNativeAppearance();
       'is-resizing': sidebar.isResizing.value,
       'is-sidebar-collapsed': sidebar.effectiveCollapsed.value,
       'is-settings-mode': isSettingsMode,
+      'is-workspace-layout': isWorkspaceLayout,
       'is-setup-overlay': setupOverlayActive,
     }"
     :style="{ '--sidebar-width': sidebar.widthStyle.value }"

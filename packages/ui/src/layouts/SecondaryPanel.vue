@@ -2,8 +2,6 @@
 import { computed } from "vue";
 import {
   APP_SHELL_COPY,
-  SIDEBAR_FOOTER_LINKS,
-  SIDEBAR_FOOTER_STATUSES,
   SIDEBAR_GLOBAL_ACTIONS,
   SIDEBAR_GROUPS,
   SIDEBAR_NAV,
@@ -11,8 +9,8 @@ import {
   type SidebarActionItem,
 } from "../config/appShell";
 import UiIconButton from "../components/UiIconButton.vue";
-import SidebarFooter from "../components/sidebar/SidebarFooter.vue";
 import SidebarNavRow from "../components/sidebar/SidebarNavRow.vue";
+import LiliaSidebarFrame from "./LiliaSidebarFrame.vue";
 
 const hasNavSection = computed(() => SIDEBAR_NAV.length > 0);
 const hasTopSection = computed(() => (
@@ -29,8 +27,8 @@ function selectAction(action: SidebarActionItem) {
 </script>
 
 <template>
-  <aside class="secondary-panel" data-agent-id="sidebar.main">
-    <div v-if="hasTopSection" class="secondary-panel__top">
+  <LiliaSidebarFrame>
+    <template v-if="hasTopSection" #top>
       <div
         v-if="SIDEBAR_TOP_CONTENT || SIDEBAR_GLOBAL_ACTIONS.length"
         class="sb-section sb-section--actions"
@@ -65,9 +63,9 @@ function selectAction(action: SidebarActionItem) {
           />
         </nav>
       </div>
-    </div>
+    </template>
 
-    <div class="secondary-panel__body">
+    <template #body>
       <div
         v-for="group in SIDEBAR_GROUPS"
         :key="group.key"
@@ -102,15 +100,8 @@ function selectAction(action: SidebarActionItem) {
           <p v-if="group.emptyText" class="sb-tree__empty">{{ group.emptyText }}</p>
         </div>
       </div>
-    </div>
-
-    <div class="secondary-panel__footer">
-      <SidebarFooter
-        :links="SIDEBAR_FOOTER_LINKS"
-        :statuses="SIDEBAR_FOOTER_STATUSES"
-      />
-    </div>
-  </aside>
+    </template>
+  </LiliaSidebarFrame>
 </template>
 
 <style scoped>

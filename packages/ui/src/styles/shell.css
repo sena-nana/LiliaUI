@@ -53,6 +53,11 @@
   border-top-left-radius: var(--radius-lg);
 }
 
+.shell.is-workspace-layout .shell__main {
+  overflow: hidden;
+  padding: 0;
+}
+
 .shell__resizer {
   position: absolute;
   top: var(--lilia-titlebar-height);
@@ -215,6 +220,10 @@
   .shell__main {
     padding: 12px;
     border-top-left-radius: 0;
+  }
+
+  .shell.is-workspace-layout .shell__main {
+    padding: 0;
   }
 
   .shell__resizer,
