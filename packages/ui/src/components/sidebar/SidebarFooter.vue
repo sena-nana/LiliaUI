@@ -26,7 +26,10 @@ defineProps<{
       <component :is="link.icon" :size="14" aria-hidden="true" />
     </RouterLink>
 
-    <div class="sb-footer__statuses">
+    <div
+      class="sb-footer__statuses"
+      :class="{ 'sb-footer__statuses--single': statuses.length < 2 }"
+    >
       <RouterLink
         v-for="(status, index) in statuses"
         :key="status.key"
@@ -112,9 +115,8 @@ defineProps<{
 }
 
 .sb-conn {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 4px;
   height: 20px;
   padding: 0 7px;
   border-radius: var(--radius-pill);
@@ -125,15 +127,21 @@ defineProps<{
   min-width: 0;
   overflow: hidden;
   opacity: 0.62;
-  flex: 0 1 auto;
+  flex: 1 1 0;
   transition: opacity 0.35s ease, background-color 0.12s ease, color 0.12s ease;
 }
 
+.sb-footer__statuses--single .sb-conn {
+  flex: 0 1 auto;
+}
+
 .sb-conn__content {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 4px;
   min-width: 0;
+  flex: 1 1 auto;
+  width: 100%;
 }
 
 .sb-conn__icon {
@@ -163,6 +171,7 @@ defineProps<{
 }
 
 .sb-conn__label {
+  flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
