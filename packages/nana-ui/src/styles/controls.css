@@ -1,0 +1,75 @@
+.nana-button {
+  min-width: 0;
+  min-height: var(--control-height);
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text);
+  background: var(--bg-subtle);
+  cursor: pointer;
+  transition: background var(--motion-fast), color var(--motion-fast), box-shadow var(--motion-fast);
+}
+.nana-button--sm { min-height: var(--control-height-sm); padding-inline: 12px; font-size: 13px; }
+.nana-button--lg { min-height: 46px; padding-inline: 20px; }
+.nana-button--primary { color: var(--accent-text); background: var(--accent-strong); font-weight: 650; }
+.nana-button--ghost, .nana-button--text { background: transparent; }
+.nana-button--text { color: var(--accent); }
+.nana-button--danger { color: var(--err); background: var(--err-soft); }
+.nana-button:hover:not(:disabled) { box-shadow: inset 0 0 0 1px var(--border); }
+.nana-button--primary:hover:not(:disabled) { background: var(--accent); box-shadow: none; }
+.nana-button:disabled { cursor: not-allowed; opacity: 0.5; }
+.nana-button__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nana-button__spinner { width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: nana-spin 0.7s linear infinite; }
+@keyframes nana-spin { to { transform: rotate(360deg); } }
+.nana-icon-button { width: var(--control-height); padding: 0; }
+.nana-icon-button.is-active { color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--border-soft); }
+
+.nana-control {
+  width: 100%; min-width: 0; height: var(--control-height); padding: 0 12px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text); background: var(--bg-elev);
+  transition: border-color var(--motion-fast), box-shadow var(--motion-fast);
+}
+.nana-control--sm { height: var(--control-height-sm); }
+.nana-control--lg { height: 46px; }
+.nana-control:hover:not(:disabled) { border-color: var(--border-strong); }
+.nana-control:focus-visible { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); outline: none; }
+.nana-control[aria-invalid="true"] { border-color: var(--err); }
+.nana-control:disabled { color: var(--text-faint); background: var(--bg-subtle); cursor: not-allowed; }
+.nana-textarea { min-height: 96px; height: auto; padding-block: 10px; }
+.nana-select { appearance: auto; padding-right: 32px; }
+
+.nana-check, .nana-switch { display: inline-flex; align-items: center; gap: 9px; min-height: var(--control-height); color: var(--text); }
+.nana-check { cursor: pointer; }
+.nana-check input { position: absolute; opacity: 0; }
+.nana-check__mark { width: 20px; height: 20px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg-elev); }
+.nana-check input:checked + .nana-check__mark { background: var(--accent); border-color: var(--accent); box-shadow: inset 0 0 0 5px var(--accent); }
+.nana-check input:focus-visible + .nana-check__mark { outline: 2px solid var(--accent); outline-offset: 2px; }
+.nana-check.is-disabled { opacity: 0.5; cursor: not-allowed; }
+.nana-switch { padding: 0; border: 0; background: transparent; cursor: pointer; }
+.nana-switch__track { width: 44px; height: 24px; padding: 3px; border-radius: 999px; background: var(--border-strong); transition: background var(--motion-fast); }
+.nana-switch__thumb { display: block; width: 18px; height: 18px; border-radius: 50%; background: var(--bg-elev); transition: transform var(--motion-fast); }
+.nana-switch[aria-checked="true"] .nana-switch__track { background: var(--accent); }
+.nana-switch[aria-checked="true"] .nana-switch__thumb { transform: translateX(20px); }
+.nana-switch:disabled { opacity: 0.5; cursor: not-allowed; }
+.nana-slider { width: 100%; accent-color: var(--accent); }
+
+.nana-field { display: grid; gap: 6px; min-width: 0; }
+.nana-field__label { color: var(--text); font-weight: 600; }
+.nana-field__hint, .nana-field__error, .nana-validation { margin: 0; font-size: 12px; line-height: 1.45; }
+.nana-field__hint { color: var(--text-muted); }
+.nana-field__error, .nana-validation--danger { color: var(--err); }
+.nana-validation--warning { color: var(--warn); }
+
+.nana-tooltip-anchor { position: relative; display: inline-flex; min-width: 0; }
+.nana-tooltip { position: absolute; z-index: var(--z-popover); width: max-content; max-width: 260px; padding: 6px 9px; border-radius: var(--radius-xs); background: var(--text); color: var(--bg); box-shadow: var(--shadow-surface); font-size: 12px; pointer-events: none; }
+.nana-tooltip--top { left: 50%; bottom: calc(100% + 7px); transform: translateX(-50%); }
+.nana-tooltip--bottom { left: 50%; top: calc(100% + 7px); transform: translateX(-50%); }
+.nana-tooltip--left { right: calc(100% + 7px); top: 50%; transform: translateY(-50%); }
+.nana-tooltip--right { left: calc(100% + 7px); top: 50%; transform: translateY(-50%); }
+
+@media (prefers-reduced-motion: reduce) { .nana-button__spinner { animation-duration: 1.4s; } }

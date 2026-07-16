@@ -47,6 +47,8 @@ import { defineComponent, h, nextTick, type App, type Plugin, type Ref, type VNo
 import { createMemoryHistory, createRouter } from "vue-router";
 import { testAppConfig } from "../ui/fixtures/appConfig";
 import type { ComponentPerfRunner } from "./componentPerformanceRunner";
+import { professionalContractComponentScenarios } from "./scenarios/professionalContractComponents";
+import { nanaComponentScenarios } from "./scenarios/nana";
 
 export interface ComponentPerfScenario {
   name: string;
@@ -168,6 +170,15 @@ function changeValue(root: ParentNode, selector: string, value: string) {
   element.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
+async function focusIn(root: ParentNode, selector: string) {
+  const element = documentFor(root).querySelector(selector);
+  if (!(element instanceof HTMLElement)) {
+    throw new Error(`Missing perf focus target: ${selector}`);
+  }
+  element.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
+}
+
 function pointerOffset(root: ParentNode, selector: string, type: string, offsetX: number, offsetY: number) {
   const element = documentFor(root).querySelector(selector);
   if (!(element instanceof Element)) {
@@ -190,6 +201,8 @@ function animationFrame() {
 }
 
 export const componentPerformanceScenarios: ComponentPerfScenario[] = [
+  ...professionalContractComponentScenarios,
+  ...nanaComponentScenarios,
   {
     name: "ActionMenuItem",
     render: (step) => h(ActionMenuItem, { icon: Search, active: step.value % 2 === 1 }, () => "Open item"),
@@ -424,7 +437,10 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
   },
   {
     name: "Tooltip",
-    render: (step) => h(Tooltip, { open: step.value % 2 === 0 }, () => `Hint ${step.value}`),
+    render: (step) => h(Tooltip, { text: `Hint ${step.value}`, delayMs: 0 }, {
+      trigger: () => h("button", { type: "button", "data-agent-id": "perf.tooltip-trigger" }, "Inspect"),
+    }),
+    interact: (root) => focusIn(root, "[data-agent-id='perf.tooltip-trigger']"),
   },
   {
     name: "UiButton",

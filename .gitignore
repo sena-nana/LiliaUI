@@ -4,6 +4,8 @@ dist/
 .codegraph/
 target/
 tests/perf/reports/
+test-results/
+playwright-report/
 .pnp.*
 .yarn/*
 !.yarn/releases/

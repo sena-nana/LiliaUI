@@ -1,0 +1,36 @@
+{
+  "name": "@lilia/ui-foundation",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./commands": "./src/commands.ts",
+    "./anchored-position": "./src/useAnchoredPosition.ts",
+    "./button": "./src/useButtonPrimitive.ts",
+    "./dialog": "./src/useDialogPrimitive.ts",
+    "./field": "./src/useFieldPrimitive.ts",
+    "./overlay": "./src/useDismissableLayer.ts",
+    "./responsive": "./src/useResponsiveMode.ts",
+    "./sidebar": "./src/useSidebarPrimitive.ts",
+    "./settings": "./src/settings.ts",
+    "./theme": "./src/useThemeSync.ts",
+    "./tooltip": "./src/useTooltipPrimitive.ts"
+  },
+  "engines": {
+    "node": ">=26.0.0 <27"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "@lilia/ui-contract": "^0.1.0",
+    "vue": "^3.5.39",
+    "vue-router": "^5.1.0"
+  },
+  "devDependencies": {
+    "@lilia/ui-contract": "workspace:*",
+    "typescript": "^6.0.3",
+    "vue": "^3.5.39",
+    "vue-router": "^5.1.0"
+  }
+}

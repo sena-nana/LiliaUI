@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T12:19:04.426Z",
+  "generatedAt": "2026-07-16T13:58:11.753Z",
   "iterations": 9,
   "runner": "vitest-jsdom",
   "schemaVersion": 1,
@@ -684,6 +684,842 @@
       "update": {
         "median": 0.019,
         "p95": 0.023
+      }
+    },
+    "UiCheckbox": {
+      "domNodes": {
+        "median": 6,
+        "p95": 6
+      },
+      "interaction": {
+        "median": 0.117,
+        "p95": 0.191
+      },
+      "mount": {
+        "median": 0.261,
+        "p95": 0.587
+      },
+      "unmount": {
+        "median": 0.032,
+        "p95": 0.065
+      },
+      "update": {
+        "median": 0.099,
+        "p95": 0.208
+      }
+    },
+    "UiFormField": {
+      "domNodes": {
+        "median": 7,
+        "p95": 7
+      },
+      "interaction": {
+        "median": 0.069,
+        "p95": 0.113
+      },
+      "mount": {
+        "median": 0.175,
+        "p95": 0.267
+      },
+      "unmount": {
+        "median": 0.032,
+        "p95": 0.039
+      },
+      "update": {
+        "median": 0.142,
+        "p95": 0.192
+      }
+    },
+    "UiValidationMessage": {
+      "domNodes": {
+        "median": 2,
+        "p95": 2
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0
+      },
+      "mount": {
+        "median": 0.085,
+        "p95": 0.088
+      },
+      "unmount": {
+        "median": 0.014,
+        "p95": 0.015
+      },
+      "update": {
+        "median": 0.037,
+        "p95": 0.042
+      }
+    },
+    "UiDialog": {
+      "domNodes": {
+        "median": 13,
+        "p95": 13
+      },
+      "interaction": {
+        "median": 0.11,
+        "p95": 0.132
+      },
+      "mount": {
+        "median": 0.72,
+        "p95": 0.836
+      },
+      "unmount": {
+        "median": 0.078,
+        "p95": 0.088
+      },
+      "update": {
+        "median": 0.136,
+        "p95": 0.175
+      }
+    },
+    "UiDrawer": {
+      "domNodes": {
+        "median": 12,
+        "p95": 12
+      },
+      "interaction": {
+        "median": 0.082,
+        "p95": 0.087
+      },
+      "mount": {
+        "median": 0.452,
+        "p95": 0.516
+      },
+      "unmount": {
+        "median": 0.066,
+        "p95": 0.074
+      },
+      "update": {
+        "median": 0.087,
+        "p95": 0.101
+      }
+    },
+    "UiPopover": {
+      "domNodes": {
+        "median": 6,
+        "p95": 6
+      },
+      "interaction": {
+        "median": 0.065,
+        "p95": 0.075
+      },
+      "mount": {
+        "median": 0.317,
+        "p95": 0.658
+      },
+      "unmount": {
+        "median": 0.044,
+        "p95": 0.052
+      },
+      "update": {
+        "median": 0.05,
+        "p95": 0.07
+      }
+    },
+    "UiTabs": {
+      "domNodes": {
+        "median": 4,
+        "p95": 4
+      },
+      "interaction": {
+        "median": 0.055,
+        "p95": 0.057
+      },
+      "mount": {
+        "median": 0.124,
+        "p95": 0.149
+      },
+      "unmount": {
+        "median": 0.017,
+        "p95": 0.025
+      },
+      "update": {
+        "median": 0.04,
+        "p95": 0.054
+      }
+    },
+    "UiToast": {
+      "domNodes": {
+        "median": 9,
+        "p95": 9
+      },
+      "interaction": {
+        "median": 0.055,
+        "p95": 0.061
+      },
+      "mount": {
+        "median": 0.197,
+        "p95": 0.231
+      },
+      "unmount": {
+        "median": 0.025,
+        "p95": 0.033
+      },
+      "update": {
+        "median": 0.044,
+        "p95": 0.05
+      }
+    },
+    "UiProgress": {
+      "domNodes": {
+        "median": 10,
+        "p95": 10
+      },
+      "interaction": {
+        "median": 0.046,
+        "p95": 0.049
+      },
+      "mount": {
+        "median": 0.188,
+        "p95": 0.21
+      },
+      "unmount": {
+        "median": 0.022,
+        "p95": 0.027
+      },
+      "update": {
+        "median": 0.052,
+        "p95": 0.061
+      }
+    },
+    "UiSkeleton": {
+      "domNodes": {
+        "median": 2,
+        "p95": 2
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0
+      },
+      "mount": {
+        "median": 0.083,
+        "p95": 0.135
+      },
+      "unmount": {
+        "median": 0.009,
+        "p95": 0.011
+      },
+      "update": {
+        "median": 0.042,
+        "p95": 0.061
+      }
+    },
+    "UiStatusBadge": {
+      "domNodes": {
+        "median": 3,
+        "p95": 3
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0
+      },
+      "mount": {
+        "median": 0.064,
+        "p95": 0.072
+      },
+      "unmount": {
+        "median": 0.011,
+        "p95": 0.014
+      },
+      "update": {
+        "median": 0.019,
+        "p95": 0.028
+      }
+    },
+    "UiInteractiveCard": {
+      "domNodes": {
+        "median": 2,
+        "p95": 2
+      },
+      "interaction": {
+        "median": 0.051,
+        "p95": 0.058
+      },
+      "mount": {
+        "median": 0.081,
+        "p95": 0.096
+      },
+      "unmount": {
+        "median": 0.013,
+        "p95": 0.024
+      },
+      "update": {
+        "median": 0.028,
+        "p95": 0.038
+      }
+    },
+    "UiListItem": {
+      "domNodes": {
+        "median": 3,
+        "p95": 3
+      },
+      "interaction": {
+        "median": 0.038,
+        "p95": 0.042
+      },
+      "mount": {
+        "median": 0.087,
+        "p95": 0.101
+      },
+      "unmount": {
+        "median": 0.014,
+        "p95": 0.015
+      },
+      "update": {
+        "median": 0.025,
+        "p95": 0.036
+      }
+    },
+    "NanaButton": {
+      "domNodes": {
+        "median": 3,
+        "p95": 3
+      },
+      "interaction": {
+        "median": 0.228,
+        "p95": 0.291
+      },
+      "mount": {
+        "median": 0.472,
+        "p95": 0.635
+      },
+      "unmount": {
+        "median": 0.071,
+        "p95": 0.096
+      },
+      "update": {
+        "median": 0.142,
+        "p95": 0.159
+      }
+    },
+    "NanaIconButton": {
+      "domNodes": {
+        "median": 8,
+        "p95": 8
+      },
+      "interaction": {
+        "median": 0.136,
+        "p95": 0.434
+      },
+      "mount": {
+        "median": 0.583,
+        "p95": 1.936
+      },
+      "unmount": {
+        "median": 0.059,
+        "p95": 0.332
+      },
+      "update": {
+        "median": 0.127,
+        "p95": 0.329
+      }
+    },
+    "NanaInput": {
+      "domNodes": {
+        "median": 2,
+        "p95": 2
+      },
+      "interaction": {
+        "median": 0.07,
+        "p95": 0.08
+      },
+      "mount": {
+        "median": 0.128,
+        "p95": 0.164
+      },
+      "unmount": {
+        "median": 0.014,
+        "p95": 0.021
+      },
+      "update": {
+        "median": 0.036,
+        "p95": 0.047
+      }
+    },
+    "NanaTextarea": {
+      "domNodes": {
+        "median": 2,
+        "p95": 2
+      },
+      "interaction": {
+        "median": 0.061,
+        "p95": 0.194
+      },
+      "mount": {
+        "median": 0.14,
+        "p95": 0.531
+      },
+      "unmount": {
+        "median": 0.017,
+        "p95": 0.07
+      },
+      "update": {
+        "median": 0.057,
+        "p95": 0.207
+      }
+    },
+    "NanaSelect": {
+      "domNodes": {
+        "median": 4,
+        "p95": 4
+      },
+      "interaction": {
+        "median": 0.252,
+        "p95": 0.421
+      },
+      "mount": {
+        "median": 0.805,
+        "p95": 1.127
+      },
+      "unmount": {
+        "median": 0.075,
+        "p95": 0.124
+      },
+      "update": {
+        "median": 0.223,
+        "p95": 0.422
+      }
+    },
+    "NanaCheckbox": {
+      "domNodes": {
+        "median": 5,
+        "p95": 5
+      },
+      "interaction": {
+        "median": 0.158,
+        "p95": 1.192
+      },
+      "mount": {
+        "median": 0.51,
+        "p95": 0.618
+      },
+      "unmount": {
+        "median": 0.037,
+        "p95": 0.12
+      },
+      "update": {
+        "median": 0.082,
+        "p95": 0.17
+      }
+    },
+    "NanaSwitch": {
+      "domNodes": {
+        "median": 5,
+        "p95": 5
+      },
+      "interaction": {
+        "median": 0.042,
+        "p95": 0.052
+      },
+      "mount": {
+        "median": 0.102,
+        "p95": 0.135
+      },
+      "unmount": {
+        "median": 0.012,
+        "p95": 0.022
+      },
+      "update": {
+        "median": 0.029,
+        "p95": 0.037
+      }
+    },
+    "NanaSlider": {
+      "domNodes": {
+        "median": 2,
+        "p95": 2
+      },
+      "interaction": {
+        "median": 0.187,
+        "p95": 0.278
+      },
+      "mount": {
+        "median": 0.459,
+        "p95": 1.191
+      },
+      "unmount": {
+        "median": 0.046,
+        "p95": 0.071
+      },
+      "update": {
+        "median": 0.11,
+        "p95": 0.39
+      }
+    },
+    "NanaTabs": {
+      "domNodes": {
+        "median": 4,
+        "p95": 4
+      },
+      "interaction": {
+        "median": 0.315,
+        "p95": 0.361
+      },
+      "mount": {
+        "median": 0.419,
+        "p95": 0.572
+      },
+      "unmount": {
+        "median": 0.072,
+        "p95": 0.093
+      },
+      "update": {
+        "median": 0.138,
+        "p95": 0.186
+      }
+    },
+    "NanaSegmentedControl": {
+      "domNodes": {
+        "median": 4,
+        "p95": 4
+      },
+      "interaction": {
+        "median": 0.084,
+        "p95": 0.132
+      },
+      "mount": {
+        "median": 0.183,
+        "p95": 0.251
+      },
+      "unmount": {
+        "median": 0.026,
+        "p95": 0.042
+      },
+      "update": {
+        "median": 0.051,
+        "p95": 0.067
+      }
+    },
+    "NanaFormField": {
+      "domNodes": {
+        "median": 6,
+        "p95": 6
+      },
+      "interaction": {
+        "median": 0.22,
+        "p95": 0.397
+      },
+      "mount": {
+        "median": 0.45,
+        "p95": 1.061
+      },
+      "unmount": {
+        "median": 0.07,
+        "p95": 0.101
+      },
+      "update": {
+        "median": 0.295,
+        "p95": 2.401
+      }
+    },
+    "NanaValidationMessage": {
+      "domNodes": {
+        "median": 2,
+        "p95": 2
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0
+      },
+      "mount": {
+        "median": 0.063,
+        "p95": 0.095
+      },
+      "unmount": {
+        "median": 0.009,
+        "p95": 0.013
+      },
+      "update": {
+        "median": 0.026,
+        "p95": 0.039
+      }
+    },
+    "NanaCard": {
+      "domNodes": {
+        "median": 3,
+        "p95": 3
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0
+      },
+      "mount": {
+        "median": 0.07,
+        "p95": 0.406
+      },
+      "unmount": {
+        "median": 0.011,
+        "p95": 0.056
+      },
+      "update": {
+        "median": 0.023,
+        "p95": 0.05
+      }
+    },
+    "NanaInteractiveCard": {
+      "domNodes": {
+        "median": 3,
+        "p95": 3
+      },
+      "interaction": {
+        "median": 0.049,
+        "p95": 0.121
+      },
+      "mount": {
+        "median": 0.115,
+        "p95": 0.181
+      },
+      "unmount": {
+        "median": 0.015,
+        "p95": 0.022
+      },
+      "update": {
+        "median": 0.039,
+        "p95": 0.064
+      }
+    },
+    "NanaListItem": {
+      "domNodes": {
+        "median": 2,
+        "p95": 2
+      },
+      "interaction": {
+        "median": 0.03,
+        "p95": 0.033
+      },
+      "mount": {
+        "median": 0.057,
+        "p95": 0.064
+      },
+      "unmount": {
+        "median": 0.008,
+        "p95": 0.008
+      },
+      "update": {
+        "median": 0.021,
+        "p95": 0.032
+      }
+    },
+    "NanaSkeleton": {
+      "domNodes": {
+        "median": 2,
+        "p95": 2
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0
+      },
+      "mount": {
+        "median": 0.054,
+        "p95": 0.067
+      },
+      "unmount": {
+        "median": 0.005,
+        "p95": 0.006
+      },
+      "update": {
+        "median": 0.027,
+        "p95": 0.03
+      }
+    },
+    "NanaStatusBadge": {
+      "domNodes": {
+        "median": 3,
+        "p95": 3
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0
+      },
+      "mount": {
+        "median": 0.042,
+        "p95": 0.05
+      },
+      "unmount": {
+        "median": 0.006,
+        "p95": 0.007
+      },
+      "update": {
+        "median": 0.014,
+        "p95": 0.024
+      }
+    },
+    "NanaEmptyState": {
+      "domNodes": {
+        "median": 6,
+        "p95": 6
+      },
+      "interaction": {
+        "median": 0.042,
+        "p95": 0.09
+      },
+      "mount": {
+        "median": 0.085,
+        "p95": 0.212
+      },
+      "unmount": {
+        "median": 0.012,
+        "p95": 0.022
+      },
+      "update": {
+        "median": 0.027,
+        "p95": 0.058
+      }
+    },
+    "NanaUIProvider": {
+      "domNodes": {
+        "median": 3,
+        "p95": 3
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0
+      },
+      "mount": {
+        "median": 0.201,
+        "p95": 0.437
+      },
+      "unmount": {
+        "median": 0.031,
+        "p95": 0.074
+      },
+      "update": {
+        "median": 0.08,
+        "p95": 0.189
+      }
+    },
+    "NanaToast": {
+      "domNodes": {
+        "median": 12,
+        "p95": 12
+      },
+      "interaction": {
+        "median": 0.247,
+        "p95": 0.279
+      },
+      "mount": {
+        "median": 1.124,
+        "p95": 1.295
+      },
+      "unmount": {
+        "median": 0.111,
+        "p95": 0.131
+      },
+      "update": {
+        "median": 0.159,
+        "p95": 0.205
+      }
+    },
+    "NanaProgress": {
+      "domNodes": {
+        "median": 7,
+        "p95": 7
+      },
+      "interaction": {
+        "median": 0.18,
+        "p95": 0.318
+      },
+      "mount": {
+        "median": 0.395,
+        "p95": 0.71
+      },
+      "unmount": {
+        "median": 0.051,
+        "p95": 0.099
+      },
+      "update": {
+        "median": 0.146,
+        "p95": 0.186
+      }
+    },
+    "OperationalStatus": {
+      "domNodes": {
+        "median": 4,
+        "p95": 4
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0
+      },
+      "mount": {
+        "median": 0.286,
+        "p95": 0.443
+      },
+      "unmount": {
+        "median": 0.036,
+        "p95": 0.083
+      },
+      "update": {
+        "median": 0.09,
+        "p95": 0.123
+      }
+    },
+    "OperationResult": {
+      "domNodes": {
+        "median": 5,
+        "p95": 5
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0
+      },
+      "mount": {
+        "median": 0.308,
+        "p95": 0.38
+      },
+      "unmount": {
+        "median": 0.031,
+        "p95": 0.068
+      },
+      "update": {
+        "median": 0.093,
+        "p95": 0.153
+      }
+    },
+    "RecoveryError": {
+      "domNodes": {
+        "median": 12,
+        "p95": 12
+      },
+      "interaction": {
+        "median": 0.268,
+        "p95": 0.323
+      },
+      "mount": {
+        "median": 0.823,
+        "p95": 0.975
+      },
+      "unmount": {
+        "median": 0.096,
+        "p95": 0.126
+      },
+      "update": {
+        "median": 0.231,
+        "p95": 0.424
+      }
+    },
+    "UndoableActionNotice": {
+      "domNodes": {
+        "median": 1,
+        "p95": 1
+      },
+      "interaction": {
+        "median": 0.141,
+        "p95": 0.471
+      },
+      "mount": {
+        "median": 0.515,
+        "p95": 0.81
+      },
+      "unmount": {
+        "median": 0.013,
+        "p95": 0.044
+      },
+      "update": {
+        "median": 0.047,
+        "p95": 0.191
       }
     }
   },

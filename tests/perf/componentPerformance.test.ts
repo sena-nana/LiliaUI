@@ -2,6 +2,9 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import * as publicUiExports from "../../packages/ui/src/index";
+import * as publicNanaExports from "../../packages/nana-ui/src/index";
+import * as publicNanaFeedbackExports from "../../packages/nana-ui/src/feedback/index";
+import * as publicNanaShellExports from "../../packages/nana-ui/src/shell/index";
 import {
   type ComponentPerfReport,
   compareComponentPerfReport,
@@ -28,20 +31,33 @@ function isPublicVueComponent(value: unknown) {
     vueComponentMarkers.some((marker) => marker in value);
 }
 
-function exportedVueComponentNames() {
-  return Object.entries(publicUiExports)
+function exportedVueComponentNames(exports: Record<string, unknown>) {
+  return Object.entries(exports)
     .filter(([, value]) => isPublicVueComponent(value))
     .map(([name]) => name)
     .sort();
+}
+
+function missingScenarios(exports: Record<string, unknown>, scenarioNames: readonly string[]) {
+  return exportedVueComponentNames(exports).filter((name) => {
+    if (scenarioNames.includes(name)) return false;
+    const component = exports[name];
+    return !Object.entries(exports).some(
+      ([alias, value]) => value === component && scenarioNames.includes(alias),
+    );
+  });
 }
 
 describe("component performance scenarios", () => {
   it("cover every public Vue component export", () => {
     const scenarioNames = componentPerformanceScenarios.map((scenario) => scenario.name);
     const uniqueScenarioNames = [...new Set(scenarioNames)].sort();
-    const missingComponents = exportedVueComponentNames().filter(
-      (name) => !uniqueScenarioNames.includes(name),
-    );
+    const missingComponents = [
+      ...missingScenarios(publicUiExports, uniqueScenarioNames),
+      ...missingScenarios(publicNanaExports, uniqueScenarioNames),
+      ...missingScenarios(publicNanaFeedbackExports, uniqueScenarioNames),
+      ...missingScenarios(publicNanaShellExports, uniqueScenarioNames),
+    ];
     expect(uniqueScenarioNames).toHaveLength(scenarioNames.length);
     expect(missingComponents).toEqual([]);
   });

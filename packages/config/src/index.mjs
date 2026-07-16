@@ -5,6 +5,14 @@ import { defineConfig as defineViteConfig } from "vite";
 import { defineConfig as defineVitePressConfig } from "vitepress";
 
 export { calculateNextVersion } from "./version.mjs";
+export {
+  APP_LAYOUT_TYPES,
+  APP_UI_ACCENTS,
+  APP_UI_DENSITIES,
+  APP_UI_PRESETS,
+  defineAppConfig,
+  validateAppConfig,
+} from "./app-config.mjs";
 
 export function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8"));
@@ -19,14 +27,6 @@ export function writeIfChanged(path, next) {
   if (current !== next) {
     writeFileSync(path, next, "utf8");
   }
-}
-
-export function validateAppConfig(config) {
-  const required = ["appName", "productTitle", "version", "identifier", "storageKeyPrefix"];
-  for (const key of required) {
-    assertNonEmptyString(config?.[key], key);
-  }
-
 }
 
 export function syncFromAppConfig(appConfig, projectRoot = process.cwd()) {
@@ -167,12 +167,6 @@ function syncTomlValue(relativePath, key, value, projectRoot) {
     `${key} = "${escaped}"`,
   );
   writeIfChanged(path, next);
-}
-
-function assertNonEmptyString(value, keyPath) {
-  if (typeof value !== "string" || value.trim() === "") {
-    throw new Error(`app.config.json requires a non-empty string "${keyPath}".`);
-  }
 }
 
 function escapeHtml(value) {

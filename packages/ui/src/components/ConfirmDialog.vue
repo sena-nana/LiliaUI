@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AlertTriangle from "@lucide/vue/dist/esm/icons/triangle-alert.mjs";
-import { nextTick, onBeforeUnmount, ref, watch } from "vue";
+import { useDialogPrimitive } from "@lilia/ui-foundation/dialog";
+import { ref, watch } from "vue";
 import UiButton from "./UiButton.vue";
 
 const props = withDefaults(defineProps<{
@@ -29,82 +30,32 @@ const emit = defineEmits<{
 }>();
 
 const overlay = ref<HTMLElement | null>(null);
-let focusReturnTarget: HTMLElement | null = null;
-let openEpoch = 0;
-
-function actionButtons(): HTMLButtonElement[] {
-  if (!overlay.value) return [];
-  return Array.from(
-    overlay.value.querySelectorAll<HTMLButtonElement>(".dialog-card__actions button:not(:disabled)"),
-  );
-}
-
-function focusPreferredAction(epoch: number) {
-  void nextTick(() => {
-    if (epoch !== openEpoch || !props.open || !overlay.value) return;
-    const preferredAgentId = props.danger
-      ? "confirm-dialog.cancel"
-      : "confirm-dialog.confirm";
-    const preferred = overlay.value.querySelector<HTMLButtonElement>(
-      `[data-agent-id="${preferredAgentId}"]:not(:disabled)`,
-    );
-    (preferred ?? actionButtons()[0] ?? overlay.value).focus();
-  });
-}
-
-function restoreFocus() {
-  const target = focusReturnTarget;
-  focusReturnTarget = null;
-  void nextTick(() => {
-    if (target?.isConnected) target.focus();
-  });
-}
 
 function cancel() {
   if (props.busy) return;
   emit("cancel");
 }
 
-function onKeydown(event: KeyboardEvent) {
-  if (event.key === "Escape") {
-    event.preventDefault();
-    cancel();
-    return;
-  }
-
-  if (event.key !== "Tab") return;
-
-  event.preventDefault();
-  const buttons = actionButtons();
-  if (buttons.length === 0) {
-    overlay.value?.focus();
-    return;
-  }
-
-  const currentIndex = buttons.indexOf(document.activeElement as HTMLButtonElement);
-  const nextIndex = event.shiftKey
-    ? (currentIndex <= 0 ? buttons.length - 1 : currentIndex - 1)
-    : (currentIndex < 0 || currentIndex === buttons.length - 1 ? 0 : currentIndex + 1);
-  buttons[nextIndex]?.focus();
-}
-
-watch(() => props.open, (open) => {
-  openEpoch += 1;
-  if (open) {
-    focusReturnTarget = document.activeElement instanceof HTMLElement
-      ? document.activeElement
-      : null;
-    focusPreferredAction(openEpoch);
-  } else {
-    restoreFocus();
-  }
-}, { immediate: true });
+const dialog = useDialogPrimitive(
+  {
+    get open() { return props.open; },
+    closeOnEscape: true,
+    closeOnOutside: true,
+    initialFocus: "first-action",
+  },
+  overlay,
+  cancel,
+  () => overlay.value?.querySelector<HTMLButtonElement>(
+    `[data-agent-id="${props.danger ? "confirm-dialog.cancel" : "confirm-dialog.confirm"}"]:not(:disabled)`,
+  ) ?? null,
+);
 
 watch(() => props.busy, (busy, wasBusy) => {
-  if (props.open && wasBusy && !busy) focusPreferredAction(openEpoch);
+  if (!props.open || !wasBusy || busy) return;
+  overlay.value?.querySelector<HTMLButtonElement>(
+    `[data-agent-id="${props.danger ? "confirm-dialog.cancel" : "confirm-dialog.confirm"}"]:not(:disabled)`,
+  )?.focus();
 });
-
-onBeforeUnmount(restoreFocus);
 </script>
 
 <template>
@@ -119,8 +70,8 @@ onBeforeUnmount(restoreFocus);
         :aria-label="title"
         data-agent-id="confirm-dialog"
         tabindex="-1"
-        @click.self="cancel"
-        @keydown="onKeydown"
+        @click="dialog.onOutsidePointer"
+        @keydown="dialog.onKeydown"
       >
         <div class="modal-card dialog-card">
           <div class="dialog-card__header" :class="{ 'dialog-card__header--danger': danger }">

@@ -6,6 +6,7 @@
     ".": "./src/index.ts",
     "./commands": "./src/commands.ts",
     "./diagnostics": "./src/diagnostics/index.ts",
+    "./preset": "./src/preset.ts",
     "./runtime": "./src/runtime.ts",
     "./settings": "./src/settings/index.ts",
     "./shell": "./src/shell.ts",
@@ -44,7 +45,13 @@
     "vue": "^3.5.39",
     "vue-router": "^5.1.0"
   },
+  "peerDependencies": {
+    "@lilia/ui-contract": "^0.1.0",
+    "@lilia/ui-foundation": "^0.1.0"
+  },
   "devDependencies": {
+    "@lilia/ui-contract": "workspace:*",
+    "@lilia/ui-foundation": "workspace:*",
     "typescript": "^6.0.3",
     "vue-tsc": "^3.3.7"
   }

@@ -13,7 +13,9 @@
     "verbatimModuleSyntax": true
   },
   "include": [
+    "playwright.visual.config.ts",
     "tests/perf/componentPerformance.browser.ts",
-    "tests/perf/componentPerformanceTypes.ts"
+    "tests/perf/componentPerformanceTypes.ts",
+    "tests/visual/ui-layers.visual.spec.ts"
   ]
 }

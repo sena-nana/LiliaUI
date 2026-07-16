@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   calculateNextVersion,
+  defineAppConfig,
   defineLiliaDocsConfig,
   defineLiliaViteConfig,
   syncFromAppConfig,
@@ -17,6 +18,47 @@ describe("@lilia/config", () => {
     expect(() => validateAppConfig({ ...createAppConfig(), productTitle: "" })).toThrow(
       /productTitle/,
     );
+  });
+
+  it("validates Nana UI, layout, and onboarding config", () => {
+    const config = createAppConfig({
+      ui: {
+        preset: "nana",
+        density: "comfortable",
+        accent: "blue",
+      },
+      layout: {
+        type: "nana-editor",
+        sidebar: { collapsible: true },
+      },
+      onboarding: { enabled: true },
+    });
+
+    expect(defineAppConfig(config)).toBe(config);
+    expect(() => validateAppConfig(config)).not.toThrow();
+  });
+
+  it.each([
+    [{ ui: { preset: "consumer" } }, /ui\.preset/],
+    [{ ui: { preset: "nana", density: "dense" } }, /ui\.density/],
+    [{ ui: { preset: "nana", accent: "red" } }, /ui\.accent/],
+    [{ ui: { preset: "nana", theme: "dark" } }, /ui\.theme/],
+    [{ ui: { preset: "nana" }, layout: { type: "dashboard" } }, /layout\.type/],
+    [
+      { ui: { preset: "nana" }, layout: { type: "nana-editor", sidebar: {} } },
+      /layout\.sidebar\.collapsible/,
+    ],
+    [{ onboarding: { enabled: "yes" } }, /onboarding\.enabled/],
+    [{ onboarding: { enabled: true, skippable: true } }, /onboarding\.skippable/],
+  ])("rejects unsupported app config values %#", (extension, expectedError) => {
+    expect(() => validateAppConfig(createAppConfig(extension))).toThrow(expectedError);
+  });
+
+  it("requires Nana preset when a Nana page layout is configured", () => {
+    expect(() => validateAppConfig(createAppConfig({
+      ui: { preset: "lilia" },
+      layout: { type: "nana-home" },
+    }))).toThrow(/ui\.preset/);
   });
 
   it("syncs app config into package, Tauri config, and Cargo metadata", () => {
