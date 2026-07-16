@@ -3,13 +3,23 @@
   "version": "0.1.0",
   "type": "module",
   "exports": {
-    ".": "./src/index.mjs",
-    "./version": "./src/version.mjs",
+    ".": {
+      "types": "./src/index.d.mts",
+      "import": "./src/index.mjs"
+    },
+    "./app-config": {
+      "types": "./src/app-config.d.mts",
+      "import": "./src/app-config.mjs"
+    },
+    "./version": {
+      "types": "./src/version.d.mts",
+      "import": "./src/version.mjs"
+    },
     "./tsconfig/app.json": "./tsconfig/app.json",
     "./tsconfig/node.json": "./tsconfig/node.json"
   },
   "scripts": {
-    "typecheck": "node --check src/index.mjs"
+    "typecheck": "node --check src/index.mjs && node --check src/app-config.mjs && yarn run -T tsc --noEmit -p tsconfig.json"
   },
   "engines": {
     "node": ">=26.0.0 <27"

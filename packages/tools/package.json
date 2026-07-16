@@ -8,6 +8,8 @@
   "exports": {
     ".": "./src/index.mjs",
     "./node-runtime": "./src/nodeRuntime.mjs",
+    "./ui-migrate": "./src/ui-migrate/index.mjs",
+    "./ui-preset": "./src/ui-preset/index.mjs",
     "./assets/*": "./assets/*"
   },
   "files": [
@@ -16,7 +18,7 @@
     "src"
   ],
   "scripts": {
-    "typecheck": "node --check src/index.mjs && node --check src/nodeRuntime.mjs && node --check bin/lilia-tools.mjs"
+    "typecheck": "node --check src/index.mjs && node --check src/nodeRuntime.mjs && node --check src/ui-preset/*.mjs && node --check src/ui-migrate/*.mjs && node --check bin/lilia-tools.mjs"
   },
   "engines": {
     "node": ">=26.0.0 <27"

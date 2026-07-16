@@ -1,0 +1,65 @@
+import { createApp, nextTick, type Component } from "vue";
+import VisualFixture from "./VisualFixture.vue";
+import type { VisualLayerComponents } from "./types.ts";
+
+const search = new URLSearchParams(location.search);
+const layer = search.get("layer") === "nana" ? "nana" : "lilia";
+const theme = search.get("theme") === "dark" ? "dark" : "light";
+const density = search.get("density") === "compact" ? "compact" : "comfortable";
+const longText = search.get("long") === "1";
+const focusInput = search.get("focus") === "1";
+
+document.documentElement.dataset.theme = theme;
+document.documentElement.dataset.uiPreset = layer;
+document.documentElement.dataset.density = density;
+
+const module = layer === "nana"
+  ? await loadNanaLayer()
+  : await loadLiliaLayer();
+
+createApp(VisualFixture, {
+  density,
+  layer,
+  longText,
+  theme,
+  ui: module,
+}).mount("#app");
+
+await nextTick();
+if (focusInput) {
+  document.querySelector<HTMLElement>('[data-agent-id="visual.input"]')?.focus();
+}
+document.documentElement.dataset.visualReady = "true";
+
+async function loadLiliaLayer(): Promise<VisualLayerComponents> {
+  await import("@lilia/ui/styles.css");
+  const ui = await import("@lilia/ui");
+  return pickComponents(ui);
+}
+
+async function loadNanaLayer(): Promise<VisualLayerComponents> {
+  await import("@lilia/nana-ui/styles.css");
+  const ui = await import("@lilia/nana-ui");
+  return {
+    ...pickComponents(ui),
+    Provider: ui.NanaUIProvider,
+  };
+}
+
+function pickComponents(ui: ContractLayerModule): VisualLayerComponents {
+  return {
+    Button: ui.Button,
+    Card: ui.Card,
+    Checkbox: ui.Checkbox,
+    FormField: ui.FormField,
+    Input: ui.Input,
+    Progress: ui.Progress,
+    Skeleton: ui.Skeleton,
+    StatusBadge: ui.StatusBadge,
+  };
+}
+
+type ContractLayerModule = Record<
+  "Button" | "Card" | "Checkbox" | "FormField" | "Input" | "Progress" | "Skeleton" | "StatusBadge",
+  Component
+>;

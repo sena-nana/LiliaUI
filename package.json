@@ -4,17 +4,23 @@
   "version": "0.1.0",
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ],
   "scripts": {
+    "check:contract-fixtures": "yarn workspace @lilia/example-contract-layers check",
+    "check:nana-example": "yarn workspace @lilia/example-nana-basic typecheck && yarn workspace @lilia/example-nana-basic build",
+    "check:ui-boundaries": "node scripts/check-ui-boundaries.mjs",
     "perf:components:browser": "node tests/perf/componentPerformance.browser.ts",
     "perf:components:light": "NODE_DISABLE_COMPILE_CACHE=1 vitest run --config vitest.perf.config.ts",
     "perf:components:update-baseline": "node tests/perf/updateComponentPerformanceBaseline.mjs",
     "test:ui:browser": "node tests/ui/shellAppearance.browser.mjs",
+    "test:ui:visual": "playwright test --config playwright.visual.config.ts",
+    "test:ui:visual:update": "playwright test --config playwright.visual.config.ts --update-snapshots=all",
     "typecheck": "yarn workspaces foreach -Ap run typecheck && yarn typecheck:scripts",
-    "typecheck:scripts": "tsc -p tsconfig.node-scripts.json",
+    "typecheck:scripts": "tsc -p tsconfig.node-scripts.json && vue-tsc --noEmit -p tests/visual/tsconfig.json",
     "test": "NODE_DISABLE_COMPILE_CACHE=1 vitest run",
-    "verify": "yarn typecheck && yarn test && yarn test:ui:browser && yarn perf:components:light"
+    "verify": "yarn check:ui-boundaries && yarn check:contract-fixtures && yarn check:nana-example && yarn typecheck && yarn test && yarn test:ui:browser && yarn test:ui:visual && yarn perf:components:light"
   },
   "engines": {
     "node": ">=26.0.0 <27"
@@ -29,6 +35,7 @@
     "@types/node": "^26.1.1",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/compiler-sfc": "^3.5.39",
+    "axe-core": "^4.12.1",
     "jsdom": "^29.1.1",
     "typescript": "^6.0.3",
     "vite": "^8.1.4",

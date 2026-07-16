@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { useButtonPrimitive } from "@lilia/ui-foundation/button";
 import { Comment, Fragment, Text, computed, useSlots, type VNode } from "vue";
 
-export type UiButtonVariant = "ghost" | "primary" | "warning" | "danger";
+export type UiButtonVariant = "ghost" | "primary" | "secondary" | "text" | "warning" | "danger";
 export type UiButtonSize = "sm" | "md";
 export type UiButtonType = "button" | "submit" | "reset";
 
@@ -12,6 +13,7 @@ const props = withDefaults(defineProps<{
   icon?: unknown;
   disabled?: boolean;
   busy?: boolean;
+  loading?: boolean;
   agentId?: string;
 }>(), {
   variant: "ghost",
@@ -20,6 +22,7 @@ const props = withDefaults(defineProps<{
   icon: undefined,
   disabled: false,
   busy: false,
+  loading: false,
   agentId: undefined,
 });
 
@@ -31,6 +34,10 @@ const slots = useSlots();
 const hasDefaultLabel = computed(() => hasRenderableSlotContent(slots.default?.() ?? []));
 const hasIconContent = computed(() => Boolean(props.icon) || hasRenderableSlotContent(slots.icon?.() ?? []));
 const isIconOnly = computed(() => hasIconContent.value && !hasDefaultLabel.value);
+const button = useButtonPrimitive({
+  get disabled() { return props.disabled; },
+  get loading() { return props.busy || props.loading; },
+});
 
 function hasRenderableSlotContent(nodes: VNode[]): boolean {
   return nodes.some((node) => {
@@ -44,7 +51,7 @@ function hasRenderableSlotContent(nodes: VNode[]): boolean {
 }
 
 function onClick(event: MouseEvent) {
-  if (props.disabled || props.busy) return;
+  if (!button.onPress(event)) return;
   emit("click", event);
 }
 </script>
@@ -56,9 +63,10 @@ function onClick(event: MouseEvent) {
     :class="[
       `ui-button--${variant}`,
       `ui-button--${size}`,
-      { 'ui-button--icon-only': isIconOnly, 'is-busy': busy },
+      { 'ui-button--icon-only': isIconOnly, 'is-busy': busy || loading },
     ]"
-    :disabled="disabled || busy"
+    :disabled="button.disabled.value"
+    :aria-busy="button.ariaBusy.value"
     :data-agent-id="agentId"
     @click="onClick"
   >
@@ -115,6 +123,22 @@ function onClick(event: MouseEvent) {
   color: var(--text);
 }
 
+.ui-button--secondary {
+  background: var(--bg-subtle);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--border-soft);
+}
+
+.ui-button--secondary:hover:not(:disabled),
+.ui-button--text:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.ui-button--text {
+  background: transparent;
+  color: var(--accent);
+}
+
 .ui-button--ghost:hover:not(:disabled) {
   background: var(--bg-hover);
   filter: none;
@@ -122,13 +146,13 @@ function onClick(event: MouseEvent) {
 
 .ui-button--primary {
   background: var(--accent-soft);
-  color: var(--accent);
+  color: var(--accent-on-soft, var(--accent));
   font-weight: 600;
 }
 
 .ui-button--primary:hover:not(:disabled) {
   background: color-mix(in srgb, var(--accent) 20%, transparent);
-  color: var(--accent);
+  color: var(--accent-on-soft, var(--accent));
   filter: none;
 }
 

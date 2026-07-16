@@ -1,0 +1,29 @@
+.nana-pattern { min-width: 0; padding: 24px; }
+.nana-page-header { min-width: 0; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 16px; }
+.nana-page-header > div:first-child { min-width: 0; flex: 1 1 auto; }
+.nana-page-header h1 { margin: 0; font-size: 22px; line-height: 1.3; }
+.nana-page-header p { margin: 5px 0 0; color: var(--text-muted); }
+.nana-page-header__status, .nana-page-header__actions { flex: 0 0 auto; }
+.nana-primary-actions { display: flex; align-items: center; gap: 8px; }
+.nana-primary-actions__main { display: contents; }
+.nana-primary-actions__secondary { display: flex; gap: 6px; }
+.nana-context-panel { min-width: 0; }
+.nana-context-panel h2 { margin: 0 0 12px; font-size: 16px; }
+.nana-persistent-status { min-width: 0; display: flex; align-items: center; gap: 12px; }
+.nana-home__grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr); gap: 16px; }
+.nana-home__recent { grid-row: span 2; }
+.nana-home__history { grid-column: 1 / -1; }
+.nana-editor { min-width: 0; min-height: 100%; display: grid; grid-template: auto minmax(0, 1fr) auto / minmax(180px, 240px) minmax(0, 1fr); }
+.nana-editor.has-context { grid-template-columns: minmax(180px, 240px) minmax(0, 1fr) minmax(260px, 340px); }
+.nana-editor__top { grid-column: 1 / -1; padding: 10px 14px; background: var(--bg-elev); }
+.nana-editor__objects, .nana-editor__context { min-width: 0; padding: 14px; overflow: auto; background: var(--bg-elev); }
+.nana-editor__preview { min-width: 0; min-height: 0; overflow: auto; }
+.nana-editor__status { grid-column: 1 / -1; padding: 8px 14px; background: var(--bg-elev); }
+.nana-settings { display: grid; grid-template: auto minmax(0, 1fr) / 200px minmax(0, 720px); column-gap: 24px; }
+.nana-settings > .nana-page-header { grid-column: 1 / -1; }
+.nana-settings__nav, .nana-settings__content { min-width: 0; }
+.nana-onboarding { width: min(680px, calc(100% - 32px)); min-height: 420px; margin: 32px auto; padding: 26px; border-radius: var(--radius-xl); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; background: var(--bg-elev); box-shadow: var(--shadow-surface); }
+.nana-onboarding header span { color: var(--text-muted); }
+.nana-onboarding h1 { margin: 5px 0 18px; font-size: 22px; }
+.nana-onboarding footer { display: flex; justify-content: flex-end; gap: 8px; }
+@media (max-width: 860px) { .nana-home__grid { grid-template-columns: 1fr; } .nana-home__recent, .nana-home__history { grid-column: auto; grid-row: auto; } .nana-editor, .nana-editor.has-context { grid-template-columns: 180px minmax(0, 1fr); } .nana-editor__context { display: none; } .nana-settings { grid-template-columns: 1fr; } }

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>UI Layer Visual Matrix</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { margin: 0; background: #d9dde4; font-family: Arial, sans-serif; }
+      main { display: grid; grid-template-columns: repeat(2, 420px); gap: 8px; padding: 8px; }
+      figure { margin: 0; overflow: hidden; border: 1px solid #a9b0bc; background: white; }
+      figcaption { height: 24px; padding: 4px 8px; background: #eef1f5; color: #20242b; font-size: 12px; }
+      iframe { display: block; width: 100%; height: 370px; border: 0; }
+    </style>
+  </head>
+  <body>
+    <main id="matrix"></main>
+    <script>
+      const layer = new URLSearchParams(location.search).get("layer") === "nana" ? "nana" : "lilia";
+      const matrix = document.querySelector("#matrix");
+      for (const theme of ["light", "dark"]) {
+        for (const density of ["comfortable", "compact"]) {
+          const figure = document.createElement("figure");
+          const caption = document.createElement("figcaption");
+          const frame = document.createElement("iframe");
+          caption.textContent = `${layer} / ${theme} / ${density}`;
+          frame.title = caption.textContent;
+          const focus = theme === "dark" && density === "compact" ? "1" : "0";
+          frame.src = `/tests/visual/harness.html?layer=${layer}&theme=${theme}&density=${density}&focus=${focus}`;
+          figure.append(caption, frame);
+          matrix.append(figure);
+        }
+      }
+    </script>
+  </body>
+</html>
