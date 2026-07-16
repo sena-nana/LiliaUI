@@ -6,14 +6,28 @@ import {
   LiliaDesktopShell,
   LiliaSidebarFrame,
   SIDEBAR_CONFIG,
-  SIDEBAR_FOOTER_STATUS,
   SIDEBAR_FOOTER_STATUSES,
   liliaShellOptionsKey,
-  setLiliaAppConfig,
-  type LiliaAppConfig,
+  setLiliaUiConfig,
+  type LiliaUiConfig,
   type LiliaShellOptions,
-} from "@lilia/ui";
+} from "@lilia/ui/shell";
 import { testAppConfig } from "./fixtures/appConfig";
+import { createLiliaSettingsModel, liliaSettingsKey } from "@lilia/ui/settings";
+
+const TestSettingsIcon = defineComponent({ template: "<span />" });
+const testSettings = createLiliaSettingsModel({
+  defaultTab: "appearance",
+  path: "/settings",
+  tabs: [
+    { key: "appearance", label: "外观", icon: TestSettingsIcon },
+    { key: "about", label: "关于", icon: TestSettingsIcon },
+  ],
+  sections: {
+    appearance: defineComponent({ template: "<div />" }),
+    about: defineComponent({ template: "<div />" }),
+  },
+});
 
 vi.mock("@tauri-apps/api/window", () => ({
   getCurrentWindow: () => ({
@@ -27,7 +41,7 @@ vi.mock("@tauri-apps/api/window", () => ({
 
 async function renderAppShell(
   initialRoute = "/",
-  config: LiliaAppConfig = testAppConfig,
+  config: LiliaUiConfig = testAppConfig,
   shellOptions: LiliaShellOptions = {},
 ) {
   const router = createRouter({
@@ -59,12 +73,13 @@ async function renderAppShell(
   await router.push(initialRoute);
   await router.isReady();
 
-  setLiliaAppConfig(config);
+  setLiliaUiConfig(config);
   const view = render(LiliaDesktopShell, {
     global: {
       plugins: [router],
       provide: {
         [liliaShellOptionsKey as symbol]: shellOptions,
+        [liliaSettingsKey as symbol]: testSettings,
       },
     },
   });
@@ -120,7 +135,7 @@ function sidebarRowForText(container: HTMLElement, text: string): HTMLElement {
 
 beforeEach(() => {
   localStorage.clear();
-  setLiliaAppConfig(testAppConfig);
+  setLiliaUiConfig(testAppConfig);
 });
 
 describe("AppShell sidebar", () => {
@@ -161,7 +176,6 @@ describe("AppShell sidebar", () => {
       ...testAppConfig,
       sidebar: {
         ...testAppConfig.sidebar,
-        footerStatus: undefined,
         footerStatuses: [
           {
             key: "model",
@@ -193,9 +207,7 @@ describe("AppShell sidebar", () => {
     expect(legacyTarget).toHaveClass("sb-conn--warn");
     expect(editorTarget).toHaveClass("sb-conn--ok");
     expect(SIDEBAR_FOOTER_STATUSES.map((status) => status.key)).toEqual(["model", "editor"]);
-    expect(SIDEBAR_FOOTER_STATUSES[0]).toBe(SIDEBAR_FOOTER_STATUS);
-
-    Object.assign(SIDEBAR_FOOTER_STATUS, { label: "模型已配置", tone: "ok" });
+    Object.assign(SIDEBAR_FOOTER_STATUSES[0]!, { label: "模型已配置", tone: "ok" });
     await waitFor(() => {
       expect(legacyTarget).toHaveTextContent("模型已配置");
       expect(legacyTarget).toHaveClass("sb-conn--ok");
@@ -207,7 +219,6 @@ describe("AppShell sidebar", () => {
       ...testAppConfig,
       sidebar: {
         ...testAppConfig.sidebar,
-        footerStatus: undefined,
         footerStatuses: [],
       },
     });

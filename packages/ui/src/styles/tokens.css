@@ -37,6 +37,12 @@
   --err-solid: oklch(55.63% 0.1427 20.3);
   --err-solid-hover: oklch(59.34% 0.1435 19.8);
   --err-solid-text: oklch(100% 0 89.9);
+  --calendar-heatmap-level-default: var(--bg-subtle);
+  --calendar-heatmap-level-0: var(--bg-subtle);
+  --calendar-heatmap-level-1: color-mix(in oklch, var(--accent) 28%, var(--bg-subtle));
+  --calendar-heatmap-level-2: color-mix(in oklch, var(--accent) 48%, var(--bg-subtle));
+  --calendar-heatmap-level-3: color-mix(in oklch, var(--accent) 70%, var(--bg-subtle));
+  --calendar-heatmap-level-4: var(--accent);
   --panel: var(--bg-elev);
   --surface: var(--bg);
   --surface-raised: var(--bg-elev);
@@ -96,6 +102,12 @@
   --err-solid: oklch(52.5% 0.1669 25);
   --err-solid-hover: oklch(49.34% 0.1586 25.1);
   --err-solid-text: oklch(100% 0 89.9);
+  --calendar-heatmap-level-default: var(--bg-subtle);
+  --calendar-heatmap-level-0: var(--bg-subtle);
+  --calendar-heatmap-level-1: color-mix(in oklch, var(--accent) 28%, var(--bg-subtle));
+  --calendar-heatmap-level-2: color-mix(in oklch, var(--accent) 48%, var(--bg-subtle));
+  --calendar-heatmap-level-3: color-mix(in oklch, var(--accent) 70%, var(--bg-subtle));
+  --calendar-heatmap-level-4: var(--accent);
   --shadow: oklch(21.01% 0.0318 264.7);
   --shadow-lg:
     0 18px 42px -24px oklch(21.01% 0.0318 264.7 / 0.28),

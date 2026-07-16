@@ -4,38 +4,37 @@ import { createMemoryHistory, createRouter } from "vue-router";
 import { describe, expect, it } from "vitest";
 import {
   SettingsCollapsibleCard,
-  normalizeSettingsTab,
-  setLiliaAppConfig,
-  type LiliaAppConfig,
 } from "@lilia/ui";
-import LiliaSettingsPage from "../../packages/ui/src/pages/SettingsPage.vue";
-import { testAppConfig } from "./fixtures/appConfig";
+import {
+  createLiliaSettingsModel,
+  liliaSettingsKey,
+  LiliaSettingsPage,
+  normalizeSettingsTab,
+} from "@lilia/ui/settings";
 
-const customConfig = {
-  ...testAppConfig,
-  settings: {
-    aliases: { plugins: "plugin-skills" },
-    defaultTab: "appearance",
-    fullPageTabs: ["plugin-skills"],
-    tabs: [
-      { key: "appearance", label: "外观", icon: "palette" },
-      { key: "plugin-skills", label: "技能", icon: "sparkles", props: { section: "skills" } },
-    ],
-    sections: {
-      appearance: { template: "<div>appearance section</div>" },
-      "plugin-skills": {
-        props: ["section"],
-        template: "<main>plugin {{ section }}</main>",
-      },
+const TestIcon = defineComponent({ template: "<span />" });
+const customModel = createLiliaSettingsModel({
+  aliases: { plugins: "plugin-skills" },
+  defaultTab: "appearance",
+  fullPageTabs: ["plugin-skills"],
+  path: "/settings",
+  tabs: [
+    { key: "appearance", label: "外观", icon: TestIcon },
+    { key: "plugin-skills", label: "技能", icon: TestIcon, props: { section: "skills" } },
+  ],
+  sections: {
+    appearance: { template: "<div>appearance section</div>" },
+    "plugin-skills": {
+      props: ["section"],
+      template: "<main>plugin {{ section }}</main>",
     },
   },
-} satisfies LiliaAppConfig;
+});
 
 describe("settings config", () => {
   it("normalizes aliases and renders full-page configured sections with props", async () => {
-    setLiliaAppConfig(customConfig);
-    expect(normalizeSettingsTab("plugins")).toBe("plugin-skills");
-    expect(normalizeSettingsTab("missing")).toBe("appearance");
+    expect(normalizeSettingsTab(customModel, "plugins")).toBe("plugin-skills");
+    expect(normalizeSettingsTab(customModel, "missing")).toBe("appearance");
 
     const router = createRouter({
       history: createMemoryHistory(),
@@ -46,6 +45,7 @@ describe("settings config", () => {
     const view = render(LiliaSettingsPage, {
       global: {
         plugins: [router],
+        provide: { [liliaSettingsKey as symbol]: customModel },
       },
     });
 

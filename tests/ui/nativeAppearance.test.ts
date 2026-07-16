@@ -6,6 +6,15 @@ const invoke = vi.fn(async () => undefined);
 
 vi.mock("@tauri-apps/api/core", () => ({ invoke }));
 
+async function loadUi() {
+  return {
+    ...await import("@lilia/ui/shell"),
+    ...await import("@lilia/ui/settings"),
+    ...await import("@lilia/ui/composables/useNativeAppearance"),
+    ...await import("@lilia/ui/composables/useTheme"),
+  };
+}
+
 beforeEach(() => {
   localStorage.clear();
   invoke.mockReset();
@@ -16,7 +25,7 @@ beforeEach(() => {
 describe("useNativeAppearance", () => {
   it("按平台归一化材质值并安全回退未知平台", async () => {
     vi.resetModules();
-    const { normalizeBackdropMode, resolveNativePlatform } = await import("@lilia/ui");
+    const { normalizeBackdropMode, resolveNativePlatform } = await loadUi();
 
     expect(resolveNativePlatform("macos")).toBe("macos");
     expect(resolveNativePlatform("other")).toBe("linux");
@@ -29,8 +38,8 @@ describe("useNativeAppearance", () => {
   it("读取 Windows 应用默认值并同步 DOM、存储和原生材质", async () => {
     window.__LILIA_NATIVE_PLATFORM__ = "windows";
     vi.resetModules();
-    const { setLiliaAppConfig, useNativeAppearance } = await import("@lilia/ui");
-    setLiliaAppConfig({
+    const { setLiliaUiConfig, useNativeAppearance } = await loadUi();
+    setLiliaUiConfig({
       ...testAppConfig,
       appearance: {
         backdropOpacity: 0.7,
@@ -69,8 +78,8 @@ describe("useNativeAppearance", () => {
     localStorage.setItem("lilia-ui-test.backdropOpacity", "2");
     localStorage.setItem("lilia-ui-test.backdropTarget", "main");
     vi.resetModules();
-    const { setLiliaAppConfig, useNativeAppearance } = await import("@lilia/ui");
-    setLiliaAppConfig(testAppConfig);
+    const { setLiliaUiConfig, useNativeAppearance } = await loadUi();
+    setLiliaUiConfig(testAppConfig);
     const appearance = useNativeAppearance();
 
     expect(appearance.backdropMode.value).toBe("system");
@@ -86,8 +95,8 @@ describe("useNativeAppearance", () => {
     window.__LILIA_NATIVE_PLATFORM__ = "windows";
     localStorage.setItem("lilia-ui-test.backdropTarget", "invalid");
     vi.resetModules();
-    const { setLiliaAppConfig, useNativeAppearance } = await import("@lilia/ui");
-    setLiliaAppConfig({
+    const { setLiliaUiConfig, useNativeAppearance } = await loadUi();
+    setLiliaUiConfig({
       ...testAppConfig,
       appearance: { backdropTarget: "main" },
     });
@@ -106,8 +115,8 @@ describe("useNativeAppearance", () => {
 
   it("应用未配置透明区域时默认使用侧边栏", async () => {
     vi.resetModules();
-    const { setLiliaAppConfig, useNativeAppearance } = await import("@lilia/ui");
-    setLiliaAppConfig(testAppConfig);
+    const { setLiliaUiConfig, useNativeAppearance } = await loadUi();
+    setLiliaUiConfig(testAppConfig);
 
     const appearance = useNativeAppearance();
 
@@ -119,8 +128,8 @@ describe("useNativeAppearance", () => {
   it("标题栏默认跟随侧边栏并恢复有效的应用或本地偏好", async () => {
     window.__LILIA_NATIVE_PLATFORM__ = "windows";
     vi.resetModules();
-    let ui = await import("@lilia/ui");
-    ui.setLiliaAppConfig({
+    let ui = await loadUi();
+    ui.setLiliaUiConfig({
       ...testAppConfig,
       appearance: { titlebarFollowsSidebar: false },
     });
@@ -134,15 +143,15 @@ describe("useNativeAppearance", () => {
 
     localStorage.setItem("lilia-ui-test.titlebarFollowsSidebar", "invalid");
     vi.resetModules();
-    ui = await import("@lilia/ui");
-    ui.setLiliaAppConfig(testAppConfig);
+    ui = await loadUi();
+    ui.setLiliaUiConfig(testAppConfig);
     appearance = ui.useNativeAppearance();
     expect(appearance.titlebarFollowsSidebar.value).toBe(true);
 
     localStorage.setItem("lilia-ui-test.titlebarFollowsSidebar", "false");
     vi.resetModules();
-    ui = await import("@lilia/ui");
-    ui.setLiliaAppConfig(testAppConfig);
+    ui = await loadUi();
+    ui.setLiliaUiConfig(testAppConfig);
     appearance = ui.useNativeAppearance();
     expect(appearance.titlebarFollowsSidebar.value).toBe(false);
     expect(document.documentElement.dataset.titlebarFollowsSidebar).toBe("false");
@@ -151,8 +160,8 @@ describe("useNativeAppearance", () => {
   it("仅在 Windows Mica 下随主题重新应用深浅效果", async () => {
     window.__LILIA_NATIVE_PLATFORM__ = "windows";
     vi.resetModules();
-    const { setLiliaAppConfig, useNativeAppearance, useTheme } = await import("@lilia/ui");
-    setLiliaAppConfig(testAppConfig);
+    const { setLiliaUiConfig, useNativeAppearance, useTheme } = await loadUi();
+    setLiliaUiConfig(testAppConfig);
     const appearance = useNativeAppearance();
     const { setTheme } = useTheme();
     await waitFor(() => expect(invoke).toHaveBeenCalledTimes(1));
@@ -179,8 +188,8 @@ describe("useNativeAppearance", () => {
       releaseInitial = resolve;
     }));
     vi.resetModules();
-    const { setLiliaAppConfig, useNativeAppearance } = await import("@lilia/ui");
-    setLiliaAppConfig(testAppConfig);
+    const { setLiliaUiConfig, useNativeAppearance } = await loadUi();
+    setLiliaUiConfig(testAppConfig);
     const appearance = useNativeAppearance();
     await waitFor(() => expect(invoke).toHaveBeenCalledTimes(1));
 
@@ -201,8 +210,8 @@ describe("LiliaAppearanceSection", () => {
   it("Windows 显示平台材质选项并在实色模式禁用透明度", async () => {
     window.__LILIA_NATIVE_PLATFORM__ = "windows";
     vi.resetModules();
-    const { LiliaAppearanceSection, setLiliaAppConfig } = await import("@lilia/ui");
-    setLiliaAppConfig(testAppConfig);
+    const { LiliaAppearanceSection, setLiliaUiConfig } = await loadUi();
+    setLiliaUiConfig(testAppConfig);
     const view = render(LiliaAppearanceSection);
 
     expect(view.getByRole("radio", { name: "Mica" })).toHaveAttribute(
@@ -258,8 +267,8 @@ describe("LiliaAppearanceSection", () => {
   it("macOS 不暴露 Windows 材质名称，Linux 隐藏原生材质设置", async () => {
     window.__LILIA_NATIVE_PLATFORM__ = "macos";
     vi.resetModules();
-    let ui = await import("@lilia/ui");
-    ui.setLiliaAppConfig(testAppConfig);
+    let ui = await loadUi();
+    ui.setLiliaUiConfig(testAppConfig);
     const macView = render(ui.LiliaAppearanceSection);
 
     expect(macView.getByRole("radio", { name: "系统透明" })).toBeInTheDocument();
@@ -271,8 +280,8 @@ describe("LiliaAppearanceSection", () => {
 
     window.__LILIA_NATIVE_PLATFORM__ = "linux";
     vi.resetModules();
-    ui = await import("@lilia/ui");
-    ui.setLiliaAppConfig(testAppConfig);
+    ui = await loadUi();
+    ui.setLiliaUiConfig(testAppConfig);
     const linuxView = render(ui.LiliaAppearanceSection);
 
     expect(linuxView.queryByRole("radiogroup", { name: "窗口材质" })).not.toBeInTheDocument();

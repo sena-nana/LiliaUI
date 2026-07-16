@@ -13,8 +13,9 @@ describe("useCornerStyle", () => {
     window.__LILIA_NATIVE_PLATFORM__ = platform;
     vi.resetModules();
 
-    const { setLiliaAppConfig, useCornerStyle } = await import("@lilia/ui");
-    setLiliaAppConfig(testAppConfig);
+    const { setLiliaUiConfig } = await import("@lilia/ui/shell");
+    const { useCornerStyle } = await import("@lilia/ui/composables/useCornerStyle");
+    setLiliaUiConfig(testAppConfig);
     const { cornerRadius, cornerStyle } = useCornerStyle();
 
     expect(cornerStyle.value).toBe(style);
@@ -30,8 +31,9 @@ describe("useCornerStyle", () => {
     localStorage.setItem(cornerRadiusStorageKey, "14");
     vi.resetModules();
 
-    const { setLiliaAppConfig, useCornerStyle } = await import("@lilia/ui");
-    setLiliaAppConfig(testAppConfig);
+    const { setLiliaUiConfig } = await import("@lilia/ui/shell");
+    const { useCornerStyle } = await import("@lilia/ui/composables/useCornerStyle");
+    setLiliaUiConfig(testAppConfig);
     const { cornerRadius, cornerStyle } = useCornerStyle();
 
     expect(cornerStyle.value).toBe("round");
@@ -42,8 +44,9 @@ describe("useCornerStyle", () => {
 
   it("setCornerStyle 和 setCornerRadius 会同步更新 html 与 localStorage", async () => {
     vi.resetModules();
-    const { setLiliaAppConfig, useCornerStyle } = await import("@lilia/ui");
-    setLiliaAppConfig(testAppConfig);
+    const { setLiliaUiConfig } = await import("@lilia/ui/shell");
+    const { useCornerStyle } = await import("@lilia/ui/composables/useCornerStyle");
+    setLiliaUiConfig(testAppConfig);
     const { cornerRadius, cornerStyle, setCornerRadius, setCornerStyle } = useCornerStyle();
 
     setCornerStyle("round");
@@ -59,8 +62,9 @@ describe("useCornerStyle", () => {
 
   it("圆角半径会限制在可用范围内", async () => {
     vi.resetModules();
-    const { setLiliaAppConfig, useCornerStyle } = await import("@lilia/ui");
-    setLiliaAppConfig(testAppConfig);
+    const { setLiliaUiConfig } = await import("@lilia/ui/shell");
+    const { useCornerStyle } = await import("@lilia/ui/composables/useCornerStyle");
+    setLiliaUiConfig(testAppConfig);
     const { cornerRadius, setCornerRadius } = useCornerStyle();
 
     setCornerRadius(999);

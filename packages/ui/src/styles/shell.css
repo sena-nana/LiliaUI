@@ -185,11 +185,11 @@
   color: var(--accent);
 }
 
-.sb-tree__row--project {
+.sb-tree__row--muted {
   color: var(--text-muted);
 }
 
-.sb-tree__row--project.is-active {
+.sb-tree__row--muted.is-active {
   color: var(--accent);
 }
 

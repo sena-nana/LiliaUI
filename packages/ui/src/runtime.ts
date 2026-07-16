@@ -1,34 +1,28 @@
 import type { App } from "vue";
-import { installContextMenu, uninstallContextMenu } from "./composables/useContextMenu";
+import { installContextMenu } from "./composables/useContextMenu";
 import { useCornerStyle } from "./composables/useCornerStyle";
-import {
+export {
   installGlobalScrollbarVisibility,
   uninstallGlobalScrollbarVisibility,
 } from "./composables/useGlobalScrollbarVisibility";
 import { useNativeAppearance } from "./composables/useNativeAppearance";
-import { setLiliaAppConfig, type LiliaAppConfig } from "./config/appShell";
 import { vContextMenu } from "./directives/contextMenu";
 
-export interface InstallLiliaAppRuntimeOptions {
-  app?: App;
-  config: LiliaAppConfig;
+const contextMenuApps = new WeakSet<App>();
+
+export function installLiliaContextMenu(app: App) {
+  installContextMenu();
+  if (!contextMenuApps.has(app)) {
+    app.directive("contextMenu", vContextMenu);
+    app.directive("context-menu", vContextMenu);
+    contextMenuApps.add(app);
+  }
 }
 
-export function installLiliaAppRuntime(options: InstallLiliaAppRuntimeOptions) {
-  setLiliaAppConfig(options.config);
-  const { contextMenu = true, globalScrollbar = true } = options.config.runtime ?? {};
-  if (contextMenu) {
-    installContextMenu();
-    options.app?.directive("contextMenu", vContextMenu);
-    options.app?.directive("context-menu", vContextMenu);
-  } else {
-    uninstallContextMenu();
-  }
-  if (globalScrollbar) {
-    installGlobalScrollbarVisibility();
-  } else {
-    uninstallGlobalScrollbarVisibility();
-  }
-  useCornerStyle();
-  useNativeAppearance();
+export function installCornerStyle() {
+  return useCornerStyle();
+}
+
+export function installNativeAppearance() {
+  return useNativeAppearance();
 }

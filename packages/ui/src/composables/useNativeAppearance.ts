@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { readonly, ref, watch, type Ref } from "vue";
 import {
   APP_METADATA,
-  getLiliaAppConfig,
+  getLiliaUiConfig,
   type BackdropMode,
   type BackdropTarget,
   type NativePlatform,
@@ -94,7 +94,7 @@ export function readNativePlatform(): NativePlatform {
 }
 
 function configuredDefaultMode(nativePlatform: NativePlatform): BackdropMode {
-  const configured = getLiliaAppConfig().appearance?.platformDefaults?.[nativePlatform]
+  const configured = getLiliaUiConfig().appearance?.platformDefaults?.[nativePlatform]
     ?.backdropMode;
   return normalizeBackdropMode(
     isBackdropMode(configured) ? configured : DEFAULT_BACKDROP_BY_PLATFORM[nativePlatform],
@@ -104,17 +104,17 @@ function configuredDefaultMode(nativePlatform: NativePlatform): BackdropMode {
 
 function configuredDefaultOpacity(): number {
   return clampBackdropOpacity(
-    getLiliaAppConfig().appearance?.backdropOpacity ?? BACKDROP_OPACITY_DEFAULT,
+    getLiliaUiConfig().appearance?.backdropOpacity ?? BACKDROP_OPACITY_DEFAULT,
   );
 }
 
 function configuredDefaultTarget(): BackdropTarget {
-  const configured = getLiliaAppConfig().appearance?.backdropTarget;
+  const configured = getLiliaUiConfig().appearance?.backdropTarget;
   return isBackdropTarget(configured) ? configured : "sidebar";
 }
 
 function configuredTitlebarFollowsSidebar(): boolean {
-  const configured = getLiliaAppConfig().appearance?.titlebarFollowsSidebar;
+  const configured = getLiliaUiConfig().appearance?.titlebarFollowsSidebar;
   return typeof configured === "boolean" ? configured : true;
 }
 

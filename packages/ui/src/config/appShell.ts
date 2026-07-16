@@ -1,4 +1,4 @@
-import { defineAsyncComponent, markRaw, reactive, shallowRef, type Component } from "vue";
+import { markRaw, reactive, shallowRef, type Component } from "vue";
 import Bot from "@lucide/vue/dist/esm/icons/bot.mjs";
 import Brain from "@lucide/vue/dist/esm/icons/brain.mjs";
 import Download from "@lucide/vue/dist/esm/icons/download.mjs";
@@ -21,7 +21,6 @@ import Server from "@lucide/vue/dist/esm/icons/server.mjs";
 import Settings from "@lucide/vue/dist/esm/icons/settings.mjs";
 import Sparkles from "@lucide/vue/dist/esm/icons/sparkles.mjs";
 import Workflow from "@lucide/vue/dist/esm/icons/workflow.mjs";
-import type { RouteLocationRaw } from "vue-router";
 
 type IconName =
   | "bot"
@@ -47,21 +46,7 @@ type IconName =
   | "sparkles"
   | "workflow";
 
-type IconInput = IconName | Component;
-export type LiliaSettingsSectionLoader = () => Promise<{ default: Component }>;
-export type LiliaSettingsSectionInput = Component | LiliaSettingsSectionLoader;
-
-export interface LiliaShellCopy {
-  homeTitle: string;
-  homeDescription: string;
-  homeActionLabel?: string;
-  workspaceSectionTitle: string;
-  workspaceName: string;
-  workspaceEmptyText: string;
-  statusLabel: string;
-  statusTitle: string;
-  settingsDescription: string;
-}
+export type IconInput = IconName | Component;
 
 export interface LiliaSidebarActionInput {
   active?: boolean;
@@ -75,6 +60,7 @@ export interface LiliaSidebarActionInput {
 export interface LiliaSidebarNavInput {
   active?: boolean;
   disabled?: boolean;
+  emphasis?: "default" | "muted";
   icon: IconInput;
   key: string;
   label: string;
@@ -112,39 +98,15 @@ export interface LiliaSidebarConfigInput {
   collapsedStorageKey?: string;
   defaultWidth?: number;
   footerLinks?: LiliaSidebarFooterLinkInput[];
-  footerStatus?: LiliaSidebarFooterStatusInput;
   footerStatuses?: LiliaSidebarFooterStatusInput[];
   globalActions?: LiliaSidebarActionInput[];
   groups?: LiliaSidebarGroupInput[];
   maxWidth?: number;
   minWidth?: number;
   nav?: LiliaSidebarNavInput[];
+  navTitle?: string;
   topContent?: Component;
   widthStorageKey?: string;
-}
-
-export interface LiliaSettingsTabInput {
-  icon: IconInput;
-  key: string;
-  label: string;
-  props?: Record<string, unknown>;
-  to?: RouteLocationRaw;
-}
-
-export interface LiliaSettingsConfigInput {
-  aliases?: Record<string, string>;
-  defaultTab?: string;
-  fullPageTabs?: string[];
-  hideHeader?: boolean;
-  path?: string;
-  sections?: Record<string, LiliaSettingsSectionInput>;
-  tabs?: LiliaSettingsTabInput[];
-}
-
-export interface LiliaRuntimeConfigInput {
-  agentDebug?: boolean | { maxLogEntries?: number };
-  contextMenu?: boolean;
-  globalScrollbar?: boolean;
 }
 
 export type NativePlatform = "macos" | "windows" | "linux";
@@ -162,14 +124,11 @@ export interface LiliaAppearanceConfigInput {
   platformDefaults?: Partial<Record<NativePlatform, LiliaPlatformAppearanceDefaults>>;
 }
 
-export interface LiliaAppConfig {
+export interface LiliaUiConfig {
   appearance?: LiliaAppearanceConfigInput;
   appName: string;
   identifier?: string;
   productTitle: string;
-  runtime?: LiliaRuntimeConfigInput;
-  settings?: LiliaSettingsConfigInput;
-  shell?: Partial<LiliaShellCopy>;
   sidebar?: LiliaSidebarConfigInput;
   storageKeyPrefix: string;
   version: string;
@@ -182,25 +141,13 @@ export const APP_METADATA = reactive({
   storageKeyPrefix: "lilia-app",
 });
 
-export const APP_SHELL_COPY = reactive<LiliaShellCopy>({
-  homeTitle: "首页",
-  homeDescription: "",
-  workspaceSectionTitle: "工作区",
-  workspaceName: "Workspace",
-  workspaceEmptyText: "",
-  statusLabel: "Ready",
-  statusTitle: "应用状态正常。点击进入设置。",
-  settingsDescription: "偏好设置会保存到本地。",
-});
-
-export const APP_TITLE = APP_METADATA.productTitle;
-
 export const SIDEBAR_CONFIG = reactive({
   widthStorageKey: "lilia-app.sidebarWidth",
   collapsedStorageKey: "lilia-app.sidebarCollapsed",
   minWidth: 180,
   maxWidth: 480,
   defaultWidth: 220,
+  navTitle: "",
 });
 
 export interface SidebarActionItem {
@@ -223,6 +170,7 @@ export interface SidebarNavItem {
   active?: boolean;
   badges?: SidebarNavItemBadge[];
   disabled?: boolean;
+  emphasis?: "default" | "muted";
   icon: Component;
   key: string;
   label: string;
@@ -286,52 +234,16 @@ export const SIDEBAR_NAV = reactive<SidebarNavItem[]>([]);
 export const SIDEBAR_GROUPS = reactive<SidebarGroup[]>([]);
 export const SIDEBAR_TOP_CONTENT = shallowRef<Component | null>(null);
 export const SIDEBAR_FOOTER_LINKS = reactive<SidebarFooterLink[]>([]);
-export const SIDEBAR_FOOTER_STATUS = reactive<SidebarFooterStatus>({
-  key: "status",
-  to: "/settings",
-  label: "Ready",
-  title: "应用状态正常。点击进入设置。",
-  tone: "ok",
-  icon: resolveLazyLucideIcon("sparkles"),
-});
-export const SIDEBAR_FOOTER_STATUSES = reactive<SidebarFooterStatus[]>([
-  SIDEBAR_FOOTER_STATUS,
-]);
+export const SIDEBAR_FOOTER_STATUSES = reactive<SidebarFooterStatus[]>([]);
 
-export type SettingsTabKey = string;
-
-export interface SettingsTab {
-  icon: Component;
-  key: SettingsTabKey;
-  label: string;
-  props?: Record<string, unknown>;
-  to: RouteLocationRaw;
-}
-
-export const SETTINGS_TABS = reactive<SettingsTab[]>(defaultSettingsTabs("/settings"));
-
-export const DEFAULT_SETTINGS_TAB: SettingsTabKey = "appearance";
-
-export const SETTINGS_SECTIONS: Record<SettingsTabKey, Component> = defaultSettingsSections();
-
-export const SETTINGS_SECTION_PROPS = reactive<Record<string, Record<string, unknown>>>({});
-
-export const SETTINGS_CONFIG = reactive({
-  aliases: {} as Record<string, string>,
-  defaultTab: DEFAULT_SETTINGS_TAB,
-  fullPageTabs: new Set<string>(),
-  hideHeader: false,
-  path: "/settings",
-});
-
-let currentConfig: LiliaAppConfig = {
+let currentConfig: LiliaUiConfig = {
   appName: APP_METADATA.appName,
   productTitle: APP_METADATA.productTitle,
   version: APP_METADATA.version,
   storageKeyPrefix: APP_METADATA.storageKeyPrefix,
 };
 
-function resolveIcon(icon: IconInput): Component {
+export function resolveLiliaIcon(icon: IconInput): Component {
   return typeof icon === "string" ? resolveLazyLucideIcon(icon) : icon;
 }
 
@@ -342,14 +254,14 @@ function resolveLazyLucideIcon(icon: IconName): Component {
 function resolveAction(action: LiliaSidebarActionInput): SidebarActionItem {
   return {
     ...action,
-    icon: resolveIcon(action.icon),
+    icon: resolveLiliaIcon(action.icon),
   };
 }
 
 function resolveNav(item: LiliaSidebarNavInput): SidebarNavItem {
   return {
     ...item,
-    icon: resolveIcon(item.icon),
+    icon: resolveLiliaIcon(item.icon),
     tools: item.tools?.map(resolveAction),
   };
 }
@@ -358,77 +270,12 @@ function replaceArray<T>(target: T[], next: T[]) {
   target.splice(0, target.length, ...next);
 }
 
-function replaceObject<T>(target: Record<string, T>, next: Record<string, T>) {
-  for (const key of Object.keys(target)) {
-    delete target[key];
-  }
-  Object.assign(target, next);
-}
-
-function replaceSet<T>(target: Set<T>, next: Iterable<T>) {
-  target.clear();
-  for (const value of next) target.add(value);
-}
-
-function isSectionLoader(section: LiliaSettingsSectionInput): section is LiliaSettingsSectionLoader {
-  return typeof section === "function" && !("setup" in section) && !("render" in section);
-}
-
-function resolveSettingsSection(section: LiliaSettingsSectionInput): Component {
-  return isSectionLoader(section) ? defineAsyncComponent(section) : section;
-}
-
-function defaultSettingsTabs(path: string): SettingsTab[] {
-  return [
-    {
-      key: "appearance",
-      label: "外观",
-      icon: resolveLazyLucideIcon("palette"),
-      to: { path, query: { tab: "appearance" } },
-    },
-    {
-      key: "about",
-      label: "关于",
-      icon: resolveLazyLucideIcon("info"),
-      to: { path, query: { tab: "about" } },
-    },
-  ];
-}
-
-function defaultSettingsSections(): Record<string, Component> {
-  return {
-    appearance: defineAsyncComponent(() => import("../pages/settings/AppearanceSection.vue")),
-    about: defineAsyncComponent(() => import("../pages/settings/AboutSection.vue")),
-  };
-}
-
-function resolveSettingsTab(tab: LiliaSettingsTabInput, path: string): SettingsTab {
-  return {
-    ...tab,
-    icon: resolveIcon(tab.icon),
-    to: tab.to ?? { path, query: { tab: tab.key } },
-  };
-}
-
-export function setLiliaAppConfig(config: LiliaAppConfig) {
+export function setLiliaUiConfig(config: LiliaUiConfig) {
   currentConfig = config;
   APP_METADATA.appName = config.appName;
   APP_METADATA.productTitle = config.productTitle;
   APP_METADATA.version = config.version;
   APP_METADATA.storageKeyPrefix = config.storageKeyPrefix;
-
-  Object.assign(APP_SHELL_COPY, {
-    homeTitle: "首页",
-    homeDescription: "",
-    homeActionLabel: undefined,
-    workspaceSectionTitle: "工作区",
-    workspaceName: "Workspace",
-    workspaceEmptyText: "",
-    statusLabel: "Ready",
-    statusTitle: "应用状态正常。点击进入设置。",
-    settingsDescription: "偏好设置会保存到本地。",
-    ...config.shell,
-  });
 
   const sidebar = config.sidebar ?? {};
   Object.assign(SIDEBAR_CONFIG, {
@@ -437,6 +284,7 @@ export function setLiliaAppConfig(config: LiliaAppConfig) {
     minWidth: sidebar.minWidth ?? 180,
     maxWidth: sidebar.maxWidth ?? 480,
     defaultWidth: sidebar.defaultWidth ?? 220,
+    navTitle: sidebar.navTitle ?? "",
   });
 
   replaceArray(SIDEBAR_GLOBAL_ACTIONS, (sidebar.globalActions ?? []).map(resolveAction));
@@ -452,75 +300,21 @@ export function setLiliaAppConfig(config: LiliaAppConfig) {
   );
   replaceArray(
     SIDEBAR_FOOTER_LINKS,
-    (sidebar.footerLinks ?? [
-      { key: "settings", to: "/settings", label: "设置", icon: "settings" },
-    ]).map((link) => ({
+    (sidebar.footerLinks ?? []).map((link) => ({
       ...link,
-      icon: resolveIcon(link.icon),
+      icon: resolveLiliaIcon(link.icon),
     })),
   );
-  const footerStatusInputs = sidebar.footerStatuses !== undefined
-    ? sidebar.footerStatuses
-    : [sidebar.footerStatus ?? {
-      to: "/settings",
-      label: APP_SHELL_COPY.statusLabel,
-      title: APP_SHELL_COPY.statusTitle,
-      tone: "ok",
-      icon: "sparkles",
-    }];
-  const footerStatuses = footerStatusInputs.map((status, index) => ({
-    ...status,
-    key: status.key?.trim() || (index === 0 ? "status" : `status-${index + 1}`),
-    icon: resolveIcon(status.icon),
-  }));
-  const [primaryFooterStatus, ...additionalFooterStatuses] = footerStatuses;
-  if (primaryFooterStatus) {
-    Object.assign(SIDEBAR_FOOTER_STATUS, primaryFooterStatus);
-    replaceArray(SIDEBAR_FOOTER_STATUSES, [
-      SIDEBAR_FOOTER_STATUS,
-      ...additionalFooterStatuses,
-    ]);
-  } else {
-    replaceArray(SIDEBAR_FOOTER_STATUSES, []);
-  }
-
-  const settings = config.settings ?? {};
-  SETTINGS_CONFIG.defaultTab = settings.defaultTab ?? "appearance";
-  SETTINGS_CONFIG.hideHeader = settings.hideHeader ?? false;
-  SETTINGS_CONFIG.path = settings.path ?? "/settings";
-  replaceObject(SETTINGS_CONFIG.aliases, settings.aliases ?? {});
-  replaceSet(SETTINGS_CONFIG.fullPageTabs, settings.fullPageTabs ?? []);
   replaceArray(
-    SETTINGS_TABS,
-    settings.tabs?.map((tab) => resolveSettingsTab(tab, SETTINGS_CONFIG.path)) ??
-      defaultSettingsTabs(SETTINGS_CONFIG.path),
-  );
-  replaceObject(
-    SETTINGS_SECTIONS,
-    settings.sections
-      ? Object.fromEntries(
-        Object.entries(settings.sections).map(([key, section]) => [
-          key,
-          resolveSettingsSection(section),
-        ]),
-      )
-      : defaultSettingsSections(),
-  );
-  replaceObject(
-    SETTINGS_SECTION_PROPS,
-    Object.fromEntries(SETTINGS_TABS.map((tab) => [tab.key, tab.props ?? {}])),
+    SIDEBAR_FOOTER_STATUSES,
+    (sidebar.footerStatuses ?? []).map((status, index) => ({
+      ...status,
+      key: status.key?.trim() || `status-${index + 1}`,
+      icon: resolveLiliaIcon(status.icon),
+    })),
   );
 }
 
-export function getLiliaAppConfig(): LiliaAppConfig {
+export function getLiliaUiConfig(): LiliaUiConfig {
   return currentConfig;
-}
-
-export function normalizeSettingsTab(value: unknown): SettingsTabKey {
-  const candidate = Array.isArray(value) ? value[0] : value;
-  const raw = typeof candidate === "string" ? candidate : "";
-  const resolved = SETTINGS_CONFIG.aliases[raw] ?? raw;
-  return SETTINGS_TABS.some((tab) => tab.key === resolved)
-    ? resolved
-    : SETTINGS_CONFIG.defaultTab;
 }

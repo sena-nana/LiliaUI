@@ -4,8 +4,11 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./app": "./src/createLiliaApp.ts",
     "./commands": "./src/commands.ts",
+    "./diagnostics": "./src/diagnostics/index.ts",
+    "./runtime": "./src/runtime.ts",
+    "./settings": "./src/settings/index.ts",
+    "./shell": "./src/shell.ts",
     "./styles.css": "./src/styles.css",
     "./styles/global-scrollbar.css": "./src/styles/global-scrollbar.css",
     "./styles/page.css": "./src/styles/page.css",
@@ -17,12 +20,14 @@
     "./components/search-dropdown.css": "./src/components/search-dropdown.css",
     "./components/*": "./src/components/*.vue",
     "./composables/*": "./src/composables/*.ts",
-    "./config/appShell": "./src/config/appShell.ts",
-    "./directives/*": "./src/directives/*.ts",
+    "./directives/contextMenu": "./src/directives/contextMenu.ts",
     "./layouts/popup-shell.css": "./src/layouts/popup-shell.css",
     "./layouts/*": "./src/layouts/*.vue",
-    "./pages/*": "./src/pages/*.vue",
-    "./utils/*": "./src/utils/*.ts"
+    "./utils/calendarHeatmap": "./src/utils/calendarHeatmap.ts",
+    "./utils/eventListeners": "./src/utils/eventListeners.ts",
+    "./utils/lazyLoadState": "./src/utils/lazyLoadState.ts",
+    "./utils/singleFlight": "./src/utils/singleFlight.ts",
+    "./utils/textSegments": "./src/utils/textSegments.ts"
   },
   "sideEffects": [
     "**/*.css"

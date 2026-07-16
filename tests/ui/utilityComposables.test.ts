@@ -3,17 +3,20 @@ import { defineComponent, h, nextTick, ref } from "vue";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   addDomEventListener,
-  createLazyLoadState,
-  highlightQuerySegments,
-  highlightRangeSegments,
   installCombinedUnlisten,
   installUnlistenFns,
-  scheduleAfterPaint,
-  useAnchoredOverlay,
-  useFocusOnActivation,
-  withComponentEpoch,
-  type ComponentEpoch,
-} from "@lilia/ui";
+} from "@lilia/ui/utils/eventListeners";
+import {
+  createLazyLoadState,
+} from "@lilia/ui/utils/lazyLoadState";
+import {
+  highlightQuerySegments,
+  highlightRangeSegments,
+} from "@lilia/ui/utils/textSegments";
+import { scheduleAfterPaint } from "@lilia/ui/diagnostics";
+import { useAnchoredOverlay } from "@lilia/ui/composables/useAnchoredOverlay";
+import { useFocusOnActivation } from "@lilia/ui/composables/useFocusOnActivation";
+import { withComponentEpoch, type ComponentEpoch } from "@lilia/ui/composables/useComponentEpoch";
 
 describe("lazy load state", () => {
   it("caches successful loads and shares pending loads", async () => {

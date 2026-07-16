@@ -16,6 +16,8 @@
 - 修改前先确认改动属于哪个包;不要把 UI、配置、工具和构建逻辑混在一个入口里。
 - 公共 API 要保持可被远端 Git workspace 直接消费;不要依赖本地未导出的路径或消费仓库专属文件。
 - `@lilia/ui` 只承载可复用 UI 和壳层能力;应用业务页面、业务数据模型、provider、timeline、agent runner 不进入本仓库。
+- `@lilia/ui` 不创建 Vue App、Router、应用 Root、业务路由或设置路由;消费应用显式组合 Root、Shell、Hosts、命令、设置 model 和可选安装器。
+- 根入口只承载稳定常用组件;Shell、Settings、Runtime、Commands 和 Diagnostics 分别从明确 subpath 导入,禁止重新汇总到根入口。
 - `@lilia/config` 只负责配置读取、校验、同步和可继承配置;不承担 CLI 输出和流程编排。
 - `@lilia/tools` 负责面向项目的检查、资源复制、迁移和工具 CLI;不要放运行时 UI 状态。
 - `@lilia/build` 负责流程封装和跨平台命令执行;不要复制 `@lilia/config` 或 `@lilia/tools` 的业务逻辑。
@@ -35,6 +37,7 @@
 
 - 可由 Agent 定位和操作的稳定交互应提供 `data-agent-id`;命名应描述语义边界,不要绑定易变文案。
 - `@lilia/tools` 的 `doctor` / `template-check` 是消费仓库的边界报告来源;新增关键壳层目标时同步更新检查 profile。
+- `doctor` / `template-check` 默认只做最小公共检查;模板和应用在 `lilia.tools.profile.mjs` 声明自己的文件、Agent target 与入口,公共工具不得硬编码消费目录。
 - 迁移工具只能迁移通用结构、默认资源和公共配置;不要把消费仓库或 Lilia 应用专属业务协议带进默认模板。
 
 ## 验证

@@ -1,4 +1,9 @@
-import { getLiliaAppConfig } from "../config/appShell";
+export interface PerfDiagnosticsConfig {
+  contextProvider?: () => Partial<PerfLogContext>;
+  enabled: boolean | (() => boolean);
+  logger?: Pick<Console, "error" | "info">;
+  storageKey?: string;
+}
 
 export type PerfStageHandle = {
   end: (stage?: string) => void;
@@ -22,20 +27,25 @@ export type PerfLogContext = {
 };
 
 let perfSeq = 0;
-let longTaskObserverInstalled = false;
+let longTaskObserver: PerformanceObserver | null = null;
+let diagnosticsConfig: PerfDiagnosticsConfig = { enabled: false };
+
+export function configurePerfDiagnostics(config: PerfDiagnosticsConfig) {
+  diagnosticsConfig = { ...config };
+}
 
 function currentPerformance(): Performance | null {
   return typeof performance === "object" && performance ? performance : null;
 }
 
-function perfStorageKey(): string {
-  return `${getLiliaAppConfig().storageKeyPrefix}.perf`;
-}
-
 function isPerfEnabled(): boolean {
-  if (import.meta.env.DEV) return true;
+  const configured = typeof diagnosticsConfig.enabled === "function"
+    ? diagnosticsConfig.enabled()
+    : diagnosticsConfig.enabled;
+  if (configured) return true;
+  if (!diagnosticsConfig.storageKey) return false;
   try {
-    return localStorage.getItem(perfStorageKey()) === "1";
+    return localStorage.getItem(diagnosticsConfig.storageKey) === "1";
   } catch {
     return false;
   }
@@ -68,11 +78,12 @@ function createPerfContext(
     (detail?.startsWith("/") ? detail : null) ??
     currentRoute();
   const id = stringValue(options.id) ?? detail ?? `${name}:${seq}`;
+  const provided = diagnosticsConfig.contextProvider?.() ?? {};
   return {
-    feature: stringValue(options.feature) ?? name,
-    id,
-    route,
-    seq,
+    feature: stringValue(options.feature) ?? stringValue(provided.feature) ?? name,
+    id: stringValue(options.id) ?? stringValue(provided.id) ?? id,
+    route: stringValue(options.route) ?? stringValue(provided.route) ?? route,
+    seq: stringValue(options.seq) ?? stringValue(provided.seq) ?? seq,
     ...(detail ? { detail } : {}),
   };
 }
@@ -92,11 +103,13 @@ function formatPerfContext(context: PerfLogContext): string {
 
 function logPerf(name: string, duration: number, context: PerfLogContext) {
   if (!isPerfEnabled()) return;
-  console.info(`[perf] ${name} ${duration.toFixed(1)}ms ${formatPerfContext(context)}`);
+  diagnosticsConfig.logger?.info(
+    `[perf] ${name} ${duration.toFixed(1)}ms ${formatPerfContext(context)}`,
+  );
 }
 
 function logPerfFailure(name: string, context: PerfLogContext, err: unknown) {
-  console.error(`[perf] ${name}:failed ${formatPerfContext(context)}`, err);
+  diagnosticsConfig.logger?.error(`[perf] ${name}:failed ${formatPerfContext(context)}`, err);
 }
 
 function createMeasureName(name: string, stage: string) {
@@ -246,15 +259,14 @@ export function cancelIdleRun(handle: number) {
 
 export function installPerfObservers() {
   if (
-    longTaskObserverInstalled ||
+    longTaskObserver ||
     !isPerfEnabled() ||
     typeof PerformanceObserver !== "function"
   ) {
     return;
   }
-  longTaskObserverInstalled = true;
   try {
-    const observer = new PerformanceObserver((list) => {
+    longTaskObserver = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
         const detail = entry.name || "main-thread";
         logPerf(
@@ -269,8 +281,13 @@ export function installPerfObservers() {
         );
       }
     });
-    observer.observe({ entryTypes: ["longtask"] });
+    longTaskObserver.observe({ entryTypes: ["longtask"] });
   } catch {
-    longTaskObserverInstalled = false;
+    longTaskObserver = null;
   }
+}
+
+export function uninstallPerfObservers() {
+  longTaskObserver?.disconnect();
+  longTaskObserver = null;
 }

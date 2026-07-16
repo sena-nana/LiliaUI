@@ -25,7 +25,6 @@ import {
 import {
   bumpVersion,
   checkPackageManager,
-  createAppAgentDebugReport,
   createAgentDebugReport,
   copyLiliaAssets,
   createTemplateReport,
@@ -114,6 +113,7 @@ describe("@lilia/tools", () => {
 
     const report = createTemplateReport(root, {
       profile: {
+        expectedDependencies: ["@lilia/ui", "@lilia/config", "@lilia/tools", "@lilia/build"],
         importantFiles: [
           ["src/main.ts", "entry"],
           ["src/app.config.ts", "config"],
@@ -141,6 +141,7 @@ describe("@lilia/tools", () => {
     const capabilityPath = join(root, "src-tauri", "capabilities", "default.json");
     const profile = {
       expectedDependencies: ["@lilia/ui"],
+      nativeBackdropPermissions: ["lilia:default", "lilia:allow-set-window-backdrop"],
       importantFiles: [],
       agentTargetFiles: {},
     };
@@ -167,6 +168,7 @@ describe("@lilia/tools", () => {
         expectedDependencies: ["@lilia/ui"],
         importantFiles: [],
         agentTargetFiles: {},
+        entrypoints: [{ id: "agent-debug", command: "yarn agent:debug --json", purpose: "readiness" }],
       },
     });
 
@@ -177,7 +179,7 @@ describe("@lilia/tools", () => {
     expect(report.template.entrypoints.some((entry) => entry.id === "agent-debug")).toBe(true);
   });
 
-  it("combines shared and application Agent debug boundaries", () => {
+  it("uses application-declared Agent debug boundaries", () => {
     const root = createProject();
     mkdirSync(join(root, "src", "components"), { recursive: true });
     writeFileSync(
@@ -185,10 +187,12 @@ describe("@lilia/tools", () => {
       '<button data-agent-id="titlebar.app.refresh">刷新</button>',
     );
 
-    const report = createAppAgentDebugReport(root, {
-      importantFiles: [["src/components/AppActions.vue", "application titlebar actions"]],
-      agentTargetFiles: {
-        "src/components/AppActions.vue": [["titlebar.app.refresh"]],
+    const report = createAgentDebugReport(root, {
+      profile: {
+        importantFiles: [["src/components/AppActions.vue", "application titlebar actions"]],
+        agentTargetFiles: {
+          "src/components/AppActions.vue": [["titlebar.app.refresh"]],
+        },
       },
     });
 
@@ -200,7 +204,7 @@ describe("@lilia/tools", () => {
       id: "titlebar.app.refresh",
       exists: true,
     }));
-    expect(report.template.agentTargets.some((target) => target.id === "titlebar")).toBe(true);
+    expect(report.template.agentTargets).toHaveLength(1);
   });
 });
 
@@ -492,13 +496,5 @@ function createAppConfig() {
     version: "0.1.0",
     identifier: "com.lilia.test",
     storageKeyPrefix: "lilia-test",
-    shell: {
-      homeTitle: "Home",
-      homeDescription: "Ready",
-      workspaceSectionTitle: "Navigation",
-      statusLabel: "Ready",
-      statusTitle: "Ready",
-      settingsDescription: "Settings",
-    },
   };
 }

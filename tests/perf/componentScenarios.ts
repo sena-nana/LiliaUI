@@ -3,20 +3,18 @@ import Settings from "@lucide/vue/dist/esm/icons/settings.mjs";
 import {
   ActionMenuItem,
   AnchoredActionMenu,
-  ContributionHeatmap,
+  CalendarHeatmap,
   ConfirmDialog,
-  ContextMenuHost,
   Dropdown,
-  LiliaAppRoot,
-  LiliaDesktopShell,
-  LiliaSettingsPage,
-  PopupShell,
+  LiliaSidebarRow,
+  LiliaSidebarSection,
   PopupTitleBarFrame,
   SearchDropdown,
   SettingsCollapsibleCard,
   SettingsRow,
   SidebarCollapse,
   TitleBar,
+  Tooltip,
   UiButton,
   UiCard,
   UiEmptyState,
@@ -24,17 +22,28 @@ import {
   UiInput,
   UiRangeField,
   UiSegmentedControl,
+  UiSelect,
   UiSpinner,
   UiSwitch,
   UiTextarea,
-  installGlobalScrollbarVisibility,
-  buildContributionHeatmapModel,
-  openContextMenuAt,
-  setLiliaAppConfig,
-  uninstallGlobalScrollbarVisibility,
+  buildCalendarHeatmapModel,
   ViewTabs,
 } from "@lilia/ui";
-import { defineComponent, h, nextTick, type Plugin, type Ref, type VNode } from "vue";
+import ContextMenuHost from "@lilia/ui/components/ContextMenuHost";
+import OverlayHost from "@lilia/ui/components/OverlayHost";
+import PopupShell from "@lilia/ui/layouts/PopupShell";
+import { LiliaDesktopShell, setLiliaUiConfig } from "@lilia/ui/shell";
+import {
+  createLiliaSettingsModel,
+  liliaSettingsKey,
+  LiliaSettingsPage,
+} from "@lilia/ui/settings";
+import {
+  installGlobalScrollbarVisibility,
+  uninstallGlobalScrollbarVisibility,
+} from "@lilia/ui/runtime";
+import { openContextMenuAt } from "@lilia/ui/composables/useContextMenu";
+import { defineComponent, h, nextTick, type App, type Plugin, type Ref, type VNode } from "vue";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { testAppConfig } from "../ui/fixtures/appConfig";
 import type { ComponentPerfRunner } from "./componentPerformanceRunner";
@@ -63,17 +72,23 @@ const routePage = defineComponent({
 let activeRouter: ReturnType<typeof createRouter> | null = null;
 
 function resetAppConfig() {
-  setLiliaAppConfig({
-    ...testAppConfig,
-    settings: {
-      defaultTab: "appearance",
-      tabs: [
-        { key: "appearance", label: "外观", icon: "palette" },
-        { key: "about", label: "关于", icon: "info" },
-      ],
-    },
-  });
+  setLiliaUiConfig(testAppConfig);
 }
+
+const perfSettings = createLiliaSettingsModel({
+  defaultTab: "appearance",
+  path: "/settings",
+  tabs: [
+    { key: "appearance", label: "Appearance", icon: Settings },
+    { key: "about", label: "About", icon: Search },
+  ],
+  sections: { appearance: routePage, about: routePage },
+});
+const settingsPlugin: Plugin = {
+  install(app: App) {
+    app.provide(liliaSettingsKey, perfSettings);
+  },
+};
 
 function createScenarioRouter(initialPath = "/") {
   activeRouter = createRouter({
@@ -144,6 +159,15 @@ function changeChecked(root: ParentNode, selector: string, checked: boolean) {
   element.dispatchEvent(new Event("change", { bubbles: true, cancelable: true }));
 }
 
+function changeValue(root: ParentNode, selector: string, value: string) {
+  const element = documentFor(root).querySelector(selector);
+  if (!(element instanceof HTMLSelectElement)) {
+    throw new Error(`Missing perf select target: ${selector}`);
+  }
+  element.value = value;
+  element.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
 function pointerOffset(root: ParentNode, selector: string, type: string, offsetX: number, offsetY: number) {
   const element = documentFor(root).querySelector(selector);
   if (!(element instanceof Element)) {
@@ -181,15 +205,15 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
     interact: (root) => click(root, ".sb-menu__item"),
   },
   {
-    name: "ContributionHeatmap",
-    render: (step) => h(ContributionHeatmap, {
-      model: buildContributionHeatmapModel(Array.from({ length: 35 }, (_, index) => ({
+    name: "CalendarHeatmap",
+    render: (step) => h(CalendarHeatmap, {
+      model: buildCalendarHeatmapModel(Array.from({ length: 35 }, (_, index) => ({
         date: new Date(Date.UTC(2026, 5, index + 1)).toISOString().slice(0, 10),
-        count: (index + step.value) % 9,
+        value: (index + step.value) % 9,
       }))),
-      ariaLabel: "Contribution activity",
+      ariaLabel: "Calendar activity",
     }),
-    interact: (root) => pointerOffset(root, ".contribution-heatmap", "pointermove", 52, 18),
+    interact: (root) => pointerOffset(root, ".calendar-heatmap", "pointermove", 52, 18),
   },
   {
     name: "ConfirmDialog",
@@ -286,16 +310,15 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
     cleanup: uninstallGlobalScrollbarVisibility,
   },
   {
-    name: "LiliaAppRoot",
-    prepare: resetAppConfig,
-    createPlugins: () => [createScenarioRouter("/")],
-    beforeMount: readyScenarioRouter,
-    render: () => h(LiliaAppRoot),
+    name: "OverlayHost",
+    render: (step) => h(OverlayHost, {
+      components: [defineComponent({ render: () => h("div", `Overlay ${step.value}`) })],
+    }),
   },
   {
     name: "LiliaDesktopShell",
     prepare: resetAppConfig,
-    createPlugins: () => [createScenarioRouter("/")],
+    createPlugins: () => [createScenarioRouter("/"), settingsPlugin],
     beforeMount: readyScenarioRouter,
     render: () => h(LiliaDesktopShell),
     interact: (root) => click(root, "[data-agent-id='titlebar.left-sidebar.toggle']"),
@@ -303,7 +326,7 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
   {
     name: "LiliaSettingsPage",
     prepare: resetAppConfig,
-    createPlugins: () => [createScenarioRouter("/settings?tab=appearance")],
+    createPlugins: () => [createScenarioRouter("/settings?tab=appearance"), settingsPlugin],
     beforeMount: readyScenarioRouter,
     render: () => h(LiliaSettingsPage),
   },
@@ -366,6 +389,30 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
     }, () => h(UiSwitch, { modelValue: step.value % 2 === 0, label: "启用" })),
   },
   {
+    name: "LiliaSidebarRow",
+    createPlugins: () => [createScenarioRouter("/")],
+    beforeMount: readyScenarioRouter,
+    render: (step) => h(LiliaSidebarRow, {
+      label: `Item ${step.value}`,
+      icon: Search,
+      to: "/components",
+      active: step.value % 2 === 1,
+      count: step.value + 1,
+      agentId: "perf.sidebar-row",
+    }),
+    interact: (root) => click(root, "[data-agent-id='perf.sidebar-row']"),
+  },
+  {
+    name: "LiliaSidebarSection",
+    render: (step) => h(LiliaSidebarSection, {
+      title: "Section",
+      count: step.value + 1,
+      expanded: step.value % 2 === 0,
+      agentId: "perf.sidebar-section",
+    }, () => h("span", "Content")),
+    interact: (root) => click(root, ".lilia-sidebar-section__toggle"),
+  },
+  {
     name: "TitleBar",
     render: (step) => h(TitleBar, { title: `Lilia ${step.value}`, leftSidebarCollapsed: step.value % 2 === 1 }),
     interact: (root) => {
@@ -374,6 +421,10 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
       pointer(root, "[data-agent-id='titlebar']", "pointerup", { clientX: 88, clientY: 18 });
       click(root, "[data-agent-id='titlebar.left-sidebar.toggle']");
     },
+  },
+  {
+    name: "Tooltip",
+    render: (step) => h(Tooltip, { open: step.value % 2 === 0 }, () => `Hint ${step.value}`),
   },
   {
     name: "UiButton",
@@ -435,6 +486,18 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
       ],
     }),
     interact: (root) => click(root, "[data-agent-id='perf.segment.light']"),
+  },
+  {
+    name: "UiSelect",
+    render: (step) => h(UiSelect, {
+      modelValue: step.value % 2 === 0 ? "one" : "two",
+      options: [
+        { value: "one", label: "One" },
+        { value: "two", label: "Two" },
+      ],
+      agentId: "perf.select",
+    }),
+    interact: (root) => changeValue(root, "[data-agent-id='perf.select']", "two"),
   },
   {
     name: "UiSpinner",

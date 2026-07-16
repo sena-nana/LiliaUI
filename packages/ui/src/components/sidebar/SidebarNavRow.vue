@@ -6,9 +6,9 @@ import SidebarRowTools from "./SidebarRowTools.vue";
 const props = withDefaults(defineProps<{
   item: SidebarNavItem;
   agentId: string;
-  project?: boolean;
+  emphasis?: "default" | "muted";
 }>(), {
-  project: false,
+  emphasis: "default",
 });
 
 function selectItem() {
@@ -25,7 +25,7 @@ function selectItem() {
     :active="item.active"
     :disabled="item.disabled || (!item.to && !item.onSelect)"
     :agent-id="agentId"
-    :class="{ 'sb-tree__entry--project': project }"
+    :class="{ 'sidebar-nav-row--muted': emphasis === 'muted' }"
     @select="selectItem"
   >
     <template v-if="item.badges?.length" #trailing>
@@ -51,7 +51,7 @@ function selectItem() {
 </template>
 
 <style scoped>
-.sb-tree__entry--project :deep(.lilia-sidebar-row__control) {
+.sidebar-nav-row--muted :deep(.lilia-sidebar-row__control) {
   color: var(--text-muted);
 }
 
