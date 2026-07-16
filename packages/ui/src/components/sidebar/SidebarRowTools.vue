@@ -32,13 +32,9 @@ function selectTool(tool: SidebarActionItem) {
 
 <style scoped>
 .sb-tree__hover-tools {
-  margin-left: auto;
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.12s ease;
 }
 
 </style>
