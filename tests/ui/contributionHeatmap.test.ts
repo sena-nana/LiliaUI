@@ -111,6 +111,7 @@ describe("ContributionHeatmap", () => {
     expect(view.container.querySelectorAll(".contribution-heatmap__active-cell")).toHaveLength(1);
     const tooltip = screen.getByRole("tooltip");
     expect(tooltip).toHaveTextContent(firstCell.title);
+    expect(tooltip).toHaveClass("lilia-tooltip");
     expect(svg).toHaveAttribute("aria-describedby", tooltip.id);
     await pointerMove(svg, firstCell.x + 2, firstCell.y + 2);
     expect(view.container.querySelectorAll(".contribution-heatmap__active-cell")).toHaveLength(1);

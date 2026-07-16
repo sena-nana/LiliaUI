@@ -17,6 +17,7 @@ export { default as SettingsCollapsibleCard, type SettingsCollapsibleCardEmits, 
 export { default as SettingsRow, type SettingsRowProps } from "./components/SettingsRow.vue";
 export { default as SidebarCollapse } from "./components/sidebar/SidebarCollapse.vue";
 export { default as TitleBar } from "./components/TitleBar.vue";
+export { default as Tooltip } from "./components/Tooltip.vue";
 export { default as UiButton } from "./components/UiButton.vue";
 export { default as UiCard } from "./components/UiCard.vue";
 export { default as UiEmptyState } from "./components/UiEmptyState.vue";
