@@ -27,21 +27,6 @@ export function validateAppConfig(config) {
     assertNonEmptyString(config?.[key], key);
   }
 
-  const shellRequired = [
-    "homeTitle",
-    "homeDescription",
-    "workspaceSectionTitle",
-    "statusLabel",
-    "statusTitle",
-    "settingsDescription",
-  ];
-
-  if (typeof config.shell !== "object" || config.shell === null) {
-    throw new Error('app.config.json requires a "shell" object.');
-  }
-  for (const key of shellRequired) {
-    assertNonEmptyString(config.shell[key], `shell.${key}`);
-  }
 }
 
 export function syncFromAppConfig(appConfig, projectRoot = process.cwd()) {
@@ -95,7 +80,15 @@ export function defineLiliaViteConfig(options = {}) {
     clearScreen: false,
     resolve: {
       ...(resolve ?? {}),
-      dedupe: unique(["vue", "vue-router", ...(resolve?.dedupe ?? [])]),
+      dedupe: unique([
+        "vue",
+        "vue-router",
+        "@lucide/vue",
+        "vitest",
+        "@testing-library/jest-dom",
+        "@testing-library/vue",
+        ...(resolve?.dedupe ?? []),
+      ]),
     },
     optimizeDeps: {
       ...(optimizeDeps ?? {}),

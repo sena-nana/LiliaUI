@@ -8,7 +8,7 @@ import {
   statSync,
 } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import {
   calculateNextVersion,
   readAppConfig,
@@ -136,8 +136,13 @@ export function copyLiliaAssets(projectRoot = process.cwd(), options = {}) {
 
 export function createTemplateReport(projectRoot = process.cwd(), options = {}) {
   const packageJson = readJson(resolve(projectRoot, "package.json"));
-  const appConfig = readAppConfig(projectRoot);
-  const profile = createTemplateProfile(options.profile);
+  const appConfig = existsSync(resolve(projectRoot, "app.config.json"))
+    ? readAppConfig(projectRoot)
+    : {
+        appName: packageJson.name ?? "application",
+        productTitle: packageJson.productName ?? packageJson.name ?? "Application",
+      };
+  const profile = createToolsProfile(options.profile);
   const importantFiles = profile.importantFiles.map(([path, purpose]) => ({
     path,
     purpose,
@@ -158,30 +163,30 @@ export function createTemplateReport(projectRoot = process.cwd(), options = {}) 
     nativeBackdropPermissions.includes(permission),
   );
   const checks = [
-    {
+    profile.packageManager ? {
       id: "package-manager",
       ok: packageJson.packageManager === profile.packageManager,
       detail: `packageManager=${packageJson.packageManager ?? "missing"}`,
-    },
-    {
+    } : null,
+    profile.requireSingleAppRoot ? {
       id: "single-app-root",
       ok: packageJson.workspaces === undefined,
       detail: packageJson.workspaces === undefined ? "no workspaces field" : "workspaces field exists",
-    },
-    {
+    } : null,
+    profile.expectedDependencies.length ? {
       id: "lilia-dependencies-present",
       ok: expectedDependencies.every((name) => packageJson.dependencies?.[name] !== undefined),
       detail: expectedDependencies
         .map((name) => `${name}=${packageJson.dependencies?.[name] ?? "missing"}`)
         .join(", "),
-    },
-    {
+    } : null,
+    profile.nativeBackdropPermissions.length ? {
       id: "native-backdrop-permission",
       ok: nativeBackdropPermission !== undefined,
       detail: nativeBackdropPermission
         ? `permission=${nativeBackdropPermission}`
         : `expected one of ${profile.nativeBackdropPermissions.join(", ")}`,
-    },
+    } : null,
     {
       id: "important-files-present",
       ok: importantFiles.every((file) => file.exists),
@@ -192,7 +197,7 @@ export function createTemplateReport(projectRoot = process.cwd(), options = {}) 
       ok: agentTargets.every((target) => target.exists),
       detail: `${agentTargets.filter((target) => target.exists).length}/${agentTargets.length} targets present`,
     },
-  ];
+  ].filter(Boolean);
   const gitStatus = spawnSync("git", ["status", "--short"], {
     cwd: projectRoot,
     encoding: "utf-8",
@@ -250,40 +255,6 @@ export function printTemplateReport(report) {
 
 export function createAgentDebugReport(projectRoot = process.cwd(), options = {}) {
   return createAgentDebugReportFromTemplate(projectRoot, options, createTemplateReport);
-}
-
-export function createAppAgentDebugReport(projectRoot = process.cwd(), options = {}) {
-  const templateProfile = createTemplateProfile();
-  const {
-    "src/features/home/HomePage.vue": _templateHomeTargets,
-    ...sharedAgentTargetFiles
-  } = templateProfile.agentTargetFiles;
-  const profile = {
-    ...templateProfile,
-    importantFiles: [
-      ["app.config.json", "application metadata source"],
-      ["src/main.ts", "minimal Vue application bootstrap"],
-      ["src/app.config.ts", "application shell configuration adapter"],
-      ["src/app.ts", "createLiliaApp integration boundary"],
-      ["src/routes.ts", "application route table"],
-      ["src/commands.ts", "application command registration boundary"],
-      ["scripts/agent-debug.mjs", "application Agent debug entry"],
-      ["node_modules/@lilia/ui/src/index.ts", "installed public UI package entry"],
-      ["src-tauri/src/lib.rs", "Tauri command and plugin registration boundary"],
-      ...(options.importantFiles ?? []),
-    ],
-    agentTargetFiles: {
-      ...sharedAgentTargetFiles,
-      ...(options.agentTargetFiles ?? {}),
-    },
-    ...(options.profile ?? {}),
-  };
-
-  return createAgentDebugReportFromTemplate(
-    projectRoot,
-    { ...options, profile },
-    createTemplateReport,
-  );
 }
 
 export { printAgentDebugReport };
@@ -345,7 +316,8 @@ export async function runToolsCli(argv, options = {}) {
     }
 
     if (command === "doctor" || command === "template-check") {
-      const report = createTemplateReport(projectRoot);
+      const profile = await loadToolsProfile(projectRoot, readFlag(args, "--profile"));
+      const report = createTemplateReport(projectRoot, { profile });
       if (args.includes("--json")) {
         process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
       } else {
@@ -358,7 +330,8 @@ export async function runToolsCli(argv, options = {}) {
     }
 
     if (command === "agent-debug") {
-      const report = createAgentDebugReport(projectRoot);
+      const profile = await loadToolsProfile(projectRoot, readFlag(args, "--profile"));
+      const report = createAgentDebugReport(projectRoot, { profile });
       if (args.includes("--json")) {
         process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
       } else {
@@ -388,108 +361,36 @@ export async function runToolsCli(argv, options = {}) {
   }
 }
 
-function createTemplateProfile(overrides = {}) {
+export function defineToolsProfile(profile) {
+  return profile;
+}
+
+function createToolsProfile(profile = {}) {
   return {
-    packageManager: "yarn@4.17.1+sha512.ccbfabf7d7b6b32075088be9386fb9a2e00bb6887ef07fa56effabc890a56d53da1ccc4128d62db245fcbd3961b236d75335bdf7d5320ed6eafb7588b7ad4697",
-    expectedDependencies: ["@lilia/ui", "@lilia/config", "@lilia/tools", "@lilia/build"],
-    nativeBackdropPermissions: ["lilia:default", "lilia:allow-set-window-backdrop"],
+    packageManager: null,
+    requireSingleAppRoot: false,
+    expectedDependencies: [],
+    nativeBackdropPermissions: [],
     importantFiles: [
-      ["app.config.json", "single source for app name, product title, version, and identifiers"],
-      ["src/main.ts", "minimal Vue bootstrap that mounts createLiliaApp"],
-      ["src/app.config.ts", "runtime adapter from app config to @lilia/ui shell config"],
-      ["src/app.ts", "createLiliaApp integration boundary"],
-      ["src/routes.ts", "application route table"],
-      ["src/commands.ts", "application command registration boundary"],
-      ["src/features/home/HomePage.vue", "default business feature page"],
-      ["scripts/agent-debug.mjs", "template-level Agent debug compatibility entry"],
-      ["scripts/agent-debug-fallback.mjs", "temporary compatibility layer for older @lilia/tools installs"],
-      ["node_modules/@lilia/ui/src/index.ts", "installed public UI package entry"],
-      ["src-tauri/src/lib.rs", "Tauri command and plugin registration boundary"],
-      ["tests/tooling.test.ts", "tooling and template-boundary regression tests"],
-      ["docs/guide/development.md", "developer and agent orientation guide"],
+      ["package.json", "project package metadata"],
     ],
-    agentTargetFiles: {
-      "src/features/home/HomePage.vue": [
-        ["home.page"],
-        ["home.header"],
-        ["home.start-card"],
-      ],
-      "node_modules/@lilia/ui/src/layouts/AppShell.vue": [["shell.sidebar.resizer"]],
-      "node_modules/@lilia/ui/src/components/TitleBar.vue": [
-        ["titlebar"],
-        ["titlebar.left-sidebar.toggle"],
-      ],
-      "node_modules/@lilia/ui/src/layouts/SecondaryPanel.vue": [
-        ["sidebar.nav.overview", "sidebar.nav.${item.key}"],
-      ],
-      "node_modules/@lilia/ui/src/components/sidebar/SidebarFooter.vue": [
-        ["sidebar.footer.settings", "sidebar.footer.${link.key}"],
-        ["sidebar.footer.status"],
-      ],
-      "node_modules/@lilia/ui/src/layouts/SettingsSidebar.vue": [
-        ["settings.sidebar.back"],
-        ["settings.tab.appearance", "settings.tab.${tab.key}"],
-        ["settings.tab.about", "settings.tab.${tab.key}"],
-      ],
-      "node_modules/@lilia/ui/src/pages/settings/AppearanceSection.vue": [
-        ["settings.appearance.theme.dark"],
-        ["settings.appearance.theme.light"],
-        ["settings.appearance.corner.smooth"],
-        ["settings.appearance.corner.round"],
-        ["settings.appearance.corner-radius"],
-        ["settings.appearance.backdrop.system"],
-        ["settings.appearance.backdrop.mica"],
-        ["settings.appearance.backdrop.acrylic"],
-        ["settings.appearance.backdrop.solid"],
-        ["settings.appearance.backdrop-target.sidebar"],
-        ["settings.appearance.backdrop-target.main"],
-        ["settings.appearance.titlebar-follow-sidebar"],
-        ["settings.appearance.backdrop-opacity"],
-      ],
-      "node_modules/@lilia/ui/src/components/ContextMenuHost.vue": [["context-menu"]],
-      "node_modules/@lilia/ui/src/components/ConfirmDialog.vue": [
-        ["confirm-dialog.cancel"],
-        ["confirm-dialog.confirm"],
-      ],
-    },
-    boundaries: {
-      includes: [
-        "thin Tauri 2 + Vue 3 scaffold",
-        "@lilia/ui powered theme, titlebar, context menu, shell, and settings UI",
-        "@lilia/config, @lilia/tools, and @lilia/build powered shared project tooling",
-        "tauri-plugin-lilia powered window-state persistence, native backdrop, and app metadata sync",
-      ],
-      excludes: [
-        "application-specific business flows",
-        "application-specific data models and persistence",
-        "optional desktop features that are not enabled by this scaffold",
-      ],
-    },
-    entrypoints: [
-      { id: "install", command: "corepack yarn install", purpose: "install dependencies with the pinned Yarn line" },
-      { id: "frontend", command: "yarn dev", purpose: "run the Vite frontend only" },
-      { id: "desktop", command: "yarn tauri:dev", purpose: "run the Tauri desktop app with dynamic devUrl" },
-      {
-        id: "agent-debug",
-        command: "yarn agent:debug --json",
-        purpose: "inspect template readiness, shared Agent targets, and desktop replay prerequisites",
-      },
-      { id: "unit", command: "yarn test", purpose: "run Vitest regression tests" },
-      { id: "build", command: "yarn build", purpose: "type-check and build frontend assets" },
-      {
-        id: "desktop-release-fast",
-        command: "yarn tauri:build:no-bundle",
-        purpose: "compile the release desktop app without generating installers",
-      },
-      {
-        id: "rust",
-        command: "cargo check --manifest-path src-tauri/Cargo.toml",
-        purpose: "check the Tauri Rust side",
-      },
-      { id: "full", command: "yarn verify", purpose: "run the template's full verification gate" },
-    ],
-    ...overrides,
+    agentTargetFiles: {},
+    boundaries: { includes: [], excludes: [] },
+    entrypoints: [],
+    ...profile,
+    packageManager: profile.packageManager ?? null,
   };
+}
+
+async function loadToolsProfile(projectRoot, explicitPath) {
+  const profilePath = resolve(projectRoot, explicitPath ?? "lilia.tools.profile.mjs");
+  if (!existsSync(profilePath)) return {};
+  const module = await import(`${pathToFileURL(profilePath).href}?t=${Date.now()}`);
+  const profile = module.default ?? module.profile;
+  if (!profile || typeof profile !== "object") {
+    throw new Error(`Tools profile must export an object: ${profilePath}`);
+  }
+  return profile;
 }
 
 function readCapabilityPermissions(projectRoot) {

@@ -3,7 +3,7 @@ import {
   installAgentDebugHarness,
   recordAgentDebugLog,
   uninstallAgentDebugHarness,
-} from "@lilia/ui";
+} from "@lilia/ui/diagnostics";
 
 describe("Agent debug harness", () => {
   it("observes and operates stable data-agent-id targets", async () => {

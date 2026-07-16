@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, inject } from "vue";
 import { RouterView } from "vue-router";
-import { APP_METADATA, SETTINGS_TABS, normalizeSettingsTab } from "../config/appShell";
+import { APP_METADATA } from "../config/appShell";
+import { normalizeSettingsTab, useLiliaSettings } from "../settings";
 import { useRouteReturnTarget } from "../composables/useRouteReturnTarget";
 import { useShellSidebar } from "../composables/useShellSidebar";
-import { useNativeAppearance } from "../composables/useNativeAppearance";
 import { liliaShellOptionsKey, resolveShellBoolean } from "../shellOptions";
 import TitleBar from "../components/TitleBar.vue";
 import SecondaryPanel from "./SecondaryPanel.vue";
@@ -12,17 +12,19 @@ import SettingsSidebar from "./SettingsSidebar.vue";
 import "../styles/shell.css";
 
 const shellOptions = inject(liliaShellOptionsKey, {});
+const settings = useLiliaSettings();
 const { route, returnTo } = useRouteReturnTarget();
 const sidebarLocked = computed(() => route.meta.lockSidebar === true);
 const sidebarVariant = computed(() => route.meta.sidebar ?? "main");
 const isSettingsMode = computed(() => sidebarVariant.value === "settings");
 const isWorkspaceLayout = computed(() => route.meta.contentLayout === "workspace");
-const activeSettingsTab = computed(() => normalizeSettingsTab(route.query.tab));
+const activeSettingsTab = computed(() => settings
+  ? normalizeSettingsTab(settings, route.query.tab)
+  : "");
 const setupOverlayActive = computed(() => resolveShellBoolean(shellOptions.setupOverlayActive));
 const sidebarDisabled = computed(() => sidebarLocked.value || setupOverlayActive.value);
 const mainSidebar = computed(() => shellOptions.mainSidebar ?? SecondaryPanel);
 const sidebar = useShellSidebar(sidebarDisabled);
-useNativeAppearance();
 </script>
 
 <template>
@@ -49,8 +51,8 @@ useNativeAppearance();
       </template>
     </TitleBar>
     <SettingsSidebar
-      v-if="isSettingsMode && !setupOverlayActive"
-      :tabs="SETTINGS_TABS"
+      v-if="isSettingsMode && settings && !setupOverlayActive"
+      :tabs="settings.tabs"
       :active-key="activeSettingsTab"
       :return-to="returnTo"
     />

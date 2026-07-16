@@ -21,9 +21,9 @@
 
 .sidebar-search-dropdown .search-dropdown__field {
   display: grid;
-  grid-template-columns: var(--sb-project-icon-slot) minmax(0, 1fr) 30px;
+  grid-template-columns: var(--sidebar-item-icon-slot, 18px) minmax(0, 1fr) 30px;
   gap: var(--sb-row-gap);
-  padding: 0 0 0 calc(var(--sb-project-row-padding-x) - 1px);
+  padding: 0 0 0 calc(var(--sidebar-item-padding-x, 10px) - 1px);
 }
 
 .search-dropdown__field:focus-within {

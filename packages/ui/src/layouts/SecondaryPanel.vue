@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import {
-  APP_SHELL_COPY,
+  SIDEBAR_CONFIG,
   SIDEBAR_GLOBAL_ACTIONS,
   SIDEBAR_GROUPS,
   SIDEBAR_NAV,
@@ -51,8 +51,8 @@ function selectAction(action: SidebarActionItem) {
       </div>
 
       <div v-if="hasNavSection" class="sb-section">
-        <div class="sb-section__header">
-          <span class="sb-section__title">{{ APP_SHELL_COPY.workspaceSectionTitle }}</span>
+        <div v-if="SIDEBAR_CONFIG.navTitle" class="sb-section__header">
+          <span class="sb-section__title">{{ SIDEBAR_CONFIG.navTitle }}</span>
         </div>
         <nav class="sb-tree" aria-label="主导航">
           <SidebarNavRow
@@ -60,6 +60,7 @@ function selectAction(action: SidebarActionItem) {
             :key="item.key"
             :item="item"
             :agent-id="`sidebar.nav.${item.key}`"
+            :emphasis="item.emphasis"
           />
         </nav>
       </div>
@@ -95,7 +96,7 @@ function selectAction(action: SidebarActionItem) {
             :key="item.key"
             :item="item"
             :agent-id="`sidebar.group.${group.key}.item.${item.key}`"
-            project
+            :emphasis="item.emphasis"
           />
           <p v-if="group.emptyText" class="sb-tree__empty">{{ group.emptyText }}</p>
         </div>

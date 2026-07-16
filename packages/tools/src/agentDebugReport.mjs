@@ -1,11 +1,14 @@
 import { spawnSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { readAppConfig, readJson } from "@lilia/config";
 
 export function createAgentDebugReportFromTemplate(projectRoot, options, createTemplateReport) {
   const template = createTemplateReport(projectRoot, options);
   const packageJson = readJson(resolve(projectRoot, "package.json"));
-  const appConfig = readAppConfig(projectRoot);
+  const appConfig = existsSync(resolve(projectRoot, "app.config.json"))
+    ? readAppConfig(projectRoot)
+    : { appName: packageJson.name ?? "application" };
   const envPrefix = toEnvPrefix(appConfig.appName);
   const runtimeTools = [
     runtimeTool("node", ["--version"], "runs shared Lilia tooling"),

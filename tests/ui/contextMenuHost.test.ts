@@ -1,19 +1,16 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/vue";
 import ContextMenuHost from "@lilia/ui/components/ContextMenuHost";
 import { SB_MENU_POP_TRANSITION_MS } from "@lilia/ui/composables/menuMotion";
-import { createMemoryHistory, createRouter } from "vue-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { defineComponent } from "vue";
 import {
   closeContextMenu,
-  installLiliaAppRuntime,
   installContextMenu,
-  LiliaAppRoot,
   openContextMenuAt,
   type ContextMenuItem,
-} from "@lilia/ui";
-import { vContextMenu } from "@lilia/ui";
-import { testAppConfig } from "./fixtures/appConfig";
+} from "@lilia/ui/composables/useContextMenu";
+import { installLiliaContextMenu } from "@lilia/ui/runtime";
+import { vContextMenu } from "@lilia/ui/directives/contextMenu";
 
 function renderWithTemplate(template: string, setup: () => Record<string, unknown>) {
   const Wrapper = defineComponent({
@@ -63,19 +60,12 @@ describe("ContextMenuHost", () => {
     vi.restoreAllMocks();
   });
 
-  it("根组件在首次打开右键菜单时懒挂载菜单 Host", async () => {
-    const router = createRouter({
-      history: createMemoryHistory(),
-      routes: [{ path: "/", component: { template: "<div />" } }],
-    });
-    await router.push("/");
-    await router.isReady();
-
+  it("应用显式组合菜单 Host 后可响应右键菜单", async () => {
     const Wrapper = defineComponent({
-      components: { LiliaAppRoot },
+      components: { ContextMenuHost },
       template: `
         <button data-testid="target" v-context-menu="items">目标</button>
-        <LiliaAppRoot />
+        <ContextMenuHost />
       `,
       setup: () => ({
         items: [{ id: "open", label: "打开", onSelect: vi.fn() }],
@@ -87,7 +77,6 @@ describe("ContextMenuHost", () => {
         directives: {
           contextMenu: vContextMenu,
         },
-        plugins: [router],
       },
     });
 
@@ -116,7 +105,7 @@ describe("ContextMenuHost", () => {
         plugins: [
           {
             install(app) {
-              installLiliaAppRuntime({ app, config: testAppConfig });
+              installLiliaContextMenu(app);
             },
           },
         ],
@@ -130,28 +119,6 @@ describe("ContextMenuHost", () => {
 
     await fireEvent.click(await screen.findByRole("menuitem", { name: "打开" }));
     expect(action).toHaveBeenCalledTimes(1);
-  });
-
-  it("运行时配置可以关闭全局右键菜单拦截", () => {
-    installLiliaAppRuntime({
-      config: {
-        ...testAppConfig,
-        runtime: {
-          contextMenu: false,
-          globalScrollbar: false,
-        },
-      },
-    });
-
-    const event = new MouseEvent("contextmenu", {
-      bubbles: true,
-      cancelable: true,
-      clientX: 24,
-      clientY: 24,
-    });
-    document.body.dispatchEvent(event);
-
-    expect(event.defaultPrevented).toBe(false);
   });
 
   it("全局屏蔽浏览器原生右键菜单", () => {

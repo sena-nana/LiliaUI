@@ -1,29 +1,27 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="T = unknown">
 import { computed, ref, useId } from "vue";
 import {
-  contributionHeatmapCellAtPoint,
-  type ContributionHeatmapActiveCell,
-  type ContributionHeatmapModel,
-} from "../utils/contributionHeatmap";
+  calendarHeatmapCellAtPoint,
+  type CalendarHeatmapActiveCell,
+  type CalendarHeatmapModel,
+} from "../utils/calendarHeatmap";
 import Tooltip from "./Tooltip.vue";
 
 const props = withDefaults(defineProps<{
-  model: ContributionHeatmapModel;
+  model: CalendarHeatmapModel<T>;
   ariaLabel?: string;
-  activeCell?: ContributionHeatmapActiveCell | null;
-}>(), {
-  ariaLabel: "Contribution heatmap",
-});
+  activeCell?: CalendarHeatmapActiveCell<T> | null;
+}>(), { ariaLabel: "Calendar heatmap" });
 
 defineOptions({ inheritAttrs: false });
 
 const emit = defineEmits<{
-  "cell-enter": [cell: ContributionHeatmapActiveCell, event: PointerEvent];
-  "cell-move": [cell: ContributionHeatmapActiveCell, event: PointerEvent];
+  "cell-enter": [cell: CalendarHeatmapActiveCell<T>, event: PointerEvent];
+  "cell-move": [cell: CalendarHeatmapActiveCell<T>, event: PointerEvent];
   "cell-leave": [event: PointerEvent];
 }>();
 
-const internalActiveCell = ref<ContributionHeatmapActiveCell | null>(null);
+const internalActiveCell = ref<CalendarHeatmapActiveCell<T> | null>(null);
 const tooltipId = useId();
 const displayActiveCell = computed(() =>
   props.activeCell === undefined ? internalActiveCell.value : props.activeCell
@@ -43,12 +41,11 @@ const tooltipStyle = computed(() => {
 });
 
 function onPointerMove(event: PointerEvent) {
-  const cell = contributionHeatmapCellAtPoint(props.model, {
+  const cell = calendarHeatmapCellAtPoint(props.model, {
     x: event.offsetX,
     y: event.offsetY,
   });
   const previous = internalActiveCell.value;
-
   if (!cell) {
     if (previous) {
       internalActiveCell.value = null;
@@ -56,7 +53,6 @@ function onPointerMove(event: PointerEvent) {
     }
     return;
   }
-
   internalActiveCell.value = cell;
   if (previous?.date !== cell.date) {
     emit("cell-enter", cell, event);
@@ -73,12 +69,9 @@ function onPointerLeave(event: PointerEvent) {
 </script>
 
 <template>
-  <div
-    class="contribution-heatmap-wrap"
-    :style="{ width: `${model.width}px` }"
-  >
+  <div class="calendar-heatmap-wrap" :style="{ width: `${model.width}px` }">
     <svg
-      class="contribution-heatmap"
+      class="calendar-heatmap"
       role="img"
       :aria-label="ariaLabel"
       :aria-describedby="displayActiveCell ? tooltipId : undefined"
@@ -92,8 +85,8 @@ function onPointerLeave(event: PointerEvent) {
     >
       <text
         v-for="label in model.dayLabels"
-        :key="label.label"
-        class="contribution-heatmap__day-label"
+        :key="`${label.label}-${label.y}`"
+        class="calendar-heatmap__day-label"
         :x="label.x"
         :y="label.y"
       >
@@ -102,7 +95,7 @@ function onPointerLeave(event: PointerEvent) {
       <text
         v-for="month in model.monthLabels"
         :key="month.key"
-        class="contribution-heatmap__month"
+        class="calendar-heatmap__month"
         :x="month.x"
         y="10"
         text-anchor="middle"
@@ -112,86 +105,57 @@ function onPointerLeave(event: PointerEvent) {
       <path
         v-for="path in model.levelPaths"
         :key="path.level"
-        class="contribution-heatmap__level"
-        :class="`contribution-heatmap__level--${path.level}`"
+        class="calendar-heatmap__level"
+        :style="{ fill: `var(--calendar-heatmap-level-${path.level}, var(--calendar-heatmap-level-default))` }"
         :d="path.d"
       />
       <rect
         v-if="displayActiveCell"
-        class="contribution-heatmap__active-cell"
+        class="calendar-heatmap__active-cell"
         :x="displayActiveCell.x - 1"
         :y="displayActiveCell.y - 1"
         :width="model.cellSize + 2"
         :height="model.cellSize + 2"
-        rx="3"
-        ry="3"
+        :rx="model.cellRadius + 1"
+        :ry="model.cellRadius + 1"
       />
     </svg>
-    <Tooltip
-      v-if="displayActiveCell"
-      :id="tooltipId"
-      :style="tooltipStyle"
-    >
+    <Tooltip v-if="displayActiveCell" :id="tooltipId" :style="tooltipStyle">
       {{ displayActiveCell.title }}
     </Tooltip>
   </div>
 </template>
 
 <style scoped>
-.contribution-heatmap-wrap {
+.calendar-heatmap-wrap {
   position: relative;
   display: block;
   flex: 0 0 auto;
   contain: layout paint style;
 }
 
-.contribution-heatmap {
+.calendar-heatmap {
   display: block;
 }
 
-.contribution-heatmap__month,
-.contribution-heatmap__day-label {
+.calendar-heatmap__month,
+.calendar-heatmap__day-label {
   color: var(--text-muted);
   fill: currentColor;
   font-family: inherit;
   pointer-events: none;
 }
 
-.contribution-heatmap__month {
-  font-size: 10px;
-}
+.calendar-heatmap__month { font-size: 10px; }
+.calendar-heatmap__day-label { font-size: 11px; }
 
-.contribution-heatmap__day-label {
-  font-size: 11px;
-}
-
-.contribution-heatmap__level {
+.calendar-heatmap__level {
   pointer-events: none;
   stroke: color-mix(in srgb, var(--bg) 20%, transparent);
   stroke-width: 1;
 }
 
-.contribution-heatmap__level--0 {
-  fill: var(--bg-subtle);
-}
-
-.contribution-heatmap__level--1 {
-  fill: color-mix(in srgb, var(--ok) 30%, var(--bg-subtle));
-}
-
-.contribution-heatmap__level--2 {
-  fill: color-mix(in srgb, var(--ok) 55%, var(--bg-subtle));
-}
-
-.contribution-heatmap__level--3 {
-  fill: color-mix(in srgb, var(--ok) 78%, var(--bg-subtle));
-}
-
-.contribution-heatmap__level--4 {
-  fill: #3fb950;
-}
-
-.contribution-heatmap__active-cell {
+.calendar-heatmap__active-cell {
   fill: transparent;
   stroke: var(--text);
   stroke-width: 1.5;

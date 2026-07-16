@@ -1,10 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  installLiliaAppRuntime,
   installGlobalScrollbarVisibility,
   uninstallGlobalScrollbarVisibility,
-} from "@lilia/ui";
-import { testAppConfig } from "./fixtures/appConfig";
+} from "@lilia/ui/runtime";
 
 function createScroller(input: {
   clientWidth?: number;
@@ -245,16 +243,7 @@ describe("global scrollbar visibility", () => {
     element.remove();
   });
 
-  it("runtime config can disable the global scrollbar overlay", () => {
-    installLiliaAppRuntime({
-      config: {
-        ...testAppConfig,
-        runtime: {
-          contextMenu: false,
-          globalScrollbar: false,
-        },
-      },
-    });
+  it("does not create overlays before the installer is called", () => {
     const { element } = createScroller();
 
     discoverScroller(element);

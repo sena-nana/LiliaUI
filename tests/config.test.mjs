@@ -61,7 +61,12 @@ describe("@lilia/config", () => {
     const htmlPlugin = resolved.plugins.find((plugin) => plugin.name === "lilia-app-config-html");
 
     expect(resolved.server.port).toBe(1420);
-    expect(resolved.resolve.dedupe).toEqual(expect.arrayContaining(["vue", "vue-router"]));
+    expect(resolved.resolve.dedupe).toEqual(expect.arrayContaining([
+      "vue",
+      "vue-router",
+      "@lucide/vue",
+      "vitest",
+    ]));
     expect(resolved.optimizeDeps.exclude).toEqual(expect.arrayContaining(["@lilia/ui"]));
     expect(htmlPlugin.transformIndexHtml("%APP_PRODUCT_TITLE%")).toBe("Config App");
 
@@ -109,14 +114,6 @@ function createAppConfig(overrides = {}) {
     version: "0.1.0",
     identifier: "com.lilia.test",
     storageKeyPrefix: "lilia-test",
-    shell: {
-      homeTitle: "Home",
-      homeDescription: "Ready",
-      workspaceSectionTitle: "Navigation",
-      statusLabel: "Ready",
-      statusTitle: "Ready",
-      settingsDescription: "Settings",
-    },
     ...overrides,
   };
 }

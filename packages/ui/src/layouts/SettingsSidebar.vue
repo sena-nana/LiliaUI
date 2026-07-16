@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
 import ArrowLeft from "@lucide/vue/dist/esm/icons/arrow-left.mjs";
-import type { SettingsTab, SettingsTabKey } from "../config/appShell";
+import type { SettingsTab, SettingsTabKey } from "../settings";
 
 defineProps<{
-  tabs: SettingsTab[];
+  tabs: readonly SettingsTab[];
   activeKey: SettingsTabKey;
   returnTo?: string | null;
 }>();
