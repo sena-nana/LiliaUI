@@ -7,6 +7,7 @@ export type LiliaShellSetupOverlaySource =
 
 export interface LiliaShellOptions {
   mainSidebar?: Component;
+  titlebarActions?: Component;
   setupOverlayActive?: LiliaShellSetupOverlaySource;
 }
 

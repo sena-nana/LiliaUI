@@ -25,6 +25,7 @@ import {
 import {
   bumpVersion,
   checkPackageManager,
+  createAppAgentDebugReport,
   createAgentDebugReport,
   copyLiliaAssets,
   createTemplateReport,
@@ -174,6 +175,32 @@ describe("@lilia/tools", () => {
     expect(report.desktopReplay.requiredForReadiness).toBe(false);
     expect(report.runtimeTools.some((tool) => tool.id === "tauri-driver")).toBe(true);
     expect(report.template.entrypoints.some((entry) => entry.id === "agent-debug")).toBe(true);
+  });
+
+  it("combines shared and application Agent debug boundaries", () => {
+    const root = createProject();
+    mkdirSync(join(root, "src", "components"), { recursive: true });
+    writeFileSync(
+      join(root, "src", "components", "AppActions.vue"),
+      '<button data-agent-id="titlebar.app.refresh">刷新</button>',
+    );
+
+    const report = createAppAgentDebugReport(root, {
+      importantFiles: [["src/components/AppActions.vue", "application titlebar actions"]],
+      agentTargetFiles: {
+        "src/components/AppActions.vue": [["titlebar.app.refresh"]],
+      },
+    });
+
+    expect(report.template.importantFiles).toContainEqual(expect.objectContaining({
+      path: "src/components/AppActions.vue",
+      exists: true,
+    }));
+    expect(report.template.agentTargets).toContainEqual(expect.objectContaining({
+      id: "titlebar.app.refresh",
+      exists: true,
+    }));
+    expect(report.template.agentTargets.some((target) => target.id === "titlebar")).toBe(true);
   });
 });
 
