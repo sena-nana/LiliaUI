@@ -269,6 +269,22 @@ describe("AppShell sidebar", () => {
     });
   });
 
+  it("公共壳层渲染应用注入的标题栏动作", async () => {
+    const onRefresh = vi.fn();
+    const TitlebarActions = defineComponent({
+      setup() {
+        return { onRefresh };
+      },
+      template: `<button type="button" class="titlebar__btn" data-agent-id="titlebar.app.refresh" @click="onRefresh">刷新</button>`,
+    });
+    const view = await renderAppShell("/", testAppConfig, { titlebarActions: TitlebarActions });
+
+    const refresh = agentTarget(view.container, "titlebar.app.refresh");
+    expect(refresh.closest("[data-agent-id='titlebar.window-controls']")).not.toBeNull();
+    await fireEvent.click(refresh);
+    expect(onRefresh).toHaveBeenCalledOnce();
+  });
+
   it("主侧边栏支持应用注入顶部业务区并保留全局动作回退", async () => {
     const TopContent = defineComponent({
       template: `<button type="button" data-agent-id="sidebar.custom-top">搜索会话</button>`,

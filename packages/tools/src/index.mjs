@@ -252,6 +252,40 @@ export function createAgentDebugReport(projectRoot = process.cwd(), options = {}
   return createAgentDebugReportFromTemplate(projectRoot, options, createTemplateReport);
 }
 
+export function createAppAgentDebugReport(projectRoot = process.cwd(), options = {}) {
+  const templateProfile = createTemplateProfile();
+  const {
+    "src/features/home/HomePage.vue": _templateHomeTargets,
+    ...sharedAgentTargetFiles
+  } = templateProfile.agentTargetFiles;
+  const profile = {
+    ...templateProfile,
+    importantFiles: [
+      ["app.config.json", "application metadata source"],
+      ["src/main.ts", "minimal Vue application bootstrap"],
+      ["src/app.config.ts", "application shell configuration adapter"],
+      ["src/app.ts", "createLiliaApp integration boundary"],
+      ["src/routes.ts", "application route table"],
+      ["src/commands.ts", "application command registration boundary"],
+      ["scripts/agent-debug.mjs", "application Agent debug entry"],
+      ["node_modules/@lilia/ui/src/index.ts", "installed public UI package entry"],
+      ["src-tauri/src/lib.rs", "Tauri command and plugin registration boundary"],
+      ...(options.importantFiles ?? []),
+    ],
+    agentTargetFiles: {
+      ...sharedAgentTargetFiles,
+      ...(options.agentTargetFiles ?? {}),
+    },
+    ...(options.profile ?? {}),
+  };
+
+  return createAgentDebugReportFromTemplate(
+    projectRoot,
+    { ...options, profile },
+    createTemplateReport,
+  );
+}
+
 export { printAgentDebugReport };
 export { generateOpenSourceLicenseManifest };
 

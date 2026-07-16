@@ -17,6 +17,8 @@ export { default as SearchDropdown } from "./components/SearchDropdown.vue";
 export { default as SettingsCollapsibleCard, type SettingsCollapsibleCardEmits, type SettingsCollapsibleCardProps } from "./components/SettingsCollapsibleCard.vue";
 export { default as SettingsRow, type SettingsRowProps } from "./components/SettingsRow.vue";
 export { default as SidebarCollapse } from "./components/sidebar/SidebarCollapse.vue";
+export { default as LiliaSidebarFooter } from "./components/sidebar/SidebarFooter.vue";
+export { default as LiliaSidebarNavRow } from "./components/sidebar/SidebarNavRow.vue";
 export { default as TitleBar } from "./components/TitleBar.vue";
 export { default as Tooltip } from "./components/Tooltip.vue";
 export { default as UiButton } from "./components/UiButton.vue";

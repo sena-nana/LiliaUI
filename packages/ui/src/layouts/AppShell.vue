@@ -43,7 +43,11 @@ useNativeAppearance();
       :left-sidebar-collapsed="sidebar.effectiveCollapsed.value"
       :sidebar-toggles-disabled="sidebarDisabled"
       @toggle-left-sidebar="sidebar.toggleCollapsed"
-    />
+    >
+      <template v-if="shellOptions.titlebarActions" #right-actions>
+        <component :is="shellOptions.titlebarActions" />
+      </template>
+    </TitleBar>
     <SettingsSidebar
       v-if="isSettingsMode && !setupOverlayActive"
       :tabs="SETTINGS_TABS"
