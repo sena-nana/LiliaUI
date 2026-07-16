@@ -1,10 +1,27 @@
 import { fireEvent, render, screen } from "@testing-library/vue";
-import { defineComponent, ref } from "vue";
+import { defineComponent, h, ref } from "vue";
 import { describe, expect, it, vi } from "vitest";
-import { NanaButton, NanaFormField, NanaInput, NanaUIProvider } from "@lilia/nana-ui";
+import { NanaButton, NanaFormField, NanaInput, useNanaUI } from "@lilia/nana-ui";
+import { NanaUIProvider } from "@lilia/nana-ui/provider";
 import { AdvancedSettingsDisclosure, ProgressiveSection, RecoveryError } from "@lilia/nana-ui/consumer";
 
 describe("NanaUI provider and controls", () => {
+  it("shares provider state across public package entry points", async () => {
+    const PolicyControl = defineComponent({
+      setup() {
+        const ui = useNanaUI();
+        return () => h("button", { onClick: () => ui.setPolicy({ density: "compact" }) }, "紧凑密度");
+      },
+    });
+    const view = render(defineComponent({
+      components: { NanaUIProvider, PolicyControl },
+      template: `<NanaUIProvider><PolicyControl /></NanaUIProvider>`,
+    }));
+
+    await fireEvent.click(screen.getByRole("button", { name: "紧凑密度" }));
+    expect(view.container.querySelector(".nana-ui")).toHaveAttribute("data-density", "compact");
+  });
+
   it("applies explicit policy and updates controls through shared contract props", async () => {
     const action = vi.fn();
     const view = render(defineComponent({
