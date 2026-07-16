@@ -5,6 +5,7 @@ import {
   type ContributionHeatmapActiveCell,
   type ContributionHeatmapModel,
 } from "../utils/contributionHeatmap";
+import Tooltip from "./Tooltip.vue";
 
 const props = withDefaults(defineProps<{
   model: ContributionHeatmapModel;
@@ -126,15 +127,13 @@ function onPointerLeave(event: PointerEvent) {
         ry="3"
       />
     </svg>
-    <div
+    <Tooltip
       v-if="displayActiveCell"
       :id="tooltipId"
-      class="contribution-heatmap__tooltip"
-      role="tooltip"
       :style="tooltipStyle"
     >
       {{ displayActiveCell.title }}
-    </div>
+    </Tooltip>
   </div>
 </template>
 
@@ -197,21 +196,5 @@ function onPointerLeave(event: PointerEvent) {
   stroke: var(--text);
   stroke-width: 1.5;
   pointer-events: none;
-}
-
-.contribution-heatmap__tooltip {
-  position: absolute;
-  box-sizing: border-box;
-  max-width: calc(100% - 8px);
-  padding: 4px 7px;
-  overflow: hidden;
-  color: var(--bg);
-  font-size: 11px;
-  line-height: 16px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  pointer-events: none;
-  background: var(--text);
-  border-radius: 4px;
 }
 </style>
