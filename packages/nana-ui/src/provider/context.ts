@@ -8,7 +8,7 @@ export interface NanaUIContext {
   replacePolicy: (next?: Partial<UIPolicy>) => void;
 }
 
-export const nanaUIContextKey: InjectionKey<NanaUIContext> = Symbol("nana-ui-context");
+export const nanaUIContextKey = Symbol.for("@lilia/nana-ui/context") as InjectionKey<NanaUIContext>;
 
 export function createNanaUIContext(initial?: Partial<UIPolicy>): NanaUIContext {
   const policy = ref(resolveNanaPolicy(initial));

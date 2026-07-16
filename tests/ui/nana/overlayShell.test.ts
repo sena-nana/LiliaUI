@@ -77,7 +77,8 @@ describe("NanaUI overlay and shell behavior", () => {
       global: { plugins: [router] },
     });
     expect(view.container.querySelectorAll(".nana-sidebar__nav .nana-sidebar__item")).toHaveLength(1);
-    expect(view.container.querySelector("[href='/settings']")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "首页" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "设置" })).toBeVisible();
     await fireEvent.click(screen.getByRole("button", { name: "展开侧边栏" }));
     expect(view.emitted("update:mode")?.[0]).toEqual(["expanded"]);
   });

@@ -40,6 +40,7 @@ function selectLink(event: MouseEvent, item: SidebarItem) {
           class="nana-sidebar__item"
           :class="{ 'is-active': item.active }"
           :aria-current="item.active ? 'page' : undefined"
+          :aria-label="sidebar.mode.value === 'icon' ? item.label : undefined"
           :aria-disabled="item.disabled || undefined"
           :tabindex="item.disabled ? -1 : 0"
           :data-agent-id="item.agentId"
@@ -56,6 +57,7 @@ function selectLink(event: MouseEvent, item: SidebarItem) {
           class="nana-sidebar__item"
           :class="{ 'is-active': item.active }"
           :aria-pressed="item.active"
+          :aria-label="sidebar.mode.value === 'icon' ? item.label : undefined"
           :disabled="item.disabled"
           :data-agent-id="item.agentId"
           :data-sidebar-index="index"
@@ -69,11 +71,11 @@ function selectLink(event: MouseEvent, item: SidebarItem) {
     </nav>
     <footer class="nana-sidebar__footer">
       <NanaTooltip v-if="settingsItem" :text="sidebar.mode.value === 'icon' ? settingsItem.label : undefined" placement="right">
-        <RouterLink v-if="settingsItem.href" :to="settingsItem.href" class="nana-sidebar__item" :aria-disabled="settingsItem.disabled || undefined" :tabindex="settingsItem.disabled ? -1 : 0" :data-agent-id="settingsItem.agentId" @click="selectLink($event, settingsItem)">
+        <RouterLink v-if="settingsItem.href" :to="settingsItem.href" class="nana-sidebar__item" :aria-label="sidebar.mode.value === 'icon' ? settingsItem.label : undefined" :aria-disabled="settingsItem.disabled || undefined" :tabindex="settingsItem.disabled ? -1 : 0" :data-agent-id="settingsItem.agentId" @click="selectLink($event, settingsItem)">
           <component v-if="settingsItem.icon" :is="settingsItem.icon" :size="20" aria-hidden="true" />
           <span v-if="sidebar.mode.value === 'expanded'">{{ settingsItem.label }}</span>
         </RouterLink>
-        <button v-else type="button" class="nana-sidebar__item" :disabled="settingsItem.disabled" @click="emit('select', settingsItem)">
+        <button v-else type="button" class="nana-sidebar__item" :aria-label="sidebar.mode.value === 'icon' ? settingsItem.label : undefined" :disabled="settingsItem.disabled" @click="emit('select', settingsItem)">
           <component v-if="settingsItem.icon" :is="settingsItem.icon" :size="20" aria-hidden="true" />
           <span v-if="sidebar.mode.value === 'expanded'">{{ settingsItem.label }}</span>
         </button>
