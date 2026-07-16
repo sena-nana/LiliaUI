@@ -7,7 +7,7 @@ import type {
 
 defineProps<{
   links: SidebarFooterLink[];
-  status: SidebarFooterStatus;
+  statuses: SidebarFooterStatus[];
 }>();
 </script>
 
@@ -26,16 +26,34 @@ defineProps<{
       <component :is="link.icon" :size="14" aria-hidden="true" />
     </RouterLink>
 
-    <RouterLink
-      :to="status.to"
-      class="sb-conn"
-      :class="`sb-conn--${status.tone}`"
-      :title="status.title"
-      data-agent-id="sidebar.footer.status"
-    >
-      <component :is="status.icon" :size="12" aria-hidden="true" />
-      <span class="sb-conn__label">{{ status.label }}</span>
-    </RouterLink>
+    <div class="sb-footer__statuses">
+      <RouterLink
+        v-for="(status, index) in statuses"
+        :key="status.key"
+        :to="status.to"
+        class="sb-conn"
+        :class="`sb-conn--${status.tone}`"
+        :title="status.title"
+        :data-agent-id="index === 0
+          ? 'sidebar.footer.status'
+          : `sidebar.footer.status.${status.key}`"
+      >
+        <span
+          class="sb-conn__content"
+          :data-agent-id="index === 0 && status.key !== 'status'
+            ? `sidebar.footer.status.${status.key}`
+            : undefined"
+        >
+          <component
+            :is="status.icon"
+            class="sb-conn__icon"
+            :size="12"
+            aria-hidden="true"
+          />
+          <span class="sb-conn__label">{{ status.label }}</span>
+        </span>
+      </RouterLink>
+    </div>
   </div>
 </template>
 
@@ -46,8 +64,7 @@ defineProps<{
   align-items: center;
   gap: 2px;
   min-width: 0;
-  width: max-content;
-  max-width: 100%;
+  width: 100%;
 }
 
 .sb-footer__btn {
@@ -84,21 +101,43 @@ defineProps<{
   color: var(--accent);
 }
 
+.sb-footer__statuses {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-left: 4px;
+  overflow: hidden;
+}
+
 .sb-conn {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   height: 20px;
   padding: 0 7px;
-  margin-left: 4px;
   border-radius: var(--radius-pill);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.2px;
   text-decoration: none;
   min-width: 0;
+  overflow: hidden;
   opacity: 0.62;
+  flex: 0 1 auto;
   transition: opacity 0.35s ease, background-color 0.12s ease, color 0.12s ease;
+}
+
+.sb-conn__content {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sb-conn__icon {
+  flex: 0 0 auto;
 }
 
 .sb-footer:hover .sb-conn,

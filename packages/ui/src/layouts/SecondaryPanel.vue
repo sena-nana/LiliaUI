@@ -4,7 +4,7 @@ import { RouterLink } from "vue-router";
 import {
   APP_SHELL_COPY,
   SIDEBAR_FOOTER_LINKS,
-  SIDEBAR_FOOTER_STATUS,
+  SIDEBAR_FOOTER_STATUSES,
   SIDEBAR_GLOBAL_ACTIONS,
   SIDEBAR_GROUPS,
   SIDEBAR_NAV,
@@ -191,7 +191,7 @@ function selectNavItem(item: { disabled?: boolean; onSelect?: () => void | Promi
     <div class="secondary-panel__footer">
       <SidebarFooter
         :links="SIDEBAR_FOOTER_LINKS"
-        :status="SIDEBAR_FOOTER_STATUS"
+        :statuses="SIDEBAR_FOOTER_STATUSES"
       />
     </div>
   </aside>

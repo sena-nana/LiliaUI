@@ -101,6 +101,7 @@ export interface LiliaSidebarFooterLinkInput {
 
 export interface LiliaSidebarFooterStatusInput {
   icon: IconInput;
+  key?: string;
   label: string;
   title: string;
   to: string;
@@ -112,6 +113,7 @@ export interface LiliaSidebarConfigInput {
   defaultWidth?: number;
   footerLinks?: LiliaSidebarFooterLinkInput[];
   footerStatus?: LiliaSidebarFooterStatusInput;
+  footerStatuses?: LiliaSidebarFooterStatusInput[];
   globalActions?: LiliaSidebarActionInput[];
   groups?: LiliaSidebarGroupInput[];
   maxWidth?: number;
@@ -247,6 +249,7 @@ export interface SidebarFooterLink {
 
 export interface SidebarFooterStatus {
   icon: Component;
+  key: string;
   label: string;
   title: string;
   to: string;
@@ -284,12 +287,16 @@ export const SIDEBAR_GROUPS = reactive<SidebarGroup[]>([]);
 export const SIDEBAR_TOP_CONTENT = shallowRef<Component | null>(null);
 export const SIDEBAR_FOOTER_LINKS = reactive<SidebarFooterLink[]>([]);
 export const SIDEBAR_FOOTER_STATUS = reactive<SidebarFooterStatus>({
+  key: "status",
   to: "/settings",
   label: "Ready",
   title: "应用状态正常。点击进入设置。",
   tone: "ok",
   icon: resolveLazyLucideIcon("sparkles"),
 });
+export const SIDEBAR_FOOTER_STATUSES = reactive<SidebarFooterStatus[]>([
+  SIDEBAR_FOOTER_STATUS,
+]);
 
 export type SettingsTabKey = string;
 
@@ -452,16 +459,26 @@ export function setLiliaAppConfig(config: LiliaAppConfig) {
       icon: resolveIcon(link.icon),
     })),
   );
-  Object.assign(SIDEBAR_FOOTER_STATUS, {
-    ...(sidebar.footerStatus ?? {
+  const footerStatusInputs = sidebar.footerStatuses?.length
+    ? sidebar.footerStatuses
+    : [sidebar.footerStatus ?? {
       to: "/settings",
       label: APP_SHELL_COPY.statusLabel,
       title: APP_SHELL_COPY.statusTitle,
       tone: "ok",
       icon: "sparkles",
-    }),
-    icon: resolveIcon(sidebar.footerStatus?.icon ?? "sparkles"),
-  });
+    }];
+  const footerStatuses = footerStatusInputs.map((status, index) => ({
+    ...status,
+    key: status.key?.trim() || (index === 0 ? "status" : `status-${index + 1}`),
+    icon: resolveIcon(status.icon),
+  }));
+  const [primaryFooterStatus, ...additionalFooterStatuses] = footerStatuses;
+  Object.assign(SIDEBAR_FOOTER_STATUS, primaryFooterStatus);
+  replaceArray(SIDEBAR_FOOTER_STATUSES, [
+    SIDEBAR_FOOTER_STATUS,
+    ...additionalFooterStatuses,
+  ]);
 
   const settings = config.settings ?? {};
   SETTINGS_CONFIG.defaultTab = settings.defaultTab ?? "appearance";

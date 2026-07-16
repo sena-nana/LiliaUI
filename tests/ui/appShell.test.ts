@@ -5,6 +5,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   LiliaDesktopShell,
   SIDEBAR_CONFIG,
+  SIDEBAR_FOOTER_STATUS,
+  SIDEBAR_FOOTER_STATUSES,
   liliaShellOptionsKey,
   setLiliaAppConfig,
   type LiliaAppConfig,
@@ -146,6 +148,52 @@ describe("AppShell sidebar", () => {
     expect(agentTarget(view.container, "sidebar.nav.overview")).toHaveTextContent("首页");
     expect(agentTarget(view.container, "sidebar.footer.settings")).toHaveAttribute("href", "/settings");
     expect(agentTarget(view.container, "sidebar.footer.status")).toHaveClass("sb-conn--ok");
+  });
+
+  it("主侧边栏支持多个独立状态并保留单状态运行时入口", async () => {
+    const view = await renderAppShell("/", {
+      ...testAppConfig,
+      sidebar: {
+        ...testAppConfig.sidebar,
+        footerStatus: undefined,
+        footerStatuses: [
+          {
+            key: "model",
+            to: "/settings?tab=model-config",
+            label: "模型未配置",
+            title: "配置模型",
+            tone: "warn",
+            icon: "brain",
+          },
+          {
+            key: "editor",
+            to: "/settings?tab=editor",
+            label: "Editor 已就绪",
+            title: "查看 Editor",
+            tone: "ok",
+            icon: "server",
+          },
+        ],
+      },
+    });
+
+    const legacyTarget = agentTarget(view.container, "sidebar.footer.status");
+    const modelTarget = agentTarget(view.container, "sidebar.footer.status.model");
+    const editorTarget = agentTarget(view.container, "sidebar.footer.status.editor");
+
+    expect(legacyTarget).toHaveAttribute("href", "/settings?tab=model-config");
+    expect(modelTarget.closest("a")).toBe(legacyTarget);
+    expect(editorTarget).toHaveAttribute("href", "/settings?tab=editor");
+    expect(legacyTarget).toHaveClass("sb-conn--warn");
+    expect(editorTarget).toHaveClass("sb-conn--ok");
+    expect(SIDEBAR_FOOTER_STATUSES.map((status) => status.key)).toEqual(["model", "editor"]);
+    expect(SIDEBAR_FOOTER_STATUSES[0]).toBe(SIDEBAR_FOOTER_STATUS);
+
+    Object.assign(SIDEBAR_FOOTER_STATUS, { label: "模型已配置", tone: "ok" });
+    await waitFor(() => {
+      expect(legacyTarget).toHaveTextContent("模型已配置");
+      expect(legacyTarget).toHaveClass("sb-conn--ok");
+    });
   });
 
   it("主侧边栏不渲染未接入的占位工具按钮", async () => {
