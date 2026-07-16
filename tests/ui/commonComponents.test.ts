@@ -3,18 +3,22 @@ import { defineComponent, ref } from "vue";
 import { describe, expect, it, vi } from "vitest";
 import {
   SettingsRow,
+  LiliaSidebarRow,
+  LiliaSidebarSection,
   UiButton,
   UiCard,
   UiEmptyState,
   UiIconButton,
   UiInput,
   UiRangeField,
+  UiSelect,
   UiSegmentedControl,
   UiSpinner,
   UiSwitch,
   UiTextarea,
   ViewTabs,
   type UiSegmentedOption,
+  type UiSelectOption,
 } from "@lilia/ui";
 
 const TestIcon = defineComponent({
@@ -116,7 +120,7 @@ describe("common UI components", () => {
         return { enabled, locked, name, notes };
       },
       template: `
-        <UiInput v-model="name" aria-label="Name" />
+        <UiInput v-model="name" size="sm" aria-label="Name" />
         <UiTextarea v-model="notes" aria-label="Notes" />
         <UiSwitch v-model="enabled" label="Enable" />
         <UiSwitch v-model="locked" label="Locked" disabled />
@@ -136,6 +140,7 @@ describe("common UI components", () => {
     await fireEvent.click(lockedSwitch);
 
     expect(view.getByTestId("values")).toHaveTextContent("beta|ready|true|false");
+    expect(screen.getByRole("textbox", { name: "Name" })).toHaveClass("ui-input--sm");
   });
 
   it("updates segmented and range controls inside settings rows", async () => {
@@ -178,6 +183,106 @@ describe("common UI components", () => {
     expect(view.container.querySelector("[data-agent-id='size.row']")).toHaveClass("settings-row--divided");
     expect(view.container.querySelector("[data-agent-id='size.range']")).toBeInTheDocument();
     expect(view.getByTestId("values")).toHaveTextContent("b|7");
+  });
+
+  it("supports compact range output control and typed select values", async () => {
+    const options: UiSelectOption[] = [
+      { value: 1, label: "One" },
+      { value: 2, label: "Two" },
+      { value: 3, label: "Unavailable", disabled: true },
+    ];
+    const changed = vi.fn();
+    const view = render(defineComponent({
+      components: { UiRangeField, UiSelect },
+      setup() {
+        const range = ref(5);
+        const selected = ref<string | number>(1);
+        return { changed, options, range, selected };
+      },
+      template: `
+        <UiRangeField
+          v-model="range"
+          :min="0"
+          :max="10"
+          size="sm"
+          :show-output="false"
+          aria-label="Zoom"
+          @change="changed"
+        />
+        <UiSelect v-model="selected" :options="options" size="sm" aria-label="Mode" />
+        <output data-testid="typed-value">{{ typeof selected }}:{{ selected }}</output>
+      `,
+    }));
+
+    const slider = screen.getByRole("slider", { name: "Zoom" });
+    expect(slider.closest(".ui-range-field")).toHaveClass("ui-range-field--sm");
+    expect(slider.closest(".ui-range-field")?.querySelector("output")).toBeNull();
+
+    await fireEvent.change(slider, { target: { value: "6" } });
+    await fireEvent.update(screen.getByRole("combobox", { name: "Mode" }), "2");
+
+    expect(changed).toHaveBeenCalledTimes(1);
+    expect(view.getByTestId("typed-value")).toHaveTextContent("number:2");
+    expect(screen.getByRole("option", { name: "Unavailable" })).toBeDisabled();
+  });
+
+  it("exposes compact sidebar hierarchy, selection, metadata, tools, and collapse behavior", async () => {
+    const select = vi.fn();
+    const tool = vi.fn();
+    const view = render(defineComponent({
+      components: { LiliaSidebarRow, LiliaSidebarSection },
+      setup() {
+        const expanded = ref(true);
+        return { expanded, select, tool };
+      },
+      template: `
+        <LiliaSidebarSection
+          v-model:expanded="expanded"
+          title="Parameters"
+          :count="2"
+          agent-id="resources.parameters"
+        >
+          <LiliaSidebarRow
+            label="Angle X"
+            trailing="PARAM_ANGLE_X"
+            :count="1"
+            :depth="2"
+            collapsible
+            :expanded="expanded"
+            ancestor-active
+            agent-id="resources.parameter.angle-x"
+            @select="select"
+            @toggle="expanded = $event"
+          >
+            <template #tools>
+              <button type="button" aria-label="Reset angle" @click="tool">Reset</button>
+            </template>
+          </LiliaSidebarRow>
+        </LiliaSidebarSection>
+      `,
+    }));
+
+    const sectionToggle = screen.getByRole("button", { name: /Parameters/ });
+    const row = view.container.querySelector("[data-agent-id='resources.parameter.angle-x']");
+    expect(row).toHaveClass("sb-tree__row");
+    expect(row?.closest(".lilia-sidebar-row")).toHaveClass("is-ancestor-active");
+    expect(row).toHaveTextContent("PARAM_ANGLE_X");
+    expect(row?.closest(".lilia-sidebar-row")).toHaveStyle("--lilia-sidebar-depth: 2");
+    expect(row?.querySelector(".lilia-sidebar-row__icon")).toBeNull();
+
+    await fireEvent.click(row as Element);
+    await fireEvent.click(screen.getByRole("button", { name: "Reset angle" }));
+    expect(select).toHaveBeenCalledTimes(1);
+    expect(tool).toHaveBeenCalledTimes(1);
+
+    await fireEvent.keyDown(row as Element, { key: "ArrowLeft" });
+    expect(row).toHaveAttribute("aria-expanded", "false");
+    await fireEvent.keyDown(row as Element, { key: "ArrowRight" });
+    expect(row).toHaveAttribute("aria-expanded", "true");
+
+    await fireEvent.click(sectionToggle);
+    expect(sectionToggle).toHaveAttribute("aria-expanded", "false");
+    expect(row).not.toBeVisible();
   });
 
   it("renders shared view tabs with the active tab exposed", () => {

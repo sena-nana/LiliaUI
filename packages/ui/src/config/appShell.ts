@@ -459,7 +459,7 @@ export function setLiliaAppConfig(config: LiliaAppConfig) {
       icon: resolveIcon(link.icon),
     })),
   );
-  const footerStatusInputs = sidebar.footerStatuses?.length
+  const footerStatusInputs = sidebar.footerStatuses !== undefined
     ? sidebar.footerStatuses
     : [sidebar.footerStatus ?? {
       to: "/settings",
@@ -474,11 +474,15 @@ export function setLiliaAppConfig(config: LiliaAppConfig) {
     icon: resolveIcon(status.icon),
   }));
   const [primaryFooterStatus, ...additionalFooterStatuses] = footerStatuses;
-  Object.assign(SIDEBAR_FOOTER_STATUS, primaryFooterStatus);
-  replaceArray(SIDEBAR_FOOTER_STATUSES, [
-    SIDEBAR_FOOTER_STATUS,
-    ...additionalFooterStatuses,
-  ]);
+  if (primaryFooterStatus) {
+    Object.assign(SIDEBAR_FOOTER_STATUS, primaryFooterStatus);
+    replaceArray(SIDEBAR_FOOTER_STATUSES, [
+      SIDEBAR_FOOTER_STATUS,
+      ...additionalFooterStatuses,
+    ]);
+  } else {
+    replaceArray(SIDEBAR_FOOTER_STATUSES, []);
+  }
 
   const settings = config.settings ?? {};
   SETTINGS_CONFIG.defaultTab = settings.defaultTab ?? "appearance";

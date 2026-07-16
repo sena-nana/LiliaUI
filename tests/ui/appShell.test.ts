@@ -202,6 +202,20 @@ describe("AppShell sidebar", () => {
     });
   });
 
+  it("显式空状态列表不会回退到默认侧边栏状态", async () => {
+    const view = await renderAppShell("/", {
+      ...testAppConfig,
+      sidebar: {
+        ...testAppConfig.sidebar,
+        footerStatus: undefined,
+        footerStatuses: [],
+      },
+    });
+
+    expect(view.container.querySelector("[data-agent-id='sidebar.footer.status']")).toBeNull();
+    expect(SIDEBAR_FOOTER_STATUSES).toHaveLength(0);
+  });
+
   it("主侧边栏不渲染未接入的占位工具按钮", async () => {
     const view = await renderAppShell("/");
 

@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { RouterLink } from "vue-router";
 import type { SidebarNavItem } from "../../config/appShell";
-import SidebarNavRowContent from "./SidebarNavRowContent.vue";
+import LiliaSidebarRow from "./LiliaSidebarRow.vue";
 import SidebarRowTools from "./SidebarRowTools.vue";
 
 const props = withDefaults(defineProps<{
@@ -13,11 +11,6 @@ const props = withDefaults(defineProps<{
   project: false,
 });
 
-const rowStyle = computed(() => {
-  const toolCount = props.item.tools?.length ?? 0;
-  return toolCount > 0 ? { paddingRight: `${10 + toolCount * 24}px` } : undefined;
-});
-
 function selectItem() {
   if (props.item.disabled || !props.item.onSelect) return;
   void props.item.onSelect();
@@ -25,102 +18,83 @@ function selectItem() {
 </script>
 
 <template>
-  <div class="sb-tree__entry">
-    <RouterLink
-      v-if="item.to && !item.disabled"
-      :to="item.to"
-      class="sb-tree__row"
-      :class="[
-        { 'is-active': item.active },
-        { 'sb-tree__row--project': project },
-      ]"
-      :style="rowStyle"
-      exact-active-class="is-active"
-      :data-agent-id="agentId"
-    >
-      <SidebarNavRowContent :item="item" />
-    </RouterLink>
-    <button
-      v-else
-      type="button"
-      class="sb-tree__row sb-tree__row--button"
-      :class="[
-        { 'is-active': item.active },
-        { 'sb-tree__row--project': project },
-      ]"
-      :style="rowStyle"
-      :disabled="item.disabled || !item.onSelect"
-      :data-agent-id="agentId"
-      @click="selectItem"
-    >
-      <SidebarNavRowContent :item="item" />
-    </button>
-    <SidebarRowTools
-      v-if="item.tools?.length"
-      :tools="item.tools"
-      :agent-id-base="`${agentId}.tool`"
-    />
-  </div>
+  <LiliaSidebarRow
+    :label="item.label"
+    :icon="item.icon"
+    :to="item.to"
+    :active="item.active"
+    :disabled="item.disabled || (!item.to && !item.onSelect)"
+    :agent-id="agentId"
+    :class="{ 'sb-tree__entry--project': project }"
+    @select="selectItem"
+  >
+    <template v-if="item.badges?.length" #trailing>
+      <span class="sb-tree__badges" aria-hidden="true">
+        <span
+          v-for="badge in item.badges"
+          :key="badge.key"
+          class="sb-badge"
+          :class="badge.tone ? `sb-badge--${badge.tone}` : undefined"
+          :title="badge.title"
+        >
+          {{ badge.label }}
+        </span>
+      </span>
+    </template>
+    <template v-if="item.tools?.length" #tools>
+      <SidebarRowTools
+        :tools="item.tools"
+        :agent-id-base="`${agentId}.tool`"
+      />
+    </template>
+  </LiliaSidebarRow>
 </template>
 
 <style scoped>
-.sb-tree__entry {
-  position: relative;
-  min-width: 0;
-}
-
-.sb-tree__row {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 28px;
-  padding: 0 10px;
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text);
-  cursor: pointer;
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 500;
-  min-width: 0;
-  text-align: left;
-}
-
-.sb-tree__row:hover {
-  background: var(--bg-hover);
-}
-
-.sb-tree__row:disabled {
-  color: var(--text-faint);
-  cursor: default;
-}
-
-.sb-tree__row:disabled:hover {
-  background: transparent;
-}
-
-.sb-tree__row.is-active {
-  background: var(--bg-active);
-  color: var(--accent);
-}
-
-.sb-tree__row--project {
+.sb-tree__entry--project :deep(.lilia-sidebar-row__control) {
   color: var(--text-muted);
 }
 
-.sb-tree__entry:hover .sb-tree__hover-tools,
-.sb-tree__entry:focus-within .sb-tree__hover-tools {
-  opacity: 1;
-  pointer-events: auto;
+.sb-tree__badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
 }
 
-.sb-tree__hover-tools {
-  position: absolute;
-  top: 50%;
-  right: 6px;
-  z-index: 1;
-  transform: translateY(-50%);
+.sb-badge {
+  min-width: 18px;
+  max-width: 78px;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 17px;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-badge--ok {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.sb-badge--warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.sb-badge--error {
+  background: var(--err-soft);
+  color: var(--err);
+}
+
+.sb-badge--muted {
+  background: var(--bg-subtle);
+  color: var(--text-faint);
 }
 </style>
