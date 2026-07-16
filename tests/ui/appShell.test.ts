@@ -4,6 +4,7 @@ import { createMemoryHistory, createRouter } from "vue-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   LiliaDesktopShell,
+  LiliaSidebarFrame,
   SIDEBAR_CONFIG,
   SIDEBAR_FOOTER_STATUS,
   SIDEBAR_FOOTER_STATUSES,
@@ -46,6 +47,11 @@ async function renderAppShell(
         path: "/components",
         component: { template: "<div>components</div>" },
         meta: { sidebar: "main", returnable: true },
+      },
+      {
+        path: "/workspace",
+        component: { template: "<div>workspace</div>" },
+        meta: { sidebar: "main", contentLayout: "workspace", returnable: true },
       },
       { path: "/:pathMatch(.*)*", redirect: "/" },
     ],
@@ -210,14 +216,57 @@ describe("AppShell sidebar", () => {
 
   it("主侧边栏支持由应用注入业务侧栏", async () => {
     const BusinessSidebar: Component = defineComponent({
-      template: `<aside class="secondary-panel" data-agent-id="business.sidebar">业务侧栏</aside>`,
+      components: { LiliaSidebarFrame },
+      template: `
+        <LiliaSidebarFrame agent-id="business.sidebar" aria-label="业务资源">
+          <template #top><button type="button">新建项目</button></template>
+          <template #body><div>业务侧栏</div></template>
+        </LiliaSidebarFrame>
+      `,
     });
     const view = await renderAppShell("/", testAppConfig, {
       mainSidebar: BusinessSidebar,
     });
 
     expect(agentTarget(view.container, "business.sidebar")).toHaveTextContent("业务侧栏");
+    expect(agentTarget(view.container, "business.sidebar")).toHaveAttribute("aria-label", "业务资源");
+    expect(view.getByRole("button", { name: "新建项目" })).toBeInTheDocument();
+    expect(agentTarget(view.container, "sidebar.footer.settings")).toHaveAttribute("href", "/settings");
     expect(view.queryByRole("navigation", { name: "主导航" })).not.toBeInTheDocument();
+  });
+
+  it("业务侧栏可替换共享 Frame 的底部区域", async () => {
+    const BusinessSidebar: Component = defineComponent({
+      components: { LiliaSidebarFrame },
+      template: `
+        <LiliaSidebarFrame agent-id="business.sidebar">
+          <template #body><div>资源树</div></template>
+          <template #footer><button type="button">项目状态</button></template>
+        </LiliaSidebarFrame>
+      `,
+    });
+    const view = await renderAppShell("/", testAppConfig, {
+      mainSidebar: BusinessSidebar,
+    });
+
+    expect(view.getByRole("button", { name: "项目状态" })).toBeInTheDocument();
+    expect(view.container.querySelector('[data-agent-id="sidebar.footer.settings"]')).not.toBeInTheDocument();
+    expect(view.container.querySelector(".secondary-panel__footer")).toContainElement(
+      view.getByRole("button", { name: "项目状态" }),
+    );
+  });
+
+  it("workspace 路由切换主内容区的全尺寸布局", async () => {
+    const view = await renderAppShell("/workspace");
+    const shell = shellElement(view.container);
+
+    expect(shell).toHaveClass("is-workspace-layout");
+    expect(view.router.currentRoute.value.meta.contentLayout).toBe("workspace");
+
+    await view.router.push("/");
+    await waitFor(() => {
+      expect(shell).not.toHaveClass("is-workspace-layout");
+    });
   });
 
   it("主侧边栏支持应用注入顶部业务区并保留全局动作回退", async () => {

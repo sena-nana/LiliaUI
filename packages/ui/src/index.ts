@@ -4,6 +4,7 @@ import { defineAsyncComponent } from "vue";
 
 export { default as LiliaAppRoot } from "./AppRoot.vue";
 export { default as LiliaDesktopShell } from "./layouts/AppShell.vue";
+export { default as LiliaSidebarFrame } from "./layouts/LiliaSidebarFrame.vue";
 export { default as LiliaAppearanceSection } from "./pages/settings/AppearanceSection.vue";
 export { default as ActionMenuItem } from "./components/ActionMenuItem.vue";
 export { default as AnchoredActionMenu } from "./components/AnchoredActionMenu.vue";
