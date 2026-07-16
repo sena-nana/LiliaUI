@@ -363,7 +363,10 @@ describe("AppShell sidebar", () => {
         ],
         nav: [
           {
-            ...testAppConfig.sidebar.nav[0],
+            key: "components",
+            to: "/components",
+            label: "组件",
+            icon: "folder",
             tools: [{
               key: "pin",
               label: "固定",
@@ -409,10 +412,15 @@ describe("AppShell sidebar", () => {
     await fireEvent.click(view.getByRole("button", { name: "刷新" }));
     await fireEvent.click(view.getByRole("button", { name: "扫描" }));
     await fireEvent.click(view.getByRole("button", { name: "禁用扫描" }));
-    await fireEvent.click(view.getByRole("button", { name: "固定" }));
+    const navTool = view.getByRole("button", { name: "固定" });
+    const rowTool = view.getByRole("button", { name: "打开仓库" });
+    expect(navTool.parentElement?.closest("a, button")).toBeNull();
+    expect(rowTool.parentElement?.closest("a, button")).toBeNull();
+
+    await fireEvent.click(navTool);
     await fireEvent.click(view.getByRole("button", { name: "添加仓库" }));
     await fireEvent.click(view.getByRole("button", { name: "Demo" }));
-    await fireEvent.click(view.getByRole("button", { name: "打开仓库" }));
+    await fireEvent.click(rowTool);
 
     expect(globalAction).toHaveBeenCalledOnce();
     expect(navAction).toHaveBeenCalledOnce();
