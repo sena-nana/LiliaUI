@@ -7,8 +7,7 @@
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  border: 1px solid var(--border-soft);
-  border-radius: var(--app-corner-radius, var(--radius-md));
+  border-radius: 0;
   background: var(--lilia-workspace-surface);
   isolation: isolate;
 }
@@ -41,10 +40,6 @@
 
 [data-lilia-reduced-transparency="true"] .lilia-workspace-region[data-lilia-surface-mode="translucent"] {
   background: var(--lilia-region-surface, var(--bg));
-}
-
-.lilia-workspace-region[data-region-separator="inline"] {
-  border-inline-start: 1px solid var(--border-soft);
 }
 
 .lilia-workspace-region[data-region-separator="block"] {
@@ -123,6 +118,29 @@
 .lilia-workspace-region--inspector,
 .lilia-workspace-region--bottom {
   --lilia-region-surface: var(--bg-elev);
+}
+
+.lilia-workspace-region--primary {
+  --lilia-region-surface: var(--bg);
+  border-top-left-radius: var(--radius-lg);
+}
+
+.lilia-workspace-region--primary[data-edge-start="true"] {
+  border-top-left-radius: 0;
+}
+
+.lilia-workspace-region--primary > .lilia-workspace-region__content {
+  padding: var(--lilia-primary-inset, 20px 24px);
+}
+
+@media (max-width: 760px) {
+  .lilia-workspace-region--primary {
+    border-top-left-radius: 0;
+  }
+
+  .lilia-workspace-region--primary > .lilia-workspace-region__content {
+    padding: 12px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
