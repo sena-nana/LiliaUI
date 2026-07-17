@@ -2,6 +2,7 @@
 import AlertTriangle from "@lucide/vue/dist/esm/icons/triangle-alert.mjs";
 import { useDialogPrimitive } from "@lilia/ui-foundation/dialog";
 import { ref, watch } from "vue";
+import { useOverlayPresence } from "../composables/useOverlayActivity";
 import UiButton from "./UiButton.vue";
 
 const props = withDefaults(defineProps<{
@@ -30,6 +31,7 @@ const emit = defineEmits<{
 }>();
 
 const overlay = ref<HTMLElement | null>(null);
+const overlayPresence = useOverlayPresence();
 
 function cancel() {
   if (props.busy) return;
@@ -56,11 +58,19 @@ watch(() => props.busy, (busy, wasBusy) => {
     `[data-agent-id="${props.danger ? "confirm-dialog.cancel" : "confirm-dialog.confirm"}"]:not(:disabled)`,
   )?.focus();
 });
+
+watch(() => props.open, (open) => {
+  if (open) overlayPresence.activate();
+}, { immediate: true });
+
+function onAfterLeave() {
+  if (!props.open) overlayPresence.deactivate();
+}
 </script>
 
 <template>
   <Teleport to="body">
-    <Transition name="modal">
+    <Transition name="modal" @after-leave="onAfterLeave">
       <div
         v-if="open"
         ref="overlay"

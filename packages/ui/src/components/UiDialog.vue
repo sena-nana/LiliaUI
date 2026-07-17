@@ -2,7 +2,8 @@
 import X from "@lucide/vue/dist/esm/icons/x.mjs";
 import type { DialogProps } from "@lilia/ui-contract";
 import { useDialogPrimitive } from "@lilia/ui-foundation/dialog";
-import { ref } from "vue";
+import { ref, watch } from "vue";
+import { useOverlayPresence } from "../composables/useOverlayActivity";
 import "./overlay.css";
 
 const props = withDefaults(defineProps<DialogProps>(), {
@@ -14,6 +15,7 @@ const props = withDefaults(defineProps<DialogProps>(), {
 });
 const emit = defineEmits<{ "update:open": [open: boolean]; close: [] }>();
 const overlay = ref<HTMLElement | null>(null);
+const overlayPresence = useOverlayPresence();
 
 function close() {
   emit("update:open", false);
@@ -21,11 +23,19 @@ function close() {
 }
 
 const dialog = useDialogPrimitive(props, overlay, close);
+
+watch(() => props.open, (open) => {
+  if (open) overlayPresence.activate();
+}, { immediate: true });
+
+function onAfterLeave() {
+  if (!props.open) overlayPresence.deactivate();
+}
 </script>
 
 <template>
   <Teleport to="body">
-    <Transition name="ui-overlay-fade">
+    <Transition name="ui-overlay-fade" @after-leave="onAfterLeave">
       <div
         v-if="open"
         ref="overlay"

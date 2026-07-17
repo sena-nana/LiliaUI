@@ -4,6 +4,7 @@ import ChevronDown from "@lucide/vue/dist/esm/icons/chevron-down.mjs";
 import { SB_MENU_POP_TRANSITION_MS } from "../composables/menuMotion";
 import { useAnchoredMenuMotion } from "../composables/useAnchoredMenuMotion";
 import { useDismissableOverlay } from "../composables/useDismissableOverlay";
+import { useOverlayPresence } from "../composables/useOverlayActivity";
 import "./action-menu.css";
 
 interface Option {
@@ -37,6 +38,7 @@ const props = defineProps<{
 const emit = defineEmits<{ "update:modelValue": [value: any] }>();
 
 const open = ref(false);
+const overlayPresence = useOverlayPresence();
 const placement = computed(() =>
   props.placement === "bottom" ? "bottom" : "top",
 );
@@ -107,10 +109,15 @@ useDismissableOverlay({
 });
 
 watch(open, (value) => {
+  if (value) overlayPresence.activate();
   if (!value) {
     menuMotion.clearAnchor();
   }
 });
+
+function onAfterLeave() {
+  if (!open.value) overlayPresence.deactivate();
+}
 </script>
 
 <template>
@@ -138,7 +145,11 @@ watch(open, (value) => {
     </button>
 
     <Teleport to="body">
-      <Transition name="sb-menu-pop" :duration="SB_MENU_POP_TRANSITION_MS">
+      <Transition
+        name="sb-menu-pop"
+        :duration="SB_MENU_POP_TRANSITION_MS"
+        @after-leave="onAfterLeave"
+      >
         <div
           v-if="open"
           :ref="menuMotion.menuEl"

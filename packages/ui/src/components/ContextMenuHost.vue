@@ -12,9 +12,11 @@ import {
   SB_MENU_POP_TRANSITION_MS,
 } from "../composables/menuMotion";
 import { useAnchoredOverlay } from "../composables/useAnchoredOverlay";
+import { useOverlayPresence } from "../composables/useOverlayActivity";
 import "./action-menu.css";
 
 const { state } = useContextMenu();
+const overlayPresence = useOverlayPresence();
 
 const rendered = ref(false);
 const activeSubmenuIndex = ref<number | null>(null);
@@ -66,6 +68,8 @@ function selectMenuItem(item: ContextMenuItem) {
 }
 
 function onAfterLeave() {
+  if (state.open) return;
+  overlayPresence.deactivate();
   finalizeClosedContextMenu();
 }
 
@@ -77,6 +81,7 @@ watch(
       clearSubmenu();
       return;
     }
+    overlayPresence.activate();
     rendered.value = true;
     clearSubmenu();
     setAnchorPoint({ x: state.x, y: state.y });
