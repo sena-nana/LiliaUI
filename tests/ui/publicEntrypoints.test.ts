@@ -9,9 +9,10 @@ describe("public package entrypoints", () => {
   });
 
   it("loads stable boundaries without installing diagnostics", async () => {
-    const [root, shell, settings, runtime, commands, diagnostics] = await Promise.all([
+    const [root, shell, layouts, settings, runtime, commands, diagnostics] = await Promise.all([
       import("@lilia/ui"),
       import("@lilia/ui/shell"),
+      import("@lilia/ui/layouts"),
       import("@lilia/ui/settings"),
       import("@lilia/ui/runtime"),
       import("@lilia/ui/commands"),
@@ -20,6 +21,10 @@ describe("public package entrypoints", () => {
 
     expect(root.UiButton).toBeDefined();
     expect(shell.LiliaDesktopShell).toBeDefined();
+    expect(shell.LiliaAppShell).toBeDefined();
+    expect(layouts.LiliaWorkspace).toBeDefined();
+    expect(layouts.LiliaWorkspaceRegion).toBeDefined();
+    expect(layouts.useWorkspaceRegion).toBeTypeOf("function");
     expect(settings.createLiliaSettingsModel).toBeTypeOf("function");
     expect(runtime.installLiliaContextMenu).toBeTypeOf("function");
     expect(commands.createCommandRegistry).toBeTypeOf("function");

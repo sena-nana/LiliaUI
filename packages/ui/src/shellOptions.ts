@@ -6,6 +6,7 @@ export type LiliaShellSetupOverlaySource =
   | (() => boolean);
 
 export interface LiliaShellOptions {
+  /** @deprecated Only used by LiliaDesktopShell. Compose Workspace Regions instead. */
   mainSidebar?: Component;
   titlebarActions?: Component;
   setupOverlayActive?: LiliaShellSetupOverlaySource;

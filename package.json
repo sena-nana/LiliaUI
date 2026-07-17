@@ -10,6 +10,7 @@
   "scripts": {
     "check:contract-fixtures": "yarn workspace @lilia/example-contract-layers check",
     "check:nana-example": "yarn workspace @lilia/example-nana-basic typecheck && yarn workspace @lilia/example-nana-basic build",
+    "check:workspace-example": "yarn workspace @lilia/example-workspace-regions typecheck && yarn workspace @lilia/example-workspace-regions build",
     "check:ui-boundaries": "node scripts/check-ui-boundaries.mjs",
     "perf:components:browser": "node tests/perf/componentPerformance.browser.ts",
     "perf:components:light": "NODE_DISABLE_COMPILE_CACHE=1 vitest run --config vitest.perf.config.ts",
@@ -21,7 +22,7 @@
     "typecheck": "yarn workspaces foreach -Ap run typecheck && yarn typecheck:scripts",
     "typecheck:scripts": "tsc -p tsconfig.node-scripts.json && vue-tsc --noEmit -p tests/visual/tsconfig.json",
     "test": "NODE_DISABLE_COMPILE_CACHE=1 vitest run",
-    "verify": "yarn check:ui-boundaries && yarn check:contract-fixtures && yarn check:nana-example && yarn typecheck && yarn test && yarn test:ui:browser && yarn test:ui:surface && yarn test:ui:visual && yarn perf:components:light"
+    "verify": "yarn check:ui-boundaries && yarn check:contract-fixtures && yarn check:nana-example && yarn check:workspace-example && yarn typecheck && yarn test && yarn test:ui:browser && yarn test:ui:surface && yarn test:ui:visual && yarn perf:components:light"
   },
   "engines": {
     "node": ">=26.0.0 <27"

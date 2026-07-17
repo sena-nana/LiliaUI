@@ -1,6 +1,8 @@
 /// <reference path="./shims-vue.d.ts" />
 
-export { default as LiliaDesktopShell } from "./layouts/AppShell.vue";
+export { default as LiliaAppShell } from "./layouts/AppShell.vue";
+/** @deprecated Compose LiliaAppShell with Workspace Regions instead. */
+export { default as LiliaDesktopShell } from "./layouts/LegacyAppShell.vue";
 export { default as LiliaSidebarFrame } from "./layouts/LiliaSidebarFrame.vue";
 export { default as LiliaSidebarNavRow } from "./components/sidebar/SidebarNavRow.vue";
 export { default as LiliaSidebarFooter } from "./components/sidebar/SidebarFooter.vue";

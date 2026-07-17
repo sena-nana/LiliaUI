@@ -13,9 +13,10 @@ interface Props {
   title?: string;
   leftSidebarCollapsed?: boolean;
   sidebarTogglesDisabled?: boolean;
+  showSidebarToggle?: boolean;
 }
 
-withDefaults(defineProps<Props>(), { title: "" });
+withDefaults(defineProps<Props>(), { title: "", showSidebarToggle: true });
 
 defineEmits<{
   toggleLeftSidebar: [];
@@ -99,27 +100,30 @@ function onTitlebarPointerDown(event: PointerEvent) {
     @pointercancel="clearPendingDrag"
   >
     <div class="titlebar__left-controls" data-agent-id="titlebar.left-controls">
-      <button
-        data-agent-id="titlebar.left-sidebar.toggle"
-        type="button"
-        class="titlebar__btn titlebar__left-sidebar-btn"
-        :aria-label="leftSidebarCollapsed ? '展开左侧栏' : '折叠左侧栏'"
-        :title="leftSidebarCollapsed ? '展开左侧栏' : '折叠左侧栏'"
-        :aria-pressed="leftSidebarCollapsed"
-        :disabled="sidebarTogglesDisabled"
-        @click="$emit('toggleLeftSidebar')"
-      >
-        <PanelLeftOpen
-          v-if="leftSidebarCollapsed"
-          :size="15"
-          aria-hidden="true"
-        />
-        <PanelLeftClose
-          v-else
-          :size="15"
-          aria-hidden="true"
-        />
-      </button>
+      <slot name="left-actions">
+        <button
+          v-if="showSidebarToggle"
+          data-agent-id="titlebar.left-sidebar.toggle"
+          type="button"
+          class="titlebar__btn titlebar__left-sidebar-btn"
+          :aria-label="leftSidebarCollapsed ? '展开左侧栏' : '折叠左侧栏'"
+          :title="leftSidebarCollapsed ? '展开左侧栏' : '折叠左侧栏'"
+          :aria-pressed="leftSidebarCollapsed"
+          :disabled="sidebarTogglesDisabled"
+          @click="$emit('toggleLeftSidebar')"
+        >
+          <PanelLeftOpen
+            v-if="leftSidebarCollapsed"
+            :size="15"
+            aria-hidden="true"
+          />
+          <PanelLeftClose
+            v-else
+            :size="15"
+            aria-hidden="true"
+          />
+        </button>
+      </slot>
     </div>
     <div class="titlebar__center" data-agent-id="titlebar.center">
       <slot name="center">
@@ -182,6 +186,10 @@ function onTitlebarPointerDown(event: PointerEvent) {
   justify-self: start;
   gap: 2px;
   padding: 0 6px 0 calc(6px + var(--lilia-titlebar-leading-inset, 0px));
+  -webkit-app-region: no-drag;
+}
+
+.titlebar__left-controls :slotted(*) {
   -webkit-app-region: no-drag;
 }
 
