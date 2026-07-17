@@ -5,6 +5,7 @@ import { APP_METADATA } from "../config/appShell";
 import { normalizeSettingsTab, useLiliaSettings } from "../settings";
 import { useRouteReturnTarget } from "../composables/useRouteReturnTarget";
 import { useShellSidebar } from "../composables/useShellSidebar";
+import { useNativeAppearance } from "../composables/useNativeAppearance";
 import { liliaShellOptionsKey, resolveShellBoolean } from "../shellOptions";
 import TitleBar from "../components/TitleBar.vue";
 import SecondaryPanel from "./SecondaryPanel.vue";
@@ -25,6 +26,11 @@ const setupOverlayActive = computed(() => resolveShellBoolean(shellOptions.setup
 const sidebarDisabled = computed(() => sidebarLocked.value || setupOverlayActive.value);
 const mainSidebar = computed(() => shellOptions.mainSidebar ?? SecondaryPanel);
 const sidebar = useShellSidebar(sidebarDisabled);
+const appearance = useNativeAppearance();
+const shellTranslucent = computed(() => appearance.backdropMode.value !== "solid");
+const sidebarTranslucent = computed(() => shellTranslucent.value && appearance.backdropTarget.value === "sidebar");
+const mainTranslucent = computed(() => shellTranslucent.value && appearance.backdropTarget.value === "main");
+const titlebarTranslucent = computed(() => sidebarTranslucent.value && appearance.titlebarFollowsSidebar.value);
 </script>
 
 <template>
@@ -39,12 +45,20 @@ const sidebar = useShellSidebar(sidebarDisabled);
       'is-setup-overlay': setupOverlayActive,
     }"
     :style="{ '--sidebar-width': sidebar.widthStyle.value }"
+    :data-lilia-surface-mode="shellTranslucent ? 'translucent' : 'solid'"
+    :data-lilia-backdrop="shellTranslucent ? 'native' : 'none'"
+    data-lilia-surface-level="base"
+    data-lilia-surface-boundary
   >
     <TitleBar
       :title="APP_METADATA.productTitle"
       :left-sidebar-collapsed="sidebar.effectiveCollapsed.value"
       :sidebar-toggles-disabled="sidebarDisabled"
       @toggle-left-sidebar="sidebar.toggleCollapsed"
+      :data-lilia-surface-mode="titlebarTranslucent ? 'translucent' : 'solid'"
+      data-lilia-backdrop="none"
+      data-lilia-surface-level="raised"
+      data-lilia-surface-boundary
     >
       <template v-if="shellOptions.titlebarActions" #right-actions>
         <component :is="shellOptions.titlebarActions" />
@@ -55,8 +69,19 @@ const sidebar = useShellSidebar(sidebarDisabled);
       :tabs="settings.tabs"
       :active-key="activeSettingsTab"
       :return-to="returnTo"
+      :surface-mode="sidebarTranslucent ? 'translucent' : 'solid'"
+      backdrop-effect="none"
+      surface-level="base"
+      surface-boundary
     />
-    <component :is="mainSidebar" v-else-if="!setupOverlayActive" />
+    <component
+      :is="mainSidebar"
+      v-else-if="!setupOverlayActive"
+      :surface-mode="sidebarTranslucent ? 'translucent' : 'solid'"
+      backdrop-effect="none"
+      surface-level="base"
+      surface-boundary
+    />
     <div
       v-if="!setupOverlayActive"
       data-agent-id="shell.sidebar.resizer"
@@ -71,7 +96,14 @@ const sidebar = useShellSidebar(sidebarDisabled);
       @pointerdown="sidebar.startResize"
       @dblclick="sidebar.resetWidth"
     />
-    <main class="shell__main" data-agent-id="shell.main">
+    <main
+      class="shell__main"
+      data-agent-id="shell.main"
+      :data-lilia-surface-mode="mainTranslucent ? 'translucent' : 'solid'"
+      data-lilia-backdrop="none"
+      data-lilia-surface-level="base"
+      data-lilia-surface-boundary
+    >
       <RouterView />
     </main>
   </div>

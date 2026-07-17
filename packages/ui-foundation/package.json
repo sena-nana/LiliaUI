@@ -13,6 +13,7 @@
     "./responsive": "./src/useResponsiveMode.ts",
     "./sidebar": "./src/useSidebarPrimitive.ts",
     "./settings": "./src/settings.ts",
+    "./surface": "./src/surface.ts",
     "./theme": "./src/useThemeSync.ts",
     "./tooltip": "./src/useTooltipPrimitive.ts"
   },

@@ -70,4 +70,4 @@ UI Policy 回答“界面默认如何工作”，由 `UIPolicy` 明确注入：
 
 通用组件契约、primitive、主题、Policy、Shell 与迁移工具属于本仓库。路由、业务页面、provider 协议、业务状态、导航信息架构和应用专属 Tauri 命令属于消费应用。
 
-相关文档：[Contract 与组件分类](./component-contract.md)、[迁移边界](./migration.md)。
+相关文档：[Contract 与组件分类](./component-contract.md)、[Surface Material 与 Interaction State Layer](./surface-material.md)、[迁移边界](./migration.md)。

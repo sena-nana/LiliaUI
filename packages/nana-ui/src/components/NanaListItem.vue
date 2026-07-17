@@ -7,11 +7,12 @@ const emit = defineEmits<{ select: [] }>();
 <template>
   <button
     type="button"
-    class="nana-list-item"
+    class="nana-list-item lilia-interactive-item"
     :class="{ 'is-active': active, 'is-selected': selected }"
     :disabled="disabled"
     :aria-current="active ? 'page' : undefined"
     :aria-pressed="selected"
+    :data-lilia-selected="active || selected ? 'true' : undefined"
     :data-agent-id="agentId"
     @click="emit('select')"
   ><slot /></button>

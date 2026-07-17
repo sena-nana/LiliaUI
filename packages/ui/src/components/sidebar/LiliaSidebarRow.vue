@@ -86,11 +86,12 @@ function onKeydown(event: KeyboardEvent) {
       v-if="to && !disabled"
       :to="to"
       class="lilia-sidebar-row__control sb-tree__row"
-      :class="{ 'is-active': active }"
+      :class="['lilia-interactive-item', { 'is-active': active }]"
       exact-active-class="is-active"
       :title="title"
       :aria-expanded="collapsible ? expanded : undefined"
       :data-agent-id="agentId"
+      :data-lilia-selected="active ? 'true' : undefined"
       @click="select"
       @keydown="onKeydown"
     >
@@ -118,11 +119,12 @@ function onKeydown(event: KeyboardEvent) {
       v-else
       type="button"
       class="lilia-sidebar-row__control sb-tree__row"
-      :class="{ 'is-active': active }"
+      :class="['lilia-interactive-item', { 'is-active': active }]"
       :disabled="disabled"
       :title="title"
       :aria-expanded="collapsible ? expanded : undefined"
       :data-agent-id="agentId"
+      :data-lilia-selected="active ? 'true' : undefined"
       @click="select"
       @keydown="onKeydown"
     >
@@ -180,19 +182,34 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 .lilia-sidebar-row__control:hover {
-  background: var(--bg-hover);
+  background: var(--lilia-state-layer-hover);
   color: var(--text);
 }
 
+.lilia-sidebar-row__control:active:not(:disabled) {
+  background: var(--lilia-state-layer-pressed);
+}
+
 .lilia-sidebar-row__control:focus-visible {
-  outline: 2px solid var(--accent-soft);
+  outline: 2px solid var(--lilia-state-focus-ring);
   outline-offset: -2px;
 }
 
 .lilia-sidebar-row.is-active .lilia-sidebar-row__control,
 .lilia-sidebar-row__control.is-active {
-  background: var(--bg-active);
-  color: var(--accent);
+  background: var(--lilia-state-layer-selected);
+  color: var(--lilia-state-foreground-selected);
+  box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected);
+}
+
+.lilia-sidebar-row.is-active .lilia-sidebar-row__control:hover,
+.lilia-sidebar-row__control.is-active:hover {
+  background: var(--lilia-state-layer-selected-hover);
+}
+
+.lilia-sidebar-row.is-active .lilia-sidebar-row__control:active:not(:disabled),
+.lilia-sidebar-row__control.is-active:active:not(:disabled) {
+  background: var(--lilia-state-layer-selected-pressed);
 }
 
 .lilia-sidebar-row.is-ancestor-active .lilia-sidebar-row__control {
@@ -238,7 +255,7 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 .lilia-sidebar-row__toggle:hover {
-  background: var(--bg-hover);
+  background: var(--lilia-state-layer-hover);
 }
 
 .lilia-sidebar-row__toggle svg {

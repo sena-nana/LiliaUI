@@ -19,12 +19,13 @@ function onClick(event: MouseEvent) {
 
 <template>
   <button
-    class="ui-list-item"
+    class="ui-list-item lilia-interactive-item"
     :class="{ 'is-active': active, 'is-selected': selected }"
     :type="type"
     :disabled="disabled"
     :aria-current="active ? 'page' : undefined"
     :aria-pressed="selected"
+    :data-lilia-selected="active || selected ? 'true' : undefined"
     :data-agent-id="agentId"
     @click="onClick"
   >
@@ -36,10 +37,15 @@ function onClick(event: MouseEvent) {
 
 <style scoped>
 .ui-list-item { display: flex; width: 100%; min-width: 0; min-height: 34px; align-items: center; gap: 8px; padding: 6px 9px; border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--text); cursor: pointer; font: inherit; text-align: left; transition: background-color 0.12s ease, border-color 0.12s ease; }
-.ui-list-item:hover:not(:disabled) { background: var(--bg-hover); }
+.ui-list-item:hover:not(:disabled) { background: var(--lilia-state-layer-hover); }
+.ui-list-item:active:not(:disabled) { background: var(--lilia-state-layer-pressed); }
 .ui-list-item.is-active,
-.ui-list-item.is-selected { border-color: color-mix(in oklch, var(--accent) 42%, transparent); background: var(--accent-soft); }
-.ui-list-item:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.ui-list-item.is-selected { border-color: var(--lilia-state-indicator-selected); background: var(--lilia-state-layer-selected); color: var(--lilia-state-foreground-selected); box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected); }
+.ui-list-item.is-active:hover:not(:disabled),
+.ui-list-item.is-selected:hover:not(:disabled) { background: var(--lilia-state-layer-selected-hover); }
+.ui-list-item.is-active:active:not(:disabled),
+.ui-list-item.is-selected:active:not(:disabled) { background: var(--lilia-state-layer-selected-pressed); }
+.ui-list-item:focus-visible { outline: 2px solid var(--lilia-state-focus-ring); outline-offset: -2px; }
 .ui-list-item:disabled { cursor: not-allowed; opacity: 0.5; }
 .ui-list-item__content { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ui-list-item__leading,

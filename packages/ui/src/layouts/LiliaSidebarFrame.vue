@@ -1,24 +1,32 @@
 <script setup lang="ts">
-import { useSlots } from "vue";
+import type { SurfaceProps } from "@lilia/ui-contract";
+import { resolveSurfaceAttributes } from "@lilia/ui-foundation/surface";
+import { computed, useSlots } from "vue";
 import {
   SIDEBAR_FOOTER_LINKS,
   SIDEBAR_FOOTER_STATUSES,
 } from "../config/appShell";
 import SidebarFooter from "../components/sidebar/SidebarFooter.vue";
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<SurfaceProps & {
   agentId?: string;
   ariaLabel?: string;
 }>(), {
   agentId: "sidebar.main",
   ariaLabel: undefined,
+  surfaceMode: "solid",
+  backdropEffect: "none",
+  surfaceLevel: "base",
+  surfaceBoundary: true,
 });
 
 const slots = useSlots();
+const surfaceAttributes = computed(() => resolveSurfaceAttributes(props));
 </script>
 
 <template>
   <aside
+    v-bind="surfaceAttributes"
     class="secondary-panel"
     :aria-label="ariaLabel"
     :data-agent-id="agentId"

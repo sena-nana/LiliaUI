@@ -7,7 +7,10 @@ export interface VisualLayerComponents {
   Checkbox: Component;
   FormField: Component;
   Input: Component;
+  InteractiveCard: Component;
+  ListItem: Component;
   Progress: Component;
   Skeleton: Component;
   StatusBadge: Component;
+  Tabs: Component;
 }

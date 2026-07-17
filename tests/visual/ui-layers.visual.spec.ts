@@ -12,11 +12,21 @@ for (const layer of layers) {
       candidate.url().includes("theme=dark&density=compact"),
     );
     await stateFrame?.locator('[data-agent-id="visual.hover"]').hover();
-    await expect(page).toHaveScreenshot(`${layer}-layer.png`, {
-      animations: "disabled",
-      fullPage: true,
-      scale: "css",
-    });
+    const pressed = stateFrame?.locator('[data-agent-id="visual.surface.translucent.selected"]');
+    const pressedBox = await pressed?.boundingBox();
+    if (pressedBox) {
+      await page.mouse.move(pressedBox.x + pressedBox.width / 2, pressedBox.y + pressedBox.height / 2);
+      await page.mouse.down();
+    }
+    try {
+      await expect(page).toHaveScreenshot(`${layer}-layer.png`, {
+        animations: "disabled",
+        fullPage: true,
+        scale: "css",
+      });
+    } finally {
+      if (pressedBox) await page.mouse.up();
+    }
   });
 
   for (const theme of themes) {

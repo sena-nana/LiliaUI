@@ -1,6 +1,7 @@
 .sb-menu-pop-enter-active,
 .sb-menu-pop-leave-active {
   transition: opacity 0.16s ease, transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: opacity, transform;
 }
 
 .sb-menu-pop-leave-active {
@@ -29,7 +30,6 @@
   box-shadow: var(--shadow-menu);
   contain: layout paint style;
   transform-origin: var(--sb-menu-origin-x, 0px) var(--sb-menu-origin-y, 0px);
-  will-change: transform, opacity, translate;
 }
 
 .sb-menu__item {
@@ -53,8 +53,17 @@
 
 .sb-menu__item:hover,
 .sb-menu__item.is-active {
-  background: var(--bg-hover);
+  background: var(--lilia-state-layer-hover);
   filter: none;
+}
+
+.sb-menu__item:active:not(:disabled) {
+  background: var(--lilia-state-layer-pressed);
+}
+
+.sb-menu__item:focus-visible {
+  outline: 2px solid var(--lilia-state-focus-ring);
+  outline-offset: -2px;
 }
 
 .sb-menu__item.is-danger {

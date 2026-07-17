@@ -30,7 +30,7 @@ function onClick(event: MouseEvent) {
 <template>
   <button
     type="button"
-    class="sb-menu__item"
+    class="sb-menu__item lilia-interactive-item"
     :class="{
       'is-active': active,
       'is-danger': danger,

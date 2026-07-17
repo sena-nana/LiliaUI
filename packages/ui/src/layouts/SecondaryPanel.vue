@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { SurfaceProps } from "@lilia/ui-contract";
 import { computed } from "vue";
 import {
   SIDEBAR_CONFIG,
@@ -11,6 +12,13 @@ import {
 import UiIconButton from "../components/UiIconButton.vue";
 import SidebarNavRow from "../components/sidebar/SidebarNavRow.vue";
 import LiliaSidebarFrame from "./LiliaSidebarFrame.vue";
+
+const surface = withDefaults(defineProps<SurfaceProps>(), {
+  surfaceMode: "solid",
+  backdropEffect: "none",
+  surfaceLevel: "base",
+  surfaceBoundary: true,
+});
 
 const hasNavSection = computed(() => SIDEBAR_NAV.length > 0);
 const hasTopSection = computed(() => (
@@ -27,7 +35,12 @@ function selectAction(action: SidebarActionItem) {
 </script>
 
 <template>
-  <LiliaSidebarFrame>
+  <LiliaSidebarFrame
+    :surface-mode="surface.surfaceMode"
+    :backdrop-effect="surface.backdropEffect"
+    :surface-level="surface.surfaceLevel"
+    :surface-boundary="surface.surfaceBoundary"
+  >
     <template v-if="hasTopSection" #top>
       <div
         v-if="SIDEBAR_TOP_CONTENT || SIDEBAR_GLOBAL_ACTIONS.length"

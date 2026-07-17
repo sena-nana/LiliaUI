@@ -97,6 +97,10 @@ watch(
         v-if="rendered"
         ref="menuEl"
         class="ctx-menu"
+        data-lilia-surface-mode="solid"
+        data-lilia-backdrop="none"
+        data-lilia-surface-level="overlay"
+        data-lilia-surface-boundary
         role="menu"
         data-agent-id="context-menu"
         :style="menuStyle"
@@ -109,7 +113,7 @@ watch(
         >
           <button
             type="button"
-            class="ctx-menu__item"
+            class="ctx-menu__item lilia-interactive-item"
             :class="{
               'ctx-menu__item--danger': isDanger(item),
               'ctx-menu__item--pending': isContextMenuItemPending(item),
@@ -132,6 +136,10 @@ watch(
           <div
             v-if="hasChildren(item) && isSubmenuActive(index)"
             class="ctx-menu__submenu"
+            data-lilia-surface-mode="solid"
+            data-lilia-backdrop="none"
+            data-lilia-surface-level="overlay"
+            data-lilia-surface-boundary
             role="menu"
             :data-agent-id="`context-menu.submenu.${item.id ?? index}`"
           >
@@ -139,7 +147,7 @@ watch(
               v-for="(child, childIndex) in item.children"
               :key="child.id ?? childIndex"
               type="button"
-              class="ctx-menu__item"
+              class="ctx-menu__item lilia-interactive-item"
               :class="{
                 'ctx-menu__item--danger': isDanger(child),
                 'ctx-menu__item--pending': isContextMenuItemPending(child),
@@ -178,7 +186,6 @@ watch(
   user-select: none;
   contain: layout style;
   transform-origin: var(--sb-menu-origin-x, 0px) var(--sb-menu-origin-y, 0px);
-  will-change: transform, opacity, translate;
 }
 
 .ctx-menu__entry {
@@ -207,12 +214,21 @@ watch(
 }
 
 .ctx-menu__item:hover:not(:disabled) {
-  background: var(--bg-hover);
+  background: var(--lilia-state-layer-hover);
   filter: none;
 }
 
 .ctx-menu__item--submenu-active:not(:disabled) {
-  background: var(--bg-hover);
+  background: var(--lilia-state-layer-hover);
+}
+
+.ctx-menu__item:active:not(:disabled) {
+  background: var(--lilia-state-layer-pressed);
+}
+
+.ctx-menu__item:focus-visible {
+  outline: 2px solid var(--lilia-state-focus-ring);
+  outline-offset: -2px;
 }
 
 .ctx-menu__item:disabled {

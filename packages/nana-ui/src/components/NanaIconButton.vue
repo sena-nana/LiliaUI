@@ -19,6 +19,8 @@ const emit = defineEmits<{ click: [event: MouseEvent] }>();
       :loading="loading"
       :agent-id="agentId"
       :aria-label="label"
+      :aria-pressed="active"
+      :data-lilia-selected="active ? 'true' : undefined"
       @click="emit('click', $event)"
     >
       <template #icon><component :is="icon" aria-hidden="true" :size="18" /></template>

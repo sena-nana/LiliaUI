@@ -143,6 +143,10 @@ watch(open, (value) => {
           v-if="open"
           :ref="menuMotion.menuEl"
           class="dd__menu"
+          data-lilia-surface-mode="solid"
+          data-lilia-backdrop="none"
+          data-lilia-surface-level="overlay"
+          data-lilia-surface-boundary
           :class="sizeClass"
           role="listbox"
           :aria-multiselectable="multiple ? 'true' : undefined"
@@ -153,11 +157,12 @@ watch(open, (value) => {
             v-for="option in options"
             :key="String(option.value)"
             type="button"
-            class="dd__item"
+            class="dd__item lilia-interactive-item"
             :class="{ 'is-active': isSelected(option), 'is-multiple': multiple }"
             :disabled="option.disabled"
             role="option"
             :aria-selected="isSelected(option)"
+            :data-lilia-selected="isSelected(option) ? 'true' : undefined"
             :data-agent-id="option.agentId"
             @click="pick(option)"
           >
@@ -266,7 +271,6 @@ watch(open, (value) => {
   max-height: 280px;
   overflow: auto;
   transform-origin: var(--sb-menu-origin-x, 0px) var(--sb-menu-origin-y, 0px);
-  will-change: transform, opacity, translate;
 }
 
 .dd__menu.dd--large {
@@ -306,8 +310,31 @@ watch(open, (value) => {
 
 .dd__item:hover:not(:disabled),
 .dd__item.is-active {
-  background: var(--bg-hover);
+  background: var(--lilia-state-layer-hover);
   filter: none;
+}
+
+.dd__item.is-active {
+  background: var(--lilia-state-layer-selected);
+  color: var(--lilia-state-foreground-selected);
+  box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected);
+}
+
+.dd__item.is-active:hover:not(:disabled) {
+  background: var(--lilia-state-layer-selected-hover);
+}
+
+.dd__item:active:not(:disabled) {
+  background: var(--lilia-state-layer-pressed);
+}
+
+.dd__item.is-active:active:not(:disabled) {
+  background: var(--lilia-state-layer-selected-pressed);
+}
+
+.dd__item:focus-visible {
+  outline: 2px solid var(--lilia-state-focus-ring);
+  outline-offset: -2px;
 }
 
 .dd__item.is-multiple {

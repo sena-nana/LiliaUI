@@ -15,12 +15,13 @@
     "perf:components:light": "NODE_DISABLE_COMPILE_CACHE=1 vitest run --config vitest.perf.config.ts",
     "perf:components:update-baseline": "node tests/perf/updateComponentPerformanceBaseline.mjs",
     "test:ui:browser": "node tests/ui/shellAppearance.browser.mjs",
+    "test:ui:surface": "node tests/ui/surfaceStateLayer.browser.mjs",
     "test:ui:visual": "playwright test --config playwright.visual.config.ts",
     "test:ui:visual:update": "playwright test --config playwright.visual.config.ts --update-snapshots=all",
     "typecheck": "yarn workspaces foreach -Ap run typecheck && yarn typecheck:scripts",
     "typecheck:scripts": "tsc -p tsconfig.node-scripts.json && vue-tsc --noEmit -p tests/visual/tsconfig.json",
     "test": "NODE_DISABLE_COMPILE_CACHE=1 vitest run",
-    "verify": "yarn check:ui-boundaries && yarn check:contract-fixtures && yarn check:nana-example && yarn typecheck && yarn test && yarn test:ui:browser && yarn test:ui:visual && yarn perf:components:light"
+    "verify": "yarn check:ui-boundaries && yarn check:contract-fixtures && yarn check:nana-example && yarn typecheck && yarn test && yarn test:ui:browser && yarn test:ui:surface && yarn test:ui:visual && yarn perf:components:light"
   },
   "engines": {
     "node": ">=26.0.0 <27"

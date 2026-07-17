@@ -17,7 +17,7 @@ defineProps<{
       v-for="link in links"
       :key="link.label"
       :to="link.to"
-      class="sb-footer__btn"
+      class="sb-footer__btn lilia-interactive-item"
       active-class="is-active"
       :title="link.title ?? link.label"
       :aria-label="link.label"
@@ -88,7 +88,7 @@ defineProps<{
 }
 
 .sb-footer__btn:hover {
-  background: var(--bg-hover);
+  background: var(--lilia-state-layer-hover);
   color: var(--text);
   filter: none;
 }
@@ -100,8 +100,9 @@ defineProps<{
 }
 
 .sb-footer__btn.is-active {
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: var(--lilia-state-layer-selected);
+  color: var(--lilia-state-foreground-selected);
+  box-shadow: inset 0 -2px 0 var(--lilia-state-indicator-selected);
 }
 
 .sb-footer__statuses {

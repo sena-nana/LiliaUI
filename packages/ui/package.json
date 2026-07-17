@@ -14,6 +14,7 @@
     "./styles/global-scrollbar.css": "./src/styles/global-scrollbar.css",
     "./styles/page.css": "./src/styles/page.css",
     "./styles/shell.css": "./src/styles/shell.css",
+    "./styles/state-layer.css": "./src/styles/state-layer.css",
     "./styles/tokens.css": "./src/styles/tokens.css",
     "./theme/base.css": "./src/styles.css",
     "./components/action-menu.css": "./src/components/action-menu.css",

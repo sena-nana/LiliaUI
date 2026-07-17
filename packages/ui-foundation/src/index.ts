@@ -1,6 +1,7 @@
 export * from "./focus";
 export * from "./commands";
 export * from "./settings";
+export * from "./surface";
 export * from "./useButtonPrimitive";
 export * from "./useAnchoredPosition";
 export * from "./useDialogPrimitive";
