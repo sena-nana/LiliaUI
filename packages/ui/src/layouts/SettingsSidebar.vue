@@ -1,22 +1,31 @@
 <script setup lang="ts">
+import type { SurfaceProps } from "@lilia/ui-contract";
+import { resolveSurfaceAttributes } from "@lilia/ui-foundation/surface";
 import { RouterLink } from "vue-router";
 import ArrowLeft from "@lucide/vue/dist/esm/icons/arrow-left.mjs";
+import { computed } from "vue";
 import type { SettingsTab, SettingsTabKey } from "../settings";
 
-defineProps<{
+const props = withDefaults(defineProps<SurfaceProps & {
   tabs: readonly SettingsTab[];
   activeKey: SettingsTabKey;
   returnTo?: string | null;
-}>();
+}>(), {
+  surfaceMode: "solid",
+  backdropEffect: "none",
+  surfaceLevel: "base",
+  surfaceBoundary: true,
+});
+const surfaceAttributes = computed(() => resolveSurfaceAttributes(props));
 </script>
 
 <template>
-  <aside class="secondary-panel settings-sidebar" aria-label="设置分类" data-agent-id="settings.sidebar">
+  <aside v-bind="surfaceAttributes" class="secondary-panel settings-sidebar" aria-label="设置分类" data-agent-id="settings.sidebar">
     <div class="secondary-panel__top settings-sidebar__head">
       <RouterLink :to="returnTo || '/'" custom v-slot="{ navigate }">
         <button
           type="button"
-          class="settings-sidebar__back"
+          class="settings-sidebar__back lilia-interactive-item"
           aria-label="返回"
           title="返回"
           data-agent-id="settings.sidebar.back"
@@ -39,9 +48,10 @@ defineProps<{
         >
           <button
             type="button"
-            class="settings-sidebar__tab"
+            class="settings-sidebar__tab lilia-interactive-item"
             :class="{ 'is-active': activeKey === tab.key }"
             :aria-current="activeKey === tab.key ? 'page' : undefined"
+            :data-lilia-selected="activeKey === tab.key ? 'true' : undefined"
             :data-agent-id="`settings.tab.${tab.key}`"
             @click="navigate"
           >
@@ -88,8 +98,12 @@ defineProps<{
 }
 
 .settings-sidebar__back:hover {
-  background: var(--bg-hover);
+  background: var(--lilia-state-layer-hover);
   filter: none;
+}
+
+.settings-sidebar__back:active {
+  background: var(--lilia-state-layer-pressed);
 }
 
 .settings-sidebar__tabs {
@@ -118,14 +132,27 @@ defineProps<{
 }
 
 .settings-sidebar__tab:hover {
-  background: var(--bg-hover);
+  background: var(--lilia-state-layer-hover);
   color: var(--text);
   filter: none;
 }
 
+.settings-sidebar__tab:active {
+  background: var(--lilia-state-layer-pressed);
+}
+
 .settings-sidebar__tab.is-active {
-  background: var(--bg-active);
-  color: var(--accent);
+  background: var(--lilia-state-layer-selected);
+  color: var(--lilia-state-foreground-selected);
+  box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected);
+}
+
+.settings-sidebar__tab.is-active:hover {
+  background: var(--lilia-state-layer-selected-hover);
+}
+
+.settings-sidebar__tab.is-active:active {
+  background: var(--lilia-state-layer-selected-pressed);
 }
 
 .settings-sidebar__tab-icon {

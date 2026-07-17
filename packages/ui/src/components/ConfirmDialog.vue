@@ -65,6 +65,10 @@ watch(() => props.busy, (busy, wasBusy) => {
         v-if="open"
         ref="overlay"
         class="modal-overlay"
+        data-lilia-surface-mode="translucent"
+        data-lilia-backdrop="css-blur"
+        data-lilia-surface-level="overlay"
+        data-lilia-surface-boundary
         role="dialog"
         aria-modal="true"
         :aria-label="title"
@@ -73,7 +77,7 @@ watch(() => props.busy, (busy, wasBusy) => {
         @click="dialog.onOutsidePointer"
         @keydown="dialog.onKeydown"
       >
-        <div class="modal-card dialog-card">
+        <div class="modal-card dialog-card" data-lilia-surface-mode="solid" data-lilia-backdrop="none" data-lilia-surface-level="floating" data-lilia-surface-boundary>
           <div class="dialog-card__header" :class="{ 'dialog-card__header--danger': danger }">
             <AlertTriangle v-if="danger" :size="14" aria-hidden="true" />
             <span>{{ title }}</span>
@@ -124,7 +128,7 @@ watch(() => props.busy, (busy, wasBusy) => {
   justify-content: center;
   padding-top: 12vh;
   background: var(--scrim);
-  backdrop-filter: blur(2px);
+  --lilia-surface-css-blur: 2px;
 }
 
 .modal-card {

@@ -24,10 +24,11 @@ const tabs: Array<{ key: ViewKey; label: string; icon: unknown; disabled: boolea
       v-for="tab in tabs"
       :key="tab.key"
       type="button"
-      class="view-tabs__tab"
+      class="view-tabs__tab lilia-interactive-item"
       :class="{ 'is-active': active === tab.key }"
       :disabled="tab.disabled"
       :aria-selected="active === tab.key"
+      :data-lilia-selected="active === tab.key ? 'true' : undefined"
       :title="tab.disabled ? '即将上线' : tab.label"
       role="tab"
       :data-agent-id="`view-tabs.${tab.key}`"
@@ -68,15 +69,33 @@ const tabs: Array<{ key: ViewKey; label: string; icon: unknown; disabled: boolea
 }
 
 .view-tabs__tab:hover:not(:disabled):not(.is-active) {
-  background: var(--bg-hover);
+  background: var(--lilia-state-layer-hover);
   color: var(--text);
   filter: none;
 }
 
 .view-tabs__tab.is-active {
-  color: var(--text);
-  border-bottom-color: var(--accent);
-  background: transparent;
+  color: var(--lilia-state-foreground-selected);
+  border-bottom-color: var(--lilia-state-indicator-selected);
+  background: var(--lilia-state-layer-selected);
+  box-shadow: inset 0 -2px 0 var(--lilia-state-indicator-selected);
+}
+
+.view-tabs__tab.is-active:hover:not(:disabled) {
+  background: var(--lilia-state-layer-selected-hover);
+}
+
+.view-tabs__tab:active:not(:disabled) {
+  background: var(--lilia-state-layer-pressed);
+}
+
+.view-tabs__tab.is-active:active:not(:disabled) {
+  background: var(--lilia-state-layer-selected-pressed);
+}
+
+.view-tabs__tab:focus-visible {
+  outline: 2px solid var(--lilia-state-focus-ring);
+  outline-offset: -2px;
 }
 
 .view-tabs__tab:disabled {

@@ -17,6 +17,6 @@ function onKeydown(event: KeyboardEvent, index: number) {
 
 <template>
   <div class="nana-tabs" :class="`nana-tabs--${orientation}`" role="tablist" :aria-orientation="orientation" :data-agent-id="agentId">
-    <button v-for="(option, index) in options" :key="option.value" type="button" role="tab" :aria-selected="option.value === modelValue" :tabindex="option.value === modelValue ? 0 : -1" :disabled="option.disabled" @click="emit('update:modelValue', option.value)" @keydown="onKeydown($event, index)">{{ option.label }}</button>
+    <button v-for="(option, index) in options" :key="option.value" type="button" class="lilia-interactive-item" role="tab" :aria-selected="option.value === modelValue" :data-lilia-selected="option.value === modelValue ? 'true' : undefined" :tabindex="option.value === modelValue ? 0 : -1" :disabled="option.disabled" @click="emit('update:modelValue', option.value)" @keydown="onKeydown($event, index)">{{ option.label }}</button>
   </div>
 </template>

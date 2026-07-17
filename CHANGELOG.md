@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-07-17 — Surface Material 与 State Layer
+
+### Contract additive
+
+- `@lilia/ui-contract` 新增 `SurfaceMode`、`BackdropEffect`、`SurfaceLevel` 与 Surface Boundary 契约；`@lilia/ui-foundation/surface` 提供无视觉、无 Context 的稳定 attributes 解析。
+
+### Lilia 与 Nana Layer
+
+- 两套 Layer 新增 Solid/Translucent 状态 Token，并统一迁移 Sidebar/Tree、Navigation/List、Menu、Tabs/Segmented、Select/Command Palette、Interactive Card 与 Toolbar Toggle。
+- 选中和焦点不再只依赖背景色；Backdrop 只由显式 Surface 拥有，Reduced Transparency 与高对比模式回退到不透明状态色。
+
+### Validation and performance
+
+- 新增双 Surface 视觉 fixture、真实浏览器材质/合成边界检查，以及 240 行 State Layer 长列表浏览器性能场景。
+
 ## 2026-07-16 — Consumer UI Layer
 
 ### Contract additive

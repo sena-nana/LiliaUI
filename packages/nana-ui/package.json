@@ -16,6 +16,7 @@
     "./settings": "./src/settings/index.ts",
     "./state": "./src/state/index.ts",
     "./styles.css": "./src/styles.css",
+    "./styles/state-layer.css": "./src/styles/state-layer.css",
     "./theme/base.css": "./src/styles/base.css",
     "./theme/tokens.css": "./src/styles/tokens.css"
   },

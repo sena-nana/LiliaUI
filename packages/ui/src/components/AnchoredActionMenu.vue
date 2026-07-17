@@ -63,6 +63,10 @@ watch(
         v-if="open"
         ref="overlayEl"
         class="sb-menu"
+        data-lilia-surface-mode="solid"
+        data-lilia-backdrop="none"
+        data-lilia-surface-level="overlay"
+        data-lilia-surface-boundary
         :role="role"
         :aria-label="ariaLabel"
         :style="overlayStyle"

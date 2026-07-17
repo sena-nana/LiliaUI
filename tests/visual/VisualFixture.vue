@@ -43,6 +43,42 @@ const longLabel = props.longText
           <component :is="ui.Button" variant="secondary" disabled>不可用</component>
         </div>
       </component>
+      <section class="visual-surfaces" aria-label="Surface state fixtures">
+        <div
+          class="visual-surface visual-surface--solid"
+          data-lilia-surface-mode="solid"
+          data-lilia-backdrop="none"
+          data-lilia-surface-level="base"
+          data-lilia-surface-boundary
+        >
+          <strong>Solid</strong>
+          <component :is="ui.ListItem" selected agent-id="visual.surface.solid.selected">Selected list item</component>
+          <component
+            :is="ui.Tabs"
+            model-value="selected"
+            :options="[{ value: 'selected', label: 'Selected' }, { value: 'idle', label: 'Idle' }]"
+            aria-label="Solid tabs"
+          />
+        </div>
+        <div
+          class="visual-surface visual-surface--translucent"
+          data-lilia-surface-mode="translucent"
+          data-lilia-backdrop="css-blur"
+          data-lilia-surface-level="base"
+          data-lilia-surface-boundary
+        >
+          <strong>Translucent</strong>
+          <component :is="ui.ListItem" selected agent-id="visual.surface.translucent.selected">Selected list item</component>
+          <component
+            :is="ui.InteractiveCard"
+            selected
+            surface-mode="translucent"
+            backdrop-effect="none"
+            surface-level="raised"
+            surface-boundary
+          >Selected card</component>
+        </div>
+      </section>
     </main>
   </component>
 </template>
@@ -59,4 +95,10 @@ body { overflow: auto !important; background: var(--bg); }
 .visual-fixture .nana-card, .visual-fixture .ui-card { display: grid; min-width: 0; gap: 9px; padding: 12px; }
 .visual-long { min-width: 0; margin: 0; color: var(--text-muted); overflow-wrap: anywhere; }
 .visual-actions { display: flex; min-width: 0; flex-wrap: wrap; gap: 7px; }
+.visual-surfaces { display: grid; min-width: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.visual-surface { min-width: 0; padding: 10px; display: grid; gap: 7px; border-radius: var(--radius-md); }
+.visual-surface--solid { background: var(--bg-elev); }
+.visual-surface--translucent { background: var(--lilia-backdrop-surface, oklch(100% 0 0 / 0.12)); }
+.visual-surface > strong { color: var(--text-muted); font-size: 12px; }
+@media (max-width: 520px) { .visual-surfaces { grid-template-columns: minmax(0, 1fr); } }
 </style>

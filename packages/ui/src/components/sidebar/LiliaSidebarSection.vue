@@ -39,7 +39,7 @@ function toggle() {
     <header class="lilia-sidebar-section__header">
       <button
         type="button"
-        class="lilia-sidebar-section__toggle"
+        class="lilia-sidebar-section__toggle lilia-interactive-item"
         :class="{ 'is-static': !collapsible }"
         :disabled="!collapsible"
         :aria-expanded="collapsible ? expanded : undefined"
@@ -97,12 +97,12 @@ function toggle() {
 }
 
 .lilia-sidebar-section__toggle:hover:not(:disabled) {
-  background: var(--bg-hover);
+  background: var(--lilia-state-layer-hover);
   color: var(--text-muted);
 }
 
 .lilia-sidebar-section__toggle:focus-visible {
-  outline: 2px solid var(--accent-soft);
+  outline: 2px solid var(--lilia-state-focus-ring);
   outline-offset: -2px;
 }
 

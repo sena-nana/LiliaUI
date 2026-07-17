@@ -53,13 +53,16 @@ function pickComponents(ui: ContractLayerModule): VisualLayerComponents {
     Checkbox: ui.Checkbox,
     FormField: ui.FormField,
     Input: ui.Input,
+    InteractiveCard: ui.InteractiveCard,
+    ListItem: ui.ListItem,
     Progress: ui.Progress,
     Skeleton: ui.Skeleton,
     StatusBadge: ui.StatusBadge,
+    Tabs: ui.Tabs,
   };
 }
 
 type ContractLayerModule = Record<
-  "Button" | "Card" | "Checkbox" | "FormField" | "Input" | "Progress" | "Skeleton" | "StatusBadge",
+  "Button" | "Card" | "Checkbox" | "FormField" | "Input" | "InteractiveCard" | "ListItem" | "Progress" | "Skeleton" | "StatusBadge" | "Tabs",
   Component
 >;

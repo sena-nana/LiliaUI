@@ -13,7 +13,7 @@ import {
   UiToast,
   UiValidationMessage,
 } from "@lilia/ui";
-import { h } from "vue";
+import { h, ref } from "vue";
 import type { ComponentPerfScenario } from "../componentScenarios";
 
 function click(root: ParentNode, selector: string) {
@@ -21,6 +21,8 @@ function click(root: ParentNode, selector: string) {
   if (!(element instanceof HTMLElement)) throw new Error(`Missing perf click target: ${selector}`);
   element.click();
 }
+
+const surfaceLongListSelectionOffset = ref(0);
 
 export const professionalContractComponentScenarios: ComponentPerfScenario[] = [
   {
@@ -139,5 +141,30 @@ export const professionalContractComponentScenarios: ComponentPerfScenario[] = [
       agentId: "perf.list-item",
     }, () => "Recent item"),
     interact: (root) => click(root, "[data-agent-id='perf.list-item']"),
+  },
+  {
+    name: "SurfaceStateLayerLongList",
+    runners: ["browser"],
+    prepare: () => { surfaceLongListSelectionOffset.value = 0; },
+    render: (step) => h("section", {
+      "data-lilia-surface-mode": step.value % 2 === 0 ? "solid" : "translucent",
+      "data-lilia-backdrop": "none",
+      "data-lilia-surface-boundary": "",
+      "data-agent-id": "perf.surface-long-list",
+      style: { maxHeight: "320px", overflow: "auto" },
+    }, Array.from({ length: 240 }, (_, index) => h(UiListItem, {
+      selected: index === (surfaceLongListSelectionOffset.value + step.value * 239) % 240,
+      agentId: `perf.surface-row.${index}`,
+      onSelect: () => {
+        surfaceLongListSelectionOffset.value = (index - step.value * 239 + 240) % 240;
+      },
+    }, () => `Row ${index}`))),
+    interact: (root) => {
+      const viewport = (root.ownerDocument ?? document).querySelector("[data-agent-id='perf.surface-long-list']");
+      if (!(viewport instanceof HTMLElement)) throw new Error("Missing surface long-list viewport");
+      viewport.scrollTop = viewport.scrollHeight;
+      viewport.dispatchEvent(new Event("scroll", { bubbles: true }));
+      click(root, "[data-agent-id='perf.surface-row.120']");
+    },
   },
 ];

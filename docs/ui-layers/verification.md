@@ -38,6 +38,7 @@ yarn test:ui:browser
 | 两套 Layer 独立视觉回归 | `tests/visual/__screenshots__` 的双 Layer 状态矩阵 | 已有 |
 | color contrast、200% zoom、长文本 | `tests/visual/ui-layers.visual.spec.ts` 的真实 Chromium CSS/axe/overflow 场景 | 已有 |
 | reduced motion 行为 | 同一浏览器场景验证两层 Skeleton 动画由 media query 停止 | 已有 |
+| Surface/State Layer 材质、降级与合成边界 | `tests/ui/surfaceStateLayer.test.ts`、`surfaceStateLayer.browser.mjs`、双 Layer 视觉 fixture、`SurfaceStateLayerLongList` 浏览器性能场景 | 已有 |
 
 ## Contract 变更证据
 
@@ -61,6 +62,7 @@ yarn test:ui:browser
 - Chromium 中以真实 Layer CSS 执行 axe `color-contrast`，不禁用规则；
 - 200% 渲染比例和长文本下检查关键容器与视口横向溢出；
 - `prefers-reduced-motion: reduce` 下两层 loading 动画的 computed style 均为 `none`。
+- Solid/Translucent 状态色、Reduced Transparency/High Contrast 回退、Backdrop 单一所有权和 Solid 项无独立合成层。
 
 有意调整视觉结构后，使用 `yarn test:ui:visual:update` 更新截图，再立即运行普通视觉命令确认基线稳定。
 

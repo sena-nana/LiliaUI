@@ -6,7 +6,6 @@
   opacity: 0;
   transition: opacity 0.48s ease;
   contain: layout paint style;
-  will-change: transform, opacity;
 }
 
 .global-scrollbar-overlay::before {

@@ -97,7 +97,7 @@
 }
 
 .search-dropdown__action:hover {
-  background: var(--bg-hover);
+  background: var(--lilia-state-layer-hover);
   color: var(--text);
   filter: none;
 }
@@ -115,7 +115,6 @@
   background: var(--bg-elev);
   box-shadow: var(--shadow-menu);
   contain: layout paint style;
-  will-change: translate;
 }
 
 .search-dropdown__menu--bottom {
@@ -149,8 +148,17 @@
 
 .search-dropdown__item.is-active,
 .search-dropdown__item:hover {
-  background: var(--bg-hover);
+  background: var(--lilia-state-layer-hover);
   filter: none;
+}
+
+.search-dropdown__item:active {
+  background: var(--lilia-state-layer-pressed);
+}
+
+.search-dropdown__item:focus-visible {
+  outline: 2px solid var(--lilia-state-focus-ring);
+  outline-offset: -2px;
 }
 
 .search-dropdown__title {

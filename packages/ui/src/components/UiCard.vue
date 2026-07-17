@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import type { SurfaceProps } from "@lilia/ui-contract";
+import { resolveSurfaceAttributes } from "@lilia/ui-foundation/surface";
+import { computed } from "vue";
 import UiSpinner from "./UiSpinner.vue";
 
 export type UiCardVariant = "surface" | "default" | "outlined" | "raised" | "flat" | "interactive";
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<SurfaceProps & {
   title?: string;
   variant?: UiCardVariant;
   empty?: boolean;
@@ -19,15 +22,22 @@ withDefaults(defineProps<{
   selected: false,
   disabled: false,
   agentId: undefined,
+  surfaceMode: "solid",
+  backdropEffect: "none",
+  surfaceLevel: "raised",
+  surfaceBoundary: true,
 });
+const surfaceAttributes = computed(() => resolveSurfaceAttributes(props));
 </script>
 
 <template>
   <section
+    v-bind="surfaceAttributes"
     class="card ui-card"
-    :class="[`card--${variant === 'default' ? 'surface' : variant}`, { empty, 'is-selected': selected, 'is-disabled': disabled }]"
+    :class="[`card--${variant === 'default' ? 'surface' : variant}`, { empty, 'is-selected': selected, 'is-disabled': disabled, 'lilia-interactive-item': variant === 'interactive' }]"
     :data-agent-id="agentId"
     :aria-disabled="disabled || undefined"
+    :data-lilia-selected="selected ? 'true' : undefined"
   >
     <h2 v-if="title || $slots.title">
       <span class="card-h2__title">
@@ -41,7 +51,11 @@ withDefaults(defineProps<{
 
 <style scoped>
 .ui-card.card--interactive { transition: background-color 0.12s ease, border-color 0.12s ease; }
-.ui-card.card--interactive:hover:not(.is-disabled) { background: var(--bg-hover); }
-.ui-card.is-selected { border: 1px solid color-mix(in oklch, var(--accent) 45%, var(--border)); background: color-mix(in oklch, var(--accent) 6%, var(--bg-elev)); }
+.ui-card[data-lilia-surface-mode="translucent"] { background: transparent; }
+.ui-card.card--interactive:hover:not(.is-disabled) { background: var(--lilia-state-layer-hover); }
+.ui-card.card--interactive:active:not(.is-disabled) { background: var(--lilia-state-layer-pressed); }
+.ui-card.is-selected { border: 1px solid var(--lilia-state-indicator-selected); background: var(--lilia-state-layer-selected); color: var(--lilia-state-foreground-selected); box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected); }
+.ui-card.is-selected:hover:not(.is-disabled) { background: var(--lilia-state-layer-selected-hover); }
+.ui-card.is-selected:active:not(.is-disabled) { background: var(--lilia-state-layer-selected-pressed); }
 .ui-card.is-disabled { opacity: 0.55; }
 </style>

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T13:58:16.190Z",
+  "generatedAt": "2026-07-17T03:44:56.331Z",
   "iterations": 7,
   "runner": "browser",
   "schemaVersion": 1,
@@ -1674,6 +1674,28 @@
       "update": {
         "median": 0.2,
         "p95": 0.2
+      }
+    },
+    "SurfaceStateLayerLongList": {
+      "domNodes": {
+        "median": 482,
+        "p95": 482
+      },
+      "interaction": {
+        "median": 3.4,
+        "p95": 3.5
+      },
+      "mount": {
+        "median": 3.5,
+        "p95": 4.5
+      },
+      "unmount": {
+        "median": 0.2,
+        "p95": 0.3
+      },
+      "update": {
+        "median": 1.8,
+        "p95": 1.9
       }
     }
   },

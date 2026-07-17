@@ -8,7 +8,12 @@
 .nana-sidebar__nav { min-height: 0; flex: 1 1 auto; display: flex; flex-direction: column; gap: 4px; overflow: auto; }
 .nana-sidebar__item { width: 100%; min-width: 0; min-height: var(--control-height); padding: 0 11px; border: 1px solid transparent; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 10px; color: var(--text-muted); background: transparent; text-decoration: none; cursor: pointer; }
 .nana-sidebar--icon .nana-sidebar__item { width: 46px; justify-content: center; padding: 0; }
-.nana-sidebar__item:hover, .nana-sidebar__item.is-active, .nana-sidebar__item[aria-current="page"] { color: var(--accent-strong); background: var(--accent-soft); border-color: var(--border-soft); }
+.nana-sidebar__item:hover { color: var(--text); background: var(--lilia-state-layer-hover); }
+.nana-sidebar__item:active { background: var(--lilia-state-layer-pressed); }
+.nana-sidebar__item.is-active, .nana-sidebar__item[aria-current="page"] { color: var(--lilia-state-foreground-selected); background: var(--lilia-state-layer-selected); border-color: var(--lilia-state-indicator-selected); box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected); }
+.nana-sidebar__item.is-active:hover, .nana-sidebar__item[aria-current="page"]:hover { background: var(--lilia-state-layer-selected-hover); }
+.nana-sidebar__item.is-active:active, .nana-sidebar__item[aria-current="page"]:active { background: var(--lilia-state-layer-selected-pressed); }
+.nana-sidebar__item:focus-visible { outline: 2px solid var(--lilia-state-focus-ring); outline-offset: 2px; }
 .nana-sidebar__item[aria-disabled="true"], .nana-sidebar__item:disabled { opacity: 0.45; pointer-events: none; }
 .nana-sidebar__footer { padding-top: 8px; display: grid; gap: 5px; }
 .nana-sidebar__footer > .nana-tooltip-anchor:last-child { justify-self: end; }

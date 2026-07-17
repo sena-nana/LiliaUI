@@ -140,6 +140,10 @@ defineExpose({
         v-if="open"
         :ref="setMenuEl"
         class="search-dropdown__menu"
+        data-lilia-surface-mode="solid"
+        data-lilia-backdrop="none"
+        data-lilia-surface-level="overlay"
+        data-lilia-surface-boundary
         :class="menuPlacementClass"
         role="listbox"
         :style="overlayStyle"

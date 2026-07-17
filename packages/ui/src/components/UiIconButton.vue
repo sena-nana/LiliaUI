@@ -43,6 +43,8 @@ const emit = defineEmits<{
     :disabled="disabled"
     :busy="busy"
     :agent-id="agentId"
+    :aria-pressed="active"
+    :data-lilia-selected="active ? 'true' : undefined"
     @click="emit('click', $event)"
   >
     <template #icon>
@@ -70,16 +72,24 @@ const emit = defineEmits<{
   border-radius: var(--radius-xs);
 }
 
-.ui-icon-button.ui-button:hover:not(:disabled),
-.ui-icon-button.ui-button.is-active {
-  background: var(--bg-hover);
+.ui-icon-button.ui-button:hover:not(:disabled) {
+  background: var(--lilia-state-layer-hover);
   color: var(--text);
   filter: none;
 }
 
-.ui-icon-button--primary.ui-button.is-active {
-  background: var(--accent-soft);
-  color: var(--accent);
+.ui-icon-button.ui-button:active:not(:disabled) {
+  background: var(--lilia-state-layer-pressed);
+}
+
+.ui-icon-button.ui-button.is-active {
+  background: var(--lilia-state-layer-selected);
+  color: var(--lilia-state-foreground-selected);
+  box-shadow: inset 0 -2px 0 var(--lilia-state-indicator-selected);
+}
+
+.ui-icon-button.ui-button.is-active:active:not(:disabled) {
+  background: var(--lilia-state-layer-selected-pressed);
 }
 
 .ui-icon-button--warning.ui-button {
@@ -90,6 +100,11 @@ const emit = defineEmits<{
 .ui-icon-button--warning.ui-button.is-active {
   background: var(--warn-soft);
   color: var(--warn);
+}
+
+.ui-icon-button--warning.ui-button.is-active,
+.ui-icon-button--danger.ui-button.is-active {
+  box-shadow: inset 0 -2px 0 currentColor;
 }
 
 .ui-icon-button--danger.ui-button {

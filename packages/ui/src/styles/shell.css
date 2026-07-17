@@ -74,7 +74,6 @@
   transition:
     translate 0.24s var(--sidebar-easing),
     visibility 0s linear 0s;
-  will-change: translate;
 }
 
 .shell__resizer::before {
@@ -94,6 +93,7 @@
 
 .shell.is-resizing .shell__resizer {
   transition: none;
+  will-change: translate;
 }
 
 .shell.is-resizing .shell__main,
@@ -136,7 +136,6 @@
     opacity 0.2s var(--sidebar-easing),
     transform 0.24s var(--sidebar-easing),
     visibility 0s linear 0s;
-  will-change: opacity, transform;
 }
 
 .secondary-panel__top,
@@ -177,12 +176,25 @@
 }
 
 .sb-tree__row:hover {
-  background: var(--bg-hover);
+  background: var(--lilia-state-layer-hover);
+}
+
+.sb-tree__row:active:not(:disabled) {
+  background: var(--lilia-state-layer-pressed);
 }
 
 .sb-tree__row.is-active {
-  background: var(--bg-active);
-  color: var(--accent);
+  background: var(--lilia-state-layer-selected);
+  color: var(--lilia-state-foreground-selected);
+  box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected);
+}
+
+.sb-tree__row.is-active:hover {
+  background: var(--lilia-state-layer-selected-hover);
+}
+
+.sb-tree__row.is-active:active:not(:disabled) {
+  background: var(--lilia-state-layer-selected-pressed);
 }
 
 .sb-tree__row--muted {
@@ -207,6 +219,7 @@
   transform: translateX(-12px);
   pointer-events: none;
   transition-delay: 0s, 0s, 0.22s;
+  will-change: opacity, transform;
 }
 
 @media (max-width: 760px) {
