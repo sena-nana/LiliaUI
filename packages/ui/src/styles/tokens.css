@@ -29,9 +29,9 @@
   --lilia-color-state-selected-pressed-solid: oklch(30.5% 0 89.9);
   --lilia-color-state-hover-translucent: oklch(100% 0 89.9 / var(--lilia-alpha-hover));
   --lilia-color-state-pressed-translucent: oklch(100% 0 89.9 / var(--lilia-alpha-pressed));
-  --lilia-color-state-selected-translucent: oklch(76.49% 0.102 246.4 / var(--lilia-alpha-selected));
-  --lilia-color-state-selected-hover-translucent: oklch(76.49% 0.102 246.4 / var(--lilia-alpha-selected-hover));
-  --lilia-color-state-selected-pressed-translucent: oklch(76.49% 0.102 246.4 / var(--lilia-alpha-selected-pressed));
+  --lilia-color-state-selected-translucent: oklch(100% 0 89.9 / var(--lilia-alpha-selected));
+  --lilia-color-state-selected-hover-translucent: oklch(100% 0 89.9 / var(--lilia-alpha-selected-hover));
+  --lilia-color-state-selected-pressed-translucent: oklch(100% 0 89.9 / var(--lilia-alpha-selected-pressed));
   --lilia-state-layer-hover: var(--lilia-color-state-hover-solid);
   --lilia-state-layer-pressed: var(--lilia-color-state-pressed-solid);
   --lilia-state-layer-selected: var(--lilia-color-state-selected-solid);
@@ -115,9 +115,9 @@
   --lilia-color-state-selected-pressed-solid: oklch(90.5% 0 89.9);
   --lilia-color-state-hover-translucent: oklch(0% 0 89.9 / var(--lilia-alpha-hover));
   --lilia-color-state-pressed-translucent: oklch(0% 0 89.9 / var(--lilia-alpha-pressed));
-  --lilia-color-state-selected-translucent: oklch(58.91% 0.1555 253.4 / var(--lilia-alpha-selected));
-  --lilia-color-state-selected-hover-translucent: oklch(58.91% 0.1555 253.4 / var(--lilia-alpha-selected-hover));
-  --lilia-color-state-selected-pressed-translucent: oklch(58.91% 0.1555 253.4 / var(--lilia-alpha-selected-pressed));
+  --lilia-color-state-selected-translucent: oklch(0% 0 89.9 / var(--lilia-alpha-selected));
+  --lilia-color-state-selected-hover-translucent: oklch(0% 0 89.9 / var(--lilia-alpha-selected-hover));
+  --lilia-color-state-selected-pressed-translucent: oklch(0% 0 89.9 / var(--lilia-alpha-selected-pressed));
   --border: oklch(92.12% 0.0046 258.3);
   --border-soft: oklch(95.45% 0.0046 258.3);
   --border-strong: oklch(85.32% 0.0094 258.3);
