@@ -15,7 +15,7 @@ import {
 const DEFAULT_PORT = 1420;
 const LOCALHOST_CHECK_HOSTS = ["127.0.0.1", "::1"];
 const NATIVE_CPU_FLAG = "-C target-cpu=native";
-const require = createRequire(import.meta.url);
+const packageRequire = createRequire(import.meta.url);
 const PRIORITY_EXTS = {
   win32: [".msi", ".exe"],
   darwin: [".dmg", ".pkg"],
@@ -95,10 +95,10 @@ export function yarnSpawn(platform = process.platform, env = process.env) {
   };
 }
 
-export function resolveToolCommand(packageName, binName, args = []) {
+export function resolveToolCommand(packageName, binName, args = [], projectRoot = process.cwd()) {
   return {
     command: process.execPath,
-    args: [resolvePackageBin(packageName, binName), ...args],
+    args: [resolvePackageBin(packageName, binName, projectRoot), ...args],
   };
 }
 
@@ -347,7 +347,7 @@ function runSync(command, args = [], options = {}) {
 }
 
 function runTool(packageName, binName, args = [], options = {}) {
-  const command = resolveToolCommand(packageName, binName, args);
+  const command = resolveToolCommand(packageName, binName, args, options.cwd);
   runSync(command.command, command.args, options);
 }
 
@@ -371,8 +371,14 @@ function runTauri(args = [], options = {}) {
   runTool("@tauri-apps/cli", "tauri", args, options);
 }
 
-function resolvePackageBin(packageName, binName) {
-  const packageJsonPath = require.resolve(`${packageName}/package.json`);
+function resolvePackageBin(packageName, binName, projectRoot = process.cwd()) {
+  const consumerRequire = createRequire(resolve(projectRoot, "package.json"));
+  let packageJsonPath;
+  try {
+    packageJsonPath = consumerRequire.resolve(`${packageName}/package.json`);
+  } catch {
+    packageJsonPath = packageRequire.resolve(`${packageName}/package.json`);
+  }
   const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
   const bin = packageJson.bin;
   const relativeBin = typeof bin === "string" ? bin : bin?.[binName];
