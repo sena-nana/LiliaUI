@@ -44,7 +44,6 @@
 :where(.lilia-interactive-item, [data-lilia-interactive])[data-lilia-selected="true"] {
   background-color: var(--lilia-state-layer-selected);
   color: var(--lilia-state-foreground-selected);
-  box-shadow: var(--lilia-state-selected-shadow);
 }
 
 :where(.lilia-interactive-item, [data-lilia-interactive])[data-lilia-selected="true"]:hover:not(:disabled):not([aria-disabled="true"]) {
