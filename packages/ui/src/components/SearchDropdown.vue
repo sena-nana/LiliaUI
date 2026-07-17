@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, type ComponentPublicInstance } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, watch, type ComponentPublicInstance } from "vue";
 import { useAnchoredOverlay } from "../composables/useAnchoredOverlay";
 import { useDismissableOverlay } from "../composables/useDismissableOverlay";
+import { useOverlayPresence } from "../composables/useOverlayActivity";
 import {
   highlightQuerySegments as createQuerySegments,
   highlightRangeSegments,
@@ -38,6 +39,7 @@ const inputRef = ref<HTMLInputElement | null>(null);
 const suppressNextFocusOpen = ref(false);
 let disposed = false;
 const openState = computed(() => props.open);
+const overlayPresence = useOverlayPresence();
 const preferredPlacement = computed(() => "bottom-start" as const);
 const {
   overlayEl: menuEl,
@@ -89,6 +91,14 @@ useDismissableOverlay({
   },
 });
 
+watch(openState, (open) => {
+  if (open) overlayPresence.activate();
+}, { immediate: true });
+
+function onAfterLeave() {
+  if (!props.open) overlayPresence.deactivate();
+}
+
 onBeforeUnmount(() => {
   disposed = true;
 });
@@ -136,24 +146,26 @@ defineExpose({
       <slot name="trailing" />
     </div>
     <Teleport to="body">
-      <div
-        v-if="open"
-        :ref="setMenuEl"
-        class="search-dropdown__menu"
-        data-lilia-surface-mode="solid"
-        data-lilia-backdrop="none"
-        data-lilia-surface-level="overlay"
-        data-lilia-surface-boundary
-        :class="menuPlacementClass"
-        role="listbox"
-        :style="overlayStyle"
-      >
-        <slot
-          :query="modelValue"
-          :highlight-query-segments="highlightQuerySegments"
-          :highlight-range-segments="highlightRangeSegments"
-        />
-      </div>
+      <Transition @after-leave="onAfterLeave">
+        <div
+          v-if="open"
+          :ref="setMenuEl"
+          class="search-dropdown__menu"
+          data-lilia-surface-mode="solid"
+          data-lilia-backdrop="none"
+          data-lilia-surface-level="overlay"
+          data-lilia-surface-boundary
+          :class="menuPlacementClass"
+          role="listbox"
+          :style="overlayStyle"
+        >
+          <slot
+            :query="modelValue"
+            :highlight-query-segments="highlightQuerySegments"
+            :highlight-range-segments="highlightRangeSegments"
+          />
+        </div>
+      </Transition>
     </Teleport>
   </div>
 </template>

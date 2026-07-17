@@ -6,6 +6,7 @@ import {
   type AnchoredMenuPosition,
 } from "../composables/menuMotion";
 import { useAnchoredOverlay } from "../composables/useAnchoredOverlay";
+import { useOverlayPresence } from "../composables/useOverlayActivity";
 import "./action-menu.css";
 
 const props = withDefaults(defineProps<{
@@ -23,6 +24,7 @@ const props = withDefaults(defineProps<{
 });
 
 const openState = computed(() => props.open);
+const overlayPresence = useOverlayPresence();
 const preferredPlacement = computed(() => props.preferredPlacement);
 const {
   overlayEl,
@@ -54,11 +56,23 @@ watch(
   },
   { immediate: true },
 );
+
+watch(() => props.open, (open) => {
+  if (open) overlayPresence.activate();
+}, { immediate: true });
+
+function onAfterLeave() {
+  if (!props.open) overlayPresence.deactivate();
+}
 </script>
 
 <template>
   <Teleport to="body">
-    <Transition name="sb-menu-pop" :duration="SB_MENU_POP_TRANSITION_MS">
+    <Transition
+      name="sb-menu-pop"
+      :duration="SB_MENU_POP_TRANSITION_MS"
+      @after-leave="onAfterLeave"
+    >
       <div
         v-if="open"
         ref="overlayEl"
