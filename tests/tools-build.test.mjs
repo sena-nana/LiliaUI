@@ -5,6 +5,7 @@ import {
   mkdirSync,
   readFileSync,
   readlinkSync,
+  realpathSync,
   rmSync,
   symlinkSync,
   unlinkSync,
@@ -266,6 +267,23 @@ describe("@lilia/build", () => {
       expect(command.args[0]).toContain("node_modules");
       expect(command.args.at(-1)).toBe("--version");
     }
+  });
+
+  it("prefers the consumer project's tool instance for portal-linked build wrappers", () => {
+    const root = createProject();
+    const packageRoot = join(root, "node_modules", "fixture-tool");
+    const binPath = join(packageRoot, "bin", "fixture.mjs");
+    mkdirSync(join(packageRoot, "bin"), { recursive: true });
+    writeFileSync(
+      join(packageRoot, "package.json"),
+      JSON.stringify({ name: "fixture-tool", bin: { fixture: "bin/fixture.mjs" } }),
+    );
+    writeFileSync(binPath, "");
+
+    const command = resolveToolCommand("fixture-tool", "fixture", ["--version"], root);
+
+    expect(command.command).toBe(process.execPath);
+    expect(command.args).toEqual([realpathSync(binPath), "--version"]);
   });
 
   it("allows custom projects without app.config.json to reuse build tooling", () => {

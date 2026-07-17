@@ -39,6 +39,7 @@ try {
     sidebar: "rgb(34, 35, 36)",
     main: "rgb(17, 18, 19)",
   });
+  await assertNarrowSidebarScope(page);
 
   console.log("Shell appearance browser checks passed.");
 } finally {
@@ -73,4 +74,33 @@ async function assertSurfaces(page, backdrop, target, followsSidebar, expected) 
   assert.equal(surfaces.titlebar, expected.titlebar);
   assert.equal(surfaces.sidebar, expected.sidebar);
   assert.equal(surfaces.main, expected.main);
+}
+
+async function assertNarrowSidebarScope(page) {
+  await page.setViewportSize({ width: 640, height: 480 });
+  await page.setContent(`
+    <!doctype html>
+    <html>
+      <head><style>${tokens}\n${shellCss}</style></head>
+      <body>
+        <div class="shell">
+          <header class="titlebar"></header>
+          <aside class="secondary-panel" data-sidebar="legacy"></aside>
+          <main class="shell__main">
+            <div class="lilia-workspace-region">
+              <aside class="secondary-panel" data-sidebar="workspace"></aside>
+            </div>
+          </main>
+        </div>
+      </body>
+    </html>
+  `);
+
+  const displays = await page.evaluate(() => ({
+    legacy: getComputedStyle(document.querySelector('[data-sidebar="legacy"]')).display,
+    workspace: getComputedStyle(document.querySelector('[data-sidebar="workspace"]')).display,
+  }));
+
+  assert.equal(displays.legacy, "none", "legacy shell sidebar remains hidden on narrow viewports");
+  assert.equal(displays.workspace, "flex", "Workspace Region sidebar remains visible as overlay content");
 }

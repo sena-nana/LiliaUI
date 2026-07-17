@@ -240,7 +240,7 @@
   }
 
   .shell__resizer,
-  .secondary-panel {
+  .shell > .secondary-panel {
     display: none;
   }
 }
