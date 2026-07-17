@@ -32,6 +32,14 @@ import {
 import ContextMenuHost from "@lilia/ui/components/ContextMenuHost";
 import OverlayHost from "@lilia/ui/components/OverlayHost";
 import PopupShell from "@lilia/ui/layouts/PopupShell";
+import {
+  LiliaBottomPanel,
+  LiliaInspector,
+  LiliaPrimaryContent,
+  LiliaResourcePanel,
+  LiliaSectionNavigation,
+  LiliaWorkspace,
+} from "@lilia/ui/layouts";
 import { LiliaDesktopShell, setLiliaUiConfig } from "@lilia/ui/shell";
 import {
   createLiliaSettingsModel,
@@ -335,6 +343,39 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
     beforeMount: readyScenarioRouter,
     render: () => h(LiliaDesktopShell),
     interact: (root) => click(root, "[data-agent-id='titlebar.left-sidebar.toggle']"),
+  },
+  {
+    name: "LiliaWorkspace",
+    render: (step) => h(LiliaWorkspace, { "aria-label": "Performance workspace" }, {
+      default: () => [
+        h(LiliaSectionNavigation, {
+          id: "perf-sections",
+          hidden: step.value % 3 === 2,
+        }, () => h("div", "Sections")),
+        h(LiliaResourcePanel, {
+          id: "perf-resources",
+          size: 224 + (step.value % 2) * 8,
+          resizable: true,
+        }, () => h("div", "Resources")),
+        h(LiliaPrimaryContent, { id: "perf-primary" }, () => h("div", `Editor ${step.value}`)),
+        h(LiliaInspector, {
+          id: "perf-inspector",
+          hidden: step.value % 2 === 1,
+          resizable: true,
+        }, () => h("div", "Inspector")),
+        h(LiliaBottomPanel, {
+          id: "perf-console",
+          role: "console",
+          size: 160,
+          resizable: true,
+        }, () => h("div", "Console")),
+      ],
+    }),
+    interact: (root) => {
+      const handle = documentFor(root).querySelector('[data-agent-id="workspace.region.perf-resources.resize"]');
+      if (!(handle instanceof HTMLElement)) throw new Error("Missing workspace performance resize handle");
+      handle.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "ArrowRight" }));
+    },
   },
   {
     name: "LiliaSettingsPage",

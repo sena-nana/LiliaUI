@@ -822,6 +822,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@lilia/example-workspace-regions@workspace:examples/workspace-regions":
+  version: 0.0.0-use.local
+  resolution: "@lilia/example-workspace-regions@workspace:examples/workspace-regions"
+  dependencies:
+    "@lilia/ui": "workspace:*"
+    "@vitejs/plugin-vue": "npm:^6.0.8"
+    typescript: "npm:^6.0.3"
+    vite: "npm:^8.1.4"
+    vue: "npm:^3.5.39"
+    vue-tsc: "npm:^3.3.7"
+  languageName: unknown
+  linkType: soft
+
 "@lilia/nana-ui@workspace:*, @lilia/nana-ui@workspace:packages/nana-ui":
   version: 0.0.0-use.local
   resolution: "@lilia/nana-ui@workspace:packages/nana-ui"

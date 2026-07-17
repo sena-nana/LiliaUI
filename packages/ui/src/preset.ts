@@ -1,5 +1,5 @@
 import type { AppUIPresetAdapter, UIPolicy } from "@lilia/ui-contract";
-import LiliaDesktopShell from "./layouts/AppShell.vue";
+import LiliaDesktopShell from "./layouts/LegacyAppShell.vue";
 
 export const defaultLiliaPolicy: Readonly<UIPolicy> = Object.freeze({
   density: "compact",

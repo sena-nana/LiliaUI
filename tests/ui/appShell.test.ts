@@ -3,6 +3,7 @@ import { defineComponent, ref, type Component } from "vue";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  LiliaAppShell,
   LiliaDesktopShell,
   LiliaSidebarFrame,
   SIDEBAR_CONFIG,
@@ -679,5 +680,32 @@ describe("AppShell sidebar", () => {
     await waitFor(() => {
       expect(view.router.currentRoute.value.fullPath).toBe("/");
     });
+  });
+});
+
+describe("LiliaAppShell window boundary", () => {
+  it("renders window infrastructure without creating navigation or router content assumptions", () => {
+    const NativeHost = defineComponent({ template: '<div data-testid="native-host">native</div>' });
+    const Overlay = defineComponent({ template: '<div data-testid="overlay-host">overlay</div>' });
+    const view = render(LiliaAppShell, {
+      props: {
+        title: "Workspace",
+        overlayComponents: [Overlay],
+      },
+      slots: {
+        default: '<section data-testid="workspace-content">content</section>',
+        "native-host": NativeHost,
+        "titlebar-leading": '<button aria-label="workspace command">command</button>',
+      },
+    });
+
+    expect(view.getByTestId("workspace-content")).toBeInTheDocument();
+    expect(view.getByTestId("native-host")).toBeInTheDocument();
+    expect(view.getByTestId("overlay-host")).toBeInTheDocument();
+    expect(view.getByRole("button", { name: "workspace command" })).toBeInTheDocument();
+    expect(view.queryByRole("button", { name: "折叠左侧栏" })).not.toBeInTheDocument();
+    expect(view.container.querySelector(".secondary-panel")).toBeNull();
+    expect(view.container.querySelector(".shell__resizer")).toBeNull();
+    expect(view.container.querySelector("main")).toBeNull();
   });
 });

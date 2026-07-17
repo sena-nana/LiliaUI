@@ -1521,6 +1521,28 @@
         "median": 0.047,
         "p95": 0.191
       }
+    },
+    "LiliaWorkspace": {
+      "domNodes": {
+        "median": 19,
+        "p95": 19
+      },
+      "interaction": {
+        "median": 0.131,
+        "p95": 0.172
+      },
+      "mount": {
+        "median": 1.292,
+        "p95": 2.043
+      },
+      "unmount": {
+        "median": 0.069,
+        "p95": 0.078
+      },
+      "update": {
+        "median": 0.619,
+        "p95": 0.664
+      }
     }
   },
   "thresholds": {

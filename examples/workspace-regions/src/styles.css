@@ -1,0 +1,122 @@
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.layout-switcher,
+.toolbar,
+.icon-rail,
+.lilia-workspace-region__content > header,
+.lilia-workspace-region__content > button,
+.inspector-values {
+  display: flex;
+  align-items: center;
+}
+
+.layout-switcher {
+  gap: 2px;
+}
+
+.layout-switcher button,
+.toolbar button,
+.icon-rail button,
+.lilia-workspace-region__content > button {
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  min-height: 28px;
+}
+
+.layout-switcher button:hover,
+.layout-switcher button.is-active,
+.toolbar button:hover,
+.icon-rail button:hover,
+.lilia-workspace-region__content > button:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.icon-rail {
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 6px;
+}
+
+.icon-rail button {
+  width: 32px;
+}
+
+.lilia-workspace-region__content > header {
+  height: 34px;
+  padding: 0 12px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.lilia-workspace-region__content > button,
+.inspector-values {
+  width: calc(100% - 16px);
+  margin: 2px 8px;
+  padding: 0 8px;
+  text-align: start;
+  gap: 8px;
+}
+
+.inspector-values {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  font-size: 12px;
+}
+
+.inspector-values dt {
+  color: var(--text-muted);
+}
+
+.inspector-values dd {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toolbar {
+  height: 34px;
+  gap: 8px;
+  padding: 0 10px;
+}
+
+.toolbar strong {
+  margin-right: auto;
+  font-size: 13px;
+}
+
+.editor-surface,
+.native-viewport {
+  width: 100%;
+  height: 100%;
+}
+
+.editor-surface {
+  box-sizing: border-box;
+  padding: 18px;
+  font-family: ui-monospace, monospace;
+  color: var(--text-muted);
+  background: var(--bg);
+}
+
+.native-viewport {
+  display: block;
+  background: var(--bg-subtle);
+}

@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-07-17 — Workspace Region 布局
+
+### Lilia Layer
+
+- `@lilia/ui/layouts` 新增 `LiliaWorkspace`、统一 `LiliaWorkspaceRegion`、六个语义预设和 `useWorkspaceRegion` 几何订阅；支持任意数量的 start/end Region、Workspace/Primary 两级顶底区域、受控状态、键盘 resize 与响应式 collapse/overlay。
+- `LiliaAppShell` 收敛为窗口 Chrome、安全区、原生宿主与 Overlay Host；全局导航不再是新 Shell 的固定部件。旧 `LiliaDesktopShell` 与 `mainSidebar` 作为阶段性兼容入口保留并弃用。
+
+### Tooling and migration
+
+- 新增三类专业工具布局的可运行示例与固定 Shell 到 Workspace Region 的迁移文档；应用继续显式持有 Router、Region 状态与持久化协议。
+
+### Validation and performance
+
+- 增加单主区、多层左右 Region、顶底归属、动态邻接、响应式、几何更新和 Shell 边界功能测试，并新增轻量与真实浏览器 Workspace resize 性能基线。
+
 ## 2026-07-17 — Surface Material 与 State Layer
 
 ### Contract additive

@@ -1,5 +1,7 @@
 # Preset 与应用迁移边界
 
+桌面工作区从固定 Shell 侧栏迁移到统一 Region 的步骤见 [Workspace Region 布局与迁移](../workspace-regions.md)。旧 `LiliaDesktopShell` 在迁移窗口内保留，新应用使用 `LiliaAppShell` 与 `@lilia/ui/layouts`。
+
 ## 两个独立维度
 
 UI preset 与依赖来源互不替代：
