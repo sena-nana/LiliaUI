@@ -42,6 +42,10 @@ export { default as Toast, default as UiToast } from "./components/UiToast.vue";
 export { default as UiValidationMessage, default as ValidationMessage } from "./components/UiValidationMessage.vue";
 export { default as ViewTabs } from "./components/ViewTabs.vue";
 export {
+  useOverlayActivity,
+  useOverlayPresence,
+} from "./composables/useOverlayActivity";
+export {
   default as LiliaSidebarRow,
   type LiliaSidebarRowProps,
   type LiliaSidebarRowState,
