@@ -655,6 +655,7 @@ describe("AppShell sidebar", () => {
     expect(agentTarget(view.container, "settings.tab.appearance")).toHaveClass("is-active");
     expect(agentTarget(view.container, "settings.tab.about")).toHaveTextContent("关于");
     expect(view.queryByRole("navigation", { name: "主导航" })).not.toBeInTheDocument();
+    expect(view.container.querySelector('[data-agent-id="sidebar.footer.settings"]')).toBeNull();
     expect(view.getByRole("button", { name: /外观/ })).toHaveClass("is-active");
     expect(view.router.currentRoute.value.meta.sidebar).toBe("settings");
     expect(view.router.currentRoute.value.meta.lockSidebar).toBe(true);

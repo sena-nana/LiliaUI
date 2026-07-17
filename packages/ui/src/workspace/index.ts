@@ -10,6 +10,7 @@ export {
 } from "./presets";
 export { useWorkspaceRegion } from "./useWorkspaceRegion";
 export type {
+  LiliaWorkspaceProps,
   LiliaWorkspaceRegionProps,
   WorkspaceRegionGeometry,
   WorkspaceRegionNarrowBehavior,

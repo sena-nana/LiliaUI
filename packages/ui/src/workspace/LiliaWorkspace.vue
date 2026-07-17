@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { resolveSurfaceAttributes } from "@lilia/ui-foundation/surface";
 import {
   computed,
   onBeforeUnmount,
@@ -7,7 +8,6 @@ import {
   provide,
   ref,
   shallowRef,
-  type Component,
 } from "vue";
 import {
   workspaceContextKey,
@@ -15,18 +15,27 @@ import {
   type WorkspaceRegionRegistration,
 } from "./context";
 import { intersectRects } from "./geometry";
+import type { LiliaWorkspaceProps } from "./types";
 import { createWorkspaceLayout } from "./workspaceLayout";
 import "../styles/workspace.css";
 
-const props = withDefaults(defineProps<{
-  as?: string | Component;
-  ariaLabel?: string;
-  shadow?: boolean;
-}>(), {
+const props = withDefaults(defineProps<LiliaWorkspaceProps>(), {
   as: "div",
+  agentId: "workspace",
   ariaLabel: undefined,
   shadow: false,
+  surfaceMode: "solid",
+  surfaceLevel: "base",
+  surfaceBoundary: true,
 });
+
+const surfaceAttributes = computed(() => resolveSurfaceAttributes({
+  surfaceMode: props.surfaceMode,
+  backdropEffect: props.backdropEffect
+    ?? (props.surfaceMode === "translucent" ? "native" : "none"),
+  surfaceLevel: props.surfaceLevel,
+  surfaceBoundary: props.surfaceBoundary,
+}));
 
 const root = shallowRef<HTMLElement | null>(null);
 const inlineSize = ref(0);
@@ -181,13 +190,14 @@ defineExpose({ refreshGeometry });
 <template>
   <component
     :is="props.as"
+    v-bind="surfaceAttributes"
     ref="root"
     class="lilia-workspace"
     :class="{ 'lilia-workspace--shadow': shadow }"
     :style="workspaceStyle"
     :aria-label="ariaLabel"
     :data-has-primary="layout.hasPrimary ? 'true' : 'false'"
-    data-agent-id="workspace"
+    :data-agent-id="agentId"
   >
     <slot />
   </component>

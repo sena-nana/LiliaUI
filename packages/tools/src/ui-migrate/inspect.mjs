@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import { inspectUiProject } from "../ui-preset/inspect.mjs";
 import { readText } from "../ui-preset/files.mjs";
-import { UI_LAYER_SUBPATHS } from "../ui-preset/definitions.mjs";
+import { UI_LAYER_SUBPATHS, isSupportedLayerSubpath } from "../ui-preset/definitions.mjs";
 
 const KNOWN_LAYER_SUBPATHS = new Set([
   "",
@@ -26,7 +26,7 @@ export async function inspectUiMigration(projectRoot = process.cwd(), options = 
   const contractIncompatibilities = directImports.flatMap((item) => {
     const packageName = item.specifier.startsWith("@lilia/nana-ui") ? "@lilia/nana-ui" : "@lilia/ui";
     const subpath = item.specifier.slice(packageName.length);
-    return targetSubpaths.has(subpath) ? [] : [{
+    return isSupportedLayerSubpath(subpath, targetSubpaths) ? [] : [{
       severity: "error",
       path: item.path,
       detail: `Unknown Layer subpath cannot be migrated safely: ${item.specifier}`,

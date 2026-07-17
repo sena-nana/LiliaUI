@@ -7,6 +7,11 @@ const layerStyles = [
   ["lilia", "packages/ui/src/styles/tokens.css", "packages/ui/src/styles/state-layer.css"],
   ["nana", "packages/nana-ui/src/styles/tokens.css", "packages/nana-ui/src/styles/state-layer.css"],
 ];
+const workspaceStyles = [
+  "packages/ui/src/styles/tokens.css",
+  "packages/ui/src/styles/state-layer.css",
+  "packages/ui/src/styles/workspace.css",
+].map((path) => readFileSync(resolve(path), "utf8")).join("\n");
 
 const browser = await chromium.launch();
 try {
@@ -108,9 +113,39 @@ try {
     await page.close();
   }
 
+  await assertWorkspaceSurfaceFallback(browser);
+
   console.log("Surface state-layer browser checks passed.");
 } finally {
   await browser.close();
+}
+
+async function assertWorkspaceSurfaceFallback(browser) {
+  const page = await browser.newPage();
+  await page.setContent(`<!doctype html>
+    <html>
+      <head><style>${workspaceStyles}</style></head>
+      <body>
+        <div class="lilia-workspace" data-lilia-surface-mode="translucent" data-lilia-backdrop="native" data-lilia-surface-boundary>
+          <section class="lilia-workspace-region" data-lilia-surface-mode="translucent" data-lilia-backdrop="none" data-lilia-surface-boundary></section>
+        </div>
+      </body>
+    </html>`);
+
+  const backgrounds = async () => page.evaluate(() => ({
+    region: getComputedStyle(document.querySelector(".lilia-workspace-region")).backgroundColor,
+    workspace: getComputedStyle(document.querySelector(".lilia-workspace")).backgroundColor,
+  }));
+  assert.deepEqual(await backgrounds(), {
+    region: "rgba(0, 0, 0, 0)",
+    workspace: "rgba(0, 0, 0, 0)",
+  }, "translucent Workspace surfaces remain transparent and share the outer native backdrop");
+
+  await page.locator("html").evaluate((node) => { node.dataset.liliaReducedTransparency = "true"; });
+  const reduced = await backgrounds();
+  assert.notEqual(reduced.workspace, "rgba(0, 0, 0, 0)", "reduced transparency restores the Workspace fill");
+  assert.notEqual(reduced.region, "rgba(0, 0, 0, 0)", "reduced transparency restores the Region fill");
+  await page.close();
 }
 
 function fixture(layer, css) {

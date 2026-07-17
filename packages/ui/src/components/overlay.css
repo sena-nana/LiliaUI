@@ -34,9 +34,15 @@
 .ui-overlay__close { width: 28px; height: 28px; flex: 0 0 28px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-muted); cursor: pointer; }
 .ui-overlay__close:hover { background: var(--bg-hover); color: var(--text); }
 .ui-overlay__close:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.ui-overlay__close:disabled { cursor: default; opacity: 0.55; }
+.ui-overlay__close:disabled:hover { background: transparent; color: var(--text-muted); }
 
 .ui-dialog { align-items: flex-start; justify-content: center; padding-top: 12vh; }
 .ui-dialog__surface { width: min(520px, 92vw); max-height: 76vh; border-radius: var(--radius-md); }
+.ui-dialog__surface--compact { width: min(420px, 92vw); }
+.ui-dialog__surface--medium { width: min(600px, calc(100vw - 32px)); }
+.ui-dialog__surface--wide { width: min(680px, calc(100vw - 32px)); max-height: calc(100vh - 32px); }
+.ui-dialog__surface--workspace { width: min(1080px, calc(100vw - 32px)); max-height: calc(100vh - 32px); }
 
 .ui-drawer { align-items: stretch; }
 .ui-drawer--left { justify-content: flex-start; }

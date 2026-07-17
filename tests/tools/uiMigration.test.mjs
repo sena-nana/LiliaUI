@@ -1,12 +1,44 @@
 // @vitest-environment node
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   inspectUiMigration,
   runUiMigration,
 } from "@lilia/tools/ui-migrate";
+import { UI_LAYER_SUBPATHS } from "@lilia/tools/ui-preset";
 import { createUiFixture, read, write } from "./uiFixture.mjs";
 
 describe("UI migration tooling", () => {
+  it("keeps the Lilia migration allowlist aligned with the published package exports", () => {
+    const manifest = JSON.parse(readFileSync(join(process.cwd(), "packages/ui/package.json"), "utf8"));
+    const publishedSubpaths = Object.keys(manifest.exports).map((subpath) =>
+      subpath === "." ? "" : subpath.slice(1));
+
+    expect(new Set(UI_LAYER_SUBPATHS.lilia)).toEqual(new Set(publishedSubpaths));
+  });
+
+  it("accepts Lilia stable barrels and wildcard public subpaths", async () => {
+    const root = createUiFixture({
+      legacy: true,
+      main: [
+        'import { LiliaWorkspace } from "@lilia/ui/layouts";',
+        'import { installNativeAppearance } from "@lilia/ui/runtime";',
+        'import { configurePerfDiagnostics } from "@lilia/ui/diagnostics";',
+        'import ContextMenuHost from "@lilia/ui/components/ContextMenuHost";',
+        'import { useContextMenu } from "@lilia/ui/composables/useContextMenu";',
+        'import { calendarLevel } from "@lilia/ui/utils/calendarHeatmap";',
+        'import "@lilia/ui/styles/page.css";',
+        "",
+      ].join("\n"),
+    });
+
+    const inspection = await inspectUiMigration(root, { preset: "lilia" });
+
+    expect(inspection.contractIncompatibilities).toHaveLength(0);
+    expect(inspection.blockers).toHaveLength(0);
+  });
+
   it("routes known imports through a generated facade without rewriting business behavior", async () => {
     const root = createUiFixture({
       legacy: true,

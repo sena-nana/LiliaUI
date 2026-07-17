@@ -4,9 +4,11 @@ import { findModuleSpecifiers, rewriteModuleSpecifiers } from "./imports.mjs";
 import {
   MANAGED_PRESET_END,
   MANAGED_PRESET_START,
+  UI_FACADE_SUBPATHS,
   UI_LAYER_PACKAGES,
   UI_LAYER_SUBPATHS,
   UI_PRESETS,
+  isSupportedLayerSubpath,
   layerPackage,
 } from "./definitions.mjs";
 
@@ -36,7 +38,7 @@ function renderFacadeFile(path, preset, options) {
   if (path.endsWith("styles.css")) return `@import "${packageName}/styles.css";\n`;
   if (path.endsWith("contract.ts")) return 'export * from "@lilia/ui-contract";\n';
   if (path.endsWith("preset.ts")) return `${managedPresetBlock(preset)}\n`;
-  const subpaths = options.facadeSubpaths ?? ["", "/shell", "/settings", "/commands"];
+  const subpaths = options.facadeSubpaths ?? UI_FACADE_SUBPATHS[preset];
   return subpaths.map((subpath) => `export * from "${packageName}${subpath}";`).join("\n") + "\n";
 }
 
@@ -73,7 +75,7 @@ function unsupportedLayerSpecifiers(source, path, preset, options) {
   return findModuleSpecifiers(source, path).flatMap(({ value }) => {
     const packageName = Object.values(UI_LAYER_PACKAGES).find((name) =>
       value === name || value.startsWith(`${name}/`));
-    return packageName && !allowed.has(value.slice(packageName.length)) ? [value] : [];
+    return packageName && !isSupportedLayerSubpath(value.slice(packageName.length), allowed) ? [value] : [];
   });
 }
 

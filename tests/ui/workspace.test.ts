@@ -25,6 +25,69 @@ function region(container: HTMLElement, id: string) {
 }
 
 describe("Workspace Region layout", () => {
+  it("publishes the default Surface boundary and keeps backdrop ownership on a translucent workspace", () => {
+    const view = render(LiliaWorkspace, {
+      props: {
+        agentId: "workspace.repository",
+        surfaceMode: "translucent",
+        surfaceLevel: "raised",
+      },
+      slots: {
+        default: () => h(LiliaResourcePanel, {
+          id: "resources",
+          surfaceMode: "translucent",
+          surfaceLevel: "raised",
+        }),
+      },
+    });
+
+    const workspace = view.container.querySelector(".lilia-workspace");
+    if (!(workspace instanceof HTMLElement)) throw new Error("Missing workspace");
+    const resources = region(view.container, "resources");
+
+    expect(workspace).toHaveAttribute("data-agent-id", "workspace.repository");
+    expect(workspace).toHaveAttribute("data-lilia-surface-mode", "translucent");
+    expect(workspace).toHaveAttribute("data-lilia-backdrop", "native");
+    expect(workspace).toHaveAttribute("data-lilia-surface-level", "raised");
+    expect(workspace).toHaveAttribute("data-lilia-surface-boundary");
+
+    expect(resources).toHaveAttribute("data-agent-id", "workspace.region.resources");
+    expect(resources).toHaveAttribute("data-lilia-surface-mode", "translucent");
+    expect(resources).toHaveAttribute("data-lilia-backdrop", "none");
+    expect(resources).toHaveAttribute("data-lilia-surface-level", "raised");
+    expect(resources).toHaveAttribute("data-lilia-surface-boundary");
+  });
+
+  it("allows explicit Surface overrides without weakening the stable Region Agent target", () => {
+    const view = render(LiliaWorkspace, {
+      props: {
+        backdropEffect: "css-blur",
+        surfaceBoundary: false,
+        surfaceMode: "translucent",
+      },
+      slots: {
+        default: () => h(LiliaWorkspaceRegion, {
+          id: "details",
+          role: "inspector",
+          surfaceBoundary: false,
+          surfaceMode: "solid",
+          "data-agent-id": "consumer.override",
+        }),
+      },
+    });
+
+    const workspace = view.container.querySelector(".lilia-workspace");
+    if (!(workspace instanceof HTMLElement)) throw new Error("Missing workspace");
+    const details = region(view.container, "details");
+
+    expect(workspace).toHaveAttribute("data-lilia-backdrop", "css-blur");
+    expect(workspace).not.toHaveAttribute("data-lilia-surface-boundary");
+    expect(details).toHaveAttribute("data-lilia-surface-mode", "solid");
+    expect(details).toHaveAttribute("data-lilia-backdrop", "none");
+    expect(details).not.toHaveAttribute("data-lilia-surface-boundary");
+    expect(details).toHaveAttribute("data-agent-id", "workspace.region.details");
+  });
+
   it("renders a single primary region without an empty navigation track", async () => {
     const view = render(LiliaWorkspace, {
       slots: {
@@ -35,11 +98,18 @@ describe("Workspace Region layout", () => {
 
     const workspace = view.container.querySelector(".lilia-workspace");
     if (!(workspace instanceof HTMLElement)) throw new Error("Missing workspace");
+    expect(workspace).toHaveAttribute("data-lilia-surface-mode", "solid");
+    expect(workspace).toHaveAttribute("data-lilia-backdrop", "none");
+    expect(workspace).toHaveAttribute("data-lilia-surface-level", "base");
+    expect(workspace).toHaveAttribute("data-lilia-surface-boundary");
     expect(workspace.style.gridTemplateColumns).toBe("minmax(320px, 1fr)");
     expect(view.queryByRole("navigation")).not.toBeInTheDocument();
     expect(region(view.container, "primary")).toHaveAttribute("data-edge-start", "true");
     expect(region(view.container, "primary")).toHaveAttribute("data-edge-end", "true");
     expect(region(view.container, "primary")).not.toHaveAttribute("data-region-separator");
+    expect(region(view.container, "primary")).toHaveAttribute("data-lilia-surface-mode", "solid");
+    expect(region(view.container, "primary")).toHaveAttribute("data-lilia-backdrop", "none");
+    expect(region(view.container, "primary")).toHaveAttribute("data-lilia-surface-boundary");
   });
 
   it("recomputes attached edges and separators after independently hiding regions", async () => {
@@ -203,6 +273,41 @@ describe("Workspace Region layout", () => {
 
     await fireEvent.keyDown(handle, { key: "ArrowRight" });
     expect(handle).toHaveAttribute("aria-valuenow", "180");
+  });
+
+  it("preserves explicit false boolean props through Region presets", async () => {
+    const Fixture = defineComponent({
+      setup() {
+        const collapsed = ref(false);
+        return { collapsed };
+      },
+      components: { LiliaPrimaryContent, LiliaResourcePanel, LiliaWorkspace },
+      template: `
+        <LiliaWorkspace>
+          <LiliaResourcePanel
+            id="resources"
+            :collapsed="collapsed"
+            :disabled="false"
+            :hidden="false"
+            collapsible
+            resizable
+          />
+          <LiliaPrimaryContent id="primary">
+            <button @click="collapsed = !collapsed">toggle</button>
+          </LiliaPrimaryContent>
+        </LiliaWorkspace>
+      `,
+    });
+    const view = render(Fixture);
+    const resources = region(view.container, "resources");
+
+    expect(resources).not.toHaveAttribute("hidden");
+    expect(view.container.querySelector('[data-agent-id="workspace.region.resources.resize"]'))
+      .toBeInstanceOf(HTMLElement);
+
+    await fireEvent.click(view.getByRole("button", { name: "toggle" }));
+    await nextTick();
+    expect(resources).toHaveAttribute("hidden");
   });
 
   it("supports bounded fixed tracks, weighted fill tracks, and explicit overflow", async () => {

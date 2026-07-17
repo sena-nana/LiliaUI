@@ -13,6 +13,10 @@
   isolation: isolate;
 }
 
+.lilia-workspace[data-lilia-surface-mode="translucent"] {
+  background: transparent;
+}
+
 .lilia-workspace--shadow {
   box-shadow: var(--shadow-surface);
 }
@@ -25,6 +29,18 @@
   background: var(--lilia-region-surface, var(--bg));
   color: var(--text);
   contain: layout style;
+}
+
+.lilia-workspace-region[data-lilia-surface-mode="translucent"] {
+  background: transparent;
+}
+
+[data-lilia-reduced-transparency="true"] .lilia-workspace[data-lilia-surface-mode="translucent"] {
+  background: var(--lilia-workspace-surface, var(--bg));
+}
+
+[data-lilia-reduced-transparency="true"] .lilia-workspace-region[data-lilia-surface-mode="translucent"] {
+  background: var(--lilia-region-surface, var(--bg));
 }
 
 .lilia-workspace-region[data-region-separator="inline"] {

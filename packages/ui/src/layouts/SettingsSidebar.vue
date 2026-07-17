@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { SurfaceProps } from "@lilia/ui-contract";
-import { resolveSurfaceAttributes } from "@lilia/ui-foundation/surface";
 import { RouterLink } from "vue-router";
 import ArrowLeft from "@lucide/vue/dist/esm/icons/arrow-left.mjs";
-import { computed } from "vue";
 import type { SettingsTab, SettingsTabKey } from "../settings";
+import LiliaSidebarFrame from "./LiliaSidebarFrame.vue";
+import "../styles/sidebar.css";
 
 const props = withDefaults(defineProps<SurfaceProps & {
   tabs: readonly SettingsTab[];
@@ -16,12 +16,21 @@ const props = withDefaults(defineProps<SurfaceProps & {
   surfaceLevel: "base",
   surfaceBoundary: true,
 });
-const surfaceAttributes = computed(() => resolveSurfaceAttributes(props));
 </script>
 
 <template>
-  <aside v-bind="surfaceAttributes" class="secondary-panel settings-sidebar" aria-label="设置分类" data-agent-id="settings.sidebar">
-    <div class="secondary-panel__top settings-sidebar__head">
+  <LiliaSidebarFrame
+    class="settings-sidebar"
+    aria-label="设置分类"
+    agent-id="settings.sidebar"
+    :default-footer="false"
+    :surface-mode="props.surfaceMode"
+    :backdrop-effect="props.backdropEffect"
+    :surface-level="props.surfaceLevel"
+    :surface-boundary="props.surfaceBoundary"
+  >
+    <template #top>
+      <div class="settings-sidebar__head">
       <RouterLink :to="returnTo || '/'" custom v-slot="{ navigate }">
         <button
           type="button"
@@ -35,9 +44,10 @@ const surfaceAttributes = computed(() => resolveSurfaceAttributes(props));
           <span>返回</span>
         </button>
       </RouterLink>
-    </div>
+      </div>
+    </template>
 
-    <div class="secondary-panel__body">
+    <template #body>
       <nav class="settings-sidebar__tabs" aria-label="设置分类">
         <RouterLink
           v-for="tab in tabs"
@@ -65,8 +75,8 @@ const surfaceAttributes = computed(() => resolveSurfaceAttributes(props));
           </button>
         </RouterLink>
       </nav>
-    </div>
-  </aside>
+    </template>
+  </LiliaSidebarFrame>
 </template>
 
 <style scoped>

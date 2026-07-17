@@ -1,4 +1,11 @@
-import { defineComponent, h, type Component, type DefineComponent } from "vue";
+import {
+  defineComponent,
+  getCurrentInstance,
+  h,
+  type Component,
+  type ComponentObjectPropsOptions,
+  type DefineComponent,
+} from "vue";
 import LiliaWorkspaceRegion from "./LiliaWorkspaceRegion.vue";
 import type { LiliaWorkspaceRegionProps } from "./types";
 
@@ -6,6 +13,13 @@ type WorkspaceRegionPresetProps = Omit<LiliaWorkspaceRegionProps, "role"> & {
   role?: LiliaWorkspaceRegionProps["role"];
 };
 type WorkspaceRegionPreset = DefineComponent<WorkspaceRegionPresetProps>;
+const regionRuntimeProps = (
+  LiliaWorkspaceRegion as unknown as { props: ComponentObjectPropsOptions }
+).props;
+
+function hyphenate(value: string) {
+  return value.replace(/\B([A-Z])/g, "-$1").toLowerCase();
+}
 
 function createWorkspaceRegionPreset(
   name: string,
@@ -15,9 +29,21 @@ function createWorkspaceRegionPreset(
   return defineComponent({
     name,
     inheritAttrs: false,
-    setup(_props, { attrs, slots }) {
+    props: regionRuntimeProps,
+    setup(props, { attrs, slots }) {
+      const instance = getCurrentInstance();
+      const regionProps = props as Record<string, unknown>;
       return () => h(LiliaWorkspaceRegion as Component, {
         ...defaults,
+        ...Object.fromEntries(Object.keys(regionRuntimeProps).flatMap((key) => {
+          const provided = instance?.vnode.props;
+          return provided && (
+            Object.prototype.hasOwnProperty.call(provided, key)
+            || Object.prototype.hasOwnProperty.call(provided, hyphenate(key))
+          )
+            ? [[key, regionProps[key]]]
+            : [];
+        })),
         ...attrs,
         class: [presetClass, attrs.class],
       }, slots);

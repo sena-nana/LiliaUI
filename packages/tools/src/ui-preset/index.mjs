@@ -10,9 +10,11 @@ export { createUiReport, formatUiReport } from "./report.mjs";
 export { findModuleSpecifiers, rewriteModuleSpecifiers } from "./imports.mjs";
 export {
   UI_LAYER_PACKAGES,
+  UI_FACADE_SUBPATHS,
   UI_LAYER_SUBPATHS,
   UI_PRESETS,
   UI_SHARED_PACKAGES,
+  isSupportedLayerSubpath,
 } from "./definitions.mjs";
 
 export async function runUiPreset(projectRoot = process.cwd(), action = "status", options = {}) {

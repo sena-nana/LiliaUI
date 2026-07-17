@@ -8,8 +8,12 @@ import "./overlay.css";
 
 const props = withDefaults(defineProps<DialogProps>(), {
   description: undefined,
+  size: "default",
   closeOnEscape: true,
   closeOnOutside: true,
+  closeDisabled: false,
+  closeAgentId: undefined,
+  closeLabel: "关闭",
   initialFocus: "first-action",
   agentId: undefined,
 });
@@ -18,6 +22,7 @@ const overlay = ref<HTMLElement | null>(null);
 const overlayPresence = useOverlayPresence();
 
 function close() {
+  if (props.closeDisabled) return;
   emit("update:open", false);
   emit("close");
 }
@@ -48,13 +53,20 @@ function onAfterLeave() {
         @click="dialog.onOutsidePointer"
         @keydown="dialog.onKeydown"
       >
-        <div class="ui-overlay__surface ui-dialog__surface">
+        <div class="ui-overlay__surface ui-dialog__surface" :class="`ui-dialog__surface--${size}`">
           <header class="ui-overlay__header">
             <div class="ui-overlay__heading">
               <h2 class="ui-overlay__title"><slot name="title">{{ title }}</slot></h2>
               <p v-if="description" class="ui-overlay__description">{{ description }}</p>
             </div>
-            <button class="ui-overlay__close" type="button" aria-label="关闭" @click="close">
+            <button
+              class="ui-overlay__close"
+              type="button"
+              :aria-label="closeLabel"
+              :data-agent-id="closeAgentId"
+              :disabled="closeDisabled"
+              @click="close"
+            >
               <X :size="16" aria-hidden="true" />
             </button>
           </header>

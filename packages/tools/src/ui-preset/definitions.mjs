@@ -15,14 +15,26 @@ export const UI_PRESETS = Object.freeze({
 
 export const UI_LAYER_SUBPATHS = Object.freeze({
   lilia: Object.freeze([
-    "", "/commands", "/diagnostics", "/preset", "/runtime", "/settings", "/shell",
-    "/styles.css", "/theme/base.css",
+    "", "/commands", "/diagnostics", "/layouts", "/preset", "/runtime", "/settings", "/shell",
+    "/styles.css", "/styles/global-scrollbar.css", "/styles/page.css", "/styles/shell.css",
+    "/styles/sidebar.css", "/styles/state-layer.css", "/styles/tokens.css", "/styles/workspace.css", "/theme/base.css",
+    "/components/action-menu.css", "/components/popup-titlebar-frame.css", "/components/search-dropdown.css",
+    "/components/*", "/composables/*", "/directives/contextMenu", "/layouts/popup-shell.css", "/layouts/*",
+    "/utils/calendarHeatmap", "/utils/eventListeners", "/utils/lazyLoadState", "/utils/singleFlight",
+    "/utils/textSegments",
   ]),
   nana: Object.freeze([
     "", "/consumer", "/expressive", "/feedback", "/lazy", "/patterns",
     "/commands", "/preset", "/provider", "/settings", "/shell", "/state",
-    "/styles.css", "/theme/base.css",
+    "/styles.css", "/styles/state-layer.css", "/theme/base.css", "/theme/tokens.css",
   ]),
+});
+
+export const UI_FACADE_SUBPATHS = Object.freeze({
+  lilia: Object.freeze([
+    "", "/commands", "/diagnostics", "/layouts", "/runtime", "/settings", "/shell",
+  ]),
+  nana: Object.freeze(["", "/commands", "/settings", "/shell"]),
 });
 
 export const DEFAULT_UI_FILES = Object.freeze([
@@ -49,6 +61,14 @@ export function layerPackage(preset) {
 export function isLayerSpecifier(specifier) {
   return Object.values(UI_LAYER_PACKAGES).some((name) =>
     specifier === name || specifier.startsWith(`${name}/`));
+}
+
+export function isSupportedLayerSubpath(subpath, supportedSubpaths) {
+  return [...supportedSubpaths].some((candidate) => {
+    if (!candidate.endsWith("*")) return candidate === subpath;
+    const prefix = candidate.slice(0, -1);
+    return subpath.startsWith(prefix) && subpath.length > prefix.length;
+  });
 }
 
 export function otherPreset(preset) {
