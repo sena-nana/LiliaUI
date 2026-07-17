@@ -154,7 +154,6 @@ const props = withDefaults(defineProps<SurfaceProps & {
 .settings-sidebar__tab.is-active {
   background: var(--lilia-state-layer-selected);
   color: var(--lilia-state-foreground-selected);
-  box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected);
 }
 
 .settings-sidebar__tab.is-active:hover {
