@@ -84,6 +84,7 @@ export function defineLiliaViteConfig(options = {}) {
         "vue",
         "vue-router",
         "@lucide/vue",
+        "@tauri-apps/api",
         "vitest",
         "@testing-library/jest-dom",
         "@testing-library/vue",

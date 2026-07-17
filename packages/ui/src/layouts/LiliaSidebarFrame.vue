@@ -7,13 +7,16 @@ import {
   SIDEBAR_FOOTER_STATUSES,
 } from "../config/appShell";
 import SidebarFooter from "../components/sidebar/SidebarFooter.vue";
+import "../styles/sidebar.css";
 
 const props = withDefaults(defineProps<SurfaceProps & {
   agentId?: string;
   ariaLabel?: string;
+  defaultFooter?: boolean;
 }>(), {
   agentId: "sidebar.main",
   ariaLabel: undefined,
+  defaultFooter: true,
   surfaceMode: "solid",
   backdropEffect: "none",
   surfaceLevel: "base",
@@ -41,7 +44,7 @@ const surfaceAttributes = computed(() => resolveSurfaceAttributes(props));
       </slot>
     </div>
 
-    <div class="secondary-panel__footer">
+    <div v-if="slots.footer || defaultFooter" class="secondary-panel__footer">
       <slot name="footer">
         <SidebarFooter
           :links="SIDEBAR_FOOTER_LINKS"

@@ -107,6 +107,7 @@ describe("@lilia/config", () => {
       "vue",
       "vue-router",
       "@lucide/vue",
+      "@tauri-apps/api",
       "vitest",
     ]));
     expect(resolved.optimizeDeps.exclude).toEqual(expect.arrayContaining(["@lilia/ui"]));

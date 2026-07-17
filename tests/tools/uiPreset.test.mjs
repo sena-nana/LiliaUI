@@ -2,12 +2,68 @@
 import { describe, expect, it } from "vitest";
 import {
   createUiPresetPlan,
+  findModuleSpecifiers,
   inspectUiProject,
+  rewriteModuleSpecifiers,
   runUiPreset,
 } from "@lilia/tools/ui-preset";
 import { createUiFixture, initializeGit, read, readJson, write } from "./uiFixture.mjs";
 
 describe("UI preset tooling", () => {
+  it.each([
+    ["Markdown nested templates and fenced-code pattern", [
+      'blocks.push(`<${tag}>${items.map((item) => `<li>${item}</li>`).join("")}</${tag}>`);',
+      "if (/^```/.test(line.trim())) return;",
+    ].join("\n")],
+    ["escaped quote and slash class", String.raw`const escaped = tag.replace(/["\\]/g, "\\$&");`],
+    ["agent id punctuation class", "const encoded = value.replace(/[!'()*]/g, encode);"],
+    ["quoted remote name pattern", "const remote = /remote ['\"]?origin['\"]? not/i;"],
+  ])("scans imports after the %s used by LiliaGithub", (_name, expression) => {
+    const source = [
+      expression,
+      'import { UiButton } from "@lilia/ui";',
+      "",
+    ].join("\n");
+
+    expect(findModuleSpecifiers(source, "fixture.ts").map((item) => item.value))
+      .toEqual(["@lilia/ui"]);
+  });
+
+  it("distinguishes escaped regular expressions from division while rewriting imports", () => {
+    const source = String.raw`
+const matcher = /[\/\\'"]+\/(?:foo|bar)/giu;
+const ratio = total / divisor;
+const normalized = 120 / 3 / ratio;
+ratio /= scale;
+export { UiButton } from "@lilia/ui";
+`;
+
+    const result = rewriteModuleSpecifiers(source, "fixture.ts", (specifier) =>
+      specifier === "@lilia/ui" ? "./ui" : specifier);
+
+    expect(result.changed).toBe(true);
+    expect(result.edits).toHaveLength(1);
+    expect(result.content).toContain("const ratio = total / divisor;");
+    expect(result.content).toContain("const normalized = 120 / 3 / ratio;");
+    expect(findModuleSpecifiers(result.content, "fixture.ts").map((item) => item.value))
+      .toEqual(["./ui"]);
+  });
+
+  it("creates the complete stable Lilia facade and remains idempotent", async () => {
+    const root = createUiFixture({ legacy: true });
+
+    const first = await runUiPreset(root, "lilia", { commands: [] });
+    const facade = read(root, "src/ui/index.ts");
+    const repeated = await runUiPreset(root, "lilia", { commands: [] });
+
+    expect(first.status).toBe("changed");
+    expect(facade).toContain('export * from "@lilia/ui/layouts";');
+    expect(facade).toContain('export * from "@lilia/ui/runtime";');
+    expect(facade).toContain('export * from "@lilia/ui/diagnostics";');
+    expect(repeated.status).toBe("unchanged");
+    expect(repeated.changes).toHaveLength(0);
+  });
+
   it("switches dependencies, config, facade, and styles as one idempotent plan", async () => {
     const root = createUiFixture();
     const commandRunner = async (command) => ({ id: command.id, code: 0 });

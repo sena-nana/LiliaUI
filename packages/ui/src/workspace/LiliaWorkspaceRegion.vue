@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { resolveSurfaceAttributes } from "@lilia/ui-foundation/surface";
 import {
   computed,
   inject,
@@ -35,6 +36,10 @@ const props = withDefaults(defineProps<LiliaWorkspaceRegionProps>(), {
   responsivePriority: 0,
   resizeLabel: "调整区域尺寸",
   resizeStep: 8,
+  surfaceMode: "solid",
+  backdropEffect: "none",
+  surfaceLevel: "base",
+  surfaceBoundary: true,
 });
 
 const emit = defineEmits<{
@@ -46,6 +51,10 @@ const emit = defineEmits<{
 }>();
 
 const attrs = useAttrs();
+const regionAttributes = computed(() => ({
+  ...attrs,
+  ...resolveSurfaceAttributes(props),
+}));
 const injectedWorkspace = inject(workspaceContextKey);
 if (!injectedWorkspace) throw new Error("LiliaWorkspaceRegion must be rendered inside LiliaWorkspace.");
 const workspace = injectedWorkspace;
@@ -240,7 +249,7 @@ defineExpose({
 <template>
   <component
     :is="props.as"
-    v-bind="attrs"
+    v-bind="regionAttributes"
     ref="element"
     class="lilia-workspace-region"
     :style="regionStyle"

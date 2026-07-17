@@ -5,6 +5,7 @@ import { nextTick, ref, toRef, watch } from "vue";
 import "./overlay.css";
 
 const props = withDefaults(defineProps<PopoverProps>(), {
+  ariaLabel: undefined,
   placement: "bottom",
   closeOnEscape: true,
   closeOnOutside: true,
@@ -55,6 +56,7 @@ watch(() => props.open, (open) => {
       class="ui-popover__surface"
       :class="`ui-popover__surface--${placement}`"
       role="dialog"
+      :aria-label="ariaLabel"
       :data-agent-id="agentId"
       tabindex="-1"
     ><slot /></div>

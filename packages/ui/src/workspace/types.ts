@@ -1,3 +1,4 @@
+import type { SurfaceProps } from "@lilia/ui-contract";
 import type { Component, Ref, ShallowRef } from "vue";
 
 export type WorkspaceRegionRole =
@@ -15,7 +16,13 @@ export type WorkspaceRegionScope = "workspace" | "primary";
 export type WorkspaceRegionOverflow = "auto" | "hidden" | "visible";
 export type WorkspaceRegionNarrowBehavior = "shrink" | "collapse" | "overlay" | "none";
 
-export interface LiliaWorkspaceRegionProps {
+export interface LiliaWorkspaceProps extends SurfaceProps {
+  as?: string | Component;
+  ariaLabel?: string;
+  shadow?: boolean;
+}
+
+export interface LiliaWorkspaceRegionProps extends Omit<SurfaceProps, "agentId"> {
   id: string;
   role: WorkspaceRegionRole;
   placement?: WorkspaceRegionPlacement;

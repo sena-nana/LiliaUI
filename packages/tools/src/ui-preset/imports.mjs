@@ -1,5 +1,24 @@
 const WORD_START = /[A-Za-z_$]/;
 const WORD_PART = /[\w$-]/;
+const REGEX_PREFIX_WORDS = new Set([
+  "await",
+  "case",
+  "delete",
+  "do",
+  "else",
+  "in",
+  "instanceof",
+  "new",
+  "of",
+  "return",
+  "throw",
+  "typeof",
+  "void",
+  "yield",
+]);
+const REGEX_PREFIX_PUNCTUATION = new Set([
+  "(", "[", "{", ",", ";", ":", "=", "!", "?", "+", "-", "*", "%", "&", "|", "^", "~", "<", ">",
+]);
 
 export function findModuleSpecifiers(source, filePath = "source.ts") {
   if (filePath.endsWith(".css")) return findCssImports(source);
@@ -50,6 +69,11 @@ function tokenize(source, start, end) {
     if (/\s/.test(char)) { index += 1; continue; }
     if (char === "/" && source[index + 1] === "/") { index = skipLine(source, index + 2, end); continue; }
     if (char === "/" && source[index + 1] === "*") { index = skipBlock(source, index + 2, end); continue; }
+    if (char === "/" && source[index + 1] !== "=" && canStartRegex(tokens)) {
+      index = skipRegex(source, index, end);
+      tokens.push({ type: "literal", value: "regex" });
+      continue;
+    }
     if (char === "'" || char === '"') {
       const token = readString(source, index, end, char);
       tokens.push(token);
@@ -97,12 +121,56 @@ function skipBlock(source, index, end) {
   return next + 2;
 }
 
+function skipRegex(source, open, end) {
+  let index = open + 1;
+  let inCharacterClass = false;
+  while (index < end) {
+    const char = source[index];
+    if (char === "\n" || char === "\r") {
+      throw new Error(`Cannot safely parse an unterminated regular expression literal at offset ${open}.`);
+    }
+    if (char === "\\") {
+      index += 2;
+      continue;
+    }
+    if (char === "[") {
+      inCharacterClass = true;
+      index += 1;
+      continue;
+    }
+    if (char === "]" && inCharacterClass) {
+      inCharacterClass = false;
+      index += 1;
+      continue;
+    }
+    if (char === "/" && !inCharacterClass) {
+      index += 1;
+      while (index < end && /[A-Za-z]/.test(source[index])) index += 1;
+      return index;
+    }
+    index += 1;
+  }
+  throw new Error(`Cannot safely parse an unterminated regular expression literal at offset ${open}.`);
+}
+
+function canStartRegex(tokens) {
+  const previous = tokens[tokens.length - 1];
+  if (!previous) return true;
+  if (previous.type === "word") return REGEX_PREFIX_WORDS.has(previous.value);
+  if (previous.type === "string" || previous.type === "template") return false;
+  return REGEX_PREFIX_PUNCTUATION.has(previous.value);
+}
+
 function readTemplate(source, open, end) {
   let index = open + 1;
   let interpolated = false;
   while (index < end) {
     if (source[index] === "\\") { index += 2; continue; }
-    if (source[index] === "$" && source[index + 1] === "{") interpolated = true;
+    if (source[index] === "$" && source[index + 1] === "{") {
+      interpolated = true;
+      index = skipTemplateExpression(source, index + 2, end);
+      continue;
+    }
     if (source[index] === "`") {
       return {
         close: index,
@@ -118,6 +186,49 @@ function readTemplate(source, open, end) {
     index += 1;
   }
   throw new Error("Cannot safely parse an unterminated template literal.");
+}
+
+function skipTemplateExpression(source, start, end) {
+  const tokens = [];
+  let depth = 1;
+  let index = start;
+  while (index < end) {
+    const char = source[index];
+    if (/\s/.test(char)) { index += 1; continue; }
+    if (char === "/" && source[index + 1] === "/") { index = skipLine(source, index + 2, end); continue; }
+    if (char === "/" && source[index + 1] === "*") { index = skipBlock(source, index + 2, end); continue; }
+    if (char === "/" && source[index + 1] !== "=" && canStartRegex(tokens)) {
+      index = skipRegex(source, index, end);
+      tokens.push({ type: "literal", value: "regex" });
+      continue;
+    }
+    if (char === "'" || char === '"') {
+      const token = readString(source, index, end, char);
+      tokens.push(token);
+      index = token.close + 1;
+      continue;
+    }
+    if (char === "`") {
+      const template = readTemplate(source, index, end);
+      tokens.push(template.token);
+      index = template.close + 1;
+      continue;
+    }
+    if (WORD_START.test(char)) {
+      const wordStart = index++;
+      while (index < end && WORD_PART.test(source[index])) index += 1;
+      tokens.push({ type: "word", value: source.slice(wordStart, index), start: wordStart, end: index });
+      continue;
+    }
+    if (char === "{") depth += 1;
+    if (char === "}") {
+      depth -= 1;
+      if (depth === 0) return index + 1;
+    }
+    tokens.push({ type: "punct", value: char, start: index, end: index + 1 });
+    index += 1;
+  }
+  throw new Error("Cannot safely parse an unterminated template interpolation.");
 }
 
 function findVueImports(source) {
