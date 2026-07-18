@@ -14,10 +14,7 @@ export interface AgentDebugSnapshot {
   recentErrors: AgentDebugLogEntry[];
   route: string;
   title: string;
-  viewport: {
-    height: number;
-    width: number;
-  };
+  viewport: { height: number; width: number };
 }
 
 export interface AgentDebugLogEntry {
@@ -30,14 +27,7 @@ export interface AgentDebugLogEntry {
 export type AgentDebugAction =
   | { target: string; type: "click" }
   | { clear?: boolean; target: string; text: string; type: "type" }
-  | {
-      altKey?: boolean;
-      ctrlKey?: boolean;
-      key: string;
-      metaKey?: boolean;
-      shiftKey?: boolean;
-      type: "hotkey";
-    }
+  | { altKey?: boolean; ctrlKey?: boolean; key: string; metaKey?: boolean; shiftKey?: boolean; type: "hotkey" }
   | { data?: unknown; label: string; type: "mark" };
 
 export interface LiliaAgentDebugApi {

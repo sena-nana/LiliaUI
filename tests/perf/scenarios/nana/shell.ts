@@ -1,6 +1,6 @@
 import Home from "@lucide/vue/dist/esm/icons/house.mjs";
 import Settings from "@lucide/vue/dist/esm/icons/settings.mjs";
-import { NanaAppShell, NanaSidebar } from "@lilia/nana-ui/shell";
+import { NanaAppShell, NanaSidebar, NanaTitleBar } from "@lilia/nana-ui/shell";
 import { h } from "vue";
 import type { ComponentPerfScenario } from "../../componentScenarios";
 import { click, keydown } from "./helpers";
@@ -13,6 +13,12 @@ const navigation = [
 const settingsItem = { id: "settings", label: "Settings", icon: Settings };
 
 export const nanaShellScenarios: ComponentPerfScenario[] = [
+  {
+    name: "NanaTitleBar",
+    runners: ["browser"],
+    render: (step) => h(NanaTitleBar, { title: `Nana ${step.value}` }),
+    interact: (root) => click(root, "[data-agent-id='nana.window.maximize']"),
+  },
   {
     name: "NanaSidebar",
     runners: ["browser"],

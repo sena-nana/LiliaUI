@@ -5,6 +5,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./commands": "./src/commands.ts",
+    "./diagnostics": "./src/diagnostics.ts",
     "./consumer": "./src/consumer/index.ts",
     "./expressive": "./src/expressive/index.ts",
     "./feedback": "./src/feedback/index.ts",
@@ -12,6 +13,8 @@
     "./patterns": "./src/patterns/index.ts",
     "./preset": "./src/preset.ts",
     "./provider": "./src/provider/index.ts",
+    "./runtime": "./src/runtime.ts",
+    "./runtime/tauri": "./src/runtime/tauri.ts",
     "./shell": "./src/shell/index.ts",
     "./settings": "./src/settings/index.ts",
     "./state": "./src/state/index.ts",
@@ -36,10 +39,14 @@
     "vue": "^3.5.39",
     "vue-router": "^5.1.0"
   },
+  "dependencies": {
+    "@tauri-apps/api": "^2.11.1"
+  },
   "devDependencies": {
     "@lilia/ui-contract": "workspace:*",
     "@lilia/ui-foundation": "workspace:*",
     "@lucide/vue": "^1.22.0",
+    "@tauri-apps/api": "^2.11.1",
     "typescript": "^6.0.3",
     "vue": "^3.5.39",
     "vue-router": "^5.1.0",

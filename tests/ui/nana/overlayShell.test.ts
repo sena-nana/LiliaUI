@@ -110,4 +110,37 @@ describe("NanaUI overlay and shell behavior", () => {
     await view.rerender({ navigation: [], contextVisible: true });
     expect(screen.getByText("属性内容")).toBeVisible();
   });
+
+  it("renders grouped items, badges, actions, and disabled actions", async () => {
+    const router = routerPlugin();
+    await router.push("/");
+    await router.isReady();
+    const pin = vi.fn();
+    const remove = vi.fn();
+    render(NanaSidebar, {
+      props: {
+        sections: [{
+          id: "inbox",
+          label: "收集箱",
+          items: [{
+            id: "chat-1",
+            label: "会话一",
+            href: "/",
+            badges: [{ id: "phase", label: "运行中", tone: "warning" }],
+            actions: [
+              { id: "pin", label: "置顶", run: pin },
+              { id: "delete", label: "删除", disabled: true, run: remove },
+            ],
+          }],
+        }],
+      },
+      global: { plugins: [router] },
+    });
+    expect(screen.getByText("收集箱")).toBeVisible();
+    expect(screen.getByText("运行中")).toBeVisible();
+    await fireEvent.click(screen.getByRole("button", { name: "置顶" }));
+    expect(pin).toHaveBeenCalledOnce();
+    expect(screen.getByRole("button", { name: "删除" })).toBeDisabled();
+    expect(remove).not.toHaveBeenCalled();
+  });
 });

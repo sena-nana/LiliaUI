@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-07-18 — Nana 桌面应用公共能力
+
+### Contract 与 Foundation
+
+- 侧栏契约新增分组、空状态、徽标和行操作；Agent Debug harness 与无边框窗口控制下沉到共享 Foundation，并保留 Professional diagnostics 兼容入口。
+
+### Nana Layer
+
+- `@lilia/nana-ui` 新增桌面标题栏、分组侧栏、应用壳层、持久化 system/light/dark 主题与密度、设置 Tab、外观与关于区块，以及 diagnostics、runtime 与 Tauri adapter 入口。
+
+### Tooling and migration
+
+- Nana preset/facade 纳入 diagnostics 与 runtime subpath，迁移检查统一报告单一 Layer、统一 revision 和直接 Layer import。
+
 ## 2026-07-18 — 重构后稳定化
 
 ### Contract additive

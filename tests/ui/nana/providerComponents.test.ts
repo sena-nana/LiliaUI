@@ -50,6 +50,26 @@ describe("NanaUI provider and controls", () => {
     expect(action).toHaveBeenCalledOnce();
   });
 
+  it("persists system-aware theme and density through provider context", async () => {
+    localStorage.removeItem("nana-test.theme");
+    localStorage.removeItem("nana-test.density");
+    const AppearanceControl = defineComponent({
+      setup() {
+        const ui = useNanaUI();
+        return () => h("button", { onClick: () => { ui.setTheme("dark"); ui.setDensity("compact"); } }, "更新外观");
+      },
+    });
+    const view = render(defineComponent({
+      components: { AppearanceControl, NanaUIProvider },
+      template: `<NanaUIProvider storage-key-prefix="nana-test"><AppearanceControl /></NanaUIProvider>`,
+    }));
+    await fireEvent.click(screen.getByRole("button", { name: "更新外观" }));
+    expect(view.container.querySelector(".nana-ui")).toHaveAttribute("data-theme", "dark");
+    expect(view.container.querySelector(".nana-ui")).toHaveAttribute("data-density", "compact");
+    expect(localStorage.getItem("nana-test.theme")).toBe("dark");
+    expect(localStorage.getItem("nana-test.density")).toBe("compact");
+  });
+
   it("keeps advanced content collapsed by policy until the user opens a disclosure", async () => {
     render(defineComponent({
       components: { AdvancedSettingsDisclosure, NanaUIProvider, ProgressiveSection },

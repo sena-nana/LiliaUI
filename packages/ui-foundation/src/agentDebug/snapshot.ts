@@ -4,37 +4,24 @@ export function createAgentDebugSnapshot(recentErrors: AgentDebugLogEntry[]): Ag
   return {
     activeElement: elementSnapshot(document.activeElement),
     elements: Array.from(document.querySelectorAll<HTMLElement>("[data-agent-id]"))
-      .map((element) => elementSnapshot(element))
-      .filter((snapshot): snapshot is AgentDebugElementSnapshot => snapshot !== null),
+      .map(elementSnapshot)
+      .filter((value): value is AgentDebugElementSnapshot => value !== null),
     recentErrors,
     route: `${window.location.pathname}${window.location.search}${window.location.hash}`,
     title: document.title,
-    viewport: {
-      height: window.innerHeight,
-      width: window.innerWidth,
-    },
+    viewport: { height: window.innerHeight, width: window.innerWidth },
   };
 }
 
 function elementSnapshot(element: Element | null): AgentDebugElementSnapshot | null {
-  if (!(element instanceof HTMLElement)) return null;
-  const agentId = element.dataset.agentId;
-  if (!agentId) return null;
+  if (!(element instanceof HTMLElement) || !element.dataset.agentId) return null;
   return {
-    agentId,
+    agentId: element.dataset.agentId,
     ariaLabel: element.getAttribute("aria-label"),
-    disabled: isDisabled(element),
+    disabled: element.hasAttribute("disabled") || element.getAttribute("aria-disabled") === "true",
     role: element.getAttribute("role"),
     tagName: element.tagName.toLowerCase(),
-    text: normalizeText(element.innerText || element.textContent || ""),
+    text: (element.innerText || element.textContent || "").replace(/\s+/g, " ").trim().slice(0, 160),
     title: element.getAttribute("title"),
   };
-}
-
-function isDisabled(element: HTMLElement): boolean {
-  return element.hasAttribute("disabled") || element.getAttribute("aria-disabled") === "true";
-}
-
-function normalizeText(value: string): string {
-  return value.replace(/\s+/g, " ").trim().slice(0, 160);
 }

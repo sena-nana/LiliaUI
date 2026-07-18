@@ -22,8 +22,24 @@
 .nana-settings { display: grid; grid-template: auto minmax(0, 1fr) / 200px minmax(0, 720px); column-gap: 24px; }
 .nana-settings > .nana-page-header { grid-column: 1 / -1; }
 .nana-settings__nav, .nana-settings__content { min-width: 0; }
+.nana-settings__nav { display: flex; flex-direction: column; gap: 4px; }
+.nana-settings__nav-item { min-height: var(--control-height); padding: 0 12px; display: flex; align-items: center; gap: 9px; color: var(--text-muted); border-radius: var(--radius-sm); text-decoration: none; }
+.nana-settings__nav-item:hover { color: var(--text); background: var(--lilia-state-layer-hover); }
+.nana-settings__nav-item.is-active { color: var(--lilia-state-foreground-selected); background: var(--lilia-state-layer-selected); box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected); }
+.nana-settings__content { display: grid; align-content: start; }
+.nana-settings-card__header { margin-bottom: 8px; }
+.nana-settings-card__header h2 { margin: 0; font-size: 17px; }
+.nana-settings-card__header p { margin: 4px 0 0; color: var(--text-muted); font-size: 12px; }
+.nana-setting-row { min-width: 0; padding: 14px 0; display: grid; grid-template-columns: minmax(160px, 1fr) minmax(260px, auto); align-items: center; gap: 20px; border-top: 1px solid var(--border-soft); }
+.nana-setting-row > div:first-child { min-width: 0; display: grid; gap: 3px; }
+.nana-setting-row strong { font-size: 13px; }
+.nana-setting-row span { color: var(--text-muted); font-size: 12px; }
+.nana-about-list { margin: 0; display: grid; }
+.nana-about-list > div { padding: 12px 0; display: grid; grid-template-columns: 110px minmax(0, 1fr); border-top: 1px solid var(--border-soft); }
+.nana-about-list dt { color: var(--text-muted); }
+.nana-about-list dd { margin: 0; overflow-wrap: anywhere; }
 .nana-onboarding { width: min(680px, calc(100% - 32px)); min-height: 420px; margin: 32px auto; padding: 26px; border-radius: var(--radius-xl); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; background: var(--bg-elev); box-shadow: var(--shadow-surface); }
 .nana-onboarding header span { color: var(--text-muted); }
 .nana-onboarding h1 { margin: 5px 0 18px; font-size: 22px; }
 .nana-onboarding footer { display: flex; justify-content: flex-end; gap: 8px; }
-@media (max-width: 860px) { .nana-home__grid { grid-template-columns: 1fr; } .nana-home__recent, .nana-home__history { grid-column: auto; grid-row: auto; } .nana-editor, .nana-editor.has-context { grid-template-columns: 180px minmax(0, 1fr); } .nana-editor__context { display: none; } .nana-settings { grid-template-columns: 1fr; } }
+@media (max-width: 860px) { .nana-home__grid { grid-template-columns: 1fr; } .nana-home__recent, .nana-home__history { grid-column: auto; grid-row: auto; } .nana-editor, .nana-editor.has-context { grid-template-columns: 180px minmax(0, 1fr); } .nana-editor__context { display: none; } .nana-settings { grid-template-columns: 1fr; } .nana-settings__nav { flex-direction: row; overflow-x: auto; } .nana-setting-row { grid-template-columns: 1fr; } }
