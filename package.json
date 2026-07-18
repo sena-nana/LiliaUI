@@ -13,7 +13,7 @@
     "check:workspace-example": "pnpm --filter @lilia/example-workspace-regions typecheck && pnpm --filter @lilia/example-workspace-regions build",
     "check:ui-boundaries": "node scripts/check-ui-boundaries.mjs",
     "perf:components:browser": "node tests/perf/componentPerformance.browser.ts",
-    "perf:components:light": "NODE_DISABLE_COMPILE_CACHE=1 vitest run --config vitest.perf.config.ts",
+    "perf:components:light": "cross-env NODE_DISABLE_COMPILE_CACHE=1 vitest run --config vitest.perf.config.ts",
     "perf:components:update-baseline": "node tests/perf/updateComponentPerformanceBaseline.mjs",
     "test:ui:browser": "node tests/ui/shellAppearance.browser.mjs",
     "test:ui:surface": "node tests/ui/surfaceStateLayer.browser.mjs",
@@ -21,7 +21,7 @@
     "test:ui:visual:update": "playwright test --config playwright.visual.config.ts --update-snapshots=all",
     "typecheck": "pnpm -r --parallel --if-present run typecheck && pnpm typecheck:scripts",
     "typecheck:scripts": "tsc -p tsconfig.node-scripts.json && vue-tsc --noEmit -p tests/visual/tsconfig.json",
-    "test": "NODE_DISABLE_COMPILE_CACHE=1 vitest run",
+    "test": "cross-env NODE_DISABLE_COMPILE_CACHE=1 vitest run",
     "verify": "pnpm check:ui-boundaries && pnpm check:contract-fixtures && pnpm check:nana-example && pnpm check:workspace-example && pnpm typecheck && pnpm test && pnpm test:ui:browser && pnpm test:ui:surface && pnpm test:ui:visual && pnpm perf:components:light"
   },
   "engines": {
@@ -46,6 +46,7 @@
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/compiler-sfc": "^3.5.39",
     "axe-core": "^4.12.1",
+    "cross-env": "^10.1.0",
     "jsdom": "^29.1.1",
     "typescript": "^6.0.3",
     "vite": "^8.1.4",
