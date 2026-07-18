@@ -18,8 +18,8 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v5
-      - uses: ./.github/actions/setup-node-yarn
+      - uses: ./.github/actions/setup-node-pnpm
       - name: Typecheck
-        run: corepack yarn typecheck
+        run: pnpm typecheck
       - name: Test
-        run: corepack yarn test
+        run: pnpm test
