@@ -75,7 +75,5 @@ export interface SidebarProps extends AgentTargetProps {
 }
 
 export interface AppShellProps extends AgentTargetProps {
-  sidebarMode?: SidebarMode;
-  narrow?: boolean;
-  contextVisible?: boolean;
+  title?: string;
 }

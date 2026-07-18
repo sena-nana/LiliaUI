@@ -1,20 +1,15 @@
 .nana-shell {
+  position: relative;
   min-width: 0;
   min-height: 100vh;
   display: grid;
-  grid-template:
-    "titlebar titlebar titlebar" 34px
-    "top top top" 48px
-    "sidebar main context" minmax(0, 1fr)
-    ". status status" auto /
-    auto minmax(0, 1fr) auto;
+  grid-template-rows: 34px minmax(0, 1fr);
   overflow: hidden;
   background: var(--bg);
   color: var(--text);
 }
 
 .nana-titlebar {
-  grid-area: titlebar;
   min-width: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -27,14 +22,12 @@
 .nana-titlebar__leading { min-width: 0; padding-inline-start: 10px; -webkit-app-region: no-drag; }
 .nana-titlebar__title { grid-column: 2; overflow: hidden; color: var(--text-muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .nana-titlebar__controls { grid-column: 3; justify-self: end; height: 100%; display: flex; -webkit-app-region: no-drag; }
-.nana-titlebar__controls button { width: 44px; height: 100%; padding: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--text-muted); background: transparent; border: 0; cursor: pointer; }
-.nana-titlebar__controls button:hover { color: var(--text); background: var(--bg-hover); }
-.nana-titlebar__controls button.is-close:hover { color: white; background: var(--err); }
+.nana-titlebar__actions { height: 100%; display: flex; align-items: center; gap: 8px; }
+.nana-titlebar__controls > button { width: 44px; height: 100%; padding: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--text-muted); background: transparent; border: 0; cursor: pointer; }
+.nana-titlebar__controls > button:hover { color: var(--text); background: var(--bg-hover); }
+.nana-titlebar__controls > button.is-close:hover { color: white; background: var(--err); }
 
-.nana-shell__top { grid-area: top; min-width: 0; padding: 0 14px; display: flex; align-items: center; gap: 16px; background: var(--bg-elev); box-shadow: 0 1px 0 var(--border-soft); }
-.nana-shell__project { min-width: 0; flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.nana-shell__states { display: flex; align-items: center; gap: 8px; }
-.nana-sidebar { grid-area: sidebar; width: 236px; min-height: 0; padding: 10px 8px; display: flex; flex-direction: column; background: var(--bg-elev); transition: width var(--motion-panel); }
+.nana-sidebar { width: 236px; min-height: 0; padding: 10px 8px; display: flex; flex-direction: column; background: var(--bg-elev); transition: width var(--motion-panel); }
 .nana-sidebar--icon { width: 64px; }
 .nana-sidebar__header { min-width: 0; margin-bottom: 8px; }
 .nana-sidebar__nav { min-height: 0; flex: 1 1 auto; display: flex; flex-direction: column; gap: 4px; overflow: auto; }
@@ -63,8 +56,5 @@
 .nana-sidebar__action:disabled { opacity: 0.4; cursor: not-allowed; }
 .nana-sidebar__footer { padding-top: 8px; display: grid; gap: 5px; }
 .nana-sidebar__footer > .nana-icon-button:last-child { justify-self: end; }
-.nana-shell__main { grid-area: main; min-width: 0; min-height: 0; overflow: auto; }
-.nana-shell__context { grid-area: context; width: min(340px, 28vw); min-height: 0; padding: 16px; overflow: auto; background: var(--bg-elev); box-shadow: -1px 0 0 var(--border-soft); }
-.nana-shell__status { grid-area: status; min-width: 0; padding: 8px 14px; background: var(--bg-elev); box-shadow: 0 -1px 0 var(--border-soft); }
-.nana-shell.is-narrow { grid-template-columns: 64px minmax(0, 1fr); }
-@media (max-width: 640px) { .nana-shell__states { gap: 5px; } }
+.nana-shell__content { min-width: 0; min-height: 0; overflow: auto; }
+.nana-shell__overlays { position: relative; z-index: var(--z-dialog); }

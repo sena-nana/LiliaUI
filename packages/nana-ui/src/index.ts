@@ -24,5 +24,3 @@ export { default as Progress, default as NanaProgress } from "./components/NanaP
 export { default as Skeleton, default as NanaSkeleton } from "./components/NanaSkeleton.vue";
 export { default as StatusBadge, default as NanaStatusBadge } from "./components/NanaStatusBadge.vue";
 export { default as EmptyState, default as NanaEmptyState } from "./components/NanaEmptyState.vue";
-export * from "./provider";
-export type * from "@lilia/ui-contract";

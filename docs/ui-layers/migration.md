@@ -1,6 +1,6 @@
 # Preset 与应用迁移边界
 
-桌面工作区从固定 Shell 侧栏迁移到统一 Region 的步骤见 [Workspace Region 布局与迁移](../workspace-regions.md)。旧 `LiliaDesktopShell` 在迁移窗口内保留，新应用使用 `LiliaAppShell` 与 `@lilia/ui/layouts`。
+桌面工作区从固定 Shell 侧栏迁移到统一 Region 的步骤见 [Workspace Region 布局与迁移](../workspace-regions.md)。旧 Router-owning Shell 已移除；Lilia 应用使用 `LiliaAppShell` 与 Workspace Regions，Nana 应用使用 `NanaAppShell` 并显式组合 Router、NanaSidebar 与任务布局。
 
 ## 两个独立维度
 
@@ -26,7 +26,7 @@ src/ui/
 ```
 
 - feature 从本地 `src/ui` 导入基础组件和类型。
-- app/router 从 `preset.ts` 取得 `AppUIPresetAdapter.shell` 和可选 provider。
+- app/root 从 `preset.ts` 取得 `AppUIPresetAdapter.shell` 和必需 provider，并在两者内部显式组合 Router 与布局。
 - main 只导入本地 `styles.css`。
 - 一次构建只声明一个 `@lilia/ui` 或 `@lilia/nana-ui` 完整 Layer。
 

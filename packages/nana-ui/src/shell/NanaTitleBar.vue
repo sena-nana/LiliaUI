@@ -51,8 +51,9 @@ function onPointerMove(event: PointerEvent) {
     @dblclick="controls.toggleMaximize"
   >
     <div class="nana-titlebar__leading"><slot name="leading" /></div>
-    <div class="nana-titlebar__title">{{ title }}</div>
+    <div class="nana-titlebar__title"><slot name="center">{{ title }}</slot></div>
     <div class="nana-titlebar__controls">
+      <div v-if="$slots.actions" class="nana-titlebar__actions"><slot name="actions" /></div>
       <button type="button" aria-label="最小化" data-agent-id="nana.window.minimize" @click="controls.minimize"><Minus :size="14" /></button>
       <button type="button" :aria-label="controls.isMaximized.value ? '还原' : '最大化'" data-agent-id="nana.window.maximize" @click="controls.toggleMaximize">
         <Copy v-if="controls.isMaximized.value" :size="13" /><Square v-else :size="12" />

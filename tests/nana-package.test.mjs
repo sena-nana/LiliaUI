@@ -9,10 +9,14 @@ describe("@lilia/nana-ui package", () => {
     const manifest = JSON.parse(readFileSync(resolve("packages/nana-ui/package.json"), "utf8"));
     expect(manifest.exports).toMatchObject({
       ".": expect.any(String),
+      "./commands": expect.any(String),
       "./consumer": expect.any(String),
       "./lazy": expect.any(String),
       "./patterns": expect.any(String),
       "./preset": expect.any(String),
+      "./preset/definition": expect.any(String),
+      "./provider": expect.any(String),
+      "./settings": expect.any(String),
       "./shell": expect.any(String),
       "./state": expect.any(String),
       "./styles.css": expect.any(String),
@@ -22,6 +26,30 @@ describe("@lilia/nana-ui package", () => {
     await expect(import("@lilia/nana-ui")).resolves.toHaveProperty("NanaButton");
     await expect(import("@lilia/nana-ui/state")).resolves.toHaveProperty("createUndoManager");
     await expect(import("@lilia/nana-ui/preset")).resolves.toHaveProperty("nanaPresetAdapter");
+    await expect(import("@lilia/nana-ui/preset/definition")).resolves.toHaveProperty("nanaPresetDefinition");
+    await expect(import("@lilia/nana-ui/provider")).resolves.toHaveProperty("NanaUIProvider");
+    await expect(import("@lilia/nana-ui/commands")).resolves.toHaveProperty("createCommandRegistry");
+    await expect(import("@lilia/nana-ui/settings")).resolves.toHaveProperty("NanaSettingsPage");
+    await expect(import("@lilia/nana-ui/shell")).resolves.toHaveProperty("NanaAppShell");
+    await expect(import("@lilia/nana-ui")).resolves.not.toHaveProperty("NanaUIProvider");
+  });
+
+  it("keeps both preset definitions free of Shell and Provider modules", async () => {
+    const result = await build({
+      configFile: false,
+      logLevel: "silent",
+      build: { write: false, rollupOptions: { input: "virtual:preset-definitions" } },
+      plugins: [vue(), virtualEntry("virtual:preset-definitions", `
+        import { liliaPresetDefinition } from "@lilia/ui/preset/definition";
+        import { nanaPresetDefinition } from "@lilia/nana-ui/preset/definition";
+        globalThis.__presetDefinitions = [liliaPresetDefinition, nanaPresetDefinition];
+      `)],
+    });
+    const modules = outputModuleIds(result);
+    expect(modules.some((id) => id.includes("/ui/src/layouts/"))).toBe(false);
+    expect(modules.some((id) => id.includes("/ui/src/provider/"))).toBe(false);
+    expect(modules.some((id) => id.includes("/nana-ui/src/shell/"))).toBe(false);
+    expect(modules.some((id) => id.includes("/nana-ui/src/provider/"))).toBe(false);
   });
 
   it("tree-shakes shell, patterns, and Consumer components from a base-only build", async () => {

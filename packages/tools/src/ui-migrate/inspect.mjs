@@ -8,6 +8,8 @@ const KNOWN_LAYER_SUBPATHS = new Set([
   "/commands",
   "/diagnostics",
   "/preset",
+  "/preset/definition",
+  "/provider",
   "/runtime",
   "/settings",
   "/shell",
@@ -32,7 +34,14 @@ export async function inspectUiMigration(projectRoot = process.cwd(), options = 
       detail: `Unknown Layer subpath cannot be migrated safely: ${item.specifier}`,
     }];
   });
-  const legacyShellFiles = sources.filter((item) => /\b(?:LiliaDesktopShell|LegacyAppShell|NanaDesktopShell)\b/.test(item.source));
+  const legacyNamedShellFiles = sources.filter((item) => /\b(?:LiliaDesktopShell|LegacyAppShell|NanaDesktopShell)\b/.test(item.source));
+  const legacyNanaShellFiles = sources.filter((item) => (
+    /\bNanaAppShell\b/.test(item.source)
+    && /(?:\bnavigation\b|settingsItem|settings-item|sidebarMode|sidebar-mode|contextVisible|context-visible|contextTitle|context-title)/.test(item.source)
+  ));
+  const legacyShellFiles = [...new Map(
+    [...legacyNamedShellFiles, ...legacyNanaShellFiles].map((item) => [item.path, item]),
+  ).values()];
   const shellFiles = sources.filter((item) => (
     /\b(?:createApp|Sidebar)\b/.test(item.source)
     && !legacyShellFiles.some((legacy) => legacy.path === item.path)
@@ -55,7 +64,7 @@ export async function inspectUiMigration(projectRoot = process.cwd(), options = 
     informationArchitectureReview: [
       ...legacyShellFiles.map((item) => ({
         path: item.path,
-        detail: "Legacy Shell detected: migrate to LiliaAppShell + Workspace Regions before removal in 0.3.0.",
+        detail: "Router-owning Shell API was removed: compose the Layer AppShell, application Router, navigation, and layout explicitly.",
       })),
       ...shellFiles.map((item) => ({
         path: item.path,

@@ -33,16 +33,16 @@ document.documentElement.dataset.visualReady = "true";
 
 async function loadLiliaLayer(): Promise<VisualLayerComponents> {
   await import("@lilia/ui/styles.css");
-  const ui = await import("@lilia/ui");
-  return pickComponents(ui);
+  const [ui, provider] = await Promise.all([import("@lilia/ui"), import("@lilia/ui/provider")]);
+  return { ...pickComponents(ui), Provider: provider.LiliaUIProvider };
 }
 
 async function loadNanaLayer(): Promise<VisualLayerComponents> {
   await import("@lilia/nana-ui/styles.css");
-  const ui = await import("@lilia/nana-ui");
+  const [ui, provider] = await Promise.all([import("@lilia/nana-ui"), import("@lilia/nana-ui/provider")]);
   return {
     ...pickComponents(ui),
-    Provider: ui.NanaUIProvider,
+    Provider: provider.NanaUIProvider,
   };
 }
 

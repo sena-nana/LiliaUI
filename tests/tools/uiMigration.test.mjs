@@ -47,7 +47,7 @@ describe("UI migration tooling", () => {
     expect(inspection.blockers).toHaveLength(0);
   });
 
-  it("reports the Legacy Shell lifecycle and Workspace Regions replacement", async () => {
+  it("reports the removed Router-owning Shell contract", async () => {
     const root = createUiFixture({
       legacy: true,
       main: [
@@ -59,9 +59,25 @@ describe("UI migration tooling", () => {
     const inspection = await inspectUiMigration(root);
     expect(inspection.informationArchitectureReview).toContainEqual(expect.objectContaining({
       path: "src/main.ts",
-      detail: expect.stringContaining("LiliaAppShell + Workspace Regions"),
+      detail: expect.stringContaining("Router-owning Shell API was removed"),
     }));
-    expect(inspection.informationArchitectureReview[0].detail).toContain("0.3.0");
+  });
+
+  it("reports NanaAppShell calls that still pass removed navigation and context props", async () => {
+    const root = createUiFixture({
+      legacy: true,
+      main: [
+        'import { NanaAppShell } from "@lilia/nana-ui/shell";',
+        'export const props = { navigation: [], contextVisible: true };',
+        'export const shell = NanaAppShell;',
+        "",
+      ].join("\n"),
+    });
+    const inspection = await inspectUiMigration(root, { preset: "nana" });
+    expect(inspection.informationArchitectureReview).toContainEqual(expect.objectContaining({
+      path: "src/main.ts",
+      detail: expect.stringContaining("Router-owning Shell API was removed"),
+    }));
   });
 
   it("routes known imports through a generated facade without rewriting business behavior", async () => {

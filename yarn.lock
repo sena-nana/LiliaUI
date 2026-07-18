@@ -905,6 +905,9 @@ __metadata:
   peerDependencies:
     "@lilia/ui-contract": ^0.1.0
     "@lilia/ui-foundation": ^0.1.0
+    "@lucide/vue": ^1.22.0
+    vue: ^3.5.39
+    vue-router: ^5.1.0
   languageName: unknown
   linkType: soft
 
