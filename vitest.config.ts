@@ -3,7 +3,7 @@ import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vitest/config";
 
 const rootVueRouter = fileURLToPath(
-  new URL("./node_modules/vue-router/dist/vue-router.mjs", import.meta.url),
+  new URL("./node_modules/vue-router/dist/vue-router.js", import.meta.url),
 );
 
 export default defineConfig({
