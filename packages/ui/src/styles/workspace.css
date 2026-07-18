@@ -123,6 +123,7 @@
 .lilia-workspace-region--primary {
   --lilia-region-surface: var(--bg);
   border-top-left-radius: var(--radius-lg);
+  contain: layout paint style;
 }
 
 .lilia-workspace-region--primary[data-edge-start="true"] {
