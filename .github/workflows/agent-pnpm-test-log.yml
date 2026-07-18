@@ -1,0 +1,29 @@
+name: Capture pnpm test failure
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-node-pnpm
+      - name: Run tests
+        id: test
+        continue-on-error: true
+        shell: bash
+        run: pnpm test > pnpm-test.log 2>&1
+      - name: Upload test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnpm-test-log
+          path: pnpm-test.log
+          retention-days: 1
+      - if: steps.test.outcome != 'success'
+        run: exit 1
