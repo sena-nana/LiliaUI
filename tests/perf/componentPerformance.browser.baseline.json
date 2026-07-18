@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-18T11:31:40.092Z",
+  "generatedAt": "2026-07-18T13:33:35.884Z",
   "iterations": 7,
   "runner": "browser",
   "schemaVersion": 1,
@@ -1170,28 +1170,6 @@
         "p95": 0
       }
     },
-    "LiliaDesktopShell": {
-      "domNodes": {
-        "median": 60,
-        "p95": 60
-      },
-      "interaction": {
-        "median": 0.3,
-        "p95": 0.4
-      },
-      "mount": {
-        "median": 2.3,
-        "p95": 2.5
-      },
-      "unmount": {
-        "median": 0.1,
-        "p95": 0.1
-      },
-      "update": {
-        "median": 0,
-        "p95": 0
-      }
-    },
     "LiliaWorkspace": {
       "domNodes": {
         "median": 19,
@@ -1820,6 +1798,94 @@
       "mount": {
         "median": 0.2,
         "p95": 0.2
+      },
+      "unmount": {
+        "median": 0,
+        "p95": 0
+      },
+      "update": {
+        "median": 0.1,
+        "p95": 0.1
+      }
+    },
+    "LiliaAppShell": {
+      "domNodes": {
+        "median": 21,
+        "p95": 21
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0.1
+      },
+      "mount": {
+        "median": 0.8,
+        "p95": 1
+      },
+      "unmount": {
+        "median": 0,
+        "p95": 0.1
+      },
+      "update": {
+        "median": 0.2,
+        "p95": 0.2
+      }
+    },
+    "LiliaUIProvider": {
+      "domNodes": {
+        "median": 3,
+        "p95": 3
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0
+      },
+      "mount": {
+        "median": 0.1,
+        "p95": 0.2
+      },
+      "unmount": {
+        "median": 0,
+        "p95": 0
+      },
+      "update": {
+        "median": 0.1,
+        "p95": 0.1
+      }
+    },
+    "NanaSettingsPage": {
+      "domNodes": {
+        "median": 20,
+        "p95": 20
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0.1
+      },
+      "mount": {
+        "median": 0.6,
+        "p95": 0.7
+      },
+      "unmount": {
+        "median": 0,
+        "p95": 0.1
+      },
+      "update": {
+        "median": 0,
+        "p95": 0
+      }
+    },
+    "NanaTitleBar": {
+      "domNodes": {
+        "median": 15,
+        "p95": 15
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0
+      },
+      "mount": {
+        "median": 0.5,
+        "p95": 0.6
       },
       "unmount": {
         "median": 0,

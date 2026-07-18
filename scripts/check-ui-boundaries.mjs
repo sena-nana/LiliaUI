@@ -2,7 +2,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { extname, join, relative, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
-const packageRoots = ["ui-contract", "ui-foundation", "nana-ui"]
+const packageRoots = ["ui-contract", "ui-foundation", "ui", "nana-ui"]
   .map((name) => resolve(root, "packages", name));
 const sourceFiles = packageRoots.flatMap((packageRoot) => walk(resolve(packageRoot, "src")));
 const violations = [];
@@ -16,14 +16,19 @@ for (const [subpath, target] of Object.entries(uiManifest.exports ?? {})) {
 
 for (const file of sourceFiles) {
   const source = readFileSync(file, "utf8");
-  const name = relative(root, file);
+  const name = relative(root, file).replaceAll("\\", "/");
   const lines = source.split(/\r?\n/).length;
-  if (lines > 300) violations.push(`${name}: ${lines} lines exceeds the 300-line responsibility limit`);
+  if (!name.startsWith("packages/ui/") && lines > 300) {
+    violations.push(`${name}: ${lines} lines exceeds the 300-line responsibility limit`);
+  }
   if (name.startsWith("packages/ui-contract/") && /from\s+["'](?:vue|@lilia\/|.*\.css)/.test(source)) {
     violations.push(`${name}: ui-contract must remain type-first and visual-layer independent`);
   }
   if (name.startsWith("packages/ui-foundation/") && /from\s+["']@lilia\/(?:ui|nana-ui)(?:\/|["'])/.test(source)) {
     violations.push(`${name}: ui-foundation cannot depend on a visual layer`);
+  }
+  if (name.startsWith("packages/ui/") && /from\s+["']@lilia\/nana-ui(?:\/|["'])/.test(source)) {
+    violations.push(`${name}: Professional Layer cannot depend on nana-ui`);
   }
   if (name.startsWith("packages/nana-ui/") && /from\s+["']@lilia\/ui(?:\/|["'])/.test(source)) {
     violations.push(`${name}: nana-ui cannot depend on the Professional Layer`);
@@ -47,7 +52,7 @@ if (violations.length) {
   process.exit(1);
 }
 
-console.log(`Checked ${sourceFiles.length} UI Contract/Foundation/Nana source files.`);
+console.log(`Checked ${sourceFiles.length} UI Contract/Foundation/Layer source files.`);
 
 function walk(directory) {
   return readdirSync(directory).flatMap((entry) => {

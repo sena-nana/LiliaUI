@@ -12,6 +12,7 @@
     "./lazy": "./src/lazy.ts",
     "./patterns": "./src/patterns/index.ts",
     "./preset": "./src/preset.ts",
+    "./preset/definition": "./src/preset-definition.ts",
     "./provider": "./src/provider/index.ts",
     "./runtime": "./src/runtime.ts",
     "./runtime/tauri": "./src/runtime/tauri.ts",

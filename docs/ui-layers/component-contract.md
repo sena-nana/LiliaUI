@@ -22,7 +22,7 @@
 | --- | --- | --- |
 | Contract 基础组件 | Button、Input、Dialog、Toast、Tabs、Card | Props/events/slots/v-model 保持类型和行为兼容 |
 | Foundation 能力 | commands、settings、dismissable layer、focus、responsive、sidebar primitive | 两个 Layer 复用同一实现或同一状态机 |
-| Layer Shell | Lilia Desktop Shell、Nana App Shell | 都通过 preset adapter 暴露，但允许不同布局结构和默认值 |
+| Layer Shell | Lilia App Shell、Nana App Shell | 共享 Router-free props/slots 和应用所有权边界，允许不同 DOM、视觉 Chrome 与扩展槽 |
 | Lilia-only | diagnostics、专业高密度工具布局、细粒度 composable | 不承诺 Nana 等价入口 |
 | Nana-only | Consumer patterns、recovery、progressive settings、expressive、undo feedback | 不加入 Contract，除非出现第二个独立实现需求 |
 | 应用业务 | routes、业务 workflow、数据模型、业务 provider | 不进入公共 Layer 或 Contract |
@@ -35,6 +35,7 @@
 - 根入口只导出稳定常用能力；Layer-only 能力使用明确 subpath，避免根入口持续膨胀。
 - `@lilia/ui` 保留既有 `Ui*` 名称；Contract alias 的增加不能无计划移除旧名。
 - `commands`、`settings` 等共享运行时能力位于 Foundation，由两个 Layer 的稳定 subpath 转发。
+- `provider`、`preset/definition`、`preset` 与 `shell` 是双 Layer 的共同框架入口；Provider 默认 Policy 和 Shell 视觉实现分别由 Layer 决定。
 
 ## 弃用流程
 

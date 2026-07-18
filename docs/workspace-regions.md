@@ -119,7 +119,7 @@ Workspace 共享一个 `ResizeObserver`，并监听窗口与 `visualViewport` re
 
 ## 从旧 Shell 迁移
 
-`LiliaDesktopShell` 与 `LiliaShellOptions.mainSidebar` 暂时保留为兼容入口，并已标记为弃用。迁移不要求一次删除全部旧 API：
+`LiliaDesktopShell` 与 `LiliaShellOptions.mainSidebar` 已在双 Layer 框架统一的 breaking release 中移除。消费应用按以下步骤迁移：
 
 1. 将应用 Root、Router 与 settings provider 继续保留在应用仓库。
 2. 确认应用显式声明 `@lilia/ui` 的 `@lilia/ui-contract` 与 `@lilia/ui-foundation` peer，并让所有 `@lilia/*` Git workspace 依赖固定到同一 commit；本地验证时同时 link 这两个包。
@@ -128,6 +128,6 @@ Workspace 共享一个 `ResizeObserver`，并监听窗口与 `visualViewport` re
 5. 把页面 `RouterView` 放入 `LiliaPrimaryContent`；设置页也作为业务声明的 Region 组合，不再通过 Shell route meta 替换侧栏。
 6. 将侧栏宽度与折叠偏好改为 `v-model:size` / `v-model:collapsed`，由应用现有设置存储持久化。
 7. 删除消费端针对 `.shell__main`、`.secondary-panel`、`leftSidebar1/2` 等内部选择器的覆盖。
-8. 在完成所有路由迁移后，再从 `LiliaDesktopShell` 切换到 `LiliaAppShell`。
+8. 将应用 Root 直接切换为 `LiliaAppShell`，并确认 Shell 在未安装 Router 时也能独立挂载。
 
 可运行示例位于 [`examples/workspace-regions`](../examples/workspace-regions)，同一页面覆盖 LiliaCode、LiliaGithub 与 Live2DEditor 三类典型组合，并用 `safeRect` 更新预览画布的 backing size。

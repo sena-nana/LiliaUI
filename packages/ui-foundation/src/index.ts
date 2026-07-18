@@ -1,6 +1,7 @@
 export * from "./focus";
 export * from "./agentDebug/index";
 export * from "./commands";
+export * from "./policy";
 export * from "./settings";
 export * from "./surface";
 export * from "./useButtonPrimitive";

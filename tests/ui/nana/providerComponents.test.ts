@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/vue";
 import { defineComponent, h, ref } from "vue";
 import { describe, expect, it, vi } from "vitest";
-import { NanaButton, NanaFormField, NanaInput, useNanaUI } from "@lilia/nana-ui";
-import { NanaUIProvider } from "@lilia/nana-ui/provider";
+import { NanaButton, NanaFormField, NanaInput } from "@lilia/nana-ui";
+import { NanaUIProvider, useNanaUI } from "@lilia/nana-ui/provider";
 import { AdvancedSettingsDisclosure, ProgressiveSection, RecoveryError } from "@lilia/nana-ui/consumer";
 
 describe("NanaUI provider and controls", () => {

@@ -1,59 +1,74 @@
-import { inject, readonly, ref, type InjectionKey, type Ref } from "vue";
+import {
+  computed,
+  inject,
+  readonly,
+  ref,
+  type ComputedRef,
+  type InjectionKey,
+  type Ref,
+} from "vue";
 import type { UIDensity, UIPolicy } from "@lilia/ui-contract";
-import type { NativeBackdropMode, NativePlatform } from "@lilia/ui-foundation/native-appearance";
+import {
+  createUIPolicyContext,
+  type UIPolicyContext,
+} from "@lilia/ui-foundation/policy";
+import {
+  defaultNativeBackdrop,
+  resolveNativePlatform,
+  type NativeBackdropMode,
+  type NativePlatform,
+} from "@lilia/ui-foundation/native-appearance";
 import type { ResolvedUITheme, UITheme } from "@lilia/ui-foundation/theme";
-import { resolveNanaPolicy } from "./policy";
+import { defaultNanaPolicy } from "../policy";
 
-export interface NanaUIContext {
-  policy: Readonly<Ref<UIPolicy>>;
+export interface NanaUIContext extends UIPolicyContext {
   theme: Readonly<Ref<UITheme>>;
   resolvedTheme: Readonly<Ref<ResolvedUITheme>>;
   backdropMode: Readonly<Ref<NativeBackdropMode>>;
   platform: NativePlatform;
   metadata: Readonly<{ productTitle: string; version: string }>;
-  setPolicy: (patch: Partial<UIPolicy>) => void;
   setTheme: (theme: UITheme) => void;
   setDensity: (density: UIDensity) => void;
   setBackdropMode: (mode: NativeBackdropMode) => void;
-  replacePolicy: (next?: Partial<UIPolicy>) => void;
 }
 
-export const nanaUIContextKey = Symbol.for("@lilia/nana-ui/context") as InjectionKey<NanaUIContext>;
-
 export interface NanaUIContextOptions {
-  theme: Ref<UITheme>;
-  resolvedTheme: Ref<ResolvedUITheme>;
-  backdropMode: Ref<NativeBackdropMode>;
-  platform: NativePlatform;
+  theme?: Ref<UITheme>;
+  resolvedTheme?: Ref<ResolvedUITheme> | ComputedRef<ResolvedUITheme>;
+  backdropMode?: Ref<NativeBackdropMode>;
+  platform?: NativePlatform;
   metadata?: { productTitle?: string; version?: string };
 }
 
-export function createNanaUIContext(initial: Partial<UIPolicy> | undefined, options: NanaUIContextOptions): NanaUIContext {
-  const policy = ref(resolveNanaPolicy(initial));
+export const nanaUIContextKey = Symbol.for("@lilia/nana-ui/provider") as InjectionKey<NanaUIContext>;
+
+export function createNanaUIContext(
+  initial?: Partial<UIPolicy>,
+  options: NanaUIContextOptions = {},
+): NanaUIContext {
+  const policyContext = createUIPolicyContext(defaultNanaPolicy, initial);
+  const theme = options.theme ?? ref<UITheme>("system");
+  const resolvedTheme = options.resolvedTheme ?? computed<ResolvedUITheme>(() => theme.value === "light" ? "light" : "dark");
+  const platform = options.platform ?? resolveNativePlatform();
+  const backdropMode = options.backdropMode ?? ref<NativeBackdropMode>(defaultNativeBackdrop(platform));
   return {
-    policy: readonly(policy),
-    theme: readonly(options.theme),
-    resolvedTheme: readonly(options.resolvedTheme),
-    backdropMode: readonly(options.backdropMode),
-    platform: options.platform,
+    ...policyContext,
+    theme: readonly(theme),
+    resolvedTheme: readonly(resolvedTheme),
+    backdropMode: readonly(backdropMode),
+    platform,
     metadata: Object.freeze({
       productTitle: options.metadata?.productTitle ?? "",
       version: options.metadata?.version ?? "",
     }),
-    setPolicy(patch) {
-      policy.value = resolveNanaPolicy({ ...policy.value, ...patch });
-    },
-    replacePolicy(next) {
-      policy.value = resolveNanaPolicy(next);
-    },
-    setTheme(next) { options.theme.value = next; },
-    setDensity(density) { policy.value = resolveNanaPolicy({ ...policy.value, density }); },
-    setBackdropMode(mode) { options.backdropMode.value = mode; },
+    setTheme(next) { theme.value = next; },
+    setDensity(density) { policyContext.setPolicy({ density }); },
+    setBackdropMode(mode) { backdropMode.value = mode; },
   };
 }
 
+const fallbackContext = createNanaUIContext();
+
 export function useNanaUI(): NanaUIContext {
-  const context = inject(nanaUIContextKey, null);
-  if (!context) throw new Error("useNanaUI() requires NanaUIProvider.");
-  return context;
+  return inject(nanaUIContextKey, fallbackContext);
 }

@@ -1,21 +1,7 @@
-import type { Component, ComputedRef, InjectionKey, Ref } from "vue";
-
-export type LiliaShellSetupOverlaySource =
-  | Ref<boolean>
-  | ComputedRef<boolean>
-  | (() => boolean);
+import type { Component, InjectionKey } from "vue";
 
 export interface LiliaShellOptions {
-  /** @deprecated Only used by LiliaDesktopShell. Compose Workspace Regions instead. */
-  mainSidebar?: Component;
   titlebarActions?: Component;
-  setupOverlayActive?: LiliaShellSetupOverlaySource;
 }
 
 export const liliaShellOptionsKey: InjectionKey<LiliaShellOptions> = Symbol("liliaShellOptions");
-
-export function resolveShellBoolean(source: LiliaShellSetupOverlaySource | undefined): boolean {
-  if (!source) return false;
-  if (typeof source === "function") return source();
-  return source.value;
-}
