@@ -1,4 +1,3 @@
-import { invoke } from "@tauri-apps/api/core";
 import { readonly, ref, watch, type Ref } from "vue";
 import {
   APP_METADATA,
@@ -8,6 +7,7 @@ import {
   type NativePlatform,
 } from "../config/appShell";
 import { useTheme } from "./useTheme";
+import { getNativeAppearanceAdapter } from "../runtime/nativeAppearanceAdapter";
 
 export interface NativeAppearanceSettings {
   backdropMode: BackdropMode;
@@ -203,7 +203,7 @@ async function flushNativeBackdrop() {
       const request = pendingNativeState;
       pendingNativeState = null;
       try {
-        await invoke("plugin:lilia|set_window_backdrop", request);
+        await getNativeAppearanceAdapter()?.setWindowBackdrop(request);
       } catch {
         // 浏览器预览或原生能力不可用时仍保留可用的实体 CSS 表面。
       }

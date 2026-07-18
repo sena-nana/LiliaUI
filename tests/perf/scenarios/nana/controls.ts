@@ -105,6 +105,6 @@ export const nanaControlScenarios: ComponentPerfScenario[] = [
       options: [{ value: "easy", label: "Easy" }, { value: "custom", label: "Custom" }],
       agentId: "perf.nana.segmented",
     }),
-    interact: (root) => click(root, "[data-agent-id='perf.nana.segmented'] [role='tab']:last-child"),
+    interact: (root) => click(root, "[data-agent-id='perf.nana.segmented'] [role='radio']:last-child"),
   },
 ];

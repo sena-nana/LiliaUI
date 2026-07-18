@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import X from "@lucide/vue/dist/esm/icons/x.mjs";
-import type { ToastProps } from "@lilia/ui-contract";
+import type { ToastEmits, ToastProps } from "@lilia/ui-contract";
 
 withDefaults(defineProps<ToastProps>(), {
   description: undefined,
@@ -8,7 +8,7 @@ withDefaults(defineProps<ToastProps>(), {
   dismissible: true,
   agentId: undefined,
 });
-defineEmits<{ dismiss: [] }>();
+defineEmits<ToastEmits>();
 </script>
 
 <template>

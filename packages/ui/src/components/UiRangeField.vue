@@ -1,32 +1,26 @@
 <script setup lang="ts">
+import type { SliderEmits, SliderProps } from "@lilia/ui-contract";
 import type { UiControlSize } from "./UiInput.vue";
 
-const props = withDefaults(defineProps<{
-  modelValue: number;
-  min: number;
-  max: number;
-  step?: number;
+const props = withDefaults(defineProps<SliderProps & {
   unit?: string;
-  ariaLabel?: string;
-  "aria-label"?: string;
-  agentId?: string;
-  disabled?: boolean;
   size?: UiControlSize;
   showOutput?: boolean;
 }>(), {
+  modelValue: 0,
+  min: 0,
+  max: 100,
   step: 1,
   unit: "",
   agentId: undefined,
   disabled: false,
+  loading: false,
+  invalid: false,
   size: "md",
   showOutput: true,
 });
 
-const emit = defineEmits<{
-  "update:modelValue": [value: number];
-  input: [event: Event];
-  change: [event: Event];
-}>();
+const emit = defineEmits<SliderEmits>();
 
 function onInput(event: Event) {
   emit("update:modelValue", Number((event.target as HTMLInputElement).value));
@@ -46,9 +40,12 @@ function onChange(event: Event) {
       :max="max"
       :step="props.step"
       :value="modelValue"
-      :aria-label="props.ariaLabel ?? props['aria-label']"
+      :aria-label="props.ariaLabel"
+      :aria-describedby="props.ariaDescribedby"
+      :aria-invalid="props.invalid || undefined"
+      :aria-busy="props.loading || undefined"
       :data-agent-id="agentId"
-      :disabled="disabled"
+      :disabled="disabled || loading"
       @input="onInput"
       @change="onChange"
     />
@@ -73,6 +70,11 @@ function onChange(event: Event) {
 .ui-range-field--sm {
   min-height: 28px;
   gap: 8px;
+}
+
+.ui-range-field--lg {
+  min-height: 36px;
+  gap: 12px;
 }
 
 .ui-range-field:not(:has(output)) {

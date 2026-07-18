@@ -2,19 +2,18 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/vue";
 import { defineComponent, nextTick, ref } from "vue";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  AnchoredActionMenu,
   ConfirmDialog,
-  Dropdown,
-  SearchDropdown,
   UiDialog,
   UiDrawer,
 } from "@lilia/ui";
-import ContextMenuHost from "@lilia/ui/components/ContextMenuHost";
-import { SB_MENU_POP_TRANSITION_MS } from "@lilia/ui/composables/menuMotion";
 import {
+  AnchoredActionMenu,
+  ContextMenuHost,
   useOverlayActivity,
   useOverlayPresence,
-} from "@lilia/ui/composables/useOverlayActivity";
+} from "@lilia/ui/overlay";
+import { Dropdown, SearchDropdown } from "@lilia/ui/search";
+import { SB_MENU_POP_TRANSITION_MS } from "@lilia/ui/composables/menuMotion";
 import {
   closeContextMenu,
   openContextMenuAt,

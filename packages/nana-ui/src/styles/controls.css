@@ -27,7 +27,7 @@
 @keyframes nana-spin { to { transform: rotate(360deg); } }
 .nana-icon-button { width: var(--control-height); padding: 0; }
 .nana-icon-button:active:not(:disabled) { background: var(--lilia-state-layer-pressed); }
-.nana-icon-button.is-active { color: var(--lilia-state-foreground-selected); background: var(--lilia-state-layer-selected); box-shadow: inset 0 -2px 0 var(--lilia-state-indicator-selected); }
+.nana-icon-button.is-active { color: var(--lilia-state-foreground-selected); background: var(--lilia-state-layer-selected); }
 .nana-icon-button.is-active:active:not(:disabled) { background: var(--lilia-state-layer-selected-pressed); }
 
 .nana-control {

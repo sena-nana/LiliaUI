@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import X from "@lucide/vue/dist/esm/icons/x.mjs";
-import type { ProgressProps } from "@lilia/ui-contract";
+import type { ProgressEmits, ProgressProps } from "@lilia/ui-contract";
 import { computed } from "vue";
 
 const props = withDefaults(defineProps<ProgressProps>(), {
@@ -9,7 +9,7 @@ const props = withDefaults(defineProps<ProgressProps>(), {
   cancellable: false,
   agentId: undefined,
 });
-defineEmits<{ cancel: [] }>();
+defineEmits<ProgressEmits>();
 const safeMax = computed(() => Math.max(props.max, 1));
 const boundedValue = computed(() => props.value === undefined
   ? undefined
@@ -28,7 +28,7 @@ const percentage = computed(() => boundedValue.value === undefined
         <X :size="14" aria-hidden="true" />
       </button>
     </div>
-    <progress :value="boundedValue" :max="safeMax" :aria-label="label">{{ percentage }}%</progress>
+    <progress :value="boundedValue" :max="safeMax" :aria-label="label" :aria-valuenow="boundedValue">{{ percentage }}%</progress>
   </div>
 </template>
 

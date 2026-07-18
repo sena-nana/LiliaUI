@@ -1,24 +1,23 @@
 <script setup lang="ts">
+import type { IconButtonProps } from "@lilia/ui-contract";
+import type { Component } from "vue";
 import UiButton from "./UiButton.vue";
 import type { UiButtonSize, UiButtonVariant } from "./UiButton.vue";
 import UiSpinner from "./UiSpinner.vue";
 
-const props = withDefaults(defineProps<{
-  icon: unknown;
-  label: string;
+const props = withDefaults(defineProps<Omit<IconButtonProps, "size" | "variant"> & {
+  icon: Component;
   title?: string;
   size?: UiButtonSize;
   variant?: UiButtonVariant;
-  active?: boolean;
-  disabled?: boolean;
   busy?: boolean;
-  agentId?: string;
 }>(), {
   title: undefined,
   size: "md",
   variant: "ghost",
   active: false,
   disabled: false,
+  loading: false,
   busy: false,
   agentId: undefined,
 });
@@ -39,17 +38,20 @@ const emit = defineEmits<{
     :variant="variant"
     :size="size"
     :aria-label="label"
-    :title="title ?? label"
+    :title="title ?? tooltip ?? label"
     :disabled="disabled"
-    :busy="busy"
+    :loading="loading || busy"
+    :invalid="invalid"
+    :aria-describedby="ariaDescribedby"
     :agent-id="agentId"
     :aria-pressed="active"
     :data-lilia-selected="active ? 'true' : undefined"
+    data-lilia-selected-indicator="bottom"
     @click="emit('click', $event)"
   >
     <template #icon>
-      <UiSpinner v-if="busy" :size="size === 'sm' ? 13 : 14" :label="label" />
-      <component v-else :is="icon" :size="size === 'sm' ? 13 : 14" aria-hidden="true" />
+      <UiSpinner v-if="loading || busy" :size="size === 'sm' ? 13 : size === 'lg' ? 16 : 14" :label="label" />
+      <component v-else :is="icon" :size="size === 'sm' ? 13 : size === 'lg' ? 16 : 14" aria-hidden="true" />
     </template>
   </UiButton>
 </template>
@@ -72,6 +74,12 @@ const emit = defineEmits<{
   border-radius: var(--radius-xs);
 }
 
+.ui-icon-button--lg.ui-button {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+}
+
 .ui-icon-button.ui-button:hover:not(:disabled) {
   background: var(--lilia-state-layer-hover);
   color: var(--text);
@@ -85,7 +93,6 @@ const emit = defineEmits<{
 .ui-icon-button.ui-button.is-active {
   background: var(--lilia-state-layer-selected);
   color: var(--lilia-state-foreground-selected);
-  box-shadow: inset 0 -2px 0 var(--lilia-state-indicator-selected);
 }
 
 .ui-icon-button.ui-button.is-active:active:not(:disabled) {

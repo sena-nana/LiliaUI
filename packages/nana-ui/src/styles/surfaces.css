@@ -5,7 +5,7 @@
 .nana-card[data-lilia-surface-mode="translucent"] { background: transparent; }
 .nana-card--interactive:hover:not(.is-disabled) { background: var(--lilia-state-layer-hover); }
 .nana-card--interactive:active:not(.is-disabled) { background: var(--lilia-state-layer-pressed); }
-.nana-card.is-selected { color: var(--lilia-state-foreground-selected); background: var(--lilia-state-layer-selected); box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected); }
+.nana-card.is-selected { color: var(--lilia-state-foreground-selected); background: var(--lilia-state-layer-selected); }
 .nana-card.is-selected:hover:not(.is-disabled) { background: var(--lilia-state-layer-selected-hover); }
 .nana-card.is-selected:active:not(.is-disabled) { background: var(--lilia-state-layer-selected-pressed); }
 .nana-card.is-disabled { opacity: 0.5; }
@@ -14,7 +14,7 @@
 .nana-list-item { width: 100%; min-height: var(--control-height); padding: 8px 12px; border: 1px solid transparent; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 10px; color: var(--text); background: transparent; text-align: left; cursor: pointer; }
 .nana-list-item:hover:not(:disabled) { background: var(--lilia-state-layer-hover); }
 .nana-list-item:active:not(:disabled) { background: var(--lilia-state-layer-pressed); }
-.nana-list-item.is-active, .nana-list-item.is-selected { color: var(--lilia-state-foreground-selected); background: var(--lilia-state-layer-selected); border-color: var(--lilia-state-indicator-selected); box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected); }
+.nana-list-item.is-active, .nana-list-item.is-selected { color: var(--lilia-state-foreground-selected); background: var(--lilia-state-layer-selected); border-color: var(--lilia-state-indicator-selected); }
 .nana-list-item.is-active:hover:not(:disabled), .nana-list-item.is-selected:hover:not(:disabled) { background: var(--lilia-state-layer-selected-hover); }
 .nana-list-item.is-active:active:not(:disabled), .nana-list-item.is-selected:active:not(:disabled) { background: var(--lilia-state-layer-selected-pressed); }
 .nana-list-item:focus-visible { outline: 2px solid var(--lilia-state-focus-ring); outline-offset: 2px; }

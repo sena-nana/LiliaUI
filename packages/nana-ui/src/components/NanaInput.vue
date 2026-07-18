@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import type { InputProps } from "@lilia/ui-contract";
+import type { InputEmits, InputProps } from "@lilia/ui-contract";
 
 const props = withDefaults(defineProps<InputProps & { type?: string }>(), {
   modelValue: "",
   type: "text",
   size: "md",
   disabled: false,
+  loading: false,
   invalid: false,
 });
-const emit = defineEmits<{ "update:modelValue": [value: string]; input: [event: Event] }>();
+const emit = defineEmits<InputEmits>();
 function onInput(event: Event) {
   emit("update:modelValue", (event.target as HTMLInputElement).value);
   emit("input", event);
@@ -25,7 +26,8 @@ function onInput(event: Event) {
     :placeholder="placeholder"
     :readonly="readonly"
     :required="required"
-    :disabled="disabled"
+    :disabled="disabled || loading"
+    :aria-busy="loading || undefined"
     :aria-invalid="invalid || undefined"
     :aria-label="ariaLabel"
     :aria-describedby="ariaDescribedby"

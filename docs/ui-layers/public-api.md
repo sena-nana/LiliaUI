@@ -1,0 +1,44 @@
+# Public API 与稳定化审计
+
+## 正式入口
+
+`@lilia/ui` 使用显式 allowlist；package exports 不含 wildcard，因此新增内部文件不会自动成为公共 API。
+
+| 入口 | 稳定职责 |
+| --- | --- |
+| `@lilia/ui` | Professional Contract 基础组件与常用公共组件 |
+| `@lilia/ui/calendar` | CalendarHeatmap 与纯数据模型工具 |
+| `@lilia/ui/search` | Dropdown 与 SearchDropdown |
+| `@lilia/ui/overlay` | OverlayHost、ContextMenuHost、AnchoredActionMenu 与 overlay activity |
+| `@lilia/ui/layouts` | Workspace、Region、布局预设与 geometry 订阅 |
+| `@lilia/ui/shell` | LiliaAppShell、Sidebar 与 Shell 配置 |
+| `@lilia/ui/settings` | Settings model、provider 与页面容器 |
+| `@lilia/ui/runtime` | 浏览器安全、显式安装的运行时能力与 NativeAppearanceAdapter |
+| `@lilia/ui/runtime/tauri` | Native Appearance 的显式 Tauri adapter |
+| `@lilia/ui/commands` | 独立 command registry |
+| `@lilia/ui/diagnostics` | 显式加载的 Agent Debug 与性能诊断 |
+
+历史 `components/<name>`、`composables/<name>` 与 `layouts/PopupShell` 只对已经公开的确定路径保留显式兼容映射；不再允许通配路径。新代码使用上表中的职责入口。
+
+## Contract 审计结果
+
+| 组件组 | props 基础 | 共享行为证据 |
+| --- | --- | --- |
+| Button / IconButton | `ButtonProps` / `IconButtonProps` | disabled、loading、invalid、click |
+| Input / Textarea / Select | 对应 Contract props | ARIA、input/change、typed select value |
+| Checkbox / Switch / Slider | 对应 Contract props | loading/invalid、v-model、原生 Event |
+| FormField / ValidationMessage | 对应 Contract props | label、hint/error、described-by |
+| Dialog / Drawer / Popover / Tooltip | 对应 Contract props | open、关闭策略、title/footer/trigger slots |
+| Toast / Progress / Skeleton / StatusBadge | 对应 Contract props | live role、cancel/dismiss、可访问名称 |
+| Tabs / SegmentedControl | `TabsProps<T>` / `SegmentedControlProps<T>` | 共享 roving focus、Home/End、disabled、空/动态 options |
+| Card / InteractiveCard / ListItem | 对应 Contract props | selected、disabled、select/press/click |
+
+两层行为 fixture 位于 `tests/ui/contractLayerConformance.test.ts`；双 Layer 类型与生产构建 fixture 位于 `examples/contract-layers`。
+
+文本 Input 接受 `string | number` 作为显示值，但与原生 input 一致始终 emit `string`。Select 按 options 查回原值并保持 `string | number` 的实际类型，找不到匹配项时不发出 model update，避免运行时类型漂移。
+
+## 平台依赖审计
+
+- `@lilia/ui-foundation` 的 settings 使用中性 `NavigationTarget`，没有 Router 运行时或类型 peer dependency。
+- Router adapter 留在 Professional/Nana 的具体页面和 Shell。
+- `useNativeAppearance` 与 `@lilia/ui/runtime` 不静态导入或调用 Tauri。桌面应用从 `@lilia/ui/runtime/tauri` 显式安装 adapter；浏览器和测试在没有 adapter 时仍保持完整 CSS 状态。`@lilia/ui` 现有 TitleBar 窗口控制仍使用 Tauri API，因此包依赖保持向后兼容。

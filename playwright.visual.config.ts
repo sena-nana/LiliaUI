@@ -1,4 +1,7 @@
 import { defineConfig } from "@playwright/test";
+import { resolveChromiumExecutable } from "./tests/browser/chromium.ts";
+
+const executablePath = resolveChromiumExecutable();
 
 export default defineConfig({
   testDir: "./tests/visual",
@@ -9,6 +12,7 @@ export default defineConfig({
   use: {
     baseURL: "http://127.0.0.1:4178",
     browserName: "chromium",
+    launchOptions: executablePath ? { executablePath } : undefined,
     viewport: { width: 880, height: 780 },
   },
   webServer: {

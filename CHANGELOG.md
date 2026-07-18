@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-07-18 — 重构后稳定化
+
+### Contract additive
+
+- Contract 补全 controls、selection、overlay、feedback 与 selectable surface 的 events/slots 类型；Professional 与 Nana 实现统一继承 Contract props，并冻结 Input 字符串 emit 与 Select typed value emit 语义。
+
+### Foundation
+
+- 新增 `useRovingFocus`、`useTabsPrimitive` 与 `useSegmentedControlPrimitive`，统一方向键、Home/End、disabled 跳过、默认 tabbable item、主动 focus、动态与空 options。
+- settings 改用中性 `NavigationTarget`，Foundation 移除 `vue-router` peer dependency。
+
+### Lilia 与 Nana Layer
+
+- 两层 controls、overlays、feedback、Tabs/Segmented 与 selectable surfaces 通过同一行为 fixture；Native Appearance 改为浏览器安全 adapter，Tauri 实现移入显式 `@lilia/ui/runtime/tauri`。
+- `@lilia/ui` 移除无约束 wildcard exports，新增 calendar、search、overlay 等职责 subpath 和非法内部路径检查。
+
+### Tooling and migration
+
+- `ui-migrate --check` 明确识别 Legacy Shell，并提示迁移到 `LiliaAppShell + Workspace Regions`；旧 Shell 最后支持 `0.2.x`，仅在 `0.3.0` breaking release 移除。
+
+### Validation and performance
+
+- Workspace geometry 改为 subscriber-gated measurement，同帧 refresh 合并且 ResizeObserver 不重复 observe；增加 20/50 Region、动态状态、连续 resize 与 subscriber 对比场景。
+
 ## 2026-07-17 — Workspace Region 布局
 
 ### Lilia Layer

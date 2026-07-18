@@ -9,7 +9,6 @@ import {
   LiliaSidebarRow,
   LiliaSidebarSection,
   PopupTitleBarFrame,
-  SearchDropdown,
   SettingsCollapsibleCard,
   SettingsRow,
   SidebarCollapse,
@@ -31,6 +30,7 @@ import {
 } from "@lilia/ui";
 import ContextMenuHost from "@lilia/ui/components/ContextMenuHost";
 import OverlayHost from "@lilia/ui/components/OverlayHost";
+import { SearchDropdown } from "@lilia/ui/search";
 import PopupShell from "@lilia/ui/layouts/PopupShell";
 import {
   LiliaBottomPanel,
@@ -39,6 +39,8 @@ import {
   LiliaResourcePanel,
   LiliaSectionNavigation,
   LiliaWorkspace,
+  LiliaWorkspaceRegion,
+  useWorkspaceRegion,
 } from "@lilia/ui/layouts";
 import { LiliaDesktopShell, setLiliaUiConfig } from "@lilia/ui/shell";
 import {
@@ -78,6 +80,45 @@ const routePage = defineComponent({
     ]);
   },
 });
+
+const WorkspaceGeometryProbe = defineComponent({
+  name: "WorkspaceGeometryProbe",
+  props: { id: { type: String, required: true } },
+  setup(props) {
+    const geometry = useWorkspaceRegion(props.id);
+    return () => h("span", {
+      "data-geometry-visible": String(geometry.visible.value),
+      "data-geometry-stable": String(geometry.stable.value),
+    }, props.id);
+  },
+});
+
+function workspaceRegionNodes(
+  count: number,
+  step: Ref<number>,
+  options: { subscribers?: boolean; dynamic?: boolean } = {},
+) {
+  return Array.from({ length: count }, (_, index) => {
+    const id = `perf-region-${index}`;
+    const primary = index === Math.floor(count / 2);
+    const dynamic = options.dynamic && index % 5 === 0;
+    return h(LiliaWorkspaceRegion, {
+      id,
+      role: primary ? "primary" : index % 2 === 0 ? "resources" : "inspector",
+      placement: primary ? "primary" : index % 2 === 0 ? "start" : "end",
+      size: primary ? undefined : 72 + (index % 4) * 8,
+      hidden: dynamic && step.value % 3 === 1,
+      collapsed: dynamic && step.value % 3 === 2,
+      collapsible: dynamic,
+      narrowBehavior: dynamic ? "overlay" : "shrink",
+      collapseBelow: dynamic ? 900 : undefined,
+    }, {
+      default: () => options.subscribers
+        ? h(WorkspaceGeometryProbe, { id })
+        : h("span", `Region ${index} / ${step.value}`),
+    });
+  });
+}
 
 let activeRouter: ReturnType<typeof createRouter> | null = null;
 
@@ -350,16 +391,19 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
       default: () => [
         h(LiliaSectionNavigation, {
           id: "perf-sections",
+          role: "navigation",
           hidden: step.value % 3 === 2,
         }, () => h("div", "Sections")),
         h(LiliaResourcePanel, {
           id: "perf-resources",
+          role: "resources",
           size: 224 + (step.value % 2) * 8,
           resizable: true,
         }, () => h("div", "Resources")),
-        h(LiliaPrimaryContent, { id: "perf-primary" }, () => h("div", `Editor ${step.value}`)),
+        h(LiliaPrimaryContent, { id: "perf-primary", role: "primary" }, () => h("div", `Editor ${step.value}`)),
         h(LiliaInspector, {
           id: "perf-inspector",
+          role: "inspector",
           hidden: step.value % 2 === 1,
           resizable: true,
         }, () => h("div", "Inspector")),
@@ -375,6 +419,61 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
       const handle = documentFor(root).querySelector('[data-agent-id="workspace.region.perf-resources.resize"]');
       if (!(handle instanceof HTMLElement)) throw new Error("Missing workspace performance resize handle");
       handle.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "ArrowRight" }));
+    },
+  },
+  {
+    name: "LiliaWorkspaceStatic20",
+    render: (step) => h(LiliaWorkspace, { ariaLabel: "20 region mount" }, {
+      default: () => workspaceRegionNodes(20, step),
+    }),
+  },
+  {
+    name: "LiliaWorkspaceStatic50",
+    render: (step) => h(LiliaWorkspace, { ariaLabel: "50 region mount" }, {
+      default: () => workspaceRegionNodes(50, step),
+    }),
+  },
+  {
+    name: "LiliaWorkspaceGeometrySubscribers20",
+    render: (step) => h(LiliaWorkspace, { ariaLabel: "20 subscribed regions" }, {
+      default: () => workspaceRegionNodes(20, step, { subscribers: true }),
+    }),
+  },
+  {
+    name: "LiliaWorkspaceDynamic50",
+    render: (step) => h(LiliaWorkspace, { ariaLabel: "Dynamic region workspace" }, {
+      default: () => workspaceRegionNodes(50, step, { dynamic: true, subscribers: true }),
+    }),
+  },
+  {
+    name: "LiliaWorkspaceContinuousResize",
+    render: (step) => h(LiliaWorkspace, { ariaLabel: "Resize workspace" }, {
+      default: () => [
+        h(LiliaWorkspaceRegion, {
+          id: "continuous-resize",
+          role: "resources",
+          placement: "start",
+          size: 220 + step.value,
+          minSize: 120,
+          maxSize: 480,
+          resizable: true,
+        }, () => h(WorkspaceGeometryProbe, { id: "continuous-resize" })),
+        h(LiliaWorkspaceRegion, { id: "resize-primary", role: "primary" }, () => "Primary"),
+      ],
+    }),
+    async interact(root) {
+      const handle = documentFor(root).querySelector<HTMLElement>(
+        "[data-agent-id='workspace.region.continuous-resize.resize']",
+      );
+      if (!handle) throw new Error("Missing continuous resize handle");
+      Object.defineProperty(handle, "setPointerCapture", { configurable: true, value: () => undefined });
+      Object.defineProperty(handle, "hasPointerCapture", { configurable: true, value: () => false });
+      handle.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0, clientX: 220, pointerId: 7 }));
+      for (let index = 0; index < 12; index += 1) {
+        window.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, clientX: 224 + index * 4, pointerId: 7 }));
+      }
+      await animationFrame();
+      window.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, clientX: 272, pointerId: 7 }));
     },
   },
   {

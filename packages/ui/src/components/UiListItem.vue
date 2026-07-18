@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ListItemProps } from "@lilia/ui-contract";
+import type { ListItemEmits, ListItemProps } from "@lilia/ui-contract";
 
 const props = withDefaults(defineProps<ListItemProps & { type?: "button" | "submit" | "reset" }>(), {
   active: false,
@@ -8,7 +8,7 @@ const props = withDefaults(defineProps<ListItemProps & { type?: "button" | "subm
   type: "button",
   agentId: undefined,
 });
-const emit = defineEmits<{ select: []; click: [event: MouseEvent] }>();
+const emit = defineEmits<ListItemEmits>();
 
 function onClick(event: MouseEvent) {
   if (props.disabled) return;
@@ -26,6 +26,7 @@ function onClick(event: MouseEvent) {
     :aria-current="active ? 'page' : undefined"
     :aria-pressed="selected"
     :data-lilia-selected="active || selected ? 'true' : undefined"
+    data-lilia-selected-indicator="start"
     :data-agent-id="agentId"
     @click="onClick"
   >
@@ -40,7 +41,7 @@ function onClick(event: MouseEvent) {
 .ui-list-item:hover:not(:disabled) { background: var(--lilia-state-layer-hover); }
 .ui-list-item:active:not(:disabled) { background: var(--lilia-state-layer-pressed); }
 .ui-list-item.is-active,
-.ui-list-item.is-selected { border-color: var(--lilia-state-indicator-selected); background: var(--lilia-state-layer-selected); color: var(--lilia-state-foreground-selected); box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected); }
+.ui-list-item.is-selected { border-color: var(--lilia-state-indicator-selected); background: var(--lilia-state-layer-selected); color: var(--lilia-state-foreground-selected); }
 .ui-list-item.is-active:hover:not(:disabled),
 .ui-list-item.is-selected:hover:not(:disabled) { background: var(--lilia-state-layer-selected-hover); }
 .ui-list-item.is-active:active:not(:disabled),

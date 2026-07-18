@@ -1,8 +1,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { chromium } from "@playwright/test";
 import { createServer } from "vite";
 import vue from "@vitejs/plugin-vue";
+import { launchChromium } from "../browser/chromium.ts";
 import type {
   ComponentPerfRegression,
   ComponentPerfReport,
@@ -50,7 +50,7 @@ const address = server.httpServer?.address();
 if (!address || typeof address === "string") {
   throw new Error("Unable to start Vite performance harness.");
 }
-let browser: Awaited<ReturnType<typeof chromium.launch>> | undefined;
+let browser: Awaited<ReturnType<typeof launchChromium>> | undefined;
 try {
   const {
     compareComponentPerfReport,
@@ -59,7 +59,7 @@ try {
     "/tests/perf/componentPerformanceRunner.ts",
   ) as ComponentPerformanceModule;
 
-  browser = await chromium.launch();
+  browser = await launchChromium();
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
   await page.goto(`http://127.0.0.1:${address.port}/tests/perf/browserHarness.html`);
   const report = await page.evaluate<ComponentPerfReport>(() => {

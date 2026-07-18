@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { InteractiveCardProps } from "@lilia/ui-contract";
+import type { InteractiveCardEmits, InteractiveCardProps } from "@lilia/ui-contract";
 import NanaCard from "./NanaCard.vue";
 const props = withDefaults(defineProps<InteractiveCardProps>(), {
   selected: false,
@@ -10,7 +10,13 @@ const props = withDefaults(defineProps<InteractiveCardProps>(), {
   surfaceLevel: "raised",
   surfaceBoundary: true,
 });
-const emit = defineEmits<{ select: [] }>();
+const emit = defineEmits<InteractiveCardEmits>();
+function onClick(event: MouseEvent) {
+  if (props.disabled) return;
+  emit("select");
+  emit("press");
+  emit("click", event);
+}
 </script>
 
 <template>
@@ -24,7 +30,7 @@ const emit = defineEmits<{ select: [] }>();
     :surface-level="props.surfaceLevel"
     :surface-boundary="props.surfaceBoundary"
   >
-    <button type="button" class="nana-card__action" :disabled="disabled" :aria-pressed="pressed ?? selected" @click="emit('select')">
+    <button type="button" class="nana-card__action" data-lilia-selected-indicator="start" :disabled="disabled" :aria-pressed="pressed ?? selected" @click="onClick">
       <slot />
     </button>
   </NanaCard>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import X from "@lucide/vue/dist/esm/icons/x.mjs";
-import type { DrawerProps } from "@lilia/ui-contract";
+import type { DrawerProps, OpenStateEmits } from "@lilia/ui-contract";
 import { useDialogPrimitive } from "@lilia/ui-foundation/dialog";
 import { ref, watch } from "vue";
 import { useOverlayPresence } from "../composables/useOverlayActivity";
@@ -11,14 +11,18 @@ const props = withDefaults(defineProps<DrawerProps>(), {
   side: "right",
   closeOnEscape: true,
   closeOnOutside: true,
+  closeDisabled: false,
+  closeAgentId: undefined,
+  closeLabel: "关闭",
   initialFocus: "first-action",
   agentId: undefined,
 });
-const emit = defineEmits<{ "update:open": [open: boolean]; close: [] }>();
+const emit = defineEmits<OpenStateEmits>();
 const overlay = ref<HTMLElement | null>(null);
 const overlayPresence = useOverlayPresence();
 
 function close() {
+  if (props.closeDisabled) return;
   emit("update:open", false);
   emit("close");
 }
@@ -56,7 +60,7 @@ function onAfterLeave() {
               <h2 class="ui-overlay__title"><slot name="title">{{ title }}</slot></h2>
               <p v-if="description" class="ui-overlay__description">{{ description }}</p>
             </div>
-            <button class="ui-overlay__close" type="button" aria-label="关闭" @click="close">
+            <button class="ui-overlay__close" type="button" :aria-label="closeLabel" :data-agent-id="closeAgentId" :disabled="closeDisabled" @click="close">
               <X :size="16" aria-hidden="true" />
             </button>
           </header>

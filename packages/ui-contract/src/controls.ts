@@ -13,6 +13,8 @@ export interface ButtonProps extends ControlStateProps {
   variant?: ButtonVariant;
   size?: UIControlSize;
 }
+export interface ButtonEmits { click: [event: MouseEvent] }
+export interface ButtonSlots { default?: () => unknown; icon?: () => unknown }
 
 export interface IconButtonProps extends ButtonProps, AccessibleLabelProps {
   label: string;
@@ -22,17 +24,23 @@ export interface IconButtonProps extends ButtonProps, AccessibleLabelProps {
 
 export interface InputProps extends ControlStateProps, AccessibleLabelProps {
   modelValue?: string | number;
+  type?: string;
   name?: string;
   placeholder?: string;
   readonly?: boolean;
   required?: boolean;
   size?: UIControlSize;
 }
+export interface InputEmits {
+  "update:modelValue": [value: string];
+  input: [event: Event];
+}
 
 export interface TextareaProps extends InputProps {
   rows?: number;
   resize?: "none" | "vertical" | "both";
 }
+export interface TextareaEmits extends InputEmits {}
 
 export interface SelectOption<T = string | number> {
   value: T;
@@ -46,23 +54,37 @@ export interface SelectProps<T = string | number> extends ControlStateProps, Acc
   placeholder?: string;
   size?: UIControlSize;
 }
+export interface SelectEmits<T = string | number> {
+  "update:modelValue": [value: T];
+  change: [event: Event];
+}
 
 export interface CheckboxProps extends ControlStateProps {
   modelValue?: boolean;
   indeterminate?: boolean;
   label?: string;
 }
+export interface CheckboxEmits {
+  "update:modelValue": [value: boolean];
+  change: [event: Event];
+}
 
 export interface SwitchProps extends ControlStateProps, AccessibleLabelProps {
   modelValue?: boolean;
   label?: string;
 }
+export interface SwitchEmits extends CheckboxEmits {}
 
 export interface SliderProps extends ControlStateProps, AccessibleLabelProps {
   modelValue?: number;
   min?: number;
   max?: number;
   step?: number;
+}
+export interface SliderEmits {
+  "update:modelValue": [value: number];
+  input: [event: Event];
+  change: [event: Event];
 }
 
 export interface FormFieldProps extends AgentTargetProps {

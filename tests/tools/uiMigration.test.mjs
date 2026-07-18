@@ -18,7 +18,7 @@ describe("UI migration tooling", () => {
     expect(new Set(UI_LAYER_SUBPATHS.lilia)).toEqual(new Set(publishedSubpaths));
   });
 
-  it("accepts Lilia stable barrels and wildcard public subpaths", async () => {
+  it("accepts Lilia stable barrels and explicit compatibility subpaths", async () => {
     const root = createUiFixture({
       legacy: true,
       main: [
@@ -37,6 +37,23 @@ describe("UI migration tooling", () => {
 
     expect(inspection.contractIncompatibilities).toHaveLength(0);
     expect(inspection.blockers).toHaveLength(0);
+  });
+
+  it("reports the Legacy Shell lifecycle and Workspace Regions replacement", async () => {
+    const root = createUiFixture({
+      legacy: true,
+      main: [
+        'import { LiliaDesktopShell } from "@lilia/ui/shell";',
+        "export const shell = LiliaDesktopShell;",
+        "",
+      ].join("\n"),
+    });
+    const inspection = await inspectUiMigration(root);
+    expect(inspection.informationArchitectureReview).toContainEqual(expect.objectContaining({
+      path: "src/main.ts",
+      detail: expect.stringContaining("LiliaAppShell + Workspace Regions"),
+    }));
+    expect(inspection.informationArchitectureReview[0].detail).toContain("0.3.0");
   });
 
   it("routes known imports through a generated facade without rewriting business behavior", async () => {

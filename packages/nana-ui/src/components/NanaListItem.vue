@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import type { ListItemProps } from "@lilia/ui-contract";
+import type { ListItemEmits, ListItemProps } from "@lilia/ui-contract";
 withDefaults(defineProps<ListItemProps>(), { active: false, disabled: false, selected: false });
-const emit = defineEmits<{ select: [] }>();
+const emit = defineEmits<ListItemEmits>();
+function onClick(event: MouseEvent) {
+  if (event.currentTarget instanceof HTMLButtonElement && event.currentTarget.disabled) return;
+  emit("select");
+  emit("click", event);
+}
 </script>
 
 <template>
@@ -13,7 +18,8 @@ const emit = defineEmits<{ select: [] }>();
     :aria-current="active ? 'page' : undefined"
     :aria-pressed="selected"
     :data-lilia-selected="active || selected ? 'true' : undefined"
+    data-lilia-selected-indicator="start"
     :data-agent-id="agentId"
-    @click="emit('select')"
+    @click="onClick"
   ><slot /></button>
 </template>

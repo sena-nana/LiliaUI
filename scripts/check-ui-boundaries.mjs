@@ -7,6 +7,13 @@ const packageRoots = ["ui-contract", "ui-foundation", "nana-ui"]
 const sourceFiles = packageRoots.flatMap((packageRoot) => walk(resolve(packageRoot, "src")));
 const violations = [];
 
+const uiManifest = JSON.parse(readFileSync(resolve(root, "packages/ui/package.json"), "utf8"));
+for (const [subpath, target] of Object.entries(uiManifest.exports ?? {})) {
+  if (subpath.includes("*") || String(target).includes("*")) {
+    violations.push(`packages/ui/package.json: wildcard export is forbidden: ${subpath}`);
+  }
+}
+
 for (const file of sourceFiles) {
   const source = readFileSync(file, "utf8");
   const name = relative(root, file);

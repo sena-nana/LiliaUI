@@ -4,7 +4,6 @@ import {
   computed,
   onBeforeUnmount,
   onMounted,
-  onUpdated,
   provide,
   ref,
   shallowRef,
@@ -51,6 +50,8 @@ const workspaceStyle = computed(() => ({
   gridTemplateRows: layout.value.rows,
 }));
 let resizeObserver: ResizeObserver | null = null;
+let mutationObserver: MutationObserver | null = null;
+const observedElements = new Set<Element>();
 let measureFrame: number | null = null;
 let stableFrame: number | null = null;
 let nextRegionOrder = 0;
@@ -71,6 +72,7 @@ function getGeometry(id: string) {
   if (existing) return existing;
   const state: WorkspaceGeometryState = {
     id,
+    subscribers: 0,
     rect: shallowRef(null),
     safeRect: shallowRef(null),
     visible: ref(false),
@@ -80,6 +82,17 @@ function getGeometry(id: string) {
   return state;
 }
 
+function observe(element: Element) {
+  if (!resizeObserver || observedElements.has(element)) return;
+  resizeObserver.observe(element);
+  observedElements.add(element);
+}
+
+function unobserve(element: Element | null) {
+  if (!element || !observedElements.delete(element)) return;
+  resizeObserver?.unobserve(element);
+}
+
 function measureGeometry() {
   measureFrame = null;
   const workspaceElement = root.value;
@@ -87,7 +100,8 @@ function measureGeometry() {
   const workspaceRect = workspaceElement.getBoundingClientRect();
   inlineSize.value = workspaceRect.width;
   for (const registration of registrations.value) {
-    const state = getGeometry(registration.id);
+    const state = geometryStates.get(registration.id);
+    if (!state || state.subscribers === 0) continue;
     const regionLayout = layout.value.regions.get(registration.key);
     const element = registration.element.value;
     const visible = Boolean(regionLayout?.visible && element?.isConnected);
@@ -100,7 +114,7 @@ function measureGeometry() {
     const rect = element.getBoundingClientRect();
     state.rect.value = rect;
     state.safeRect.value = intersectRects(rect, workspaceRect);
-    resizeObserver?.observe(element);
+    observe(element);
   }
   stableFrame = requestFrame(() => {
     stableFrame = null;
@@ -111,9 +125,9 @@ function measureGeometry() {
 function refreshGeometry() {
   for (const state of geometryStates.values()) state.stable.value = false;
   if (!root.value) return;
-  cancelFrame(measureFrame);
   cancelFrame(stableFrame);
   stableFrame = null;
+  if (measureFrame !== null) return;
   measureFrame = requestFrame(measureGeometry);
 }
 
@@ -138,10 +152,9 @@ function registerRegion(registration: WorkspaceRegionRegistration) {
   registration.order = nextRegionOrder;
   nextRegionOrder += 1;
   registrations.value = [...registrations.value, registration];
-  getGeometry(registration.id);
   refreshGeometry();
   return () => {
-    if (registration.element.value) resizeObserver?.unobserve(registration.element.value);
+    unobserve(registration.element.value);
     registrations.value = registrations.value.filter((item) => item.key !== registration.key);
     const state = geometryStates.get(registration.id);
     if (state) {
@@ -154,11 +167,33 @@ function registerRegion(registration: WorkspaceRegionRegistration) {
   };
 }
 
+function subscribeGeometry(id: string) {
+  const state = getGeometry(id);
+  state.subscribers += 1;
+  refreshGeometry();
+  let active = true;
+  return {
+    state,
+    unsubscribe() {
+      if (!active) return;
+      active = false;
+      state.subscribers = Math.max(0, state.subscribers - 1);
+      if (state.subscribers > 0) return;
+      const registration = registrations.value.find((item) => item.id === id);
+      unobserve(registration?.element.value ?? null);
+      state.rect.value = null;
+      state.safeRect.value = null;
+      state.visible.value = false;
+      state.stable.value = true;
+    },
+  };
+}
+
 provide(workspaceContextKey, {
   inlineSize,
   layout,
   registerRegion,
-  getGeometry,
+  subscribeGeometry,
   refreshLayout,
   refreshGeometry,
 });
@@ -166,18 +201,23 @@ provide(workspaceContextKey, {
 onMounted(() => {
   if (typeof ResizeObserver === "function") {
     resizeObserver = new ResizeObserver(refreshGeometry);
-    if (root.value) resizeObserver.observe(root.value);
+    if (root.value) observe(root.value);
+  }
+  if (typeof MutationObserver === "function" && root.value) {
+    mutationObserver = new MutationObserver(refreshLayout);
+    mutationObserver.observe(root.value, { childList: true });
   }
   window.addEventListener("resize", refreshGeometry, { passive: true });
   window.visualViewport?.addEventListener("resize", refreshGeometry, { passive: true });
   measureGeometry();
 });
 
-onUpdated(refreshGeometry);
-
 onBeforeUnmount(() => {
+  mutationObserver?.disconnect();
+  mutationObserver = null;
   resizeObserver?.disconnect();
   resizeObserver = null;
+  observedElements.clear();
   window.removeEventListener("resize", refreshGeometry);
   window.visualViewport?.removeEventListener("resize", refreshGeometry);
   cancelFrame(measureFrame);

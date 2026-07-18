@@ -2,10 +2,10 @@
 import { nextTick, ref, toRef, watch } from "vue";
 import { useAnchoredPosition } from "@lilia/ui-foundation/anchored-position";
 import { useDismissableLayer } from "@lilia/ui-foundation/overlay";
-import type { PopoverProps } from "@lilia/ui-contract";
+import type { OpenStateEmits, PopoverProps } from "@lilia/ui-contract";
 
 const props = withDefaults(defineProps<PopoverProps>(), { placement: "bottom", closeOnEscape: true, closeOnOutside: true });
-const emit = defineEmits<{ "update:open": [open: boolean]; close: [] }>();
+const emit = defineEmits<OpenStateEmits>();
 const root = ref<HTMLElement | null>(null);
 const trigger = ref<HTMLElement | null>(null);
 const setOpen = (open: boolean) => {
@@ -39,5 +39,5 @@ watch(() => props.open, (open) => {
 
 <template>
   <span ref="trigger" class="nana-popover-anchor" :aria-expanded="open" @click="setOpen(!open)" @keydown.enter.prevent="setOpen(!open)" @keydown.space.prevent="setOpen(!open)"><slot name="trigger" /></span>
-  <Teleport to="body"><div v-if="open" ref="root" class="nana-popover" :class="`nana-popover--${placement}`" :style="style" role="dialog" :data-agent-id="agentId"><slot /></div></Teleport>
+  <Teleport to="body"><div v-if="open" ref="root" class="nana-popover" :class="`nana-popover--${placement}`" :style="style" role="dialog" :aria-label="ariaLabel" :data-agent-id="agentId"><slot /></div></Teleport>
 </template>

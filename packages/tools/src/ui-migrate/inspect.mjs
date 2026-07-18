@@ -32,7 +32,11 @@ export async function inspectUiMigration(projectRoot = process.cwd(), options = 
       detail: `Unknown Layer subpath cannot be migrated safely: ${item.specifier}`,
     }];
   });
-  const shellFiles = sources.filter((item) => /\b(?:LiliaDesktopShell|NanaDesktopShell|createApp|Sidebar)\b/.test(item.source));
+  const legacyShellFiles = sources.filter((item) => /\b(?:LiliaDesktopShell|LegacyAppShell|NanaDesktopShell)\b/.test(item.source));
+  const shellFiles = sources.filter((item) => (
+    /\b(?:createApp|Sidebar)\b/.test(item.source)
+    && !legacyShellFiles.some((legacy) => legacy.path === item.path)
+  ));
   const featureFiles = project.files.filter((path) => path.startsWith("src/features/"));
 
   return {
@@ -48,10 +52,16 @@ export async function inspectUiMigration(projectRoot = process.cwd(), options = 
       path,
       detail: "Review density, progressive disclosure, and non-color status cues for the selected preset.",
     })),
-    informationArchitectureReview: shellFiles.map((item) => ({
-      path: item.path,
-      detail: "Custom shell, sidebar, or mount behavior requires an information-architecture review.",
-    })),
+    informationArchitectureReview: [
+      ...legacyShellFiles.map((item) => ({
+        path: item.path,
+        detail: "Legacy Shell detected: migrate to LiliaAppShell + Workspace Regions before removal in 0.3.0.",
+      })),
+      ...shellFiles.map((item) => ({
+        path: item.path,
+        detail: "Custom shell, sidebar, or mount behavior requires an information-architecture review.",
+      })),
+    ],
     recoveryFeedbackGaps: featureFiles.map((path) => ({
       path,
       detail: "Confirm critical feedback has recovery actions and is not toast-only.",

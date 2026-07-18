@@ -483,6 +483,82 @@ describe("Workspace Region layout", () => {
 });
 
 describe("Workspace region geometry", () => {
+  it("does not measure region rects when no geometry consumer subscribed", async () => {
+    let regionReads = 0;
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function mockRect() {
+      if (this.dataset.regionId) regionReads += 1;
+      return this.classList.contains("lilia-workspace")
+        ? new DOMRect(0, 0, 1200, 800)
+        : new DOMRect(0, 0, 120, 80);
+    });
+    const Host = defineComponent({
+      setup() {
+        const revision = ref(0);
+        return { revision };
+      },
+      components: { LiliaWorkspace, LiliaWorkspaceRegion },
+      template: `
+        <LiliaWorkspace>
+          <LiliaWorkspaceRegion
+            v-for="index in 20"
+            :key="index"
+            :id="'region-' + index"
+            :role="index === 10 ? 'primary' : 'utility'"
+            :placement="index === 10 ? 'primary' : index % 2 ? 'start' : 'end'"
+          >{{ revision }}</LiliaWorkspaceRegion>
+          <button @click="revision += 1">update</button>
+        </LiliaWorkspace>
+      `,
+    });
+    const view = render(Host);
+    await waitFor(() => expect(region(view.container, "region-10")).toBeVisible());
+    expect(regionReads).toBe(0);
+    await fireEvent.click(view.getByRole("button", { name: "update" }));
+    await new Promise((resolve) => requestAnimationFrame(() => resolve(undefined)));
+    expect(regionReads).toBe(0);
+  });
+
+  it("measures only subscribed regions and coalesces refreshes in one frame", async () => {
+    const observed = new Set<Element>();
+    const observe = vi.fn((element: Element) => observed.add(element));
+    const unobserve = vi.fn((element: Element) => observed.delete(element));
+    vi.stubGlobal("ResizeObserver", vi.fn(class {
+      observe = observe;
+      unobserve = unobserve;
+      disconnect = vi.fn(() => observed.clear());
+    }));
+    const reads = new Map<string, number>();
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function mockRect() {
+      const id = this.dataset.regionId ?? "workspace";
+      reads.set(id, (reads.get(id) ?? 0) + 1);
+      return new DOMRect(0, 0, id === "workspace" ? 900 : 300, 600);
+    });
+    const Probe = defineComponent({
+      setup() { return { geometry: useWorkspaceRegion("subscribed") }; },
+      template: `<output>{{ geometry.stable.value }}</output>`,
+    });
+    const Host = defineComponent({
+      components: { LiliaWorkspace, LiliaWorkspaceRegion, Probe },
+      template: `
+        <LiliaWorkspace>
+          <LiliaWorkspaceRegion id="plain" role="resources" placement="start" />
+          <LiliaWorkspaceRegion id="subscribed" role="primary"><Probe /></LiliaWorkspaceRegion>
+          <LiliaWorkspaceRegion id="plain-end" role="inspector" placement="end" />
+        </LiliaWorkspace>
+      `,
+    });
+    const view = render(Host);
+    await waitFor(() => expect(view.getByText("true")).toBeInTheDocument());
+    expect(reads.get("plain") ?? 0).toBe(0);
+    expect(reads.get("plain-end") ?? 0).toBe(0);
+    expect(observe).toHaveBeenCalledTimes(2);
+
+    reads.set("subscribed", 0);
+    for (let index = 0; index < 8; index += 1) window.dispatchEvent(new Event("resize"));
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    expect(reads.get("subscribed")).toBe(1);
+  });
+
   it("publishes the latest clipped primary rect after region resize, viewport scale, and visibility changes", async () => {
     let primaryWidth = 640;
     const visualViewport = new EventTarget() as VisualViewport;
