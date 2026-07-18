@@ -28,7 +28,6 @@
 }
 
 :where(.lilia-interactive-item, [data-lilia-interactive]) {
-  --lilia-state-selected-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected);
   background-color: transparent;
   transition: background-color 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
 }
@@ -44,10 +43,6 @@
 :where(.lilia-interactive-item, [data-lilia-interactive])[data-lilia-selected="true"] {
   background-color: var(--lilia-state-layer-selected);
   color: var(--lilia-state-foreground-selected);
-}
-
-:where(.lilia-interactive-item, [data-lilia-interactive])[data-lilia-selected="true"][data-lilia-selected-indicator="start"] {
-  box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected);
 }
 
 :where(.lilia-interactive-item, [data-lilia-interactive])[data-lilia-selected="true"][data-lilia-selected-indicator="bottom"] {

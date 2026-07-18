@@ -35,7 +35,6 @@ const surfaceAttributes = computed(() => resolveSurfaceAttributes(props));
     :data-agent-id="agentId"
     :aria-disabled="disabled || undefined"
     :data-lilia-selected="selected ? 'true' : undefined"
-    data-lilia-selected-indicator="start"
   >
     <h2 v-if="title || $slots.title">
       <span class="card-h2__title">

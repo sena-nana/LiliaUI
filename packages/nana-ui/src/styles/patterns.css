@@ -25,7 +25,7 @@
 .nana-settings__nav { display: flex; flex-direction: column; gap: 4px; }
 .nana-settings__nav-item { min-height: var(--control-height); padding: 0 12px; display: flex; align-items: center; gap: 9px; color: var(--text-muted); border-radius: var(--radius-sm); text-decoration: none; }
 .nana-settings__nav-item:hover { color: var(--text); background: var(--lilia-state-layer-hover); }
-.nana-settings__nav-item.is-active { color: var(--lilia-state-foreground-selected); background: var(--lilia-state-layer-selected); box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected); }
+.nana-settings__nav-item.is-active { color: var(--lilia-state-foreground-selected); background: var(--lilia-state-layer-selected); }
 .nana-settings__content { display: grid; align-content: start; }
 .nana-settings-card__header { margin-bottom: 8px; }
 .nana-settings-card__header h2 { margin: 0; font-size: 17px; }
