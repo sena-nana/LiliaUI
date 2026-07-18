@@ -49,7 +49,7 @@
 .nana-sidebar--icon .nana-sidebar__item { width: 46px; justify-content: center; padding: 0; }
 .nana-sidebar__item:hover { color: var(--text); background: var(--lilia-state-layer-hover); }
 .nana-sidebar__item:active { background: var(--lilia-state-layer-pressed); }
-.nana-sidebar__item.is-active, .nana-sidebar__item[aria-current="page"] { color: var(--lilia-state-foreground-selected); background: var(--lilia-state-layer-selected); border-color: var(--lilia-state-indicator-selected); box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected); }
+.nana-sidebar__item.is-active, .nana-sidebar__item[aria-current="page"] { color: var(--lilia-state-foreground-selected); background: var(--lilia-state-layer-selected); border-color: var(--lilia-state-indicator-selected); }
 .nana-sidebar__item:focus-visible { outline: 2px solid var(--lilia-state-focus-ring); outline-offset: 2px; }
 .nana-sidebar__item[aria-disabled="true"], .nana-sidebar__item:disabled { opacity: 0.45; pointer-events: none; }
 .nana-sidebar__badges { display: inline-flex; gap: 3px; }

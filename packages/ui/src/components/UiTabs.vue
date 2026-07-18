@@ -59,7 +59,7 @@ function onKeydown(event: KeyboardEvent, index: number) {
 .ui-tabs { display: flex; min-width: 0; gap: 2px; }
 .ui-tabs--horizontal { align-items: flex-end; border-bottom: 1px solid var(--border); }
 .ui-tabs--vertical { flex-direction: column; align-items: stretch; border-right: 1px solid var(--border); }
-.ui-tabs__tab { --lilia-state-selected-shadow: inset 0 -2px 0 var(--lilia-state-indicator-selected); min-width: 0; height: 34px; padding: 0 12px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-muted); cursor: pointer; font: inherit; font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: background-color 0.12s ease, color 0.12s ease, box-shadow 0.12s ease; }
+.ui-tabs__tab { min-width: 0; height: 34px; padding: 0 12px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-muted); cursor: pointer; font: inherit; font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: background-color 0.12s ease, color 0.12s ease, box-shadow 0.12s ease; }
 .ui-tabs__tab:hover:not(:disabled) { background: var(--lilia-state-layer-hover); color: var(--text); }
 .ui-tabs__tab:active:not(:disabled) { background: var(--lilia-state-layer-pressed); }
 .ui-tabs__tab.is-active { background: var(--lilia-state-layer-selected); color: var(--lilia-state-foreground-selected); }

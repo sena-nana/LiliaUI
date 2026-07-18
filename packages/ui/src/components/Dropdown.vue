@@ -328,7 +328,6 @@ function onAfterLeave() {
 .dd__item.is-active {
   background: var(--lilia-state-layer-selected);
   color: var(--lilia-state-foreground-selected);
-  box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected);
 }
 
 .dd__item.is-active:hover:not(:disabled) {
