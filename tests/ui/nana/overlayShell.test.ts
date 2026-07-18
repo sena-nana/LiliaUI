@@ -96,19 +96,19 @@ describe("NanaUI overlay and shell behavior", () => {
     expect(view.emitted("select")).toBeUndefined();
   });
 
-  it("does not mount the context panel without explicit context", async () => {
-    const router = routerPlugin();
-    await router.push("/");
-    await router.isReady();
+  it("renders common application slots without requiring a Router", async () => {
     const view = render(NanaAppShell, {
-      props: { navigation: [], contextVisible: false },
-      slots: { context: "<div>属性内容</div>", default: "<div>主要任务</div>" },
-      global: { plugins: [router] },
+      props: { title: "Nana Workspace" },
+      slots: {
+        "header-actions": "<button>保存</button>",
+        default: "<main>主要任务</main>",
+        overlays: "<div>应用浮层</div>",
+      },
     });
     expect(screen.getByText("主要任务")).toBeVisible();
-    expect(screen.queryByText("属性内容")).toBeNull();
-    await view.rerender({ navigation: [], contextVisible: true });
-    expect(screen.getByText("属性内容")).toBeVisible();
+    expect(screen.getByRole("button", { name: "保存" })).toBeVisible();
+    expect(screen.getByText("应用浮层")).toBeVisible();
+    expect(view.container.querySelector("main main")).toBeNull();
   });
 
   it("renders grouped items, badges, actions, and disabled actions", async () => {

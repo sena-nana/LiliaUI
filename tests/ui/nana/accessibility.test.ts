@@ -1,9 +1,9 @@
 import axe from "axe-core";
 import { render } from "@testing-library/vue";
 import { defineComponent } from "vue";
-import { createMemoryHistory, createRouter } from "vue-router";
 import { describe, expect, it } from "vitest";
-import { NanaButton, NanaCheckbox, NanaFormField, NanaInput, NanaProgress, NanaUIProvider } from "@lilia/nana-ui";
+import { NanaButton, NanaCheckbox, NanaFormField, NanaInput, NanaProgress } from "@lilia/nana-ui";
+import { NanaUIProvider } from "@lilia/nana-ui/provider";
 import { NanaAppShell } from "@lilia/nana-ui/shell";
 
 const axeOptions = { rules: { "color-contrast": { enabled: false } } };
@@ -30,16 +30,10 @@ describe("NanaUI accessibility", () => {
     expect(result.violations).toEqual([]);
   });
 
-  it("keeps shell navigation and landmarks accessible", async () => {
-    const router = createRouter({
-      history: createMemoryHistory(),
-      routes: [{ path: "/", component: { template: "<article><h1>首页</h1></article>" } }],
-    });
-    await router.push("/");
-    await router.isReady();
+  it("keeps the router-free shell and application content accessible", async () => {
     const view = render(NanaAppShell, {
-      props: { navigation: [{ id: "home", label: "首页", href: "/", active: true }] },
-      global: { plugins: [router] },
+      props: { title: "Nana" },
+      slots: { default: "<main><h1>首页</h1></main>" },
     });
     const result = await axe.run(view.container, axeOptions);
     expect(result.violations).toEqual([]);

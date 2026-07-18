@@ -4,10 +4,10 @@ import Pencil from "@lucide/vue/dist/esm/icons/pencil.mjs";
 import Settings from "@lucide/vue/dist/esm/icons/settings.mjs";
 import Sparkles from "@lucide/vue/dist/esm/icons/sparkles.mjs";
 import { NanaUIProvider } from "@lilia/nana-ui/provider";
-import { NanaAppShell } from "@lilia/nana-ui/shell";
+import { NanaAppShell, NanaSidebar } from "@lilia/nana-ui/shell";
 import type { SidebarItem } from "@lilia/ui-contract";
 import { computed, markRaw } from "vue";
-import { useRoute } from "vue-router";
+import { RouterView, useRoute } from "vue-router";
 
 const route = useRoute();
 const primaryNavigation = [
@@ -33,15 +33,17 @@ const settingsItem = computed<SidebarItem>(() => ({
 
 <template>
   <NanaUIProvider agent-id="example.nana-provider">
-    <NanaAppShell
-      :navigation="navigation"
-      :settings-item="settingsItem"
-      agent-id="example.nana-shell"
-    >
-      <template #project>Nana 示例项目</template>
-      <template #save-state>已保存</template>
-      <template #device-state>设备已连接</template>
-      <template #runtime-state>待机</template>
+    <NanaAppShell title="Nana 示例项目" agent-id="example.nana-shell">
+      <template #header-actions><span>已保存 · 设备已连接 · 待机</span></template>
+      <div class="example-workspace">
+        <NanaSidebar :items="navigation" :settings-item="settingsItem" />
+        <main><RouterView /></main>
+      </div>
     </NanaAppShell>
   </NanaUIProvider>
 </template>
+
+<style scoped>
+.example-workspace { min-width: 0; min-height: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); }
+.example-workspace > main { min-width: 0; min-height: 0; overflow: auto; }
+</style>

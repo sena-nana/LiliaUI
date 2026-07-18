@@ -11,6 +11,7 @@
     "./dialog": "./src/useDialogPrimitive.ts",
     "./field": "./src/useFieldPrimitive.ts",
     "./overlay": "./src/useDismissableLayer.ts",
+    "./policy": "./src/policy.ts",
     "./responsive": "./src/useResponsiveMode.ts",
     "./roving-focus": "./src/useRovingFocus.ts",
     "./selection": "./src/useSelectionPrimitive.ts",

@@ -3,6 +3,7 @@ import { nanaControlScenarios } from "./controls";
 import { nanaFeedbackScenarios } from "./feedback";
 import { nanaFormSurfaceScenarios } from "./formsSurfaces";
 import { nanaOverlayScenarios } from "./overlays";
+import { nanaSettingsScenarios } from "./settings";
 import { nanaShellScenarios } from "./shell";
 
 export const nanaComponentScenarios: ComponentPerfScenario[] = [
@@ -10,5 +11,6 @@ export const nanaComponentScenarios: ComponentPerfScenario[] = [
   ...nanaFormSurfaceScenarios,
   ...nanaFeedbackScenarios,
   ...nanaOverlayScenarios,
+  ...nanaSettingsScenarios,
   ...nanaShellScenarios,
 ];

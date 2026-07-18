@@ -6,9 +6,9 @@ import {
   NanaListItem,
   NanaSkeleton,
   NanaStatusBadge,
-  NanaUIProvider,
   NanaValidationMessage,
 } from "@lilia/nana-ui";
+import { NanaUIProvider } from "@lilia/nana-ui/provider";
 import { h } from "vue";
 import type { ComponentPerfScenario } from "../../componentScenarios";
 import { click } from "./helpers";

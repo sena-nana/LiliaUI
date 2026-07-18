@@ -9,12 +9,14 @@ describe("public package entrypoints", () => {
   });
 
   it("loads stable boundaries without installing diagnostics", async () => {
-    const [root, calendar, search, overlay, presetDefinition, shell, shellApp, shellConfig, shellSidebar, layouts, settings, settingsSidebar, runtime, tauriRuntime, commands, diagnostics] = await Promise.all([
+    const [root, calendar, search, overlay, preset, presetDefinition, provider, shell, shellApp, shellConfig, shellSidebar, layouts, settings, settingsSidebar, runtime, tauriRuntime, commands, diagnostics] = await Promise.all([
       import("@lilia/ui"),
       import("@lilia/ui/calendar"),
       import("@lilia/ui/search"),
       import("@lilia/ui/overlay"),
+      import("@lilia/ui/preset"),
       import("@lilia/ui/preset/definition"),
+      import("@lilia/ui/provider"),
       import("@lilia/ui/shell"),
       import("@lilia/ui/shell/app"),
       import("@lilia/ui/shell/config"),
@@ -33,8 +35,9 @@ describe("public package entrypoints", () => {
     expect(search.SearchDropdown).toBeDefined();
     expect(overlay.OverlayHost).toBeDefined();
     expect(overlay.useOverlayActivity).toBeTypeOf("function");
+    expect(preset.liliaPresetAdapter.provider).toBeDefined();
     expect(presetDefinition.liliaPresetDefinition.id).toBe("lilia");
-    expect(shell.LiliaDesktopShell).toBeDefined();
+    expect(provider.LiliaUIProvider).toBeDefined();
     expect(shell.LiliaAppShell).toBeDefined();
     expect(shellApp.LiliaAppShell).toBe(shell.LiliaAppShell);
     expect(shellConfig.setLiliaUiConfig).toBeTypeOf("function");

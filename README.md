@@ -1,6 +1,6 @@
 # LiliaUI
 
-LiliaUI 是 Lilia 桌面应用生态的公共 UI、配置、工具、构建与 Tauri 运行时源码仓库。专业工具界面使用 `@lilia/ui`，面向普通用户的任务型界面使用 `@lilia/nana-ui`；两者共享 Contract 与 Foundation，但一次产品构建只选择一个完整 UI Layer。
+LiliaUI 是 Lilia 桌面应用生态的公共 UI、配置、工具、构建与 Tauri 运行时源码仓库。专业工具界面使用 `@lilia/ui`，面向普通用户的任务型界面使用 `@lilia/nana-ui`；两者共享 Contract、Foundation 以及 Router-free Preset/Provider/Shell/Settings 框架，但一次产品构建只选择一个完整 UI Layer。
 
 ## 文档入口
 

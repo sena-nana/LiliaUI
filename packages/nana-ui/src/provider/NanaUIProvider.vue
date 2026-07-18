@@ -7,6 +7,7 @@ import {
   resolveNativePlatform,
   type NativeBackdropMode,
 } from "@lilia/ui-foundation/native-appearance";
+import { provideUIPolicy } from "@lilia/ui-foundation/policy";
 import { useThemeState, type UITheme } from "@lilia/ui-foundation/theme";
 import { createNanaUIContext, nanaUIContextKey } from "./context";
 
@@ -51,6 +52,8 @@ const context = createNanaUIContext(
   },
 );
 provide(nanaUIContextKey, context);
+provideUIPolicy(context);
+
 watch(
   () => [props.policy, props.density] as const,
   ([policy, density]) => context.replacePolicy({ ...policy, ...(density ? { density } : {}) }),
