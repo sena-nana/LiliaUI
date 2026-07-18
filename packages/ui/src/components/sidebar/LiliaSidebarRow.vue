@@ -185,7 +185,6 @@ function onKeydown(event: KeyboardEvent) {
 .lilia-sidebar-row__control.is-active {
   background: var(--lilia-state-layer-selected);
   color: var(--lilia-state-foreground-selected);
-  box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected);
 }
 
 .lilia-sidebar-row.is-active .lilia-sidebar-row__control:hover,

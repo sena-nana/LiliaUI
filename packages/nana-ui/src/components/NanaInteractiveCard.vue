@@ -30,7 +30,7 @@ function onClick(event: MouseEvent) {
     :surface-level="props.surfaceLevel"
     :surface-boundary="props.surfaceBoundary"
   >
-    <button type="button" class="nana-card__action" data-lilia-selected-indicator="start" :disabled="disabled" :aria-pressed="pressed ?? selected" @click="onClick">
+    <button type="button" class="nana-card__action" :disabled="disabled" :aria-pressed="pressed ?? selected" @click="onClick">
       <slot />
     </button>
   </NanaCard>

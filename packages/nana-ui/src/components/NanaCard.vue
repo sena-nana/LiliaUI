@@ -22,6 +22,5 @@ const surfaceAttributes = computed(() => resolveSurfaceAttributes(props));
     :aria-disabled="disabled || undefined"
     :data-agent-id="agentId"
     :data-lilia-selected="selected ? 'true' : undefined"
-    data-lilia-selected-indicator="start"
   ><slot /></section>
 </template>
