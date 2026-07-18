@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useButtonPrimitive } from "@lilia/ui-foundation/button";
-import type { ButtonProps } from "@lilia/ui-contract";
+import type { ButtonEmits, ButtonProps } from "@lilia/ui-contract";
 
 const props = withDefaults(defineProps<ButtonProps>(), {
   type: "button",
@@ -10,7 +10,7 @@ const props = withDefaults(defineProps<ButtonProps>(), {
   loading: false,
   agentId: undefined,
 });
-const emit = defineEmits<{ click: [event: MouseEvent] }>();
+const emit = defineEmits<ButtonEmits>();
 const button = useButtonPrimitive(props);
 </script>
 
@@ -21,6 +21,7 @@ const button = useButtonPrimitive(props);
     :class="[`nana-button--${variant}`, `nana-button--${size}`]"
     :disabled="button.disabled.value"
     :aria-busy="button.ariaBusy.value"
+    :aria-invalid="invalid || undefined"
     :data-agent-id="agentId"
     @click="button.onPress($event) && emit('click', $event)"
   >

@@ -1,5 +1,14 @@
 import { defineAsyncComponent, inject, type App, type Component, type InjectionKey } from "vue";
-import type { RouteLocationRaw } from "vue-router";
+
+export type NavigationTarget = string | {
+  path?: string;
+  name?: string | symbol;
+  params?: Readonly<Record<string, unknown>>;
+  query?: Readonly<Record<string, unknown>>;
+  hash?: string;
+  replace?: boolean;
+  state?: Readonly<Record<string, unknown>>;
+};
 
 export type SettingsSectionLoader = () => Promise<{ default: Component }>;
 export type SettingsSectionInput = Component | SettingsSectionLoader;
@@ -9,11 +18,11 @@ export interface SettingsTabInput {
   key: string;
   label: string;
   props?: Record<string, unknown>;
-  to?: RouteLocationRaw;
+  to?: NavigationTarget;
 }
 
 export type SettingsTabKey = string;
-export interface SettingsTab extends Omit<SettingsTabInput, "to"> { to: RouteLocationRaw }
+export interface SettingsTab extends Omit<SettingsTabInput, "to"> { to: NavigationTarget }
 
 export interface SettingsModelInput {
   aliases?: Record<string, string>;

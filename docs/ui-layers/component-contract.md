@@ -1,5 +1,7 @@
 # Component Contract 与兼容策略
 
+公共入口清单、逐组件审计结果与输入值 emit 语义见 [Public API 与稳定化审计](./public-api.md)。兼容入口生命周期见 [兼容入口与弃用生命周期](./deprecations.md)。
+
 ## Contract 的稳定面
 
 `@lilia/ui-contract` 的根入口和显式 subpath 是跨 Layer 的类型级稳定面：

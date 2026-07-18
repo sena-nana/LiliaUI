@@ -14,6 +14,7 @@ import type {
 
 export interface WorkspaceGeometryState {
   id: string;
+  subscribers: number;
   rect: ShallowRef<DOMRectReadOnly | null>;
   safeRect: ShallowRef<DOMRectReadOnly | null>;
   visible: Ref<boolean>;
@@ -60,7 +61,10 @@ export interface WorkspaceContext {
   inlineSize: Readonly<Ref<number>>;
   layout: ComputedRef<WorkspaceLayoutModel>;
   registerRegion: (registration: WorkspaceRegionRegistration) => () => void;
-  getGeometry: (id: string) => WorkspaceGeometryState;
+  subscribeGeometry: (id: string) => {
+    state: WorkspaceGeometryState;
+    unsubscribe: () => void;
+  };
   refreshLayout: () => void;
   refreshGeometry: () => void;
 }

@@ -6,6 +6,7 @@ export interface ToastProps extends AgentTargetProps {
   tone?: UIStatusTone;
   dismissible?: boolean;
 }
+export interface ToastEmits { dismiss: [] }
 
 export interface ProgressProps extends AgentTargetProps {
   value?: number;
@@ -13,6 +14,7 @@ export interface ProgressProps extends AgentTargetProps {
   label: string;
   cancellable?: boolean;
 }
+export interface ProgressEmits { cancel: [] }
 
 export interface RecoveryAction {
   id: string;

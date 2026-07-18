@@ -8,6 +8,8 @@ export * from "./useDialogPrimitive";
 export * from "./useDismissableLayer";
 export * from "./useFieldPrimitive";
 export * from "./useResponsiveMode";
+export * from "./useRovingFocus";
+export * from "./useSelectionPrimitive";
 export * from "./useSidebarPrimitive";
 export * from "./useThemeSync";
 export * from "./useTooltipPrimitive";

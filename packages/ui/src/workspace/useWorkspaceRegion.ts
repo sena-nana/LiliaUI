@@ -1,4 +1,4 @@
-import { inject, readonly } from "vue";
+import { inject, onScopeDispose, readonly } from "vue";
 import { workspaceContextKey } from "./context";
 import type { WorkspaceRegionGeometry } from "./types";
 
@@ -7,7 +7,8 @@ export function useWorkspaceRegion(id: string): WorkspaceRegionGeometry {
   if (!workspace) {
     throw new Error("useWorkspaceRegion() must be called inside LiliaWorkspace.");
   }
-  const geometry = workspace.getGeometry(id);
+  const { state: geometry, unsubscribe } = workspace.subscribeGeometry(id);
+  onScopeDispose(unsubscribe);
   return {
     id,
     rect: readonly(geometry.rect),

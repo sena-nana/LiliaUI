@@ -882,11 +882,9 @@ __metadata:
     "@lilia/ui-contract": "workspace:*"
     typescript: "npm:^6.0.3"
     vue: "npm:^3.5.39"
-    vue-router: "npm:^5.1.0"
   peerDependencies:
     "@lilia/ui-contract": ^0.1.0
     vue: ^3.5.39
-    vue-router: ^5.1.0
   languageName: unknown
   linkType: soft
 

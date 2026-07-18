@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { chromium } from "@playwright/test";
+import { launchChromium } from "../browser/chromium.ts";
 
 const sidebarCss = readFileSync(resolve("packages/ui/src/styles/sidebar.css"), "utf8");
 const shellCss = [
@@ -23,7 +23,7 @@ const tokens = `
   }
 `;
 
-const browser = await chromium.launch();
+const browser = await launchChromium();
 try {
   const page = await browser.newPage();
 

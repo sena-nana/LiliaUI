@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PopoverProps } from "@lilia/ui-contract";
+import type { OpenStateEmits, PopoverProps } from "@lilia/ui-contract";
 import { useDismissableLayer } from "@lilia/ui-foundation/overlay";
 import { nextTick, ref, toRef, watch } from "vue";
 import "./overlay.css";
@@ -11,7 +11,7 @@ const props = withDefaults(defineProps<PopoverProps>(), {
   closeOnOutside: true,
   agentId: undefined,
 });
-const emit = defineEmits<{ "update:open": [open: boolean]; close: [] }>();
+const emit = defineEmits<OpenStateEmits>();
 const root = ref<HTMLElement | null>(null);
 const trigger = ref<HTMLElement | null>(null);
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { chromium } from "@playwright/test";
+import { launchChromium } from "../browser/chromium.ts";
 
 const layerStyles = [
   ["lilia", "packages/ui/src/styles/tokens.css", "packages/ui/src/styles/state-layer.css"],
@@ -13,7 +13,7 @@ const workspaceStyles = [
   "packages/ui/src/styles/workspace.css",
 ].map((path) => readFileSync(resolve(path), "utf8")).join("\n");
 
-const browser = await chromium.launch();
+const browser = await launchChromium();
 try {
   for (const [layer, tokensPath, statePath] of layerStyles) {
     const page = await browser.newPage();
@@ -162,11 +162,11 @@ function fixture(layer, css) {
       </style></head>
       <body>
         <section data-lilia-surface-mode="solid" data-lilia-backdrop="none" data-lilia-surface-boundary>
-          <button class="lilia-interactive-item" data-lilia-selected="true" data-agent-id="surface.solid.selected">Solid selected</button>
+          <button class="lilia-interactive-item" data-lilia-selected="true" data-lilia-selected-indicator="start" data-agent-id="surface.solid.selected">Solid selected</button>
         </section>
         <section data-lilia-surface-mode="translucent" data-lilia-backdrop="native" data-lilia-surface-boundary>
           <button class="lilia-interactive-item" data-agent-id="surface.translucent.idle">Translucent idle</button>
-          <button class="lilia-interactive-item" data-lilia-selected="true" data-agent-id="surface.translucent.selected">Translucent selected</button>
+          <button class="lilia-interactive-item" data-lilia-selected="true" data-lilia-selected-indicator="start" data-agent-id="surface.translucent.selected">Translucent selected</button>
           <div class="long-list">${items}</div>
         </section>
         <section data-lilia-surface-mode="translucent" data-lilia-backdrop="css-blur" data-lilia-surface-boundary data-agent-id="surface.css-blur">

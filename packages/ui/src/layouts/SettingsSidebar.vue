@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SurfaceProps } from "@lilia/ui-contract";
-import { RouterLink } from "vue-router";
+import { RouterLink, type RouteLocationRaw } from "vue-router";
 import ArrowLeft from "@lucide/vue/dist/esm/icons/arrow-left.mjs";
 import type { SettingsTab, SettingsTabKey } from "../settings";
 import LiliaSidebarFrame from "./LiliaSidebarFrame.vue";
@@ -16,6 +16,10 @@ const props = withDefaults(defineProps<SurfaceProps & {
   surfaceLevel: "base",
   surfaceBoundary: true,
 });
+
+function routerTarget(target: SettingsTab["to"]): RouteLocationRaw {
+  return target as RouteLocationRaw;
+}
 </script>
 
 <template>
@@ -52,7 +56,7 @@ const props = withDefaults(defineProps<SurfaceProps & {
         <RouterLink
           v-for="tab in tabs"
           :key="tab.key"
-          :to="tab.to"
+          :to="routerTarget(tab.to)"
           custom
           v-slot="{ navigate }"
         >

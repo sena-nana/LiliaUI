@@ -6,7 +6,6 @@ export { default as CalendarHeatmap } from "./components/CalendarHeatmap.vue";
 export { default as ConfirmDialog } from "./components/ConfirmDialog.vue";
 export { default as Dropdown } from "./components/Dropdown.vue";
 export { default as PopupTitleBarFrame } from "./components/PopupTitleBarFrame.vue";
-export { default as SearchDropdown } from "./components/SearchDropdown.vue";
 export { default as SidebarCollapse } from "./components/sidebar/SidebarCollapse.vue";
 export {
   default as SettingsCollapsibleCard,
@@ -42,14 +41,24 @@ export { default as Toast, default as UiToast } from "./components/UiToast.vue";
 export { default as UiValidationMessage, default as ValidationMessage } from "./components/UiValidationMessage.vue";
 export { default as ViewTabs } from "./components/ViewTabs.vue";
 export {
-  useOverlayActivity,
-  useOverlayPresence,
-} from "./composables/useOverlayActivity";
-export {
   default as LiliaSidebarRow,
   type LiliaSidebarRowProps,
   type LiliaSidebarRowState,
   type LiliaSidebarRowTone,
 } from "./components/sidebar/LiliaSidebarRow.vue";
 export { default as LiliaSidebarSection, type LiliaSidebarSectionProps } from "./components/sidebar/LiliaSidebarSection.vue";
-export * from "./utils/calendarHeatmap";
+export {
+  buildCalendarHeatmapModel,
+  calendarHeatmapCellAtPoint,
+  type CalendarHeatmapActiveCell,
+  type CalendarHeatmapBuildOptions,
+  type CalendarHeatmapCell,
+  type CalendarHeatmapDatum,
+  type CalendarHeatmapDayLabel,
+  type CalendarHeatmapLevelPath,
+  type CalendarHeatmapLevelStrategy,
+  type CalendarHeatmapModel,
+  type CalendarHeatmapMonthLabel,
+  type CalendarHeatmapPoint,
+  type CalendarHeatmapWeekdayLabel,
+} from "./utils/calendarHeatmap";

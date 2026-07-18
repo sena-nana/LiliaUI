@@ -1,34 +1,29 @@
 <script setup lang="ts">
+import type { SwitchEmits, SwitchProps } from "@lilia/ui-contract";
 export type UiSwitchControlPosition = "start" | "end";
 
-const props = withDefaults(defineProps<{
-  modelValue: boolean;
-  label?: string;
+const props = withDefaults(defineProps<SwitchProps & {
   hint?: string;
   controlPosition?: UiSwitchControlPosition;
   block?: boolean;
-  disabled?: boolean;
-  agentId?: string;
-  ariaLabel?: string;
-  "aria-label"?: string;
 }>(), {
+  modelValue: false,
   label: undefined,
   hint: undefined,
   controlPosition: "start",
   block: false,
   disabled: false,
+  loading: false,
+  invalid: false,
   agentId: undefined,
   ariaLabel: undefined,
-  "aria-label": undefined,
+  ariaDescribedby: undefined,
 });
 
-const emit = defineEmits<{
-  "update:modelValue": [value: boolean];
-  change: [event: Event];
-}>();
+const emit = defineEmits<SwitchEmits>();
 
 function onChange(event: Event) {
-  if (props.disabled) return;
+  if (props.disabled || props.loading) return;
   emit("update:modelValue", (event.target as HTMLInputElement).checked);
   emit("change", event);
 }
@@ -50,8 +45,11 @@ function onChange(event: Event) {
       role="switch"
       :checked="modelValue"
       :aria-checked="modelValue"
-      :aria-label="ariaLabel ?? $props['aria-label']"
-      :disabled="disabled"
+      :aria-label="ariaLabel ?? label"
+      :aria-describedby="ariaDescribedby"
+      :aria-invalid="invalid || undefined"
+      :aria-busy="loading || undefined"
+      :disabled="disabled || loading"
       :data-agent-id="agentId"
       @change="onChange"
     />

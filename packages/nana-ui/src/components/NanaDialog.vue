@@ -2,17 +2,26 @@
 import X from "@lucide/vue/dist/esm/icons/x.mjs";
 import { useDialogPrimitive } from "@lilia/ui-foundation/dialog";
 import { ref } from "vue";
-import type { DialogProps } from "@lilia/ui-contract";
+import type { DialogProps, OpenStateEmits } from "@lilia/ui-contract";
 import NanaIconButton from "./NanaIconButton.vue";
 
 const props = withDefaults(defineProps<DialogProps>(), {
+  description: undefined,
+  size: "default",
   closeOnEscape: true,
   closeOnOutside: true,
+  closeDisabled: false,
+  closeAgentId: undefined,
+  closeLabel: "关闭",
   initialFocus: "first-action",
 });
-const emit = defineEmits<{ "update:open": [open: boolean]; close: [] }>();
+const emit = defineEmits<OpenStateEmits>();
 const root = ref<HTMLElement | null>(null);
-const close = () => { emit("update:open", false); emit("close"); };
+const close = () => {
+  if (props.closeDisabled) return;
+  emit("update:open", false);
+  emit("close");
+};
 const dialog = useDialogPrimitive(
   props,
   root,
@@ -36,13 +45,13 @@ const dialog = useDialogPrimitive(
         @click="dialog.onOutsidePointer"
         @keydown="dialog.onKeydown"
       >
-        <section class="nana-dialog">
+        <section class="nana-dialog" :class="`nana-dialog--${size}`">
           <header class="nana-dialog__header">
-            <div><h2>{{ title }}</h2><p v-if="description">{{ description }}</p></div>
-            <NanaIconButton :icon="X" label="关闭" @click="close" />
+            <div><h2><slot name="title">{{ title }}</slot></h2><p v-if="description">{{ description }}</p></div>
+            <NanaIconButton :icon="X" :label="closeLabel" :agent-id="closeAgentId" :disabled="closeDisabled" @click="close" />
           </header>
           <div class="nana-dialog__body"><slot /></div>
-          <footer v-if="$slots.actions || $slots.footer" class="nana-dialog__actions"><slot name="actions"><slot name="footer" /></slot></footer>
+          <footer v-if="$slots.actions || $slots.footer" class="nana-dialog__actions"><slot name="footer"><slot name="actions" /></slot></footer>
         </section>
       </div>
     </Transition>

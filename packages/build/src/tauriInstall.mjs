@@ -173,7 +173,7 @@ export function createDesktopShortcut(plan, appConfig, env = process.env) {
       }
       unlinkSync(plan.shortcut.path);
     }
-    symlinkSync(plan.artifact.path, plan.shortcut.path, "dir");
+    symlinkSync(plan.artifact.path, plan.shortcut.path, process.platform === "win32" ? "junction" : "dir");
     return;
   }
   if (plan.platform === "linux") {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TextareaProps } from "@lilia/ui-contract";
+import type { TextareaEmits, TextareaProps } from "@lilia/ui-contract";
 
 withDefaults(defineProps<TextareaProps>(), {
   modelValue: "",
@@ -7,9 +7,14 @@ withDefaults(defineProps<TextareaProps>(), {
   resize: "vertical",
   size: "md",
   disabled: false,
+  loading: false,
   invalid: false,
 });
-const emit = defineEmits<{ "update:modelValue": [value: string] }>();
+const emit = defineEmits<TextareaEmits>();
+function onInput(event: Event) {
+  emit("update:modelValue", (event.target as HTMLTextAreaElement).value);
+  emit("input", event);
+}
 </script>
 
 <template>
@@ -22,12 +27,13 @@ const emit = defineEmits<{ "update:modelValue": [value: string] }>();
     :placeholder="placeholder"
     :readonly="readonly"
     :required="required"
-    :disabled="disabled"
+    :disabled="disabled || loading"
+    :aria-busy="loading || undefined"
     :aria-invalid="invalid || undefined"
     :aria-label="ariaLabel"
     :aria-describedby="ariaDescribedby"
     :data-agent-id="agentId"
     :style="{ resize }"
-    @input="emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
+    @input="onInput"
   />
 </template>

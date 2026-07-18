@@ -6,12 +6,19 @@ const invoke = vi.fn(async () => undefined);
 
 vi.mock("@tauri-apps/api/core", () => ({ invoke }));
 
-async function loadUi() {
+async function loadUi(options: { adapter?: boolean } = {}) {
+  const runtime = await import("@lilia/ui/runtime");
+  if (options.adapter !== false) {
+    runtime.setNativeAppearanceAdapter({
+      setWindowBackdrop: (request) => invoke("plugin:lilia|set_window_backdrop", { ...request }),
+    });
+  }
   return {
     ...await import("@lilia/ui/shell"),
     ...await import("@lilia/ui/settings"),
     ...await import("@lilia/ui/composables/useNativeAppearance"),
     ...await import("@lilia/ui/composables/useTheme"),
+    ...runtime,
   };
 }
 
@@ -23,6 +30,33 @@ beforeEach(() => {
 });
 
 describe("useNativeAppearance", () => {
+  it("无原生 adapter 时保持浏览器状态可用且不尝试原生调用", async () => {
+    window.__LILIA_NATIVE_PLATFORM__ = "windows";
+    vi.resetModules();
+    const { setLiliaUiConfig, useNativeAppearance } = await loadUi({ adapter: false });
+    setLiliaUiConfig(testAppConfig);
+    const appearance = useNativeAppearance();
+    appearance.setBackdropMode("acrylic");
+    await Promise.resolve();
+    expect(appearance.backdropMode.value).toBe("acrylic");
+    expect(document.documentElement.dataset.backdrop).toBe("acrylic");
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
+  it("adapter 失败时保留最终 CSS 状态并允许后续更新", async () => {
+    window.__LILIA_NATIVE_PLATFORM__ = "windows";
+    invoke.mockRejectedValueOnce(new Error("native unavailable"));
+    vi.resetModules();
+    const { setLiliaUiConfig, useNativeAppearance } = await loadUi();
+    setLiliaUiConfig(testAppConfig);
+    const appearance = useNativeAppearance();
+    await waitFor(() => expect(invoke).toHaveBeenCalledTimes(1));
+    appearance.setBackdropMode("acrylic");
+    await waitFor(() => expect(invoke).toHaveBeenCalledTimes(2));
+    expect(appearance.backdropMode.value).toBe("acrylic");
+    expect(document.documentElement.dataset.backdrop).toBe("acrylic");
+  });
+
   it("按平台归一化材质值并安全回退未知平台", async () => {
     vi.resetModules();
     const { normalizeBackdropMode, resolveNativePlatform } = await loadUi();

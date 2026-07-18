@@ -7,6 +7,12 @@ export {
 } from "./composables/useGlobalScrollbarVisibility";
 import { useNativeAppearance } from "./composables/useNativeAppearance";
 import { vContextMenu } from "./directives/contextMenu";
+export {
+  getNativeAppearanceAdapter,
+  setNativeAppearanceAdapter,
+  type NativeAppearanceAdapter,
+  type NativeBackdropRequest,
+} from "./runtime/nativeAppearanceAdapter";
 
 const contextMenuApps = new WeakSet<App>();
 

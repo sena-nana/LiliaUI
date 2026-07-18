@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { useButtonPrimitive } from "@lilia/ui-foundation/button";
+import type { ButtonEmits, ButtonProps, UIControlSize } from "@lilia/ui-contract";
 import { Comment, Fragment, Text, computed, useSlots, type VNode } from "vue";
 
 export type UiButtonVariant = "ghost" | "primary" | "secondary" | "text" | "warning" | "danger";
-export type UiButtonSize = "sm" | "md";
+export type UiButtonSize = UIControlSize;
 export type UiButtonType = "button" | "submit" | "reset";
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<Omit<ButtonProps, "variant" | "size"> & {
   variant?: UiButtonVariant;
   size?: UiButtonSize;
   type?: UiButtonType;
@@ -26,9 +27,7 @@ const props = withDefaults(defineProps<{
   agentId: undefined,
 });
 
-const emit = defineEmits<{
-  click: [event: MouseEvent];
-}>();
+const emit = defineEmits<ButtonEmits>();
 
 const slots = useSlots();
 const hasDefaultLabel = computed(() => hasRenderableSlotContent(slots.default?.() ?? []));
@@ -67,6 +66,7 @@ function onClick(event: MouseEvent) {
     ]"
     :disabled="button.disabled.value"
     :aria-busy="button.ariaBusy.value"
+    :aria-invalid="invalid || undefined"
     :data-agent-id="agentId"
     @click="onClick"
   >
@@ -105,6 +105,12 @@ function onClick(event: MouseEvent) {
   font-size: 12px;
 }
 
+.ui-button--lg {
+  height: 38px;
+  padding: 0 14px;
+  font-size: 14px;
+}
+
 .ui-button--icon-only {
   gap: 0;
   padding: 0;
@@ -116,6 +122,10 @@ function onClick(event: MouseEvent) {
 
 .ui-button--sm.ui-button--icon-only {
   width: 26px;
+}
+
+.ui-button--lg.ui-button--icon-only {
+  width: 38px;
 }
 
 .ui-button--ghost {

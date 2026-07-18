@@ -1,21 +1,20 @@
 <script setup lang="ts">
-export type UiControlSize = "sm" | "md";
+import type { InputEmits, InputProps, UIControlSize } from "@lilia/ui-contract";
+export type UiControlSize = UIControlSize;
 
-withDefaults(defineProps<{
-  modelValue: string | number;
-  type?: string;
+withDefaults(defineProps<Omit<InputProps, "size"> & {
   size?: UiControlSize;
-  agentId?: string;
 }>(), {
+  modelValue: "",
   type: "text",
   size: "md",
+  disabled: false,
+  loading: false,
+  invalid: false,
   agentId: undefined,
 });
 
-const emit = defineEmits<{
-  "update:modelValue": [value: string];
-  input: [event: Event];
-}>();
+const emit = defineEmits<InputEmits>();
 
 function onInput(event: Event) {
   const value = (event.target as HTMLInputElement).value;
@@ -30,6 +29,15 @@ function onInput(event: Event) {
     :class="`ui-input--${size}`"
     :type="type"
     :value="modelValue"
+    :name="name"
+    :placeholder="placeholder"
+    :readonly="readonly"
+    :required="required"
+    :disabled="disabled || loading"
+    :aria-busy="loading || undefined"
+    :aria-invalid="invalid || undefined"
+    :aria-label="ariaLabel"
+    :aria-describedby="ariaDescribedby"
     :data-agent-id="agentId"
     @input="onInput"
   />
@@ -58,6 +66,12 @@ function onInput(event: Event) {
 .ui-input--sm {
   height: 28px;
   padding: 0 8px;
+}
+
+.ui-input--lg {
+  height: 36px;
+  padding: 0 11px;
+  font-size: 14px;
 }
 
 .ui-input:hover:not(:disabled) {

@@ -1,13 +1,14 @@
 <script setup lang="ts" generic="T extends string | number">
-import type { SelectProps } from "@lilia/ui-contract";
+import type { SelectEmits, SelectProps } from "@lilia/ui-contract";
 
 const props = withDefaults(defineProps<SelectProps<T>>(), {
   size: "md",
   disabled: false,
+  loading: false,
   invalid: false,
   placeholder: undefined,
 });
-const emit = defineEmits<{ "update:modelValue": [value: T]; change: [event: Event] }>();
+const emit = defineEmits<SelectEmits<T>>();
 function onChange(event: Event) {
   const raw = (event.target as HTMLSelectElement).value;
   const match = props.options.find((option) => String(option.value) === raw);
@@ -21,7 +22,8 @@ function onChange(event: Event) {
     class="nana-control nana-select"
     :class="`nana-control--${size}`"
     :value="modelValue"
-    :disabled="disabled"
+    :disabled="disabled || loading"
+    :aria-busy="loading || undefined"
     :aria-invalid="invalid || undefined"
     :aria-label="ariaLabel"
     :aria-describedby="ariaDescribedby"

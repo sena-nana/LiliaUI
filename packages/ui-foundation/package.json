@@ -11,6 +11,8 @@
     "./field": "./src/useFieldPrimitive.ts",
     "./overlay": "./src/useDismissableLayer.ts",
     "./responsive": "./src/useResponsiveMode.ts",
+    "./roving-focus": "./src/useRovingFocus.ts",
+    "./selection": "./src/useSelectionPrimitive.ts",
     "./sidebar": "./src/useSidebarPrimitive.ts",
     "./settings": "./src/settings.ts",
     "./surface": "./src/surface.ts",
@@ -25,13 +27,11 @@
   },
   "peerDependencies": {
     "@lilia/ui-contract": "^0.1.0",
-    "vue": "^3.5.39",
-    "vue-router": "^5.1.0"
+    "vue": "^3.5.39"
   },
   "devDependencies": {
     "@lilia/ui-contract": "workspace:*",
     "typescript": "^6.0.3",
-    "vue": "^3.5.39",
-    "vue-router": "^5.1.0"
+    "vue": "^3.5.39"
   }
 }

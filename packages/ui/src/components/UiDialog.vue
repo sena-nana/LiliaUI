@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import X from "@lucide/vue/dist/esm/icons/x.mjs";
-import type { DialogProps } from "@lilia/ui-contract";
+import type { DialogProps, OpenStateEmits } from "@lilia/ui-contract";
 import { useDialogPrimitive } from "@lilia/ui-foundation/dialog";
 import { ref, watch } from "vue";
 import { useOverlayPresence } from "../composables/useOverlayActivity";
@@ -17,7 +17,7 @@ const props = withDefaults(defineProps<DialogProps>(), {
   initialFocus: "first-action",
   agentId: undefined,
 });
-const emit = defineEmits<{ "update:open": [open: boolean]; close: [] }>();
+const emit = defineEmits<OpenStateEmits>();
 const overlay = ref<HTMLElement | null>(null);
 const overlayPresence = useOverlayPresence();
 

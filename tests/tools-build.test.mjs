@@ -4,7 +4,6 @@ import {
   mkdtempSync,
   mkdirSync,
   readFileSync,
-  readlinkSync,
   realpathSync,
   rmSync,
   symlinkSync,
@@ -397,14 +396,16 @@ describe("@lilia/build", () => {
 
     createDesktopShortcut(plan, createAppConfig());
     expect(lstatSync(shortcut).isSymbolicLink()).toBe(true);
-    expect(readlinkSync(shortcut)).toBe(artifact);
+    expect(realpathSync(shortcut)).toBe(realpathSync(artifact));
     createDesktopShortcut(plan, createAppConfig());
-    expect(readlinkSync(shortcut)).toBe(artifact);
+    expect(realpathSync(shortcut)).toBe(realpathSync(artifact));
 
     unlinkSync(shortcut);
-    symlinkSync(join(root, "old-repo", "Lilia Test.app"), shortcut, "dir");
+    const oldArtifact = join(root, "old-repo", "Lilia Test.app");
+    mkdirSync(oldArtifact, { recursive: true });
+    symlinkSync(oldArtifact, shortcut, process.platform === "win32" ? "junction" : "dir");
     createDesktopShortcut(plan, createAppConfig());
-    expect(readlinkSync(shortcut)).toBe(artifact);
+    expect(realpathSync(shortcut)).toBe(realpathSync(artifact));
 
     unlinkSync(shortcut);
     mkdirSync(shortcut);
@@ -443,10 +444,17 @@ describe("@lilia/build", () => {
     }, createAppConfig());
     expect(backslashEntry).toContain(String.raw`\\\\name`);
 
-    const protectedFile = join(root, "protected.txt");
+    const protectedFile = process.platform === "win32"
+      ? join(root, "protected", "keep.txt")
+      : join(root, "protected.txt");
+    mkdirSync(join(root, "protected"), { recursive: true });
     writeFileSync(protectedFile, "keep");
     unlinkSync(shortcut);
-    symlinkSync(protectedFile, shortcut);
+    symlinkSync(
+      process.platform === "win32" ? join(root, "protected") : protectedFile,
+      shortcut,
+      process.platform === "win32" ? "junction" : undefined,
+    );
     expect(() => createDesktopShortcut(plan, createAppConfig())).toThrow(
       "Refusing to replace non-file desktop item",
     );

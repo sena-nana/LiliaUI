@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CheckboxProps } from "@lilia/ui-contract";
+import type { CheckboxEmits, CheckboxProps } from "@lilia/ui-contract";
 import { onMounted, ref, watch } from "vue";
 
 const props = withDefaults(defineProps<CheckboxProps>(), {
@@ -12,10 +12,7 @@ const props = withDefaults(defineProps<CheckboxProps>(), {
   agentId: undefined,
 });
 
-const emit = defineEmits<{
-  "update:modelValue": [value: boolean];
-  change: [event: Event];
-}>();
+const emit = defineEmits<CheckboxEmits>();
 const input = ref<HTMLInputElement | null>(null);
 
 function syncIndeterminate(value: boolean) {

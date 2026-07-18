@@ -15,11 +15,20 @@ export const UI_PRESETS = Object.freeze({
 
 export const UI_LAYER_SUBPATHS = Object.freeze({
   lilia: Object.freeze([
-    "", "/commands", "/diagnostics", "/layouts", "/preset", "/runtime", "/settings", "/shell",
+    "", "/calendar", "/commands", "/composables", "/diagnostics", "/layouts", "/overlay",
+    "/preset", "/runtime", "/runtime/tauri", "/search", "/settings", "/shell",
     "/styles.css", "/styles/global-scrollbar.css", "/styles/page.css", "/styles/shell.css",
     "/styles/sidebar.css", "/styles/state-layer.css", "/styles/tokens.css", "/styles/workspace.css", "/theme/base.css",
     "/components/action-menu.css", "/components/popup-titlebar-frame.css", "/components/search-dropdown.css",
-    "/components/*", "/composables/*", "/directives/contextMenu", "/layouts/popup-shell.css", "/layouts/*",
+    "/components/ActionMenuItem", "/components/AnchoredActionMenu", "/components/CalendarHeatmap",
+    "/components/ConfirmDialog", "/components/ContextMenuHost", "/components/Dropdown",
+    "/components/OverlayHost", "/components/PopupTitleBarFrame", "/components/SearchDropdown",
+    "/components/TitleBar", "/composables/menuMotion", "/composables/useAnchoredActionMenu",
+    "/composables/useAnchoredOverlay", "/composables/useComponentEpoch", "/composables/useContextMenu",
+    "/composables/useCornerStyle", "/composables/useFocusOnActivation", "/composables/useNativeAppearance",
+    "/composables/useNativeWindowChrome", "/composables/usePersistentState", "/composables/useResizablePane",
+    "/composables/useShellSidebar", "/composables/useTheme", "/directives/contextMenu",
+    "/layouts/popup-shell.css", "/layouts/PopupShell",
     "/utils/calendarHeatmap", "/utils/eventListeners", "/utils/lazyLoadState", "/utils/singleFlight",
     "/utils/textSegments",
   ]),

@@ -1,4 +1,4 @@
-import type { AgentTargetProps, UIOrientation } from "./common";
+import type { AccessibleLabelProps, AgentTargetProps, UIOrientation } from "./common";
 
 export interface TabOption<T = string> {
   value: T;
@@ -6,7 +6,18 @@ export interface TabOption<T = string> {
   disabled?: boolean;
 }
 
-export interface TabsProps<T = string> extends AgentTargetProps {
+export interface TabsProps<T = string> extends AgentTargetProps, AccessibleLabelProps {
+  modelValue: T;
+  options: readonly TabOption<T>[];
+  orientation?: UIOrientation;
+}
+export interface SelectionEmits<T = string | number> {
+  "update:modelValue": [value: T];
+  change: [value: T];
+}
+
+export interface SegmentedControlProps<T = string | number>
+  extends AgentTargetProps, AccessibleLabelProps {
   modelValue: T;
   options: readonly TabOption<T>[];
   orientation?: UIOrientation;

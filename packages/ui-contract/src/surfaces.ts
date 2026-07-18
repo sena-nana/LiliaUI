@@ -27,11 +27,20 @@ export interface CardProps extends SurfaceProps {
 export interface InteractiveCardProps extends CardProps {
   pressed?: boolean;
 }
+export interface InteractiveCardEmits {
+  select: [];
+  press: [];
+  click: [event: MouseEvent];
+}
 
 export interface ListItemProps extends AgentTargetProps {
   active?: boolean;
   disabled?: boolean;
   selected?: boolean;
+}
+export interface ListItemEmits {
+  select: [];
+  click: [event: MouseEvent];
 }
 
 export interface StatusBadgeProps extends AgentTargetProps {

@@ -6,6 +6,7 @@ import {
   onBeforeUnmount,
   onMounted,
   shallowRef,
+  watch,
   ref,
   useAttrs,
 } from "vue";
@@ -232,6 +233,23 @@ onMounted(() => {
   workspace.refreshLayout();
   workspace.refreshGeometry();
 });
+watch(
+  [
+    () => props.role,
+    placement,
+    () => props.scope,
+    currentSize,
+    () => props.minSize,
+    () => props.maxSize,
+    () => props.fillPriority,
+    () => props.narrowBehavior,
+    () => props.collapseBelow,
+    () => props.responsivePriority,
+    requestedVisible,
+  ],
+  workspace.refreshLayout,
+  { flush: "post" },
+);
 onBeforeUnmount(() => {
   stopResize();
   unregister();
