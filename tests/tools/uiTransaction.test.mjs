@@ -6,7 +6,7 @@ import { createUiFixture, read, write } from "./uiFixture.mjs";
 describe("UI transaction", () => {
   it("restores every file and lockfile when validation fails", async () => {
     const root = createUiFixture();
-    write(root, "yarn.lock", "original lock\n");
+    write(root, "pnpm-lock.yaml", "original lock\n");
     const packageBefore = read(root, "package.json");
     const plan = {
       projectRoot: root,
@@ -21,7 +21,7 @@ describe("UI transaction", () => {
 
     const result = await executeUiTransaction(plan, {
       commandRunner: async () => {
-        write(root, "yarn.lock", "changed lock\n");
+        write(root, "pnpm-lock.yaml", "changed lock\n");
         throw new Error("validation failed");
       },
     });
@@ -29,7 +29,7 @@ describe("UI transaction", () => {
     expect(result.status).toBe("rolled_back");
     expect(result.rollback.complete).toBe(true);
     expect(read(root, "package.json")).toBe(packageBefore);
-    expect(read(root, "yarn.lock")).toBe("original lock\n");
+    expect(read(root, "pnpm-lock.yaml")).toBe("original lock\n");
     expect(() => read(root, "src/ui/new.ts")).toThrow();
   });
 

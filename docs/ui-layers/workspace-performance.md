@@ -28,8 +28,8 @@
 更新基线使用：
 
 ```bash
-yarn perf:components:update-baseline
+pnpm perf:components:update-baseline
 ```
 
-日常门禁继续使用 `yarn perf:components:light`；真实浏览器检查使用 `yarn perf:components:browser`。
+日常门禁继续使用 `pnpm perf:components:light`；真实浏览器检查使用 `pnpm perf:components:browser`。
 

@@ -6,9 +6,10 @@ target/
 tests/perf/reports/
 test-results/
 playwright-report/
-.pnp.*
-.yarn/*
-!.yarn/releases/
-!.yarn/plugins/
-!.yarn/sdks/
-!.yarn/versions/
+.pnpm/*
+!.pnpm/releases/
+!.pnpm/plugins/
+!.pnpm/sdks/
+!.pnpm/versions/
+
+pnpm-debug.log*
