@@ -47,7 +47,7 @@ const surfaceAttributes = computed(() => resolveSurfaceAttributes(props));
   </section>
 </template>
 
-<style scoped>
+<style>
 .ui-card.card--interactive { transition: background-color 0.12s ease, border-color 0.12s ease; }
 .ui-card[data-lilia-surface-mode="translucent"] { background: transparent; }
 .ui-card.card--interactive:hover:not(.is-disabled) { background: var(--lilia-state-layer-hover); }

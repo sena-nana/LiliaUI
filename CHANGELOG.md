@@ -15,6 +15,10 @@
 
 - 两层 controls、overlays、feedback、Tabs/Segmented 与 selectable surfaces 通过同一行为 fixture；Native Appearance 改为浏览器安全 adapter，Tauri 实现移入显式 `@lilia/ui/runtime/tauri`。
 - `@lilia/ui` 移除无约束 wildcard exports，新增 calendar、search、overlay 等职责 subpath 和非法内部路径检查。
+- 新增 `@lilia/ui/shell/app`、`@lilia/ui/shell/sidebar`、`@lilia/ui/shell/config` 窄入口，避免兼容 `@lilia/ui/shell` barrel 的未使用 Shell CSS 进入新消费模板。
+- 新增无 Shell side effect 的 `@lilia/ui/preset/definition`，供新模板显式组合 `LiliaAppShell + Workspace Regions`；兼容 preset 继续保留 Legacy Shell。
+- 新增 `@lilia/ui/settings/sidebar`，避免 Shell 静态导入 settings barrel 后合并设置页异步 chunk。
+- 已具备公共组件命名空间的样式去除重复 Vue scope 属性，保持选择器语义同时收回默认消费端 CSS 体积。
 
 ### Tooling and migration
 

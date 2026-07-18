@@ -50,8 +50,8 @@ function selectItem() {
   </LiliaSidebarRow>
 </template>
 
-<style scoped>
-.sidebar-nav-row--muted :deep(.lilia-sidebar-row__control) {
+<style>
+.sidebar-nav-row--muted .lilia-sidebar-row__control {
   color: var(--text-muted);
 }
 

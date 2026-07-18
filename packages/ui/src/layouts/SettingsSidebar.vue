@@ -83,7 +83,7 @@ function routerTarget(target: SettingsTab["to"]): RouteLocationRaw {
   </LiliaSidebarFrame>
 </template>
 
-<style scoped>
+<style>
 .settings-sidebar {
   gap: 12px;
 }
@@ -111,15 +111,6 @@ function routerTarget(target: SettingsTab["to"]): RouteLocationRaw {
   transition: background-color 0.12s ease, color 0.12s ease;
 }
 
-.settings-sidebar__back:hover {
-  background: var(--lilia-state-layer-hover);
-  filter: none;
-}
-
-.settings-sidebar__back:active {
-  background: var(--lilia-state-layer-pressed);
-}
-
 .settings-sidebar__tabs {
   display: flex;
   flex-direction: column;
@@ -143,29 +134,6 @@ function routerTarget(target: SettingsTab["to"]): RouteLocationRaw {
   gap: 8px;
   text-align: left;
   transition: background-color 0.12s ease, color 0.12s ease;
-}
-
-.settings-sidebar__tab:hover {
-  background: var(--lilia-state-layer-hover);
-  color: var(--text);
-  filter: none;
-}
-
-.settings-sidebar__tab:active {
-  background: var(--lilia-state-layer-pressed);
-}
-
-.settings-sidebar__tab.is-active {
-  background: var(--lilia-state-layer-selected);
-  color: var(--lilia-state-foreground-selected);
-}
-
-.settings-sidebar__tab.is-active:hover {
-  background: var(--lilia-state-layer-selected-hover);
-}
-
-.settings-sidebar__tab.is-active:active {
-  background: var(--lilia-state-layer-selected-pressed);
 }
 
 .settings-sidebar__tab-icon {

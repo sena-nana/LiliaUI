@@ -167,7 +167,7 @@ function onTitlebarPointerDown(event: PointerEvent) {
   </header>
 </template>
 
-<style scoped>
+<style>
 .titlebar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -189,7 +189,7 @@ function onTitlebarPointerDown(event: PointerEvent) {
   -webkit-app-region: no-drag;
 }
 
-.titlebar__left-controls :slotted(*) {
+.titlebar__left-controls > * {
   -webkit-app-region: no-drag;
 }
 
@@ -248,7 +248,7 @@ function onTitlebarPointerDown(event: PointerEvent) {
   color: var(--err);
 }
 
-.titlebar__controls :slotted(.titlebar__btn) {
+.titlebar__controls > .titlebar__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -264,7 +264,7 @@ function onTitlebarPointerDown(event: PointerEvent) {
   transition: background-color 0.12s ease, color 0.12s ease;
 }
 
-.titlebar__controls :slotted(.titlebar__btn:hover) {
+.titlebar__controls > .titlebar__btn:hover {
   background: var(--bg-hover);
   color: var(--text);
 }

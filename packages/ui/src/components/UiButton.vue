@@ -79,7 +79,7 @@ function onClick(event: MouseEvent) {
   </button>
 </template>
 
-<style scoped>
+<style>
 .ui-button {
   min-width: 0;
   border: 0;

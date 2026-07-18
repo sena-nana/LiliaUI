@@ -172,7 +172,7 @@ watch(
   </Teleport>
 </template>
 
-<style scoped>
+<style>
 .ctx-menu {
   position: fixed;
   left: 0;
@@ -218,22 +218,8 @@ watch(
   transition: background-color 0.12s ease, color 0.12s ease;
 }
 
-.ctx-menu__item:hover:not(:disabled) {
-  background: var(--lilia-state-layer-hover);
-  filter: none;
-}
-
 .ctx-menu__item--submenu-active:not(:disabled) {
   background: var(--lilia-state-layer-hover);
-}
-
-.ctx-menu__item:active:not(:disabled) {
-  background: var(--lilia-state-layer-pressed);
-}
-
-.ctx-menu__item:focus-visible {
-  outline: 2px solid var(--lilia-state-focus-ring);
-  outline-offset: -2px;
 }
 
 .ctx-menu__item:disabled {

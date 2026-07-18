@@ -16,7 +16,8 @@ export const UI_PRESETS = Object.freeze({
 export const UI_LAYER_SUBPATHS = Object.freeze({
   lilia: Object.freeze([
     "", "/calendar", "/commands", "/composables", "/diagnostics", "/layouts", "/overlay",
-    "/preset", "/runtime", "/runtime/tauri", "/search", "/settings", "/shell",
+    "/preset", "/preset/definition", "/runtime", "/runtime/tauri", "/search", "/settings", "/settings/sidebar", "/shell",
+    "/shell/app", "/shell/config", "/shell/sidebar",
     "/styles.css", "/styles/global-scrollbar.css", "/styles/page.css", "/styles/shell.css",
     "/styles/sidebar.css", "/styles/state-layer.css", "/styles/tokens.css", "/styles/workspace.css", "/theme/base.css",
     "/components/action-menu.css", "/components/popup-titlebar-frame.css", "/components/search-dropdown.css",
