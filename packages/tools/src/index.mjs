@@ -423,19 +423,14 @@ function walkFiles(dir) {
 function formatPackageManagerMessage({ productTitle, reason, requiredPackageManager }) {
   return [
     "",
-    `${productTitle} requires pnpm 4 through Corepack.`,
+    `${productTitle} requires ${requiredPackageManager}.`,
     reason,
     "",
     `Expected package manager: ${requiredPackageManager}`,
     "",
     "Fix:",
-    "  npm install --global corepack@0.35.0",
-    "  corepack enable pnpm",
-    "  pnpm install",
-    "",
-    "If the `pnpm` command still resolves to pnpm 1, run the commands through Corepack:",
-    "  pnpm install",
-    "  pnpm dev",
+    "  npm install --global pnpm@11.14.0",
+    "  pnpm install --frozen-lockfile",
     "",
   ].join("\n");
 }
