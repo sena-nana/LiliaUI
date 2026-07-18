@@ -22,5 +22,15 @@ export default defineConfig({
     execArgv: ["--no-experimental-webstorage"],
     include: ["tests/ui/**/*.test.ts", "tests/*.test.mjs"],
     setupFiles: ["./tests/setupTests.ts"],
+    server: {
+      deps: {
+        inline: [
+          "@lilia/nana-ui",
+          "@lilia/ui",
+          "@lilia/ui-contract",
+          "@lilia/ui-foundation",
+        ],
+      },
+    },
   },
 });
