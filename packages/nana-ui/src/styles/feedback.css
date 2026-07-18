@@ -1,9 +1,9 @@
 .nana-tabs { display: inline-flex; align-items: center; gap: 4px; }
 .nana-tabs--vertical { flex-direction: column; align-items: stretch; }
-.nana-tabs button { --lilia-state-selected-shadow: inset 0 -2px 0 var(--lilia-state-indicator-selected); min-height: var(--control-height); padding: 0 12px; border: 0; border-radius: var(--radius-sm); color: var(--text-muted); background: transparent; cursor: pointer; }
+.nana-tabs button { min-height: var(--control-height); padding: 0 12px; border: 0; border-radius: var(--radius-sm); color: var(--text-muted); background: transparent; cursor: pointer; }
 .nana-tabs button:hover:not(:disabled) { background: var(--lilia-state-layer-hover); }
 .nana-tabs button:active:not(:disabled) { background: var(--lilia-state-layer-pressed); }
-.nana-tabs button[aria-selected="true"] { color: var(--lilia-state-foreground-selected); background: var(--lilia-state-layer-selected); box-shadow: var(--lilia-state-selected-shadow); }
+.nana-tabs button[aria-selected="true"] { color: var(--lilia-state-foreground-selected); background: var(--lilia-state-layer-selected); box-shadow: inset 0 -2px 0 var(--lilia-state-indicator-selected); }
 .nana-tabs button[aria-selected="true"]:hover:not(:disabled) { background: var(--lilia-state-layer-selected-hover); }
 .nana-tabs button[aria-selected="true"]:active:not(:disabled) { background: var(--lilia-state-layer-selected-pressed); }
 .nana-tabs button:focus-visible { outline: 2px solid var(--lilia-state-focus-ring); outline-offset: 2px; }

@@ -54,7 +54,7 @@ const surfaceAttributes = computed(() => resolveSurfaceAttributes(props));
 .ui-card[data-lilia-surface-mode="translucent"] { background: transparent; }
 .ui-card.card--interactive:hover:not(.is-disabled) { background: var(--lilia-state-layer-hover); }
 .ui-card.card--interactive:active:not(.is-disabled) { background: var(--lilia-state-layer-pressed); }
-.ui-card.is-selected { border: 1px solid var(--lilia-state-indicator-selected); background: var(--lilia-state-layer-selected); color: var(--lilia-state-foreground-selected); box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected); }
+.ui-card.is-selected { border: 1px solid var(--lilia-state-indicator-selected); background: var(--lilia-state-layer-selected); color: var(--lilia-state-foreground-selected); }
 .ui-card.is-selected:hover:not(.is-disabled) { background: var(--lilia-state-layer-selected-hover); }
 .ui-card.is-selected:active:not(.is-disabled) { background: var(--lilia-state-layer-selected-pressed); }
 .ui-card.is-disabled { opacity: 0.55; }

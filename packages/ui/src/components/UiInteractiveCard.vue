@@ -47,7 +47,7 @@ function onClick(event: MouseEvent) {
 .ui-interactive-card[data-lilia-surface-mode="translucent"] { background: transparent; }
 .ui-interactive-card:hover:not(:disabled) { border-color: var(--border-strong); background: var(--lilia-state-layer-hover); }
 .ui-interactive-card:active:not(:disabled) { background: var(--lilia-state-layer-pressed); }
-.ui-interactive-card.is-selected { border-color: var(--lilia-state-indicator-selected); background: var(--lilia-state-layer-selected); color: var(--lilia-state-foreground-selected); box-shadow: inset 3px 0 0 var(--lilia-state-indicator-selected); }
+.ui-interactive-card.is-selected { border-color: var(--lilia-state-indicator-selected); background: var(--lilia-state-layer-selected); color: var(--lilia-state-foreground-selected); }
 .ui-interactive-card.is-selected:hover:not(:disabled) { background: var(--lilia-state-layer-selected-hover); }
 .ui-interactive-card.is-selected:active:not(:disabled) { background: var(--lilia-state-layer-selected-pressed); }
 .ui-interactive-card:focus-visible { outline: 2px solid var(--lilia-state-focus-ring); outline-offset: 2px; }
