@@ -29,6 +29,13 @@
     "pnpm": ">=11.0.0 <12"
   },
   "devDependencies": {
+    "@lilia/build": "workspace:*",
+    "@lilia/config": "workspace:*",
+    "@lilia/nana-ui": "workspace:*",
+    "@lilia/tools": "workspace:*",
+    "@lilia/ui": "workspace:*",
+    "@lilia/ui-contract": "workspace:*",
+    "@lilia/ui-foundation": "workspace:*",
     "@lucide/vue": "^1.22.0",
     "@playwright/test": "^1.61.1",
     "@tauri-apps/api": "^2.11.1",
