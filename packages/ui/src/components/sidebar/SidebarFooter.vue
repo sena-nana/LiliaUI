@@ -60,7 +60,7 @@ defineProps<{
   </div>
 </template>
 
-<style scoped>
+<style>
 .sb-footer {
   padding: 0;
   display: flex;
@@ -85,12 +85,6 @@ defineProps<{
   opacity: 0.44;
   transition: opacity 0.35s ease, background-color 0.12s ease, color 0.12s ease;
   flex-shrink: 0;
-}
-
-.sb-footer__btn:hover {
-  background: var(--lilia-state-layer-hover);
-  color: var(--text);
-  filter: none;
 }
 
 .sb-footer:hover .sb-footer__btn,

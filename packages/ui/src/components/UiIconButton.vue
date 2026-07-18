@@ -46,6 +46,7 @@ const emit = defineEmits<{
     :agent-id="agentId"
     :aria-pressed="active"
     :data-lilia-selected="active ? 'true' : undefined"
+    data-lilia-interactive
     data-lilia-selected-indicator="bottom"
     @click="emit('click', $event)"
   >
@@ -56,7 +57,7 @@ const emit = defineEmits<{
   </UiButton>
 </template>
 
-<style scoped>
+<style>
 .ui-icon-button.ui-button {
   flex: 0 0 auto;
   color: var(--text-muted);
@@ -78,25 +79,6 @@ const emit = defineEmits<{
   width: 38px;
   height: 38px;
   border-radius: var(--radius-sm);
-}
-
-.ui-icon-button.ui-button:hover:not(:disabled) {
-  background: var(--lilia-state-layer-hover);
-  color: var(--text);
-  filter: none;
-}
-
-.ui-icon-button.ui-button:active:not(:disabled) {
-  background: var(--lilia-state-layer-pressed);
-}
-
-.ui-icon-button.ui-button.is-active {
-  background: var(--lilia-state-layer-selected);
-  color: var(--lilia-state-foreground-selected);
-}
-
-.ui-icon-button.ui-button.is-active:active:not(:disabled) {
-  background: var(--lilia-state-layer-selected-pressed);
 }
 
 .ui-icon-button--warning.ui-button {

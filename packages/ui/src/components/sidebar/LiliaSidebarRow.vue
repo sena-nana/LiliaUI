@@ -154,7 +154,7 @@ function onKeydown(event: KeyboardEvent) {
   </div>
 </template>
 
-<style scoped>
+<style>
 .lilia-sidebar-row {
   position: relative;
   min-width: 0;
@@ -179,20 +179,6 @@ function onKeydown(event: KeyboardEvent) {
   text-align: left;
   text-decoration: none;
   transition: background-color 0.12s ease, color 0.12s ease;
-}
-
-.lilia-sidebar-row__control:hover {
-  background: var(--lilia-state-layer-hover);
-  color: var(--text);
-}
-
-.lilia-sidebar-row__control:active:not(:disabled) {
-  background: var(--lilia-state-layer-pressed);
-}
-
-.lilia-sidebar-row__control:focus-visible {
-  outline: 2px solid var(--lilia-state-focus-ring);
-  outline-offset: -2px;
 }
 
 .lilia-sidebar-row.is-active .lilia-sidebar-row__control,

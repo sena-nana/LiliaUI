@@ -9,14 +9,19 @@ describe("public package entrypoints", () => {
   });
 
   it("loads stable boundaries without installing diagnostics", async () => {
-    const [root, calendar, search, overlay, shell, layouts, settings, runtime, tauriRuntime, commands, diagnostics] = await Promise.all([
+    const [root, calendar, search, overlay, presetDefinition, shell, shellApp, shellConfig, shellSidebar, layouts, settings, settingsSidebar, runtime, tauriRuntime, commands, diagnostics] = await Promise.all([
       import("@lilia/ui"),
       import("@lilia/ui/calendar"),
       import("@lilia/ui/search"),
       import("@lilia/ui/overlay"),
+      import("@lilia/ui/preset/definition"),
       import("@lilia/ui/shell"),
+      import("@lilia/ui/shell/app"),
+      import("@lilia/ui/shell/config"),
+      import("@lilia/ui/shell/sidebar"),
       import("@lilia/ui/layouts"),
       import("@lilia/ui/settings"),
+      import("@lilia/ui/settings/sidebar"),
       import("@lilia/ui/runtime"),
       import("@lilia/ui/runtime/tauri"),
       import("@lilia/ui/commands"),
@@ -28,12 +33,18 @@ describe("public package entrypoints", () => {
     expect(search.SearchDropdown).toBeDefined();
     expect(overlay.OverlayHost).toBeDefined();
     expect(overlay.useOverlayActivity).toBeTypeOf("function");
+    expect(presetDefinition.liliaPresetDefinition.id).toBe("lilia");
     expect(shell.LiliaDesktopShell).toBeDefined();
     expect(shell.LiliaAppShell).toBeDefined();
+    expect(shellApp.LiliaAppShell).toBe(shell.LiliaAppShell);
+    expect(shellConfig.setLiliaUiConfig).toBeTypeOf("function");
+    expect(shellSidebar.LiliaSidebarFrame).toBeDefined();
+    expect(shellSidebar.LiliaSidebarNavRow).toBeDefined();
     expect(layouts.LiliaWorkspace).toBeDefined();
     expect(layouts.LiliaWorkspaceRegion).toBeDefined();
     expect(layouts.useWorkspaceRegion).toBeTypeOf("function");
     expect(settings.createLiliaSettingsModel).toBeTypeOf("function");
+    expect(settingsSidebar.LiliaSettingsSidebar).toBeDefined();
     expect(runtime.installLiliaContextMenu).toBeTypeOf("function");
     expect(runtime.setNativeAppearanceAdapter).toBeTypeOf("function");
     expect(tauriRuntime.installTauriNativeAppearanceAdapter).toBeTypeOf("function");

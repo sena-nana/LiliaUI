@@ -63,7 +63,7 @@ function onChange(event: Event) {
   </label>
 </template>
 
-<style scoped>
+<style>
 .ui-switch {
   position: relative;
   display: inline-flex;

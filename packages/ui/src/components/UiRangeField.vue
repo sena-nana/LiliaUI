@@ -53,7 +53,7 @@ function onChange(event: Event) {
   </div>
 </template>
 
-<style scoped>
+<style>
 .ui-range-field {
   display: grid;
   grid-template-columns: minmax(80px, 1fr) auto;
