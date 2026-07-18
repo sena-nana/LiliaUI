@@ -18,6 +18,14 @@ describe("UI migration tooling", () => {
     expect(new Set(UI_LAYER_SUBPATHS.lilia)).toEqual(new Set(publishedSubpaths));
   });
 
+  it("keeps the Nana migration allowlist aligned with the published package exports", () => {
+    const manifest = JSON.parse(readFileSync(join(process.cwd(), "packages/nana-ui/package.json"), "utf8"));
+    const publishedSubpaths = Object.keys(manifest.exports).map((subpath) =>
+      subpath === "." ? "" : subpath.slice(1));
+
+    expect(new Set(UI_LAYER_SUBPATHS.nana)).toEqual(new Set(publishedSubpaths));
+  });
+
   it("accepts Lilia stable barrels and explicit compatibility subpaths", async () => {
     const root = createUiFixture({
       legacy: true,
@@ -161,17 +169,23 @@ describe("UI migration tooling", () => {
     expect(inspection.blockers).toHaveLength(1);
   });
 
-  it("stops before writing when the target Layer lacks a known source subpath", async () => {
+  it("migrates shared diagnostics and runtime through the Nana facade", async () => {
     const root = createUiFixture({
       legacy: true,
-      main: 'import { configurePerfDiagnostics } from "@lilia/ui/diagnostics";\n',
+      main: [
+        'import { installAgentDebugHarness } from "@lilia/ui/diagnostics";',
+        'import { installNativeAppearance } from "@lilia/ui/runtime";',
+        "export { installAgentDebugHarness, installNativeAppearance };",
+        "",
+      ].join("\n"),
     });
-    const original = read(root, "package.json");
 
     const report = await runUiMigration(root, { preset: "nana", commands: [] });
 
-    expect(report.status).toBe("blocked");
-    expect(report.migration.contractIncompatibilities).toHaveLength(1);
-    expect(read(root, "package.json")).toBe(original);
+    expect(report.status).toBe("changed");
+    expect(report.migration.contractIncompatibilities).toHaveLength(0);
+    expect(read(root, "src/main.ts")).toContain('from "./ui"');
+    expect(read(root, "src/ui/index.ts")).toContain('@lilia/nana-ui/diagnostics');
+    expect(read(root, "src/ui/index.ts")).toContain('@lilia/nana-ui/runtime');
   });
 });

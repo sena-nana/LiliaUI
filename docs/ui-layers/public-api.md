@@ -33,6 +33,19 @@
 
 LiliaTemplate 迁移后的生产构建报告为 CSS `42,755 / 42,890` bytes、4 个异步 chunk；预算与最小异步 chunk 数均未放宽。
 
+`@lilia/nana-ui` 同样使用显式 allowlist，并提供以下桌面应用入口：
+
+| 入口 | 稳定职责 |
+| --- | --- |
+| `@lilia/nana-ui` | Nana Contract 通用组件与 Provider |
+| `@lilia/nana-ui/shell` | NanaAppShell、NanaTitleBar 与分组 NanaSidebar |
+| `@lilia/nana-ui/settings` | Settings model、Tab 页面、外观与关于区块 |
+| `@lilia/nana-ui/runtime` | 浏览器安全的 Native Appearance adapter 契约 |
+| `@lilia/nana-ui/runtime/tauri` | 复用 tauri-plugin-lilia backdrop 命令的 Tauri adapter |
+| `@lilia/nana-ui/diagnostics` | 与视觉 Layer 无关的 Agent Debug harness |
+
+应用通过 `ui-preset` 生成的本地 facade 使用上述入口；业务代码不得直接混用 Nana 与 Professional Layer。
+
 ## Contract 审计结果
 
 | 组件组 | props 基础 | 共享行为证据 |

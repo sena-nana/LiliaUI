@@ -4,6 +4,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./agent-debug": "./src/agentDebug/index.ts",
     "./commands": "./src/commands.ts",
     "./anchored-position": "./src/useAnchoredPosition.ts",
     "./button": "./src/useButtonPrimitive.ts",
@@ -17,6 +18,8 @@
     "./settings": "./src/settings.ts",
     "./surface": "./src/surface.ts",
     "./theme": "./src/useThemeSync.ts",
+    "./native-appearance": "./src/nativeAppearance.ts",
+    "./window-controls": "./src/useTauriWindowControls.ts",
     "./tooltip": "./src/useTooltipPrimitive.ts"
   },
   "engines": {
@@ -29,8 +32,12 @@
     "@lilia/ui-contract": "^0.1.0",
     "vue": "^3.5.39"
   },
+  "dependencies": {
+    "@tauri-apps/api": "^2.11.1"
+  },
   "devDependencies": {
     "@lilia/ui-contract": "workspace:*",
+    "@tauri-apps/api": "^2.11.1",
     "typescript": "^6.0.3",
     "vue": "^3.5.39"
   }
