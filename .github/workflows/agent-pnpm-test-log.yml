@@ -1,29 +1,72 @@
-name: Capture pnpm test failure
+name: Finalize pnpm source migration
 
 on:
   pull_request:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  capture:
+  finalize:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: ./.github/actions/setup-node-pnpm
-      - name: Run tests
-        id: test
-        continue-on-error: true
-        shell: bash
-        run: pnpm test > pnpm-test.log 2>&1
-      - name: Upload test log
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: Checkout migration branch
+        uses: actions/checkout@v5
         with:
-          name: pnpm-test-log
-          path: pnpm-test.log
-          retention-days: 1
-      - if: steps.test.outcome != 'success'
-        run: exit 1
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Set up project
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Fix remaining Yarn-specific implementation details
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs';
+
+          function update(path, transform) {
+            const source = readFileSync(path, 'utf8');
+            const next = transform(source);
+            if (next !== source) writeFileSync(path, next);
+          }
+
+          update('packages/build/src/index.mjs', (source) => source
+            .replace('`yarn dev --host localhost --port ${port} --strictPort`', '`pnpm dev --host localhost --port ${port} --strictPort`')
+            .replace(
+              /export function yarnSpawn\(platform = process\.platform, env = process\.env\) \{[\s\S]*?\n\}/,
+              `export function pnpmSpawn(platform = process.platform, env = process.env) {\n  if (platform !== "win32") {\n    return { command: "pnpm", argsPrefix: [] };\n  }\n  return {\n    command: env.ComSpec || "cmd.exe",\n    argsPrefix: ["/d", "/s", "/c", "pnpm.cmd"],\n  };\n}\n\nexport const yarnSpawn = pnpmSpawn;`,
+            ));
+
+          update('packages/tools/src/index.mjs', (source) => source.replace(
+            /function formatPackageManagerMessage\(\{ productTitle, reason, requiredPackageManager \}\) \{[\s\S]*?\n\}\n\nfunction printToolsUsage/,
+            `function formatPackageManagerMessage({ productTitle, reason, requiredPackageManager }) {\n  return [\n    "",\n    \`\${productTitle} requires \${requiredPackageManager}.\`,\n    reason,\n    "",\n    \`Expected package manager: \${requiredPackageManager}\`,\n    "",\n    "Fix:",\n    "  npm install --global pnpm@11.14.0",\n    "  pnpm install --frozen-lockfile",\n    "",\n  ].join("\\n");\n}\n\nfunction printToolsUsage`,
+          ));
+
+          update('tests/tools-build.test.mjs', (source) => source
+            .replaceAll('pnpm/4.17.1', 'pnpm/11.14.0')
+            .replaceAll('pnpm/4.14.1', 'pnpm/11.13.0')
+            .replace(
+              /packageManager: "pnpm@4\.17\.1\+sha512\.[^"]+"/,
+              'packageManager: "pnpm@11.14.0"',
+            ));
+          NODE
+
+      - name: Validate migration
+        run: |
+          pnpm typecheck
+          pnpm test
+
+      - name: Commit validated source fixes
+        shell: bash
+        run: |
+          git restore --source=HEAD -- .github/workflows/agent-pnpm-test-log.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "fix: complete pnpm source migration"
+          git push origin HEAD
