@@ -46,7 +46,6 @@ function onKeydown(event: KeyboardEvent, index: number) {
       role="radio"
       :aria-checked="modelValue === option.value"
       :data-lilia-selected="modelValue === option.value ? 'true' : undefined"
-      data-lilia-selected-indicator="bottom"
       :class="{ 'is-active': modelValue === option.value }"
       :disabled="option.disabled"
       :tabindex="segmented.tabbableValue.value === option.value ? 0 : -1"
