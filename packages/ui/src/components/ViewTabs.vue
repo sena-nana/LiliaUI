@@ -55,7 +55,6 @@ const tabs: Array<{ key: ViewKey; label: string; icon: unknown; disabled: boolea
   padding: 0 12px;
   margin-bottom: -1px;
   border: 0;
-  border-bottom: 2px solid transparent;
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   background: transparent;
   color: var(--text-muted);
@@ -65,7 +64,7 @@ const tabs: Array<{ key: ViewKey; label: string; icon: unknown; disabled: boolea
   gap: 6px;
   font-size: 13px;
   font-weight: 500;
-  transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  transition: background-color 0.12s ease, color 0.12s ease;
 }
 
 .view-tabs__tab:hover:not(:disabled):not(.is-active) {
@@ -76,9 +75,7 @@ const tabs: Array<{ key: ViewKey; label: string; icon: unknown; disabled: boolea
 
 .view-tabs__tab.is-active {
   color: var(--lilia-state-foreground-selected);
-  border-bottom-color: var(--lilia-state-indicator-selected);
   background: var(--lilia-state-layer-selected);
-  box-shadow: inset 0 -2px 0 var(--lilia-state-indicator-selected);
 }
 
 .view-tabs__tab.is-active:hover:not(:disabled) {

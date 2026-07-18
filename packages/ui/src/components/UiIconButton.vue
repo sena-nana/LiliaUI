@@ -47,7 +47,6 @@ const emit = defineEmits<{
     :aria-pressed="active"
     :data-lilia-selected="active ? 'true' : undefined"
     data-lilia-interactive
-    data-lilia-selected-indicator="bottom"
     @click="emit('click', $event)"
   >
     <template #icon>
@@ -89,11 +88,6 @@ const emit = defineEmits<{
 .ui-icon-button--warning.ui-button.is-active {
   background: var(--warn-soft);
   color: var(--warn);
-}
-
-.ui-icon-button--warning.ui-button.is-active,
-.ui-icon-button--danger.ui-button.is-active {
-  box-shadow: inset 0 -2px 0 currentColor;
 }
 
 .ui-icon-button--danger.ui-button {
