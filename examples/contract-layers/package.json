@@ -6,11 +6,11 @@
   "scripts": {
     "typecheck:lilia": "vue-tsc --noEmit -p tsconfig.lilia.json",
     "typecheck:nana": "vue-tsc --noEmit -p tsconfig.nana.json",
-    "typecheck": "yarn typecheck:lilia && yarn typecheck:nana",
+    "typecheck": "pnpm typecheck:lilia && pnpm typecheck:nana",
     "build:lilia": "UI_LAYER=lilia vite build",
     "build:nana": "UI_LAYER=nana vite build",
-    "build": "yarn build:lilia && yarn build:nana",
-    "check": "yarn typecheck && yarn build"
+    "build": "pnpm build:lilia && pnpm build:nana",
+    "check": "pnpm typecheck && pnpm build"
   },
   "dependencies": {
     "@lilia/nana-ui": "workspace:*",

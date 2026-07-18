@@ -4,7 +4,7 @@ import { extname, join, relative } from "node:path";
 const SOURCE_EXTENSIONS = new Set([".css", ".js", ".jsx", ".mjs", ".ts", ".tsx", ".vue"]);
 const SKIPPED_DIRECTORIES = new Set([
   ".git",
-  ".yarn",
+  ".pnpm",
   "dist",
   "node_modules",
   "target",
