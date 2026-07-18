@@ -36,7 +36,6 @@ function onClick(event: MouseEvent) {
     :aria-pressed="pressed ?? selected"
     :aria-current="selected ? 'true' : undefined"
     :data-lilia-selected="selected ? 'true' : undefined"
-    data-lilia-selected-indicator="start"
     :data-agent-id="agentId"
     @click="onClick"
   ><slot /></button>
