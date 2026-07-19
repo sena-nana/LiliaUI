@@ -11,6 +11,7 @@
     "./overlay": "./src/overlay.ts",
     "./preset": "./src/preset.ts",
     "./preset/definition": "./src/preset-definition.ts",
+    "./provider": "./src/provider/index.ts",
     "./runtime": "./src/runtime.ts",
     "./runtime/tauri": "./src/runtime/tauri.ts",
     "./search": "./src/search.ts",
@@ -75,19 +76,22 @@
     "typecheck": "vue-tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@lucide/vue": "^1.22.0",
-    "@tauri-apps/api": "^2.11.1",
-    "vue": "^3.5.39",
-    "vue-router": "^5.1.0"
+    "@tauri-apps/api": "^2.11.1"
   },
   "peerDependencies": {
     "@lilia/ui-contract": "^0.1.0",
-    "@lilia/ui-foundation": "^0.1.0"
+    "@lilia/ui-foundation": "^0.1.0",
+    "@lucide/vue": "^1.22.0",
+    "vue": "^3.5.39",
+    "vue-router": "^5.1.0"
   },
   "devDependencies": {
     "@lilia/ui-contract": "workspace:*",
     "@lilia/ui-foundation": "workspace:*",
+    "@lucide/vue": "^1.22.0",
     "typescript": "^6.0.3",
+    "vue": "^3.5.39",
+    "vue-router": "^5.1.0",
     "vue-tsc": "^3.3.7"
   }
 }

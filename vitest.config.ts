@@ -7,6 +7,7 @@ export default defineConfig({
     environment: "jsdom",
     execArgv: ["--no-experimental-webstorage"],
     include: ["tests/ui/**/*.test.ts", "tests/*.test.mjs"],
+    maxWorkers: 2,
     setupFiles: ["./tests/setupTests.ts"],
   },
 });

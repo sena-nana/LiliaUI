@@ -23,6 +23,7 @@ yarn test:ui:browser
 | --- | --- | --- |
 | Contract 控件调用与 Professional aliases | `tests/ui/contractForms.test.ts`、`contractOverlays.test.ts`、`contractFeedbackSurfaces.test.ts` | 已有 |
 | Professional 既有入口兼容 | `tests/ui/publicEntrypoints.test.ts`、现有 `tests/ui/**` 行为测试 | 已有 |
+| 双 Layer Shell/Provider/Settings 框架一致性 | `tests/ui/frameworkLayerConformance.test.ts` | 已有 |
 | Nana Provider/Policy 与基础组件 | `tests/ui/nana/providerComponents.test.ts` | 已有 |
 | Nana Overlay、Shell、Sidebar | `tests/ui/nana/overlayShell.test.ts` | 已有 |
 | Nana 表单、进度、Shell landmark 的结构性 a11y | `tests/ui/nana/accessibility.test.ts`；浏览器 contrast 见视觉质量入口 | 已有 |

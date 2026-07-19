@@ -6,8 +6,14 @@ const themes = ["light", "dark"] as const;
 
 for (const layer of layers) {
   test(`${layer} layer visual matrix`, async ({ page }) => {
+    await resetDeviceMetrics(page);
     await page.goto(`/tests/visual/matrix.html?layer=${layer}`);
     await waitForMatrix(page);
+    const frameMetrics = await page.locator("iframe").evaluateAll((frames) => frames.map((frame) => ({
+      devicePixelRatio: (frame as HTMLIFrameElement).contentWindow?.devicePixelRatio,
+      width: (frame as HTMLIFrameElement).contentWindow?.innerWidth,
+    })));
+    expect(frameMetrics).toEqual(Array.from({ length: 4 }, () => ({ devicePixelRatio: 1, width: 418 })));
     const stateFrame = page.frames().find((candidate) =>
       candidate.url().includes("theme=dark&density=compact"),
     );
@@ -54,28 +60,32 @@ for (const layer of layers) {
 
   test(`${layer} keeps critical content inside a 200% rendering viewport`, async ({ page }) => {
     const client = await page.context().newCDPSession(page);
-    await client.send("Emulation.setDeviceMetricsOverride", {
-      width: 360,
-      height: 720,
-      deviceScaleFactor: 2,
-      mobile: false,
-      screenWidth: 720,
-      screenHeight: 1440,
-    });
-    await openFixture(page, { layer, longText: true });
-    await expect(page.evaluate(() => devicePixelRatio)).resolves.toBe(2);
-    const overflow = await page.locator("[data-visual-critical]").evaluateAll((elements) =>
-      elements.flatMap((element) => {
-        const node = element as HTMLElement;
-        const rect = node.getBoundingClientRect();
-        const exceedsSelf = node.scrollWidth > node.clientWidth + 1;
-        const exceedsViewport = rect.left < -1 || rect.right > document.documentElement.clientWidth + 1;
-        return exceedsSelf || exceedsViewport
-          ? [`${node.dataset.visualCritical}: scroll ${node.scrollWidth}/${node.clientWidth}, rect ${rect.left}/${rect.right}`]
-          : [];
-      }),
-    );
-    expect(overflow, overflow.join("\n")).toEqual([]);
+    try {
+      await client.send("Emulation.setDeviceMetricsOverride", {
+        width: 360,
+        height: 720,
+        deviceScaleFactor: 2,
+        mobile: false,
+        screenWidth: 720,
+        screenHeight: 1440,
+      });
+      await openFixture(page, { layer, longText: true });
+      await expect(page.evaluate(() => devicePixelRatio)).resolves.toBe(2);
+      const overflow = await page.locator("[data-visual-critical]").evaluateAll((elements) =>
+        elements.flatMap((element) => {
+          const node = element as HTMLElement;
+          const rect = node.getBoundingClientRect();
+          const exceedsSelf = node.scrollWidth > node.clientWidth + 1;
+          const exceedsViewport = rect.left < -1 || rect.right > document.documentElement.clientWidth + 1;
+          return exceedsSelf || exceedsViewport
+            ? [`${node.dataset.visualCritical}: scroll ${node.scrollWidth}/${node.clientWidth}, rect ${rect.left}/${rect.right}`]
+            : [];
+        }),
+      );
+      expect(overflow, overflow.join("\n")).toEqual([]);
+    } finally {
+      await client.send("Emulation.clearDeviceMetricsOverride");
+    }
   });
 
   test(`${layer} disables loading motion when reduced motion is requested`, async ({ page }) => {
@@ -86,6 +96,18 @@ for (const layer of layers) {
 
     await page.emulateMedia({ reducedMotion: "reduce" });
     await expect.poll(() => motion.evaluate((node) => getComputedStyle(node).animationName)).toBe("none");
+  });
+}
+
+async function resetDeviceMetrics(page: Page) {
+  const client = await page.context().newCDPSession(page);
+  await client.send("Emulation.setDeviceMetricsOverride", {
+    width: 880,
+    height: 780,
+    deviceScaleFactor: 1,
+    mobile: false,
+    screenWidth: 880,
+    screenHeight: 780,
   });
 }
 

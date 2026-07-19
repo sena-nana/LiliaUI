@@ -29,7 +29,7 @@ const title = computed(() => ({
 
 <template>
   <LiliaAppShell :title="title">
-    <template #titlebar-leading>
+    <template #header-leading>
       <div class="layout-switcher" aria-label="示例布局">
         <button
           v-for="layout in (['code', 'github', 'live2d'] as const)"

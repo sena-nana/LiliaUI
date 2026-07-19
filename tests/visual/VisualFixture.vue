@@ -10,7 +10,11 @@ const props = defineProps<{
 }>();
 
 const providerProps = props.layer === "nana"
-  ? { theme: props.theme, policy: { density: props.density } }
+  ? {
+      theme: props.theme,
+      policy: { density: props.density },
+      storageKeyPrefix: `visual-${props.theme}-${props.density}`,
+    }
   : { class: "visual-provider", "data-density": props.density };
 const longLabel = props.longText
   ? "这是用于验证百分之二百缩放和连续超长内容不会遮挡关键操作的应用状态说明-example.with.a.very.long.identifier.without-spaces"

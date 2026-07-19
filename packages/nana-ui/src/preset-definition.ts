@@ -1,7 +1,7 @@
 import type { UIPreset } from "@lilia/ui-contract";
 import { defaultNanaPolicy, resolveNanaPolicy } from "./policy";
 
-export function createNanaPreset(policy = defaultNanaPolicy): UIPreset {
+export function createNanaPresetDefinition(policy = defaultNanaPolicy): UIPreset {
   const resolved = resolveNanaPolicy(policy);
   return {
     id: "nana",
@@ -11,4 +11,4 @@ export function createNanaPreset(policy = defaultNanaPolicy): UIPreset {
   };
 }
 
-export const nanaPreset = createNanaPreset();
+export const nanaPresetDefinition = createNanaPresetDefinition();

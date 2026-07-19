@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-07-18 — Nana 桌面应用公共能力
+
+### Contract 与 Foundation
+
+- 侧栏契约新增分组、空状态、徽标和行操作；Agent Debug harness 与无边框窗口控制下沉到共享 Foundation，并保留 Professional diagnostics 兼容入口。
+
+### Nana Layer
+
+- `@lilia/nana-ui` 新增桌面标题栏、分组侧栏、应用壳层、持久化 system/light/dark 主题与密度、设置 Tab、外观与关于区块，以及 diagnostics、runtime 与 Tauri adapter 入口。
+
+### Tooling and migration
+
+- Nana preset/facade 纳入 diagnostics 与 runtime subpath，迁移检查统一报告单一 Layer、统一 revision 和直接 Layer import。
+
+## 2026-07-18 — 双 Layer 框架统一
+
+### Contract breaking
+
+- Lilia/Nana 统一采用 Router-free `AppShell` 契约和 `header-leading`、`header-center`、`header-actions`、`overlays` 公共 slots；删除 `LiliaDesktopShell`、`LegacyAppShell`、`NanaDesktopShell` 以及 Nana Shell 内置导航、RouterView、context/status props。
+- `AppUIPresetAdapter.provider` 改为必需；两个 Layer 的 preset adapter 均暴露 Router-free Shell 与 Policy Provider，根入口不再汇总 Provider 或 Contract 类型。
+
+### Foundation
+
+- 新增中性 UI Policy context，统一默认值、patch、replace 与 reset；Settings 新增共享 view resolver，两层一致处理 aliases、section props、header 与 `fullPageTabs`。
+
+### Layer、工具与验证
+
+- 新增 `@lilia/ui/provider` 与 `@lilia/nana-ui/preset/definition`，两个 Layer 对齐公共核心 subpath 和 peer dependency 策略；设计专属 Runtime、Diagnostics、Workspace、Consumer patterns 与 State 保持独立。
+- 边界检查改为双向扫描 Professional/Consumer Layer；迁移工具报告已移除的旧 Shell 调用，新增双 Layer framework conformance 和 Shell/Provider/Settings 性能场景。
+
 ## 2026-07-18 — 重构后稳定化
 
 ### Contract additive

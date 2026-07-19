@@ -842,6 +842,7 @@ __metadata:
     "@lilia/ui-contract": "workspace:*"
     "@lilia/ui-foundation": "workspace:*"
     "@lucide/vue": "npm:^1.22.0"
+    "@tauri-apps/api": "npm:^2.11.1"
     typescript: "npm:^6.0.3"
     vue: "npm:^3.5.39"
     vue-router: "npm:^5.1.0"
@@ -880,6 +881,7 @@ __metadata:
   resolution: "@lilia/ui-foundation@workspace:packages/ui-foundation"
   dependencies:
     "@lilia/ui-contract": "workspace:*"
+    "@tauri-apps/api": "npm:^2.11.1"
     typescript: "npm:^6.0.3"
     vue: "npm:^3.5.39"
   peerDependencies:
@@ -903,6 +905,9 @@ __metadata:
   peerDependencies:
     "@lilia/ui-contract": ^0.1.0
     "@lilia/ui-foundation": ^0.1.0
+    "@lucide/vue": ^1.22.0
+    vue: ^3.5.39
+    vue-router: ^5.1.0
   languageName: unknown
   linkType: soft
 

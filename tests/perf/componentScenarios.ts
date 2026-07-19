@@ -42,7 +42,8 @@ import {
   LiliaWorkspaceRegion,
   useWorkspaceRegion,
 } from "@lilia/ui/layouts";
-import { LiliaDesktopShell, setLiliaUiConfig } from "@lilia/ui/shell";
+import { LiliaAppShell, setLiliaUiConfig } from "@lilia/ui/shell";
+import { LiliaUIProvider } from "@lilia/ui/provider";
 import {
   createLiliaSettingsModel,
   liliaSettingsKey,
@@ -378,12 +379,25 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
     }),
   },
   {
-    name: "LiliaDesktopShell",
+    name: "LiliaAppShell",
     prepare: resetAppConfig,
-    createPlugins: () => [createScenarioRouter("/"), settingsPlugin],
-    beforeMount: readyScenarioRouter,
-    render: () => h(LiliaDesktopShell),
-    interact: (root) => click(root, "[data-agent-id='titlebar.left-sidebar.toggle']"),
+    render: (step) => h(LiliaAppShell, {
+      title: `Workspace ${step.value}`,
+      agentId: "perf.lilia.shell",
+    }, {
+      "header-actions": () => h("button", { "data-agent-id": "perf.lilia.shell.action" }, "Action"),
+      default: () => h("section", `Application ${step.value}`),
+      overlays: () => h("div", `Overlay ${step.value}`),
+    }),
+    interact: (root) => click(root, "[data-agent-id='perf.lilia.shell.action']"),
+  },
+  {
+    name: "LiliaUIProvider",
+    render: (step) => h(LiliaUIProvider, {
+      theme: step.value % 2 === 0 ? "light" : "dark",
+      policy: { density: step.value % 2 === 0 ? "compact" : "comfortable" },
+      agentId: "perf.lilia.provider",
+    }, () => h("div", `Professional content ${step.value}`)),
   },
   {
     name: "LiliaWorkspace",

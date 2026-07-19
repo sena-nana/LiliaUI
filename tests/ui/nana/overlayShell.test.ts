@@ -96,18 +96,51 @@ describe("NanaUI overlay and shell behavior", () => {
     expect(view.emitted("select")).toBeUndefined();
   });
 
-  it("does not mount the context panel without explicit context", async () => {
+  it("renders common application slots without requiring a Router", async () => {
+    const view = render(NanaAppShell, {
+      props: { title: "Nana Workspace" },
+      slots: {
+        "header-actions": "<button>保存</button>",
+        default: "<main>主要任务</main>",
+        overlays: "<div>应用浮层</div>",
+      },
+    });
+    expect(screen.getByText("主要任务")).toBeVisible();
+    expect(screen.getByRole("button", { name: "保存" })).toBeVisible();
+    expect(screen.getByText("应用浮层")).toBeVisible();
+    expect(view.container.querySelector("main main")).toBeNull();
+  });
+
+  it("renders grouped items, badges, actions, and disabled actions", async () => {
     const router = routerPlugin();
     await router.push("/");
     await router.isReady();
-    const view = render(NanaAppShell, {
-      props: { navigation: [], contextVisible: false },
-      slots: { context: "<div>属性内容</div>", default: "<div>主要任务</div>" },
+    const pin = vi.fn();
+    const remove = vi.fn();
+    render(NanaSidebar, {
+      props: {
+        sections: [{
+          id: "inbox",
+          label: "收集箱",
+          items: [{
+            id: "chat-1",
+            label: "会话一",
+            href: "/",
+            badges: [{ id: "phase", label: "运行中", tone: "warning" }],
+            actions: [
+              { id: "pin", label: "置顶", run: pin },
+              { id: "delete", label: "删除", disabled: true, run: remove },
+            ],
+          }],
+        }],
+      },
       global: { plugins: [router] },
     });
-    expect(screen.getByText("主要任务")).toBeVisible();
-    expect(screen.queryByText("属性内容")).toBeNull();
-    await view.rerender({ navigation: [], contextVisible: true });
-    expect(screen.getByText("属性内容")).toBeVisible();
+    expect(screen.getByText("收集箱")).toBeVisible();
+    expect(screen.getByText("运行中")).toBeVisible();
+    await fireEvent.click(screen.getByRole("button", { name: "置顶" }));
+    expect(pin).toHaveBeenCalledOnce();
+    expect(screen.getByRole("button", { name: "删除" })).toBeDisabled();
+    expect(remove).not.toHaveBeenCalled();
   });
 });
