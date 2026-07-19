@@ -43,6 +43,8 @@
 .nana-sidebar__item:hover { color: var(--text); background: var(--lilia-state-layer-hover); }
 .nana-sidebar__item:active { background: var(--lilia-state-layer-pressed); }
 .nana-sidebar__item.is-active, .nana-sidebar__item[aria-current="page"] { color: var(--lilia-state-foreground-selected); background: var(--lilia-state-layer-selected); border-color: var(--lilia-state-indicator-selected); }
+.nana-sidebar__item.is-active:hover, .nana-sidebar__item[aria-current="page"]:hover { background: var(--lilia-state-layer-selected-hover); }
+.nana-sidebar__item.is-active:active, .nana-sidebar__item[aria-current="page"]:active { background: var(--lilia-state-layer-selected-pressed); }
 .nana-sidebar__item:focus-visible { outline: 2px solid var(--lilia-state-focus-ring); outline-offset: 2px; }
 .nana-sidebar__item[aria-disabled="true"], .nana-sidebar__item:disabled { opacity: 0.45; pointer-events: none; }
 .nana-sidebar__badges { display: inline-flex; gap: 3px; }
