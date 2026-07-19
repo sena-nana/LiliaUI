@@ -24,7 +24,6 @@ export interface WorkspaceGeometryState {
 export interface WorkspaceRegionRegistration {
   key: symbol;
   id: string;
-  order: number;
   element: ShallowRef<HTMLElement | null>;
   role: ComputedRef<WorkspaceRegionRole>;
   placement: ComputedRef<WorkspaceRegionPlacement>;
@@ -59,7 +58,7 @@ export interface WorkspaceLayoutModel {
 
 export interface WorkspaceContext {
   inlineSize: Readonly<Ref<number>>;
-  layout: ComputedRef<WorkspaceLayoutModel>;
+  layout: Readonly<ShallowRef<WorkspaceLayoutModel>>;
   registerRegion: (registration: WorkspaceRegionRegistration) => () => void;
   subscribeGeometry: (id: string) => {
     state: WorkspaceGeometryState;

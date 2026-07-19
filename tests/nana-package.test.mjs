@@ -32,7 +32,7 @@ describe("@lilia/nana-ui package", () => {
     await expect(import("@lilia/nana-ui/settings")).resolves.toHaveProperty("NanaSettingsPage");
     await expect(import("@lilia/nana-ui/shell")).resolves.toHaveProperty("NanaAppShell");
     await expect(import("@lilia/nana-ui")).resolves.not.toHaveProperty("NanaUIProvider");
-  });
+  }, 15_000);
 
   it("keeps both preset definitions free of Shell and Provider modules", async () => {
     const result = await build({

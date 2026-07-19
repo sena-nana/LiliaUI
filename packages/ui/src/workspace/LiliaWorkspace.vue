@@ -11,6 +11,8 @@ import {
 import {
   workspaceContextKey,
   type WorkspaceGeometryState,
+  type WorkspaceLayoutModel,
+  type WorkspaceRegionLayout,
   type WorkspaceRegionRegistration,
 } from "./context";
 import { intersectRects } from "./geometry";
@@ -38,13 +40,39 @@ const surfaceAttributes = computed(() => resolveSurfaceAttributes({
 
 const root = shallowRef<HTMLElement | null>(null);
 const inlineSize = ref(0);
-const domOrderRevision = ref(0);
 const registrations = shallowRef<WorkspaceRegionRegistration[]>([]);
+const registrationsById = new Map<string, WorkspaceRegionRegistration>();
 const geometryStates = new Map<string, WorkspaceGeometryState>();
-const layout = computed(() => {
-  void domOrderRevision.value;
-  return createWorkspaceLayout(registrations.value, inlineSize.value);
-});
+
+function sameRegionLayout(left: WorkspaceRegionLayout, right: WorkspaceRegionLayout) {
+  if (
+    left.visible !== right.visible
+    || left.overlay !== right.overlay
+    || left.separator !== right.separator
+    || left.edgeStart !== right.edgeStart
+    || left.edgeEnd !== right.edgeEnd
+    || left.edgeTop !== right.edgeTop
+    || left.edgeBottom !== right.edgeBottom
+  ) return false;
+  const leftStyle = left.style as Record<string, unknown>;
+  const rightStyle = right.style as Record<string, unknown>;
+  const leftKeys = Object.keys(leftStyle);
+  const rightKeys = Object.keys(rightStyle);
+  return leftKeys.length === rightKeys.length
+    && leftKeys.every((key) => leftStyle[key] === rightStyle[key]);
+}
+
+const layout = shallowRef<WorkspaceLayoutModel>(createWorkspaceLayout([], 0));
+
+function commitLayout() {
+  const next = createWorkspaceLayout(registrations.value, inlineSize.value);
+  const regions = next.regions as Map<symbol, WorkspaceRegionLayout>;
+  for (const [key, region] of regions) {
+    const previous = layout.value.regions.get(key);
+    if (previous && sameRegionLayout(previous, region)) regions.set(key, previous);
+  }
+  layout.value = next;
+}
 const workspaceStyle = computed(() => ({
   gridTemplateColumns: layout.value.columns,
   gridTemplateRows: layout.value.rows,
@@ -54,7 +82,7 @@ let mutationObserver: MutationObserver | null = null;
 const observedElements = new Set<Element>();
 let measureFrame: number | null = null;
 let stableFrame: number | null = null;
-let nextRegionOrder = 0;
+let layoutRefreshQueued = false;
 
 function requestFrame(callback: FrameRequestCallback) {
   if (typeof requestAnimationFrame === "function") return requestAnimationFrame(callback);
@@ -98,7 +126,10 @@ function measureGeometry() {
   const workspaceElement = root.value;
   if (!workspaceElement) return;
   const workspaceRect = workspaceElement.getBoundingClientRect();
-  inlineSize.value = workspaceRect.width;
+  if (inlineSize.value !== workspaceRect.width) {
+    inlineSize.value = workspaceRect.width;
+    refreshLayout();
+  }
   for (const registration of registrations.value) {
     const state = geometryStates.get(registration.id);
     if (!state || state.subscribers === 0) continue;
@@ -123,47 +154,70 @@ function measureGeometry() {
 }
 
 function refreshGeometry() {
-  for (const state of geometryStates.values()) state.stable.value = false;
   if (!root.value) return;
+  if (measureFrame !== null) return;
+  for (const state of geometryStates.values()) state.stable.value = false;
   cancelFrame(stableFrame);
   stableFrame = null;
-  if (measureFrame !== null) return;
   measureFrame = requestFrame(measureGeometry);
 }
 
-function refreshLayout() {
+function flushLayoutRefresh() {
+  layoutRefreshQueued = false;
   const workspaceElement = root.value;
   if (workspaceElement) {
-    const children = Array.from(workspaceElement.children);
+    const registrationByElement = new Map<Element, WorkspaceRegionRegistration>();
     for (const registration of registrations.value) {
       const element = registration.element.value;
-      const index = element ? children.indexOf(element) : -1;
-      if (index >= 0) registration.order = index;
+      if (element) registrationByElement.set(element, registration);
+    }
+    const ordered: WorkspaceRegionRegistration[] = [];
+    for (const element of workspaceElement.children) {
+      const registration = registrationByElement.get(element);
+      if (registration) ordered.push(registration);
+    }
+    const orderedRegistrations = new Set(ordered);
+    for (const registration of registrations.value) {
+      if (!orderedRegistrations.has(registration)) ordered.push(registration);
+    }
+    const orderChanged = ordered.some((registration, index) => registration !== registrations.value[index]);
+    if (orderChanged) {
+      registrations.value.splice(0, registrations.value.length, ...ordered);
     }
   }
-  domOrderRevision.value += 1;
+  commitLayout();
   refreshGeometry();
 }
 
+function refreshLayout() {
+  if (layoutRefreshQueued) return;
+  layoutRefreshQueued = true;
+  queueMicrotask(flushLayoutRefresh);
+}
+
 function registerRegion(registration: WorkspaceRegionRegistration) {
-  if (registrations.value.some((item) => item.id === registration.id)) {
+  if (registrationsById.has(registration.id)) {
     throw new Error(`Duplicate LiliaWorkspaceRegion id: ${registration.id}`);
   }
-  registration.order = nextRegionOrder;
-  nextRegionOrder += 1;
-  registrations.value = [...registrations.value, registration];
-  refreshGeometry();
+  registrationsById.set(registration.id, registration);
+  registrations.value.push(registration);
+  refreshLayout();
   return () => {
     unobserve(registration.element.value);
-    registrations.value = registrations.value.filter((item) => item.key !== registration.key);
+    registrationsById.delete(registration.id);
+    const index = registrations.value.indexOf(registration);
+    if (index >= 0) {
+      registrations.value.splice(index, 1);
+    }
     const state = geometryStates.get(registration.id);
     if (state) {
       state.visible.value = false;
       state.rect.value = null;
       state.safeRect.value = null;
       state.stable.value = true;
+      if (state.subscribers === 0) geometryStates.delete(registration.id);
     }
-    refreshGeometry();
+    refreshLayout();
   };
 }
 
@@ -179,12 +233,13 @@ function subscribeGeometry(id: string) {
       active = false;
       state.subscribers = Math.max(0, state.subscribers - 1);
       if (state.subscribers > 0) return;
-      const registration = registrations.value.find((item) => item.id === id);
+      const registration = registrationsById.get(id);
       unobserve(registration?.element.value ?? null);
       state.rect.value = null;
       state.safeRect.value = null;
       state.visible.value = false;
       state.stable.value = true;
+      if (!registration) geometryStates.delete(id);
     },
   };
 }
@@ -222,6 +277,8 @@ onBeforeUnmount(() => {
   window.visualViewport?.removeEventListener("resize", refreshGeometry);
   cancelFrame(measureFrame);
   cancelFrame(stableFrame);
+  registrationsById.clear();
+  geometryStates.clear();
 });
 
 defineExpose({ refreshGeometry });

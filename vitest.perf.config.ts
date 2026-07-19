@@ -7,6 +7,10 @@ export default defineConfig({
   resolve: {
     alias: [
       {
+        find: /^vue$/,
+        replacement: resolve("node_modules/vue/dist/vue.runtime.esm-bundler.js"),
+      },
+      {
         find: /^vue-router$/,
         replacement: resolve("node_modules/vue-router/dist/vue-router.js"),
       },

@@ -32,6 +32,7 @@ type ContextMenuStore = {
   providers: WeakMap<Element, ContextMenuProvider>;
   installed: boolean;
   removeGlobalListeners: (() => void) | null;
+  removeOpenListeners: (() => void) | null;
 };
 
 declare global {
@@ -52,6 +53,7 @@ const store = globalThis.__liliaUiContextMenuStore ??= {
   providers: new WeakMap<Element, ContextMenuProvider>(),
   installed: false,
   removeGlobalListeners: null,
+  removeOpenListeners: null,
 } satisfies ContextMenuStore;
 const { state, providers } = store;
 
@@ -88,6 +90,7 @@ function openMenu(x: number, y: number, items: ContextMenuItem[]) {
   state.open = items.length > 0;
   state.pendingConfirmId = null;
   state.openSeq += 1;
+  if (state.open) attachOpenListeners();
 }
 
 export function openContextMenuAt(
@@ -102,6 +105,7 @@ export function openContextMenuAt(
 export function closeContextMenu() {
   if (!state.open) return;
   state.open = false;
+  detachOpenListeners();
 }
 
 export function finalizeClosedContextMenu() {
@@ -132,6 +136,43 @@ export async function selectContextMenuItem(item: ContextMenuItem) {
   await item.onSelect?.();
 }
 
+function onPointerDown(event: PointerEvent) {
+  const target = event.target as Element | null;
+  if (target?.closest?.(".ctx-menu")) return;
+  closeContextMenu();
+}
+
+function onKeydown(event: KeyboardEvent) {
+  if (event.key !== "Escape") return;
+  closeContextMenu();
+  event.stopPropagation();
+}
+
+function onScroll() {
+  closeContextMenu();
+}
+
+function detachOpenListeners() {
+  store.removeOpenListeners?.();
+  store.removeOpenListeners = null;
+}
+
+function attachOpenListeners() {
+  if (store.removeOpenListeners || typeof window === "undefined") return;
+  window.addEventListener("pointerdown", onPointerDown, true);
+  window.addEventListener("keydown", onKeydown);
+  window.addEventListener("scroll", onScroll, true);
+  window.addEventListener("resize", closeContextMenu);
+  window.addEventListener("blur", closeContextMenu);
+  store.removeOpenListeners = () => {
+    window.removeEventListener("pointerdown", onPointerDown, true);
+    window.removeEventListener("keydown", onKeydown);
+    window.removeEventListener("scroll", onScroll, true);
+    window.removeEventListener("resize", closeContextMenu);
+    window.removeEventListener("blur", closeContextMenu);
+  };
+}
+
 export function installContextMenu() {
   if (store.installed || typeof window === "undefined" || typeof document === "undefined") return uninstallContextMenu;
   store.installed = true;
@@ -143,37 +184,9 @@ export function installContextMenu() {
     else closeContextMenu();
   };
 
-  const onPointerDown = (event: PointerEvent) => {
-    if (!state.open) return;
-    const target = event.target as Element | null;
-    if (target?.closest?.(".ctx-menu")) return;
-    closeContextMenu();
-  };
-
-  const onKeydown = (event: KeyboardEvent) => {
-    if (event.key === "Escape" && state.open) {
-      closeContextMenu();
-      event.stopPropagation();
-    }
-  };
-
-  const onScroll = () => {
-    if (state.open) closeContextMenu();
-  };
-
   document.addEventListener("contextmenu", onContextMenu);
-  window.addEventListener("pointerdown", onPointerDown, true);
-  window.addEventListener("keydown", onKeydown);
-  window.addEventListener("scroll", onScroll, true);
-  window.addEventListener("resize", closeContextMenu);
-  window.addEventListener("blur", closeContextMenu);
   store.removeGlobalListeners = () => {
     document.removeEventListener("contextmenu", onContextMenu);
-    window.removeEventListener("pointerdown", onPointerDown, true);
-    window.removeEventListener("keydown", onKeydown);
-    window.removeEventListener("scroll", onScroll, true);
-    window.removeEventListener("resize", closeContextMenu);
-    window.removeEventListener("blur", closeContextMenu);
   };
 
   return uninstallContextMenu;
@@ -184,6 +197,7 @@ export function uninstallContextMenu() {
   store.installed = false;
   store.removeGlobalListeners?.();
   store.removeGlobalListeners = null;
+  detachOpenListeners();
   closeContextMenu();
   finalizeClosedContextMenu();
 }

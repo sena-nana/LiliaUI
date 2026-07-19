@@ -85,7 +85,6 @@ let resizeFrame: number | null = null;
 const registration: WorkspaceRegionRegistration = {
   key,
   id: props.id,
-  order: 0,
   element,
   role: computed(() => props.role),
   placement,
@@ -128,7 +127,7 @@ function setCollapsed(value: boolean) {
   if (!props.collapsible || props.disabled) return;
   internalCollapsed.value = value;
   emit("update:collapsed", value);
-  workspace.refreshGeometry();
+  workspace.refreshLayout();
 }
 
 function setSize(value: number, eventName: "resize" | "resizeEnd" = "resize") {
@@ -138,7 +137,7 @@ function setSize(value: number, eventName: "resize" | "resizeEnd" = "resize") {
   emit("update:size", next);
   if (eventName === "resize") emit("resize", next);
   else emit("resizeEnd", next);
-  workspace.refreshGeometry();
+  workspace.refreshLayout();
 }
 
 function coordinate(event: PointerEvent) {
@@ -231,7 +230,6 @@ function resetSize() {
 
 onMounted(() => {
   workspace.refreshLayout();
-  workspace.refreshGeometry();
 });
 watch(
   [

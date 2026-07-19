@@ -5,11 +5,18 @@ import { defineConfig } from "vitest/config";
 const rootVueRouter = fileURLToPath(
   new URL("./node_modules/vue-router/dist/vue-router.js", import.meta.url),
 );
+const rootVue = fileURLToPath(
+  new URL("./node_modules/vue/dist/vue.runtime.esm-bundler.js", import.meta.url),
+);
 
 export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: [
+      {
+        find: /^vue$/,
+        replacement: rootVue,
+      },
       {
         find: /^vue-router$/,
         replacement: rootVueRouter,

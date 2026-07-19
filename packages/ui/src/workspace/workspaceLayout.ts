@@ -5,14 +5,6 @@ import type {
   WorkspaceRegionRegistration,
 } from "./context";
 
-const placementOrder = {
-  start: 0,
-  primary: 1,
-  end: 2,
-  top: 3,
-  bottom: 4,
-} as const;
-
 function responsiveThreshold(region: WorkspaceRegionRegistration) {
   const explicit = region.collapseBelow.value;
   if (explicit !== null) return explicit;
@@ -96,20 +88,31 @@ export function createWorkspaceLayout(
   registrations: readonly WorkspaceRegionRegistration[],
   inlineSize: number,
 ): WorkspaceLayoutModel {
-  const regions = [...registrations].sort((left, right) => left.order - right.order);
-  const visible = regions.filter((region) => isVisible(region, inlineSize));
-  const overlays = visible.filter((region) => isResponsiveOverlay(region, inlineSize));
-  const attached = visible.filter((region) => !overlays.includes(region));
-  const middle = attached
-    .filter((region) => ["start", "primary", "end"].includes(region.placement.value))
-    .sort((left, right) => {
-      const placementDelta = placementOrder[left.placement.value] - placementOrder[right.placement.value];
-      return placementDelta || left.order - right.order;
-    });
-  const workspaceTop = attached.filter((region) => region.placement.value === "top" && region.scope.value === "workspace");
-  const primaryTop = attached.filter((region) => region.placement.value === "top" && region.scope.value === "primary");
-  const primaryBottom = attached.filter((region) => region.placement.value === "bottom" && region.scope.value === "primary");
-  const workspaceBottom = attached.filter((region) => region.placement.value === "bottom" && region.scope.value === "workspace");
+  const regions = registrations;
+  const overlays: WorkspaceRegionRegistration[] = [];
+  const starts: WorkspaceRegionRegistration[] = [];
+  const primaries: WorkspaceRegionRegistration[] = [];
+  const ends: WorkspaceRegionRegistration[] = [];
+  const workspaceTop: WorkspaceRegionRegistration[] = [];
+  const primaryTop: WorkspaceRegionRegistration[] = [];
+  const primaryBottom: WorkspaceRegionRegistration[] = [];
+  const workspaceBottom: WorkspaceRegionRegistration[] = [];
+  for (const region of regions) {
+    if (!isVisible(region, inlineSize)) continue;
+    if (isResponsiveOverlay(region, inlineSize)) {
+      overlays.push(region);
+      continue;
+    }
+    const placement = region.placement.value;
+    if (placement === "start") starts.push(region);
+    else if (placement === "primary") primaries.push(region);
+    else if (placement === "end") ends.push(region);
+    else if (placement === "top" && region.scope.value === "workspace") workspaceTop.push(region);
+    else if (placement === "top") primaryTop.push(region);
+    else if (region.scope.value === "workspace") workspaceBottom.push(region);
+    else primaryBottom.push(region);
+  }
+  const middle = [...starts, ...primaries, ...ends];
   const columns = middle.length ? middle.map(track).join(" ") : "minmax(0, 1fr)";
   const rows = [
     ...workspaceTop.map(track),
@@ -119,12 +122,10 @@ export function createWorkspaceLayout(
     ...workspaceBottom.map(track),
   ].join(" ");
   const layouts = new Map<symbol, WorkspaceRegionLayout>();
-  const primaryColumns = middle
-    .map((region, index) => ({ region, column: index + 1 }))
-    .filter(({ region }) => region.placement.value === "primary")
-    .map(({ column }) => column);
-  const primaryStart = primaryColumns[0] ?? 1;
-  const primaryEnd = (primaryColumns[primaryColumns.length - 1] ?? (middle.length || 1)) + 1;
+  const primaryStart = primaries.length ? starts.length + 1 : 1;
+  const primaryEnd = primaries.length
+    ? primaryStart + primaries.length
+    : (middle.length || 1) + 1;
   const middleRow = workspaceTop.length + primaryTop.length + 1;
   const attachedMiddleRowStart = workspaceTop.length + 1;
   const attachedMiddleRowSpan = primaryTop.length + 1 + primaryBottom.length;
@@ -210,6 +211,6 @@ export function createWorkspaceLayout(
     columns,
     rows,
     regions: layouts,
-    hasPrimary: middle.some((region) => region.placement.value === "primary"),
+    hasPrimary: primaries.length > 0,
   };
 }

@@ -7,6 +7,7 @@ import {
   closeContextMenu,
   installContextMenu,
   openContextMenuAt,
+  uninstallContextMenu,
   type ContextMenuItem,
 } from "@lilia/ui/composables/useContextMenu";
 import { installLiliaContextMenu } from "@lilia/ui/runtime";
@@ -58,6 +59,27 @@ describe("ContextMenuHost", () => {
     closeContextMenu();
     vi.useRealTimers();
     vi.restoreAllMocks();
+  });
+
+  it("只在菜单打开期间绑定高频全局监听器", () => {
+    uninstallContextMenu();
+    const addListener = vi.spyOn(window, "addEventListener");
+    const removeListener = vi.spyOn(window, "removeEventListener");
+
+    installContextMenu();
+    for (const type of ["pointerdown", "keydown", "scroll", "resize", "blur"]) {
+      expect(addListener.mock.calls.some(([eventType]) => eventType === type)).toBe(false);
+    }
+
+    openContextMenuAt(20, 24, [{ id: "open", label: "打开" }]);
+    for (const type of ["pointerdown", "keydown", "scroll", "resize", "blur"]) {
+      expect(addListener.mock.calls.some(([eventType]) => eventType === type)).toBe(true);
+    }
+
+    closeContextMenu();
+    for (const type of ["pointerdown", "keydown", "scroll", "resize", "blur"]) {
+      expect(removeListener.mock.calls.some(([eventType]) => eventType === type)).toBe(true);
+    }
   });
 
   it("应用显式组合菜单 Host 后可响应右键菜单", async () => {

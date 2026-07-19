@@ -17,6 +17,23 @@ function routerPlugin() {
 afterEach(() => vi.useRealTimers());
 
 describe("NanaUI overlay and shell behavior", () => {
+  it("navigates a 200-item sidebar through enabled-index lookups", async () => {
+    const items = Array.from({ length: 200 }, (_, index) => ({
+      disabled: index % 3 === 1,
+      id: `item-${index}`,
+      label: `Item ${index}`,
+    }));
+    render(NanaSidebar, { props: { items } });
+
+    const first = screen.getByRole("button", { name: "Item 0" });
+    first.focus();
+    await fireEvent.keyDown(first, { key: "ArrowDown" });
+    expect(screen.getByRole("button", { name: "Item 2" })).toHaveFocus();
+
+    await fireEvent.keyDown(screen.getByRole("button", { name: "Item 2" }), { key: "End" });
+    expect(screen.getByRole("button", { name: "Item 198" })).toHaveFocus();
+  });
+
   it("traps dialog focus, closes on Escape, and restores the opener", async () => {
     const view = render(defineComponent({
       components: { NanaButton, NanaDialog },

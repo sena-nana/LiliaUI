@@ -56,13 +56,20 @@ const current = computed(() =>
 const selectedValues = computed(() =>
   props.multiple && Array.isArray(props.modelValue) ? props.modelValue : [],
 );
+const selectedValueSet = computed(() => new Set(selectedValues.value));
 const buttonLabel = computed(() => {
   if (props.displayLabel) return props.displayLabel;
   if (!props.multiple) return current.value?.label ?? props.placeholder ?? "-";
-  const selected = props.options.filter((option) => selectedValues.value.includes(option.value));
-  if (!selected.length) return props.placeholder ?? "-";
-  if (selected.length <= 2) return selected.map((option) => option.label).join(", ");
-  return `${selected.slice(0, 2).map((option) => option.label).join(", ")} +${selected.length - 2}`;
+  const labels: string[] = [];
+  let selectedCount = 0;
+  for (const option of props.options) {
+    if (!selectedValueSet.value.has(option.value)) continue;
+    selectedCount += 1;
+    if (labels.length < 2) labels.push(option.label);
+  }
+  if (!selectedCount) return props.placeholder ?? "-";
+  if (selectedCount <= 2) return labels.join(", ");
+  return `${labels.join(", ")} +${selectedCount - 2}`;
 });
 
 const menuStyle = computed(() => [
@@ -82,7 +89,7 @@ function pick(option: Option) {
     const values = selectedValues.value;
     emit(
       "update:modelValue",
-      values.includes(option.value)
+      selectedValueSet.value.has(option.value)
         ? values.filter((value) => value !== option.value)
         : [...values, option.value],
     );
@@ -94,7 +101,7 @@ function pick(option: Option) {
 
 function isSelected(option: Option) {
   return props.multiple
-    ? selectedValues.value.includes(option.value)
+    ? selectedValueSet.value.has(option.value)
     : option.value === props.modelValue;
 }
 
@@ -167,6 +174,7 @@ function onAfterLeave() {
           <button
             v-for="option in options"
             :key="String(option.value)"
+            v-memo="[option.value, option.label, option.hint, option.disabled, option.agentId, multiple, isSelected(option)]"
             type="button"
             class="dd__item lilia-interactive-item"
             :class="{ 'is-active': isSelected(option), 'is-multiple': multiple }"
