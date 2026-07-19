@@ -18,6 +18,6 @@ LiliaUI 是 Lilia 桌面应用生态的公共 UI、配置、工具、构建与 T
 仓库级最低验证为：
 
 ```bash
-yarn typecheck
-yarn test
+pnpm typecheck
+pnpm test
 ```
