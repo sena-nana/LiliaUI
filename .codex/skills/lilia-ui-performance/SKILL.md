@@ -13,8 +13,8 @@ Use this skill to keep component performance a design requirement, not a late ve
 2. Use CodeGraph first when locating relevant components, composables, exports, and call paths.
 3. Identify the root cause of a performance issue before changing code; do not hide symptoms with delays, disabled controls, or console-only checks.
 4. For public component changes, update `tests/perf/componentScenarios.ts` when the component surface, important state, or primary interaction changes.
-5. Run `yarn perf:components:light` before finalizing a UI performance change. Run `yarn perf:components:browser` when the change affects overlay positioning, shell layout, menus, search, transitions, global listeners, or repeated interactions.
-6. Update the baseline only with `yarn perf:components:update-baseline`, and only after confirming the new numbers are expected.
+5. Run `pnpm perf:components:light` before finalizing a UI performance change. Run `pnpm perf:components:browser` when the change affects overlay positioning, shell layout, menus, search, transitions, global listeners, or repeated interactions.
+6. Update the baseline only with `pnpm perf:components:update-baseline`, and only after confirming the new numbers are expected.
 
 ## Standards
 

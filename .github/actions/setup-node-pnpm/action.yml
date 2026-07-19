@@ -1,30 +1,25 @@
-name: Setup Node and Yarn
-description: Install the repository Node baseline, explicit Corepack, and pinned Yarn
+name: Setup Node and pnpm
+description: Install the repository Node baseline and pinned pnpm
 
 inputs:
   working-directory:
-    description: Directory containing package.json and yarn.lock
+    description: Directory containing package.json and pnpm-lock.yaml
     default: .
 
 runs:
   using: composite
   steps:
+    - name: Set up pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 11.14.0
+
     - name: Set up Node.js
       uses: actions/setup-node@v6
       with:
         node-version-file: ${{ inputs.working-directory }}/.node-version
-
-    - name: Install Corepack
-      shell: bash
-      run: |
-        corepack_prefix="${RUNNER_TEMP}/corepack-0.35.0"
-        npm install --global --prefix "${corepack_prefix}" corepack@0.35.0
-
-        if [[ "${RUNNER_OS}" == "Windows" ]]; then
-          echo "${corepack_prefix}" >> "${GITHUB_PATH}"
-        else
-          echo "${corepack_prefix}/bin" >> "${GITHUB_PATH}"
-        fi
+        cache: pnpm
+        cache-dependency-path: ${{ inputs.working-directory }}/pnpm-lock.yaml
 
     - name: Enable the Node compile cache
       shell: bash
@@ -38,4 +33,4 @@ runs:
       env:
         NODE_COMPILE_CACHE: ${{ runner.temp }}/node-compile-cache
         NODE_COMPILE_CACHE_PORTABLE: "1"
-      run: corepack yarn install --immutable
+      run: pnpm install --frozen-lockfile
