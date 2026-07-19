@@ -7,8 +7,8 @@
     "typecheck:lilia": "vue-tsc --noEmit -p tsconfig.lilia.json",
     "typecheck:nana": "vue-tsc --noEmit -p tsconfig.nana.json",
     "typecheck": "pnpm typecheck:lilia && pnpm typecheck:nana",
-    "build:lilia": "UI_LAYER=lilia vite build",
-    "build:nana": "UI_LAYER=nana vite build",
+    "build:lilia": "cross-env UI_LAYER=lilia vite build",
+    "build:nana": "cross-env UI_LAYER=nana vite build",
     "build": "pnpm build:lilia && pnpm build:nana",
     "check": "pnpm typecheck && pnpm build"
   },
@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.8",
+    "cross-env": "^10.1.0",
     "typescript": "^6.0.3",
     "vite": "^8.1.4",
     "vue-tsc": "^3.3.7"

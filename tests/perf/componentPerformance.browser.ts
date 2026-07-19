@@ -38,6 +38,15 @@ function failReport(title: string, lines: readonly string[]) {
 const server = await createServer({
   configFile: false,
   plugins: [vue()],
+  resolve: {
+    alias: [
+      {
+        find: /^vue-router$/,
+        replacement: resolve("node_modules/vue-router/dist/vue-router.js"),
+      },
+    ],
+    dedupe: ["vue", "vue-router"],
+  },
   root: process.cwd(),
   server: {
     host: "127.0.0.1",
