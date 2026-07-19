@@ -1,0 +1,209 @@
+name: Reusable pnpm migration v3
+
+on:
+  workflow_call:
+    inputs:
+      lilia_ui_ref:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out caller branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Fetch migration script
+        uses: actions/checkout@v6
+        with:
+          repository: sena-nana/LiliaUI
+          ref: 1ce38053fb82f1925e9fae9f6e94fec643e85cbf
+          path: .pnpm-migration-tools
+          sparse-checkout: .github/scripts/migrate-pnpm.mjs
+          sparse-checkout-cone-mode: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.14.0
+
+      - name: Set up Node.js 26
+        uses: actions/setup-node@v6
+        with:
+          node-version: 26
+
+      - name: Rewrite Yarn project files
+        env:
+          LILIA_UI_REF: ${{ inputs.lilia_ui_ref }}
+        shell: bash
+        run: |
+          cp .pnpm-migration-tools/.github/scripts/migrate-pnpm.mjs /tmp/migrate-pnpm.mjs
+          rm -rf .pnpm-migration-tools
+          node /tmp/migrate-pnpm.mjs
+
+          node --input-type=module <<'NODE'
+          import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+          import { basename, extname, join } from 'node:path';
+
+          const ref = process.env.LILIA_UI_REF;
+          const ignored = new Set(['.git', 'node_modules', 'target', 'dist', 'build', 'coverage', '.cache', '.venv', 'vendor']);
+          const textExtensions = new Set(['.md', '.mdx', '.mjs', '.cjs', '.js', '.ts', '.tsx', '.vue', '.yml', '.yaml', '.json']);
+
+          function walk(directory) {
+            return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+              if (entry.isDirectory() && ignored.has(entry.name)) return [];
+              const path = join(directory, entry.name);
+              if (entry.isDirectory()) return walk(path);
+              return entry.isFile() ? [path] : [];
+            });
+          }
+
+          for (const path of walk(process.cwd())) {
+            if (statSync(path).size > 1_000_000) continue;
+            if (basename(path) === 'package.json') {
+              const manifest = JSON.parse(readFileSync(path, 'utf8'));
+              let changed = false;
+              for (const field of ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']) {
+                if (!manifest[field]) continue;
+                for (const [name, specifier] of Object.entries(manifest[field])) {
+                  if (typeof specifier !== 'string' || !specifier.startsWith('github:sena-nana/LiliaUI#')) continue;
+                  const pathMatch = specifier.match(/&path:(\/packages\/[^&]+)/);
+                  if (!pathMatch) continue;
+                  const next = `github:sena-nana/LiliaUI#${ref}&path:${pathMatch[1]}`;
+                  if (next !== specifier) {
+                    manifest[field][name] = next;
+                    changed = true;
+                  }
+                }
+              }
+              if (changed) writeFileSync(path, `${JSON.stringify(manifest, null, 2)}\n`);
+              continue;
+            }
+
+            if (!textExtensions.has(extname(path).toLowerCase())) continue;
+            const source = readFileSync(path, 'utf8');
+            const next = source
+              .replace(
+                /sena-nana\/LiliaUI\/\.github\/actions\/setup-node-(?:yarn|pnpm)@[0-9a-f]{40}/g,
+                `sena-nana/LiliaUI/.github/actions/setup-node-pnpm@${ref}`,
+              )
+              .replace(/\bcorepack\s+pnpm\s+/g, 'pnpm ');
+            if (next !== source) writeFileSync(path, next);
+          }
+
+          const workspacePath = 'pnpm-workspace.yaml';
+          let workspace = existsSync(workspacePath) ? readFileSync(workspacePath, 'utf8').replace(/\s+$/, '') : '';
+          if (!/^allowBuilds:\s*$/m.test(workspace)) {
+            workspace += `${workspace ? '\n\n' : ''}allowBuilds:\n  esbuild: true`;
+          } else if (!/^\s{2}(?:"esbuild"|esbuild):\s*true\s*$/m.test(workspace)) {
+            const lines = workspace.split('\n');
+            const start = lines.findIndex((line) => /^allowBuilds:\s*$/.test(line));
+            lines.splice(start + 1, 0, '  esbuild: true');
+            workspace = lines.join('\n');
+          }
+          writeFileSync(workspacePath, `${workspace}\n`);
+          NODE
+
+      - name: Generate pnpm lockfiles
+        shell: bash
+        run: |
+          : > /tmp/pnpm-project-dirs
+          while IFS= read -r lockfile; do
+            directory="$(dirname "${lockfile}")"
+            if [[ -f "${directory}/package.json" ]]; then
+              printf '%s\n' "${directory}" >> /tmp/pnpm-project-dirs
+              (
+                cd "${directory}"
+                pnpm import || true
+                pnpm install --lockfile-only --no-frozen-lockfile --ignore-scripts
+              )
+            fi
+          done < <(find . -type f -name yarn.lock -not -path './.git/*' | sort)
+
+          if [[ -f package.json ]]; then
+            printf '.\n' >> /tmp/pnpm-project-dirs
+            pnpm install --lockfile-only --no-frozen-lockfile --ignore-scripts
+          fi
+
+          sort -u /tmp/pnpm-project-dirs -o /tmp/pnpm-project-dirs
+          find . -type f -name yarn.lock -not -path './.git/*' -delete
+          find . -type f -name .yarnrc.yml -not -path './.git/*' -delete
+          find . -type f \( -name .pnp.cjs -o -name .pnp.js \) -not -path './.git/*' -delete
+          find . -type d -name .yarn -not -path './.git/*' -prune -exec rm -rf {} +
+
+      - name: Validate project installs
+        shell: bash
+        run: |
+          while IFS= read -r directory; do
+            [[ -n "${directory}" ]] || continue
+            if [[ "${directory}" == "." ]]; then
+              pnpm install --frozen-lockfile
+            else
+              (cd "${directory}" && pnpm install --frozen-lockfile --ignore-scripts)
+            fi
+          done < /tmp/pnpm-project-dirs
+
+      - name: Build migration bundle
+        shell: bash
+        run: |
+          git add -A
+          mkdir -p .migration-output
+          node --input-type=module <<'NODE'
+          import { execFileSync } from 'node:child_process';
+          import { writeFileSync } from 'node:fs';
+
+          const gitText = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
+          const raw = execFileSync('git', ['diff', '--cached', '--name-status', '--no-renames', '-z']).toString('utf8');
+          const fields = raw.split('\0');
+          const changes = [];
+
+          for (let index = 0; index < fields.length - 1; index += 2) {
+            const status = fields[index];
+            const path = fields[index + 1];
+            if (!status || !path || path === '.github/workflows/agent-pnpm-migrate.yml') continue;
+            if (status.startsWith('D')) {
+              const line = gitText('ls-tree', 'HEAD', '--', path);
+              changes.push({ path, mode: line ? line.split(/\s+/)[0] : '100644', type: 'blob', delete: true });
+              continue;
+            }
+            const indexLine = gitText('ls-files', '-s', '--', path);
+            const content = execFileSync('git', ['show', `:${path}`]).toString('base64');
+            changes.push({ path, mode: indexLine ? indexLine.split(/\s+/)[0] : '100644', type: 'blob', contentBase64: content });
+          }
+
+          writeFileSync('.migration-output/migration-bundle.json', JSON.stringify({
+            repository: process.env.GITHUB_REPOSITORY,
+            branch: process.env.GITHUB_HEAD_REF,
+            parentSha: gitText('rev-parse', 'HEAD'),
+            baseTreeSha: gitText('rev-parse', 'HEAD^{tree}'),
+            changes,
+          }));
+          NODE
+
+      - name: Upload migration bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnpm-migration-bundle
+          path: .migration-output/migration-bundle.json
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Commit non-workflow changes
+        shell: bash
+        run: |
+          git restore --source=HEAD -- .github/workflows
+          git add -A
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: migrate workflow from yarn to pnpm"
+          git push origin HEAD
