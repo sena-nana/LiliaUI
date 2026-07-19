@@ -3,6 +3,11 @@ import { createUiPresetPlan } from "../ui-preset/plan.mjs";
 import { readText } from "../ui-preset/files.mjs";
 import { rewriteModuleSpecifiers } from "../ui-preset/imports.mjs";
 import { isLayerSpecifier } from "../ui-preset/definitions.mjs";
+import {
+  createLegacyShellScaffoldOperations,
+  isLegacyShellSpecifier,
+  LEGACY_SHELL_BARREL_PATH,
+} from "./shell.mjs";
 
 export async function createUiMigrationPlan(inspection, targetPreset, options = {}) {
   const presetPlan = await createUiPresetPlan(inspection.project, targetPreset, {
@@ -11,12 +16,29 @@ export async function createUiMigrationPlan(inspection, targetPreset, options = 
   });
   const operations = [...presetPlan.operations];
   const blockers = [...presetPlan.blockers, ...inspection.blockers];
+  const shellPlan = await createLegacyShellScaffoldOperations(
+    inspection.project.projectRoot,
+    targetPreset,
+    inspection.legacyShellMigrations,
+  );
+  operations.push(...shellPlan.operations);
+  blockers.push(...shellPlan.blockers);
+  const shellMigrationsByPath = Map.groupBy(inspection.legacyShellMigrations, (item) => item.path);
   for (const path of [...new Set(inspection.directImports.map((item) => item.path))]) {
+    if (shellMigrationsByPath.get(path)?.some((item) => item.strategy === "replace-file")) continue;
     const before = await readText(join(inspection.project.projectRoot, path));
     try {
-      const after = rewriteModuleSpecifiers(before, path, (specifier) =>
-        localFacadeSpecifier(path, specifier)).content;
-      if (after !== before) operations.push({ path, before, after, reason: "facade-import" });
+      const shellMigration = shellMigrationsByPath.get(path)?.find((item) => item.automatic);
+      const rewritten = rewriteModuleSpecifiers(before, path, (specifier) =>
+        shellMigration && isLegacyShellSpecifier(shellMigration, specifier)
+          ? localProjectSpecifier(path, LEGACY_SHELL_BARREL_PATH.replace(/\.ts$/, ""))
+          : localFacadeSpecifier(path, specifier));
+      if (rewritten.content !== before) operations.push({
+        path,
+        before,
+        after: rewritten.content,
+        reason: shellMigration ? "legacy-shell-import" : "facade-import",
+      });
     } catch (error) {
       blockers.push({ id: "parse-error", severity: "error", detail: error.message, files: [path] });
     }
@@ -37,6 +59,10 @@ export async function createUiMigrationPlan(inspection, targetPreset, options = 
 function localFacadeSpecifier(filePath, specifier) {
   if (!isLayerSpecifier(specifier)) return specifier;
   const target = specifier.endsWith("/styles.css") ? "src/ui/styles.css" : "src/ui";
+  return localProjectSpecifier(filePath, target);
+}
+
+function localProjectSpecifier(filePath, target) {
   let result = relative(dirname(filePath), target).replaceAll("\\", "/");
   result = posix.normalize(result);
   if (!result.startsWith(".")) result = `./${result}`;

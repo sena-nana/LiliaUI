@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-19 — 旧 Shell 自动迁移
+
+### Tooling and migration
+
+- `ui-migrate` 新增结构化 `legacyShellMigrations`，可为 `LiliaDesktopShell`、已知 `LegacyAppShell`、`NanaDesktopShell` 与使用旧 props 的 `NanaAppShell` 生成消费端双 Layer 最小骨架并重定向旧导入。
+- 迁移骨架显式保留消费端 Router 与业务导航边界；定制骨架和未知 Legacy Shell 不会被静默覆盖，事务失败仍恢复新建文件与 lockfile。
+- 迁移检查和修复覆盖 `@lilia/ui-contract`、`@lilia/ui-foundation` 的显式消费声明、依赖来源与 Git workspace commit 对齐。
+
 ## 2026-07-18 — Nana 桌面应用公共能力
 
 ### Contract 与 Foundation

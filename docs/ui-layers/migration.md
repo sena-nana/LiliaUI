@@ -63,7 +63,9 @@ lilia-tools ui-migrate --preset nana
 
 - 创建缺失的 facade/preset/contract/styles 工程入口；
 - 将可解析的已知 Layer import 和 CSS 入口改到本地 facade；
+- 为 `LiliaDesktopShell`、已知结构的 `LegacyAppShell`、`NanaDesktopShell` 和仍使用旧 navigation/context props 的 `NanaAppShell` 生成消费端迁移骨架，并把旧导入改到 `src/ui/legacy-shell.ts`；
 - 替换 Layer 依赖并同步 app config；
+- 在 `dependencies` 补齐 `@lilia/ui-contract` 与 `@lilia/ui-foundation`，并让 Layer、Contract、Foundation 沿用同一来源和 Git workspace commit；
 - 更新测试中的已知 UI import；
 - 执行明确的一对一 Contract 迁移。
 
@@ -71,6 +73,7 @@ lilia-tools ui-migrate --preset nana
 
 - 无法解析的 Vue/TypeScript/CSS module 入口；
 - 未知或目标 Layer 不支持的 subpath、prop 或组件契约；
+- 已存在但不是工具生成内容的 `src/ui/LegacyShell.vue` / `src/ui/legacy-shell.ts`，以及无法确认是公共旧实现的定制 `LegacyAppShell.vue`；
 - 无标记且存在命名冲突的自定义 preset adapter；
 - 脏工作区的实际写入，除非用户显式 `--force`；
 - 保留 Nana layout 时直接切回不支持该布局的 Lilia 配置。
@@ -82,6 +85,21 @@ lilia-tools ui-migrate --preset nana
 - 为未知错误流程伪造 recovery action；
 - 删除自定义页面、样式、业务组件或数据模型；
 - 仅根据颜色、Toast 或文本猜测完整业务语义。
+
+### 旧 Shell 骨架
+
+实际迁移会把 Router 依赖留在消费仓库，并生成目标 Layer 对应的两个受管文件：
+
+```text
+src/ui/
+├── LegacyShell.vue
+└── legacy-shell.ts
+```
+
+- Lilia 骨架只组合 `LiliaAppShell`、`LiliaWorkspace`、`LiliaPrimaryContent` 与消费端 `RouterView`；业务导航由应用后续放入合适的 Workspace Region。
+- Nana 骨架显式组合 `NanaAppShell`、`NanaSidebar` 与消费端 `RouterView`，并保留旧 navigation、settings、sidebar、context props、events 和 slots 的本地适配面。
+- 骨架只是一条可编译的迁移边界，不把 Router、路由表、导航数据或业务页面带回公共 Layer。旧 Nana context 的窄屏 Drawer 等体验仍需应用复核。
+- 未修改的受管骨架可由后续迁移更新；一旦应用定制，工具会停止覆盖并报告冲突。
 
 ## 报告分类
 
