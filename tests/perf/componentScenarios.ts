@@ -54,22 +54,26 @@ import {
   uninstallGlobalScrollbarVisibility,
 } from "@lilia/ui/runtime";
 import { openContextMenuAt } from "@lilia/ui/composables/useContextMenu";
-import { defineComponent, h, nextTick, type App, type Plugin, type Ref, type VNode } from "vue";
+import { defineComponent, h, nextTick, ref, type App, type Plugin, type PropType, type Ref, type VNode } from "vue";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { testAppConfig } from "../ui/fixtures/appConfig";
 import type { ComponentPerfRunner } from "./componentPerformanceRunner";
 import { professionalContractComponentScenarios } from "./scenarios/professionalContractComponents";
 import { nanaComponentScenarios } from "./scenarios/nana";
+import { publicSubpathComponentScenarios } from "./scenarios/publicSubpathComponents";
 
 export interface ComponentPerfScenario {
   name: string;
+  covers?: readonly string[];
   render: (step: Ref<number>) => VNode;
   runners?: readonly ComponentPerfRunner[];
   createPlugins?: () => Plugin[];
   beforeMount?: () => Promise<void> | void;
   prepare?: () => void;
+  beforeInteract?: (root: ParentNode) => Promise<void> | void;
   interact?: (root: ParentNode) => Promise<void> | void;
   cleanup?: () => void;
+  budgets?: Partial<Record<"interaction" | "mount" | "unmount" | "update", number>>;
 }
 
 const routePage = defineComponent({
@@ -94,31 +98,68 @@ const WorkspaceGeometryProbe = defineComponent({
   },
 });
 
+const WorkspaceDynamicRegion = defineComponent({
+  name: "WorkspaceDynamicPerfRegion",
+  props: {
+    index: { type: Number, required: true },
+    step: { type: Object as PropType<Ref<number>>, required: true },
+  },
+  setup(props) {
+    return () => {
+      const primary = props.index === 25;
+      const baseSize = 72 + (props.index % 4) * 8;
+      return h(LiliaWorkspaceRegion, {
+        id: `perf-region-${props.index}`,
+        role: primary ? "primary" : props.index % 2 === 0 ? "resources" : "inspector",
+        placement: primary ? "primary" : props.index % 2 === 0 ? "start" : "end",
+        size: primary ? undefined : baseSize + props.step.value * 2,
+        collapsible: true,
+        narrowBehavior: "overlay",
+        collapseBelow: 900,
+      }, () => h("span", `Region ${props.index}`));
+    };
+  },
+});
+
 function workspaceRegionNodes(
   count: number,
   step: Ref<number>,
-  options: { subscribers?: boolean; dynamic?: boolean } = {},
+  options: { subscribers?: boolean; visibility?: boolean } = {},
 ) {
   return Array.from({ length: count }, (_, index) => {
     const id = `perf-region-${index}`;
     const primary = index === Math.floor(count / 2);
-    const dynamic = options.dynamic && index % 5 === 0;
+    const dynamic = Boolean(options.visibility && index % 5 === 0);
+    const baseSize = 72 + (index % 4) * 8;
     return h(LiliaWorkspaceRegion, {
       id,
       role: primary ? "primary" : index % 2 === 0 ? "resources" : "inspector",
       placement: primary ? "primary" : index % 2 === 0 ? "start" : "end",
-      size: primary ? undefined : 72 + (index % 4) * 8,
-      hidden: dynamic && step.value % 3 === 1,
-      collapsed: dynamic && step.value % 3 === 2,
+      size: primary ? undefined : baseSize,
+      hidden: options.visibility && dynamic && step.value % 3 === 1,
+      collapsed: options.visibility && dynamic && step.value % 3 === 2,
       collapsible: dynamic,
       narrowBehavior: dynamic ? "overlay" : "shrink",
       collapseBelow: dynamic ? 900 : undefined,
     }, {
       default: () => options.subscribers
         ? h(WorkspaceGeometryProbe, { id })
-        : h("span", `Region ${index} / ${step.value}`),
+        : h("span", options.visibility ? `Region ${index}` : `Region ${index} / ${step.value}`),
     });
   });
+}
+
+function dynamicWorkspaceRegionNodes(count: number, step: Ref<number>) {
+  return Array.from({ length: count }, (_, index) => index % 5 === 0
+    ? h(WorkspaceDynamicRegion, { key: index, index, step })
+    : h(LiliaWorkspaceRegion, {
+        key: index,
+        id: `perf-region-${index}`,
+        role: index === Math.floor(count / 2) ? "primary" : index % 2 === 0 ? "resources" : "inspector",
+        placement: index === Math.floor(count / 2) ? "primary" : index % 2 === 0 ? "start" : "end",
+        size: index === Math.floor(count / 2) ? undefined : 72 + (index % 4) * 8,
+      }, () => h("span", `Region ${index}`)),
+  );
 }
 
 let activeRouter: ReturnType<typeof createRouter> | null = null;
@@ -141,6 +182,13 @@ const settingsPlugin: Plugin = {
     app.provide(liliaSettingsKey, perfSettings);
   },
 };
+
+const dropdownStressOptions = Array.from({ length: 500 }, (_, index) => ({
+  value: index,
+  label: `Option ${index}`,
+  agentId: `perf.dropdown-stress.option.${index}`,
+}));
+const dropdownStressSelection = ref<readonly number[] | null>(null);
 
 function createScenarioRouter(initialPath = "/") {
   activeRouter = createRouter({
@@ -244,15 +292,41 @@ function pointerOffset(root: ParentNode, selector: string, type: string, offsetX
   element.dispatchEvent(event);
 }
 
-function animationFrame() {
-  return new Promise<void>((resolve) => {
-    requestAnimationFrame(() => resolve());
-  });
+function captureAnimationFrames() {
+  const originalRequest = window.requestAnimationFrame;
+  const originalCancel = window.cancelAnimationFrame;
+  const callbacks = new Map<number, FrameRequestCallback>();
+  let nextId = 1;
+  window.requestAnimationFrame = (callback) => {
+    const id = nextId++;
+    callbacks.set(id, callback);
+    return id;
+  };
+  window.cancelAnimationFrame = (id) => {
+    if (!callbacks.delete(id)) originalCancel.call(window, id);
+  };
+  return {
+    flush() {
+      const queued = [...callbacks.entries()];
+      callbacks.clear();
+      const timestamp = performance.now();
+      for (const [, callback] of queued) callback(timestamp);
+    },
+    restore() {
+      callbacks.clear();
+      window.requestAnimationFrame = originalRequest;
+      window.cancelAnimationFrame = originalCancel;
+    },
+  };
 }
+
+let scrollbarFrames: ReturnType<typeof captureAnimationFrames> | null = null;
+let resizeFrames: ReturnType<typeof captureAnimationFrames> | null = null;
 
 export const componentPerformanceScenarios: ComponentPerfScenario[] = [
   ...professionalContractComponentScenarios,
   ...nanaComponentScenarios,
+  ...publicSubpathComponentScenarios,
   {
     name: "ActionMenuItem",
     render: (step) => h(ActionMenuItem, { icon: Search, active: step.value % 2 === 1 }, () => "Open item"),
@@ -290,6 +364,7 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
   },
   {
     name: "ContextMenuHost",
+    budgets: { interaction: 8.3 },
     prepare: () => {
       openContextMenuAt(24, 24, [
         { id: "open", label: "打开", icon: Search },
@@ -320,6 +395,26 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
     },
   },
   {
+    name: "DropdownMulti500",
+    runners: ["browser"],
+    budgets: { interaction: 8.3, update: 8.3 },
+    prepare: () => { dropdownStressSelection.value = null; },
+    render: (step) => h(Dropdown, {
+      modelValue: dropdownStressSelection.value
+        ?? Array.from({ length: 250 }, (_, index) => index + (step.value % 2)),
+      options: dropdownStressOptions,
+      multiple: true,
+      displayLabel: "500 options",
+      agentId: "perf.dropdown-stress",
+      "onUpdate:modelValue": (value: readonly number[]) => { dropdownStressSelection.value = value; },
+    }),
+    beforeInteract: async (root) => {
+      click(root, "[data-agent-id='perf.dropdown-stress']");
+      await nextTick();
+    },
+    interact: (root) => click(root, "[data-agent-id='perf.dropdown-stress.option.300']"),
+  },
+  {
     name: "GlobalScrollbarVisibility",
     runners: ["browser"],
     prepare: installGlobalScrollbarVisibility,
@@ -338,7 +433,8 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
         },
       }, "Scrollable performance content"),
     ]),
-    interact: async (root) => {
+    beforeInteract: (root) => {
+      scrollbarFrames = captureAnimationFrames();
       const scroller = documentFor(root).querySelector("[data-agent-id='perf.global-scrollbar.scroller']");
       if (!(scroller instanceof HTMLElement)) {
         throw new Error("Missing perf interaction target: global scrollbar scroller");
@@ -358,7 +454,14 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
         pointerId: 2,
         pointerType: "mouse",
       }));
-      await animationFrame();
+    },
+    interact: (root) => {
+      const scroller = documentFor(root).querySelector("[data-agent-id='perf.global-scrollbar.scroller']");
+      if (!(scroller instanceof HTMLElement) || !scrollbarFrames) {
+        throw new Error("Missing perf interaction state: global scrollbar scroller");
+      }
+      const rect = scroller.getBoundingClientRect();
+      scrollbarFrames.flush();
       scroller.scrollTop = 80;
       scroller.dispatchEvent(new Event("scroll", { bubbles: true, cancelable: true }));
       scroller.dispatchEvent(new WheelEvent("wheel", {
@@ -368,9 +471,15 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
         clientY: rect.top + 48,
         deltaY: 36,
       }));
-      await animationFrame();
+      scrollbarFrames.flush();
+      scrollbarFrames.restore();
+      scrollbarFrames = null;
     },
-    cleanup: uninstallGlobalScrollbarVisibility,
+    cleanup() {
+      scrollbarFrames?.restore();
+      scrollbarFrames = null;
+      uninstallGlobalScrollbarVisibility();
+    },
   },
   {
     name: "OverlayHost",
@@ -401,6 +510,15 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
   },
   {
     name: "LiliaWorkspace",
+    covers: [
+      "LiliaWorkspaceRegion",
+      "LiliaGlobalNavigation",
+      "LiliaSectionNavigation",
+      "LiliaResourcePanel",
+      "LiliaPrimaryContent",
+      "LiliaInspector",
+      "LiliaBottomPanel",
+    ],
     render: (step) => h(LiliaWorkspace, { "aria-label": "Performance workspace" }, {
       default: () => [
         h(LiliaSectionNavigation, {
@@ -455,8 +573,15 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
   },
   {
     name: "LiliaWorkspaceDynamic50",
+    budgets: { update: 8.3 },
     render: (step) => h(LiliaWorkspace, { ariaLabel: "Dynamic region workspace" }, {
-      default: () => workspaceRegionNodes(50, step, { dynamic: true, subscribers: true }),
+      default: () => dynamicWorkspaceRegionNodes(50, step),
+    }),
+  },
+  {
+    name: "LiliaWorkspaceVisibility50",
+    render: (step) => h(LiliaWorkspace, { ariaLabel: "Visibility region workspace" }, {
+      default: () => workspaceRegionNodes(50, step, { visibility: true }),
     }),
   },
   {
@@ -475,7 +600,8 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
         h(LiliaWorkspaceRegion, { id: "resize-primary", role: "primary" }, () => "Primary"),
       ],
     }),
-    async interact(root) {
+    beforeInteract(root) {
+      resizeFrames = captureAnimationFrames();
       const handle = documentFor(root).querySelector<HTMLElement>(
         "[data-agent-id='workspace.region.continuous-resize.resize']",
       );
@@ -486,8 +612,17 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
       for (let index = 0; index < 12; index += 1) {
         window.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, clientX: 224 + index * 4, pointerId: 7 }));
       }
-      await animationFrame();
+    },
+    interact() {
+      if (!resizeFrames) throw new Error("Missing continuous resize frame capture");
+      resizeFrames.flush();
       window.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, clientX: 272, pointerId: 7 }));
+      resizeFrames.restore();
+      resizeFrames = null;
+    },
+    cleanup() {
+      resizeFrames?.restore();
+      resizeFrames = null;
     },
   },
   {

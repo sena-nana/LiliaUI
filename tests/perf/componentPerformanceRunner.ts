@@ -29,12 +29,21 @@ export interface ComponentPerfSample {
   update: number;
 }
 
-export const defaultComponentPerfThresholds: ComponentPerfThresholds = {
-  domNodeRegressionFloor: 8,
-  domNodeRegressionRatio: 1.25,
-  durationRegressionFloorMs: 20,
-  durationRegressionRatio: 4,
-};
+export function componentPerfThresholdsFor(runner: ComponentPerfRunner): ComponentPerfThresholds {
+  return runner === "browser"
+    ? {
+        domNodeRegressionFloor: 0,
+        domNodeRegressionRatio: 1,
+        durationRegressionFloorMs: 1.5,
+        durationRegressionRatio: 1.5,
+      }
+    : {
+        domNodeRegressionFloor: 0,
+        domNodeRegressionRatio: 1,
+        durationRegressionFloorMs: 2.5,
+        durationRegressionRatio: 2,
+      };
+}
 
 function now() {
   return performance.now();
@@ -78,6 +87,11 @@ async function measure(work: () => Promise<void> | void) {
   return now() - start;
 }
 
+async function settleVueUpdates() {
+  await nextTick();
+  await nextTick();
+}
+
 async function runOneSample(scenario: ComponentPerfScenario) {
   clearPerfDom();
   const container = document.createElement("div");
@@ -110,19 +124,21 @@ async function runOneSample(scenario: ComponentPerfScenario) {
     sample.mount = await measure(async () => {
       app.mount(container);
       mounted = true;
-      await nextTick();
+      await settleVueUpdates();
     });
 
     sample.update = await measure(async () => {
       step.value = 1;
-      await nextTick();
+      await settleVueUpdates();
     });
 
+    await scenario.beforeInteract?.(container);
+    await nextTick();
     const interact = scenario.interact;
     if (interact) {
       sample.interaction = await measure(async () => {
         await interact(container);
-        await nextTick();
+        await settleVueUpdates();
       });
     }
     sample.domNodes = countDomNodes();
@@ -166,7 +182,7 @@ export async function runComponentPerformanceSuite(options: {
     runner: options.runner,
     schemaVersion: 1,
     scenarios,
-    thresholds: defaultComponentPerfThresholds,
+    thresholds: componentPerfThresholdsFor(options.runner),
   };
 }
 
@@ -201,7 +217,7 @@ export function compareComponentPerfReport(
   actual: ComponentPerfReport,
   baseline: ComponentPerfReport,
 ) {
-  const thresholds = baseline.thresholds ?? defaultComponentPerfThresholds;
+  const thresholds = baseline.thresholds ?? componentPerfThresholdsFor(actual.runner);
   const regressions: ComponentPerfRegression[] = [];
   for (const [scenarioName, actualSummary] of Object.entries(actual.scenarios)) {
     const baselineSummary = baseline.scenarios[scenarioName];
@@ -229,6 +245,27 @@ export function compareComponentPerfReport(
         allowed: Number(allowedDomNodes.toFixed(3)),
         baseline: baselineDomNodes,
         metric: "domNodes.p95",
+        scenario: scenarioName,
+      });
+    }
+  }
+  return regressions;
+}
+
+export function compareComponentPerfBudgets(actual: ComponentPerfReport) {
+  const scenarios = new Map(componentPerformanceScenarios.map((scenario) => [scenario.name, scenario]));
+  const regressions: ComponentPerfRegression[] = [];
+  for (const [scenarioName, summary] of Object.entries(actual.scenarios)) {
+    const budgets = scenarios.get(scenarioName)?.budgets;
+    if (!budgets) continue;
+    for (const phase of ["mount", "update", "interaction", "unmount"] as const) {
+      const allowed = budgets[phase];
+      if (allowed === undefined || summary[phase].p95 <= allowed) continue;
+      regressions.push({
+        actual: summary[phase].p95,
+        allowed,
+        baseline: allowed,
+        metric: `${phase}.p95.reference-budget`,
         scenario: scenarioName,
       });
     }

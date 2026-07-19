@@ -14,6 +14,7 @@
     "check:ui-boundaries": "node scripts/check-ui-boundaries.mjs",
     "perf:components:browser": "node tests/perf/componentPerformance.browser.ts",
     "perf:components:light": "cross-env NODE_DISABLE_COMPILE_CACHE=1 vitest run --config vitest.perf.config.ts",
+    "perf:components:reference": "cross-env LILIA_PERF_REFERENCE=1 node tests/perf/componentPerformance.browser.ts",
     "perf:components:update-baseline": "node tests/perf/updateComponentPerformanceBaseline.mjs",
     "test:ui:browser": "node tests/ui/shellAppearance.browser.mjs",
     "test:ui:surface": "node tests/ui/surfaceStateLayer.browser.mjs",

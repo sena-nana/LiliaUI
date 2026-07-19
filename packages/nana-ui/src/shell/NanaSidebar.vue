@@ -44,6 +44,15 @@ const flattenedItems = computed(() => [
   ...props.sections.flatMap((section) => section.items),
 ]);
 const sidebar = useSidebarPrimitive(() => flattenedItems.value, props.mode);
+const itemIndexById = computed(() => new Map(
+  sidebar.visibleItems.value.map((item, index) => [item.id, index]),
+));
+const currentItemById = computed(() => {
+  const items = new Map(flattenedItems.value.map((item) => [item.id, item]));
+  if (props.settingsItem) items.set(props.settingsItem.id, props.settingsItem);
+  return items;
+});
+const itemElementsById = new Map<string, HTMLElement>();
 const surfaceAttributes = computed(() => resolveSurfaceAttributes(props));
 watch(() => props.mode, sidebar.setMode);
 
@@ -52,15 +61,32 @@ function toggle() {
   emit("update:mode", sidebar.mode.value);
 }
 
-function itemIndex(item: SidebarItem) {
-  return sidebar.visibleItems.value.indexOf(item);
+function itemIndex(id: string) {
+  return itemIndexById.value.get(id) ?? -1;
 }
 
 function isItemVisible(item: SidebarItem) {
-  return itemIndex(item) >= 0;
+  return itemIndexById.value.has(item.id);
 }
 
-function selectLink(event: MouseEvent, item: SidebarItem) {
+function setItemElement(id: string, value: unknown) {
+  const element = value instanceof HTMLElement
+    ? value
+    : value && typeof value === "object" && "$el" in value && value.$el instanceof HTMLElement
+      ? value.$el
+      : null;
+  if (element) itemElementsById.set(id, element);
+  else itemElementsById.delete(id);
+}
+
+function itemElementAt(index: number) {
+  const id = sidebar.visibleItems.value[index]?.id;
+  return id ? itemElementsById.get(id) : undefined;
+}
+
+function selectLink(event: MouseEvent, id: string) {
+  const item = currentItemById.value.get(id);
+  if (!item) return;
   if (item.disabled) {
     event.preventDefault();
     return;
@@ -100,10 +126,11 @@ function runAction(event: Event, action: SidebarAction) {
           :disabled="!item.href ? item.disabled : undefined"
           :tabindex="item.disabled ? -1 : 0"
           :data-agent-id="item.agentId"
-          :data-sidebar-index="itemIndex(item)"
+          :data-sidebar-index="itemIndex(item.id)"
           :data-lilia-selected="item.active ? 'true' : undefined"
-          @click="selectLink($event, item)"
-          @keydown="sidebar.onItemKeydown($event, itemIndex(item))"
+          :ref="(value: unknown) => setItemElement(item.id, value)"
+          @click="selectLink($event, item.id)"
+          @keydown="sidebar.onItemKeydown($event, itemIndex(item.id), itemElementAt)"
         >
           <component v-if="item.icon" :is="item.icon" :size="20" aria-hidden="true" />
           <span v-if="sidebar.mode.value === 'expanded'" class="nana-sidebar__label">{{ item.label }}</span>
@@ -149,10 +176,11 @@ function runAction(event: Event, action: SidebarAction) {
             :disabled="!item.href ? item.disabled : undefined"
             :tabindex="item.disabled ? -1 : 0"
             :data-agent-id="item.agentId"
-            :data-sidebar-index="itemIndex(item)"
+            :data-sidebar-index="itemIndex(item.id)"
             :data-lilia-selected="item.active ? 'true' : undefined"
-            @click="selectLink($event, item)"
-            @keydown="sidebar.onItemKeydown($event, itemIndex(item))"
+            :ref="(value: unknown) => setItemElement(item.id, value)"
+            @click="selectLink($event, item.id)"
+            @keydown="sidebar.onItemKeydown($event, itemIndex(item.id), itemElementAt)"
           >
             <component v-if="item.icon" :is="item.icon" :size="20" aria-hidden="true" />
             <span v-if="sidebar.mode.value === 'expanded'" class="nana-sidebar__label">{{ item.label }}</span>
@@ -195,7 +223,7 @@ function runAction(event: Event, action: SidebarAction) {
         :aria-label="sidebar.mode.value === 'icon' ? settingsItem.label : undefined"
         :title="sidebar.mode.value === 'icon' ? settingsItem.label : undefined"
         :data-agent-id="settingsItem.agentId"
-        @click="selectLink($event, settingsItem)"
+        @click="selectLink($event, settingsItem.id)"
       >
         <component v-if="settingsItem.icon" :is="settingsItem.icon" :size="20" aria-hidden="true" />
         <span v-if="sidebar.mode.value === 'expanded'">{{ settingsItem.label }}</span>

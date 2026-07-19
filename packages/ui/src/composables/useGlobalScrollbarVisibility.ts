@@ -71,6 +71,7 @@ let hoverTarget: ScrollTarget | null = null;
 let dragState: DragState | null = null;
 let overlayUpdateFrame: number | null = null;
 let pointerMoveFrame: number | null = null;
+let pointerTracking = false;
 let pendingPointerMove: PointerSnapshot | null = null;
 let dragScrollFrame: number | null = null;
 let pendingDragPointer: number | null = null;
@@ -617,13 +618,36 @@ function onDragPointerEnd(event: PointerEvent) {
   }
   dragState = null;
   hideSoon(target);
+  detachPointerTracking();
   window.removeEventListener("pointermove", onDragPointerMove, true);
   window.removeEventListener("pointerup", onDragPointerEnd, true);
   window.removeEventListener("pointercancel", onDragPointerEnd, true);
 }
 
 function onPointerOver(event: PointerEvent) {
-  scrollTargetFromEvent(event);
+  const target = scrollTargetFromEvent(event);
+  if (target) {
+    attachPointerTracking();
+    return;
+  }
+  detachPointerTracking();
+  if (hoverTarget) {
+    hideSoon(hoverTarget);
+    hoverTarget = null;
+  }
+}
+
+function attachPointerTracking() {
+  if (pointerTracking) return;
+  pointerTracking = true;
+  window.addEventListener("pointermove", onPointerMove, { passive: true });
+}
+
+function detachPointerTracking() {
+  if (!pointerTracking) return;
+  pointerTracking = false;
+  window.removeEventListener("pointermove", onPointerMove);
+  cancelPointerMoveFrame();
 }
 
 function onPointerMove(event: PointerEvent) {
@@ -676,6 +700,7 @@ function onFocusIn(event: FocusEvent) {
 }
 
 function onPointerLeave() {
+  detachPointerTracking();
   if (!hoverTarget) return;
   hideSoon(hoverTarget);
   hoverTarget = null;
@@ -701,7 +726,7 @@ export function uninstallGlobalScrollbarVisibility() {
   cancelDragScrollFrame();
   pendingOverlayTargets.clear();
   window.removeEventListener("pointerover", onPointerOver);
-  window.removeEventListener("pointermove", onPointerMove);
+  detachPointerTracking();
   window.removeEventListener("pointermove", onDragPointerMove, true);
   window.removeEventListener("pointerleave", onPointerLeave);
   window.removeEventListener("pointerup", onDragPointerEnd, true);
@@ -741,7 +766,6 @@ export function installGlobalScrollbarVisibility() {
     })
     : null;
   window.addEventListener("pointerover", onPointerOver, { passive: true });
-  window.addEventListener("pointermove", onPointerMove, { passive: true });
   window.addEventListener("pointerleave", onPointerLeave);
   window.addEventListener("wheel", onWheel, { passive: true });
   window.addEventListener("touchstart", onTouchStart, { passive: true });

@@ -2,8 +2,19 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import * as publicUiExports from "../../packages/ui/src/index";
+import * as publicUiLayoutExports from "../../packages/ui/src/layouts";
+import * as publicUiOverlayExports from "../../packages/ui/src/overlay";
+import * as publicUiProviderExports from "../../packages/ui/src/provider/index";
+import * as publicUiSearchExports from "../../packages/ui/src/search";
+import * as publicUiSettingsExports from "../../packages/ui/src/settings/index";
+import * as publicUiShellExports from "../../packages/ui/src/shell";
 import * as publicNanaExports from "../../packages/nana-ui/src/index";
+import * as publicNanaConsumerExports from "../../packages/nana-ui/src/consumer/index";
+import * as publicNanaExpressiveExports from "../../packages/nana-ui/src/expressive/index";
 import * as publicNanaFeedbackExports from "../../packages/nana-ui/src/feedback/index";
+import * as publicNanaPatternExports from "../../packages/nana-ui/src/patterns/index";
+import * as publicNanaProviderExports from "../../packages/nana-ui/src/provider/index";
+import * as publicNanaSettingsExports from "../../packages/nana-ui/src/settings/index";
 import * as publicNanaShellExports from "../../packages/nana-ui/src/shell/index";
 import {
   type ComponentPerfReport,
@@ -51,12 +62,27 @@ function missingScenarios(exports: Record<string, unknown>, scenarioNames: reado
 describe("component performance scenarios", () => {
   it("cover every public Vue component export", () => {
     const scenarioNames = componentPerformanceScenarios.map((scenario) => scenario.name);
+    const coveredNames = componentPerformanceScenarios.flatMap((scenario) => [
+      scenario.name,
+      ...(scenario.covers ?? []),
+    ]);
     const uniqueScenarioNames = [...new Set(scenarioNames)].sort();
     const missingComponents = [
-      ...missingScenarios(publicUiExports, uniqueScenarioNames),
-      ...missingScenarios(publicNanaExports, uniqueScenarioNames),
-      ...missingScenarios(publicNanaFeedbackExports, uniqueScenarioNames),
-      ...missingScenarios(publicNanaShellExports, uniqueScenarioNames),
+      ...missingScenarios(publicUiExports, coveredNames),
+      ...missingScenarios(publicUiLayoutExports, coveredNames),
+      ...missingScenarios(publicUiOverlayExports, coveredNames),
+      ...missingScenarios(publicUiProviderExports, coveredNames),
+      ...missingScenarios(publicUiSearchExports, coveredNames),
+      ...missingScenarios(publicUiSettingsExports, coveredNames),
+      ...missingScenarios(publicUiShellExports, coveredNames),
+      ...missingScenarios(publicNanaExports, coveredNames),
+      ...missingScenarios(publicNanaConsumerExports, coveredNames),
+      ...missingScenarios(publicNanaExpressiveExports, coveredNames),
+      ...missingScenarios(publicNanaFeedbackExports, coveredNames),
+      ...missingScenarios(publicNanaPatternExports, coveredNames),
+      ...missingScenarios(publicNanaProviderExports, coveredNames),
+      ...missingScenarios(publicNanaSettingsExports, coveredNames),
+      ...missingScenarios(publicNanaShellExports, coveredNames),
     ];
     expect(uniqueScenarioNames).toHaveLength(scenarioNames.length);
     expect(missingComponents).toEqual([]);

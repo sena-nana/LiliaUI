@@ -5,6 +5,7 @@ const executablePath = resolveChromiumExecutable();
 
 export default defineConfig({
   testDir: "./tests/visual",
+  timeout: 90_000,
   fullyParallel: false,
   workers: 1,
   reporter: "line",

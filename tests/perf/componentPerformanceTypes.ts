@@ -21,6 +21,14 @@ export interface ComponentPerfThresholds {
 }
 
 export interface ComponentPerfReport {
+  environment?: {
+    arch: string;
+    browser?: string;
+    cpu: string;
+    node: string;
+    platform: string;
+    viewport?: string;
+  };
   generatedAt: string;
   iterations: number;
   runner: ComponentPerfRunner;

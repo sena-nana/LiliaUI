@@ -33,6 +33,34 @@ function renderDropdown() {
 }
 
 describe("Dropdown", () => {
+  it("keeps 500-option multi-select updates correct", async () => {
+    const largeOptions = Array.from({ length: 500 }, (_, index) => ({
+      label: `Option ${index}`,
+      value: `option-${index}`,
+    }));
+    const view = render(defineComponent({
+      components: { Dropdown },
+      setup() {
+        const value = ref(largeOptions.slice(0, 250).map((option) => option.value));
+        return { largeOptions, value };
+      },
+      template: `
+        <Dropdown v-model="value" :options="largeOptions" multiple placement="bottom" />
+        <output data-testid="selection-count">{{ value.length }}</output>
+      `,
+    }), {
+      global: { stubs: { transition: false } },
+    });
+
+    await fireEvent.click(view.container.querySelector<HTMLButtonElement>(".dd__button")!);
+    const unchangedOption = await screen.findByRole("option", { name: "Option 301" });
+    await fireEvent.click(await screen.findByRole("option", { name: "Option 300" }));
+
+    expect(screen.getByTestId("selection-count")).toHaveTextContent("251");
+    expect(screen.getByRole("option", { name: "Option 300" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("option", { name: "Option 301" })).toBe(unchangedOption);
+  });
+
   it("可打开、选中选项并关闭", async () => {
     renderDropdown();
 

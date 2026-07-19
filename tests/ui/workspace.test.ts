@@ -136,6 +136,7 @@ describe("Workspace Region layout", () => {
       `,
     });
     const view = render(Fixture);
+    await nextTick();
 
     expect(region(view.container, "start-one")).toHaveAttribute("data-edge-start", "true");
     expect(region(view.container, "start-two")).toHaveAttribute("data-region-separator", "inline");
@@ -202,6 +203,8 @@ describe("Workspace Region layout", () => {
       `,
     });
     const view = render(Fixture);
+    await nextTick();
+    await nextTick();
     const resources = region(view.container, "resources");
     const handle = view.container.querySelector('[data-agent-id="workspace.region.resources.resize"]');
     if (!(handle instanceof HTMLElement)) throw new Error("Missing resource resize handle");
@@ -301,9 +304,11 @@ describe("Workspace Region layout", () => {
     const view = render(Fixture);
     const resources = region(view.container, "resources");
 
-    expect(resources).not.toHaveAttribute("hidden");
-    expect(view.container.querySelector('[data-agent-id="workspace.region.resources.resize"]'))
-      .toBeInstanceOf(HTMLElement);
+    await waitFor(() => {
+      expect(resources).not.toHaveAttribute("hidden");
+      expect(view.container.querySelector('[data-agent-id="workspace.region.resources.resize"]'))
+        .toBeInstanceOf(HTMLElement);
+    });
 
     await fireEvent.click(view.getByRole("button", { name: "toggle" }));
     await nextTick();
@@ -383,6 +388,7 @@ describe("Workspace Region layout", () => {
       `,
     });
     const view = render(Fixture);
+    await nextTick();
 
     expect(region(view.container, "uncontrolled")).not.toHaveAttribute("hidden");
     await fireEvent.click(view.getByRole("button", { name: "toggle uncontrolled" }));

@@ -6,7 +6,11 @@ export interface SidebarPrimitive {
   visibleItems: ComputedRef<readonly SidebarItem[]>;
   setMode: (mode: SidebarMode) => void;
   toggleMode: () => void;
-  onItemKeydown: (event: KeyboardEvent, index: number) => void;
+  onItemKeydown: (
+    event: KeyboardEvent,
+    index: number,
+    elementAt?: (index: number) => HTMLElement | null | undefined,
+  ) => void;
 }
 
 export function useSidebarPrimitive(
@@ -17,6 +21,16 @@ export function useSidebarPrimitive(
   const visibleItems = computed(() => mode.value === "icon"
     ? items().filter((item) => (item.depth ?? 0) === 0)
     : items());
+  const enabledNavigation = computed(() => {
+    const indices: number[] = [];
+    const positionByIndex = new Map<number, number>();
+    visibleItems.value.forEach((item, index) => {
+      if (item.disabled) return;
+      positionByIndex.set(index, indices.length);
+      indices.push(index);
+    });
+    return { indices, positionByIndex };
+  });
 
   return {
     mode,
@@ -27,19 +41,22 @@ export function useSidebarPrimitive(
     toggleMode() {
       mode.value = mode.value === "expanded" ? "icon" : "expanded";
     },
-    onItemKeydown(event, index) {
+    onItemKeydown(event, index, elementAt) {
       if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
-      const enabled = visibleItems.value
-        .map((item, itemIndex) => ({ item, itemIndex }))
-        .filter(({ item }) => !item.disabled);
+      const { indices: enabled, positionByIndex } = enabledNavigation.value;
       if (enabled.length === 0) return;
       event.preventDefault();
-      const current = enabled.findIndex(({ itemIndex }) => itemIndex === index);
+      const current = positionByIndex.get(index) ?? -1;
       const next = event.key === "Home" ? 0
         : event.key === "End" ? enabled.length - 1
           : event.key === "ArrowUp" ? (current <= 0 ? enabled.length - 1 : current - 1)
             : (current < 0 || current === enabled.length - 1 ? 0 : current + 1);
-      const targetIndex = enabled[next]?.itemIndex;
+      const targetIndex = enabled[next];
+      const directTarget = elementAt?.(targetIndex);
+      if (directTarget) {
+        directTarget.focus();
+        return;
+      }
       const scope = (event.currentTarget as HTMLElement | null)?.closest("nav") ?? document;
       scope.querySelector<HTMLElement>(`[data-sidebar-index="${targetIndex}"]`)?.focus();
     },

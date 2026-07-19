@@ -82,6 +82,23 @@ describe("global scrollbar visibility", () => {
     vi.unstubAllGlobals();
   });
 
+  it("tracks pointer movement only while the pointer is over a scroll target", () => {
+    const addListener = vi.spyOn(window, "addEventListener");
+    const removeListener = vi.spyOn(window, "removeEventListener");
+    installGlobalScrollbarVisibility();
+    const { element } = createScroller();
+
+    expect(addListener).not.toHaveBeenCalledWith("pointermove", expect.any(Function), expect.anything());
+
+    element.dispatchEvent(new MouseEvent("pointerover", { bubbles: true }));
+    expect(addListener).toHaveBeenCalledWith("pointermove", expect.any(Function), { passive: true });
+
+    document.body.dispatchEvent(new MouseEvent("pointerover", { bubbles: true }));
+    expect(removeListener).toHaveBeenCalledWith("pointermove", expect.any(Function));
+
+    element.remove();
+  });
+
   it("renders the visible scrollbar as an overlay and removes it after fade-out", () => {
     installGlobalScrollbarVisibility();
     const { element } = createScroller({ scrollTop: 50 });
@@ -111,6 +128,11 @@ describe("global scrollbar visibility", () => {
     installGlobalScrollbarVisibility();
     const { element } = createScroller();
 
+    element.dispatchEvent(new MouseEvent("pointerover", {
+      bubbles: true,
+      clientX: 204,
+      clientY: 50,
+    }));
     element.dispatchEvent(new MouseEvent("pointermove", {
       bubbles: true,
       clientX: 204,
@@ -135,6 +157,7 @@ describe("global scrollbar visibility", () => {
   });
 
   it("drags the overlay thumb through a larger hit target", () => {
+    const removeListener = vi.spyOn(window, "removeEventListener");
     installGlobalScrollbarVisibility();
     const { element, scrollTop } = createScroller({ scrollHeight: 500 });
     discoverScroller(element);
@@ -163,6 +186,7 @@ describe("global scrollbar visibility", () => {
       clientX: 205,
       clientY: 32,
     }));
+    expect(removeListener).toHaveBeenCalledWith("pointermove", expect.any(Function));
 
     element.remove();
   });
@@ -339,6 +363,11 @@ describe("global scrollbar visibility", () => {
     installGlobalScrollbarVisibility();
     const { element, measure } = createScroller();
 
+    element.dispatchEvent(new MouseEvent("pointerover", {
+      bubbles: true,
+      clientX: 202,
+      clientY: 50,
+    }));
     element.dispatchEvent(new MouseEvent("pointermove", {
       bubbles: true,
       clientX: 202,
@@ -359,7 +388,7 @@ describe("global scrollbar visibility", () => {
     runOverlayFrame();
 
     expect(verticalOverlay()).toHaveClass("is-visible");
-    expect(measure).toHaveBeenCalledTimes(2);
+    expect(measure).toHaveBeenCalledTimes(3);
 
     element.remove();
   });

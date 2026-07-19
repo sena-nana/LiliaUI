@@ -11,6 +11,11 @@ const navigation = [
   { id: "advanced", label: "Advanced", icon: Settings, depth: 1, agentId: "perf.nana.nav.advanced" },
 ] as const;
 const settingsItem = { id: "settings", label: "Settings", icon: Settings };
+const stressNavigation = Array.from({ length: 200 }, (_, index) => ({
+  id: `item-${index}`,
+  label: `Item ${index}`,
+  agentId: `perf.nana.stress.item.${index}`,
+}));
 
 export const nanaShellScenarios: ComponentPerfScenario[] = [
   {
@@ -32,6 +37,21 @@ export const nanaShellScenarios: ComponentPerfScenario[] = [
       keydown(root, "[data-agent-id='perf.nana.nav.home']", "ArrowDown");
       click(root, "[data-agent-id='nana.shell.sidebar.toggle']");
     },
+  },
+  {
+    name: "NanaSidebarStress200",
+    runners: ["browser"],
+    budgets: { interaction: 8.3, update: 8.3 },
+    render: (step) => h(NanaSidebar, {
+      items: stressNavigation.map((item, index) => ({
+        ...item,
+        active: index === step.value % stressNavigation.length,
+      })),
+      mode: "expanded",
+      collapsible: false,
+      agentId: "perf.nana.sidebar-stress",
+    }),
+    interact: (root) => keydown(root, "[data-agent-id='perf.nana.stress.item.0']", "ArrowDown"),
   },
   {
     name: "NanaAppShell",
