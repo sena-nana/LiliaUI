@@ -130,4 +130,6 @@ Workspace 共享一个 `ResizeObserver`，并监听窗口与 `visualViewport` re
 7. 删除消费端针对 `.shell__main`、`.secondary-panel`、`leftSidebar1/2` 等内部选择器的覆盖。
 8. 将应用 Root 直接切换为 `LiliaAppShell`，并确认 Shell 在未安装 Router 时也能独立挂载。
 
+现有应用可以先运行 `lilia-tools ui-migrate --check` 查看结构化 `legacyShellMigrations`，再用带 `--preset lilia` 或 `--preset nana` 的 dry-run/实际迁移生成消费端最小骨架。工具只把旧导入改到应用自己的 `src/ui/legacy-shell.ts`；生成的 `LegacyShell.vue` 持有 `RouterView`，公共 Layer 仍保持 Router-free。缺失的 `@lilia/ui-contract` 与 `@lilia/ui-foundation` 会按目标 Layer 的依赖来源和 commit 一并补齐。
+
 可运行示例位于 [`examples/workspace-regions`](../examples/workspace-regions)，同一页面覆盖 LiliaCode、LiliaGithub 与 Live2DEditor 三类典型组合，并用 `safeRect` 更新预览画布的 backing size。

@@ -5,6 +5,7 @@ export function createMigrationReport({ inspection, plan = null, result = null }
     ...createUiReport({ kind: "ui-migrate", inspection: inspection.project, plan, result }),
     migration: {
       safeChanges: inspection.safeChanges,
+      legacyShellMigrations: inspection.legacyShellMigrations,
       manualUiReview: inspection.manualUiReview,
       contractIncompatibilities: inspection.contractIncompatibilities,
       informationArchitectureReview: inspection.informationArchitectureReview,
