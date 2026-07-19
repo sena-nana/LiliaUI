@@ -1,5 +1,7 @@
 export * from "./focus";
+export * from "./agentDebug/index";
 export * from "./commands";
+export * from "./policy";
 export * from "./settings";
 export * from "./surface";
 export * from "./useButtonPrimitive";
@@ -12,4 +14,6 @@ export * from "./useRovingFocus";
 export * from "./useSelectionPrimitive";
 export * from "./useSidebarPrimitive";
 export * from "./useThemeSync";
+export * from "./nativeAppearance";
+export * from "./useTauriWindowControls";
 export * from "./useTooltipPrimitive";

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-18T11:31:32.523Z",
+  "generatedAt": "2026-07-18T13:03:52.626Z",
   "iterations": 9,
   "runner": "vitest-jsdom",
   "schemaVersion": 1,
@@ -994,28 +994,6 @@
         "p95": 0.029
       }
     },
-    "LiliaDesktopShell": {
-      "domNodes": {
-        "median": 60,
-        "p95": 60
-      },
-      "interaction": {
-        "median": 0.99,
-        "p95": 1.119
-      },
-      "mount": {
-        "median": 5.718,
-        "p95": 7.047
-      },
-      "unmount": {
-        "median": 0.395,
-        "p95": 0.463
-      },
-      "update": {
-        "median": 0.003,
-        "p95": 0.004
-      }
-    },
     "LiliaWorkspace": {
       "domNodes": {
         "median": 19,
@@ -1652,6 +1630,50 @@
       "update": {
         "median": 0.099,
         "p95": 0.115
+      }
+    },
+    "LiliaAppShell": {
+      "domNodes": {
+        "median": 21,
+        "p95": 21
+      },
+      "interaction": {
+        "median": 0.266,
+        "p95": 0.31
+      },
+      "mount": {
+        "median": 1.771,
+        "p95": 2.007
+      },
+      "unmount": {
+        "median": 0.136,
+        "p95": 0.144
+      },
+      "update": {
+        "median": 0.354,
+        "p95": 0.413
+      }
+    },
+    "LiliaUIProvider": {
+      "domNodes": {
+        "median": 3,
+        "p95": 3
+      },
+      "interaction": {
+        "median": 0,
+        "p95": 0
+      },
+      "mount": {
+        "median": 0.292,
+        "p95": 0.324
+      },
+      "unmount": {
+        "median": 0.039,
+        "p95": 0.043
+      },
+      "update": {
+        "median": 0.136,
+        "p95": 0.151
       }
     }
   },

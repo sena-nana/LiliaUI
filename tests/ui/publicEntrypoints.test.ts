@@ -9,12 +9,14 @@ describe("public package entrypoints", () => {
   });
 
   it("loads stable boundaries without installing diagnostics", async () => {
-    const [root, calendar, search, overlay, presetDefinition, shell, shellApp, shellConfig, shellSidebar, layouts, settings, settingsSidebar, runtime, tauriRuntime, commands, diagnostics] = await Promise.all([
+    const [root, calendar, search, overlay, preset, presetDefinition, provider, shell, shellApp, shellConfig, shellSidebar, layouts, settings, settingsSidebar, runtime, tauriRuntime, commands, diagnostics] = await Promise.all([
       import("@lilia/ui"),
       import("@lilia/ui/calendar"),
       import("@lilia/ui/search"),
       import("@lilia/ui/overlay"),
+      import("@lilia/ui/preset"),
       import("@lilia/ui/preset/definition"),
+      import("@lilia/ui/provider"),
       import("@lilia/ui/shell"),
       import("@lilia/ui/shell/app"),
       import("@lilia/ui/shell/config"),
@@ -33,8 +35,9 @@ describe("public package entrypoints", () => {
     expect(search.SearchDropdown).toBeDefined();
     expect(overlay.OverlayHost).toBeDefined();
     expect(overlay.useOverlayActivity).toBeTypeOf("function");
+    expect(preset.liliaPresetAdapter.provider).toBeDefined();
     expect(presetDefinition.liliaPresetDefinition.id).toBe("lilia");
-    expect(shell.LiliaDesktopShell).toBeDefined();
+    expect(provider.LiliaUIProvider).toBeDefined();
     expect(shell.LiliaAppShell).toBeDefined();
     expect(shellApp.LiliaAppShell).toBe(shell.LiliaAppShell);
     expect(shellConfig.setLiliaUiConfig).toBeTypeOf("function");
@@ -51,6 +54,23 @@ describe("public package entrypoints", () => {
     expect(commands.createCommandRegistry).toBeTypeOf("function");
     expect(diagnostics.installAgentDebugHarness).toBeTypeOf("function");
     expect(window.__liliaAgentDebug).toBeUndefined();
+  });
+
+  it("loads Nana desktop, diagnostics, and runtime entrypoints", async () => {
+    const [shell, settings, runtime, tauriRuntime, diagnostics] = await Promise.all([
+      import("@lilia/nana-ui/shell"),
+      import("@lilia/nana-ui/settings"),
+      import("@lilia/nana-ui/runtime"),
+      import("@lilia/nana-ui/runtime/tauri"),
+      import("@lilia/nana-ui/diagnostics"),
+    ]);
+    expect(shell.NanaTitleBar).toBeDefined();
+    expect(shell.NanaAppShell).toBeDefined();
+    expect(settings.NanaAppearanceSection).toBeDefined();
+    expect(settings.NanaAboutSection).toBeDefined();
+    expect(runtime.setNativeAppearanceAdapter).toBeTypeOf("function");
+    expect(tauriRuntime.installTauriNativeAppearanceAdapter).toBeTypeOf("function");
+    expect(diagnostics.installAgentDebugHarness).toBeTypeOf("function");
   });
 
   it("renders application-owned overlays through the router-free host", async () => {

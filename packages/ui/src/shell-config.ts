@@ -27,7 +27,5 @@ export {
 } from "./config/appShell";
 export {
   liliaShellOptionsKey,
-  resolveShellBoolean,
   type LiliaShellOptions,
-  type LiliaShellSetupOverlaySource,
 } from "./shellOptions";

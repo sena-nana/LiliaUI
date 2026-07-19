@@ -1,0 +1,109 @@
+import { cleanup, fireEvent, render } from "@testing-library/vue";
+import { computed, defineComponent, h } from "vue";
+import { createMemoryHistory, createRouter } from "vue-router";
+import { afterEach, describe, expect, it } from "vitest";
+import { LiliaUIProvider, useLiliaUI } from "@lilia/ui/provider";
+import { LiliaAppShell } from "@lilia/ui/shell";
+import { LiliaSettingsPage } from "@lilia/ui/settings";
+import { NanaUIProvider, useNanaUI } from "@lilia/nana-ui/provider";
+import { NanaAppShell } from "@lilia/nana-ui/shell";
+import { NanaSettingsPage } from "@lilia/nana-ui/settings";
+import { createSettingsModel, settingsKey } from "@lilia/ui-foundation/settings";
+
+const layers = [
+  {
+    name: "Lilia",
+    Shell: LiliaAppShell,
+    Provider: LiliaUIProvider,
+    SettingsPage: LiliaSettingsPage,
+    useLayerUI: useLiliaUI,
+    density: "compact",
+    selector: ".lilia-ui",
+  },
+  {
+    name: "Nana",
+    Shell: NanaAppShell,
+    Provider: NanaUIProvider,
+    SettingsPage: NanaSettingsPage,
+    useLayerUI: useNanaUI,
+    density: "comfortable",
+    selector: ".nana-ui",
+  },
+] as const;
+
+afterEach(cleanup);
+
+describe.each(layers)("$name framework layer", ({ Shell, Provider, SettingsPage, useLayerUI, density, selector }) => {
+  it("mounts its shell without a Router and renders the common slots", () => {
+    const view = render(Shell, {
+      props: { title: "Workspace", agentId: "framework.shell" },
+      slots: {
+        "header-leading": "Leading",
+        "header-center": "Center",
+        "header-actions": "Actions",
+        default: "Application content",
+        overlays: "Application overlay",
+      },
+    });
+
+    expect(view.getByText("Leading")).toBeVisible();
+    expect(view.getByText("Center")).toBeVisible();
+    expect(view.getByText("Actions")).toBeVisible();
+    expect(view.getByText("Application content")).toBeVisible();
+    expect(view.getByText("Application overlay")).toBeVisible();
+    expect(view.container.querySelector("[data-agent-id='framework.shell']")).not.toBeNull();
+  });
+
+  it("uses the shared policy context with layer defaults and reset behavior", async () => {
+    const PolicyControl = defineComponent({
+      setup() {
+        const context = useLayerUI();
+        const currentDensity = computed(() => context.policy.value.density);
+        return () => h("button", {
+          onClick: () => context.setPolicy({ density: "compact" }),
+          onDblclick: () => context.resetPolicy(),
+        }, currentDensity.value);
+      },
+    });
+    const view = render(Provider, { slots: { default: () => h(PolicyControl) } });
+    const root = view.container.querySelector(selector);
+    expect(root).toHaveAttribute("data-density", density);
+    const button = view.getByRole("button");
+    await fireEvent.click(button);
+    expect(root).toHaveAttribute("data-density", "compact");
+    await fireEvent.dblClick(button);
+    expect(root).toHaveAttribute("data-density", density);
+  });
+
+  it("resolves standard and full-page settings through the same Foundation model", async () => {
+    const Standard = defineComponent({ props: { value: String }, template: "<div>Standard {{ value }}</div>" });
+    const FullPage = defineComponent({ props: { value: String }, template: "<article>Full {{ value }}</article>" });
+    const Icon = defineComponent({ template: "<span />" });
+    const model = createSettingsModel({
+      defaultTab: "standard",
+      description: "Shared settings",
+      fullPageTabs: ["full"],
+      path: "/settings",
+      sections: { standard: Standard, full: FullPage },
+      tabs: [
+        { key: "standard", label: "Standard", icon: Icon, props: { value: "section" } },
+        { key: "full", label: "Full", icon: Icon, props: { value: "page" } },
+      ],
+    });
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: "/settings", component: SettingsPage }],
+    });
+    await router.push("/settings");
+    await router.isReady();
+    const view = render(SettingsPage, {
+      global: { plugins: [router], provide: { [settingsKey as symbol]: model } },
+    });
+    expect(view.getByText("Standard section")).toBeVisible();
+    expect(view.getByText("Shared settings")).toBeVisible();
+
+    await router.push("/settings?tab=full");
+    expect(await view.findByText("Full page")).toBeVisible();
+    expect(view.queryByText("Shared settings")).toBeNull();
+  });
+});

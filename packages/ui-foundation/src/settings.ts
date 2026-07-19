@@ -47,6 +47,14 @@ export interface SettingsModel {
   tabs: readonly SettingsTab[];
 }
 
+export interface SettingsView {
+  key: string;
+  label: string;
+  section: Component;
+  props: Readonly<Record<string, unknown>>;
+  fullPage: boolean;
+}
+
 export const settingsKey: InjectionKey<SettingsModel> = Symbol("ui-settings");
 
 export function createSettingsModel(input: SettingsModelInput): SettingsModel {
@@ -74,6 +82,17 @@ export function normalizeSettingsTab(model: SettingsModel, value: unknown): stri
   const raw = typeof candidate === "string" ? candidate : "";
   const resolved = model.aliases[raw] ?? raw;
   return model.tabs.some((tab) => tab.key === resolved) ? resolved : model.defaultTab;
+}
+
+export function resolveSettingsView(model: SettingsModel, value: unknown): SettingsView {
+  const key = normalizeSettingsTab(model, value);
+  return {
+    key,
+    label: model.tabs.find((tab) => tab.key === key)?.label ?? "",
+    section: model.sections[key],
+    props: model.sectionProps[key] ?? {},
+    fullPage: model.fullPageTabs.has(key),
+  };
 }
 
 function isLoader(section: SettingsSectionInput): section is SettingsSectionLoader {

@@ -1,6 +1,6 @@
 import Home from "@lucide/vue/dist/esm/icons/house.mjs";
 import Settings from "@lucide/vue/dist/esm/icons/settings.mjs";
-import { NanaAppShell, NanaSidebar } from "@lilia/nana-ui/shell";
+import { NanaAppShell, NanaSidebar, NanaTitleBar } from "@lilia/nana-ui/shell";
 import { h } from "vue";
 import type { ComponentPerfScenario } from "../../componentScenarios";
 import { click, keydown } from "./helpers";
@@ -13,6 +13,12 @@ const navigation = [
 const settingsItem = { id: "settings", label: "Settings", icon: Settings };
 
 export const nanaShellScenarios: ComponentPerfScenario[] = [
+  {
+    name: "NanaTitleBar",
+    runners: ["browser"],
+    render: (step) => h(NanaTitleBar, { title: `Nana ${step.value}` }),
+    interact: (root) => click(root, "[data-agent-id='nana.window.maximize']"),
+  },
   {
     name: "NanaSidebar",
     runners: ["browser"],
@@ -31,18 +37,13 @@ export const nanaShellScenarios: ComponentPerfScenario[] = [
     name: "NanaAppShell",
     runners: ["browser"],
     render: (step) => h(NanaAppShell, {
-      navigation,
-      settingsItem,
-      sidebarMode: step.value % 2 === 0 ? "expanded" : "icon",
-      contextVisible: true,
-      contextTitle: `Properties ${step.value + 1}`,
+      title: `Nana Project ${step.value + 1}`,
       agentId: "perf.nana.shell",
     }, {
-      project: () => h("strong", "Nana Project"),
+      "header-actions": () => h("button", { "data-agent-id": "perf.nana.shell.action" }, "Save"),
       default: () => h("section", "Workspace"),
-      context: () => h("div", "Property controls"),
-      status: () => h("span", "Ready"),
+      overlays: () => h("div", "Application overlay"),
     }),
-    interact: (root) => click(root, "[data-agent-id='nana.shell.sidebar.toggle']"),
+    interact: (root) => click(root, "[data-agent-id='perf.nana.shell.action']"),
   },
 ];

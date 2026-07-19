@@ -2,7 +2,7 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import {
-  normalizeSettingsTab,
+  resolveSettingsView,
   useLiliaSettings,
 } from "../settings";
 import "../styles/page.css";
@@ -10,30 +10,24 @@ import "../styles/page.css";
 const route = useRoute();
 const settings = useLiliaSettings();
 if (!settings) throw new Error("LiliaSettingsPage requires provideLiliaSettings().");
-const activeTab = computed(() => normalizeSettingsTab(settings, route.query.tab));
-const activeTabSection = computed(() => settings.sections[activeTab.value]);
-const activeTabProps = computed(() => settings.sectionProps[activeTab.value] ?? {});
-const activeTabLabel = computed(
-  () => settings.tabs.find((tab) => tab.key === activeTab.value)?.label ?? "",
-);
-const isFullPageSection = computed(() => settings.fullPageTabs.has(activeTab.value));
+const activeView = computed(() => resolveSettingsView(settings, route.query.tab));
 </script>
 
 <template>
   <component
-    v-if="isFullPageSection"
-    :is="activeTabSection"
-    v-bind="activeTabProps"
+    v-if="activeView.fullPage"
+    :is="activeView.section"
+    v-bind="activeView.props"
     data-agent-id="settings.full-page-section"
   />
-  <section v-else class="settings-page" :data-agent-id="`settings.page.${activeTab}`">
+  <section v-else class="settings-page" :data-agent-id="`settings.page.${activeView.key}`">
     <div v-if="!settings.hideHeader" class="page-header">
       <div>
-        <h1>{{ activeTabLabel }}</h1>
+        <h1>{{ activeView.label }}</h1>
         <p v-if="settings.description">{{ settings.description }}</p>
       </div>
     </div>
 
-    <component :is="activeTabSection" v-bind="activeTabProps" />
+    <component :is="activeView.section" v-bind="activeView.props" />
   </section>
 </template>

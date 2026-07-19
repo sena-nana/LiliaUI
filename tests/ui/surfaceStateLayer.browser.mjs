@@ -36,7 +36,6 @@ try {
       const idleStyle = style("surface.translucent.idle");
       const selectedStyle = style("surface.translucent.selected");
       const solidStyle = style("surface.solid.selected");
-      const bottomIndicatorStyle = style("surface.translucent.bottom-indicator");
       const blurStyle = style("surface.css-blur");
       return {
         blur: blurStyle.backdropFilter,
@@ -49,7 +48,6 @@ try {
         selectedShadow: selectedStyle.boxShadow,
         solidBackground: solidStyle.backgroundColor,
         solidShadow: solidStyle.boxShadow,
-        bottomIndicatorShadow: bottomIndicatorStyle.boxShadow,
       };
     });
 
@@ -63,7 +61,6 @@ try {
     assert.doesNotMatch(initial.solidBackground, /\/|rgba\([^)]*,\s*0\./, `${layer}: solid selection is opaque`);
     assert.equal(initial.selectedShadow, "none", `${layer}: ordinary translucent selection has no side indicator`);
     assert.equal(initial.solidShadow, "none", `${layer}: ordinary solid selection has no side indicator`);
-    assert.notEqual(initial.bottomIndicatorShadow, "none", `${layer}: bottom indicators remain available where explicitly declared`);
 
     const before = await selected.boundingBox();
     await page.locator("html").evaluate((node) => { node.dataset.liliaReducedTransparency = "true"; });
@@ -170,7 +167,6 @@ function fixture(layer, css) {
         <section data-lilia-surface-mode="translucent" data-lilia-backdrop="native" data-lilia-surface-boundary>
           <button class="lilia-interactive-item" data-agent-id="surface.translucent.idle">Translucent idle</button>
           <button class="lilia-interactive-item" data-lilia-selected="true" data-agent-id="surface.translucent.selected">Translucent selected</button>
-          <button class="lilia-interactive-item" data-lilia-selected="true" data-lilia-selected-indicator="bottom" data-agent-id="surface.translucent.bottom-indicator">Bottom indicator</button>
           <div class="long-list">${items}</div>
         </section>
         <section data-lilia-surface-mode="translucent" data-lilia-backdrop="css-blur" data-lilia-surface-boundary data-agent-id="surface.css-blur">

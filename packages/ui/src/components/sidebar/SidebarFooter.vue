@@ -96,7 +96,6 @@ defineProps<{
 .sb-footer__btn.is-active {
   background: var(--lilia-state-layer-selected);
   color: var(--lilia-state-foreground-selected);
-  box-shadow: inset 0 -2px 0 var(--lilia-state-indicator-selected);
 }
 
 .sb-footer__statuses {

@@ -16,7 +16,7 @@ export const UI_PRESETS = Object.freeze({
 export const UI_LAYER_SUBPATHS = Object.freeze({
   lilia: Object.freeze([
     "", "/calendar", "/commands", "/composables", "/diagnostics", "/layouts", "/overlay",
-    "/preset", "/preset/definition", "/runtime", "/runtime/tauri", "/search", "/settings", "/settings/sidebar", "/shell",
+    "/preset", "/preset/definition", "/provider", "/runtime", "/runtime/tauri", "/search", "/settings", "/settings/sidebar", "/shell",
     "/shell/app", "/shell/config", "/shell/sidebar",
     "/styles.css", "/styles/global-scrollbar.css", "/styles/page.css", "/styles/shell.css",
     "/styles/sidebar.css", "/styles/state-layer.css", "/styles/tokens.css", "/styles/workspace.css", "/theme/base.css",
@@ -35,16 +35,19 @@ export const UI_LAYER_SUBPATHS = Object.freeze({
   ]),
   nana: Object.freeze([
     "", "/consumer", "/expressive", "/feedback", "/lazy", "/patterns",
-    "/commands", "/preset", "/provider", "/settings", "/shell", "/state",
+    "/commands", "/diagnostics", "/preset", "/preset/definition", "/provider", "/runtime", "/runtime/tauri",
+    "/settings", "/shell", "/state",
     "/styles.css", "/styles/state-layer.css", "/theme/base.css", "/theme/tokens.css",
   ]),
 });
 
 export const UI_FACADE_SUBPATHS = Object.freeze({
   lilia: Object.freeze([
-    "", "/commands", "/diagnostics", "/layouts", "/runtime", "/settings", "/shell",
+    "", "/commands", "/diagnostics", "/layouts", "/provider", "/runtime", "/settings", "/shell",
   ]),
-  nana: Object.freeze(["", "/commands", "/settings", "/shell"]),
+  nana: Object.freeze([
+    "", "/commands", "/diagnostics", "/provider", "/runtime", "/runtime/tauri", "/settings", "/shell",
+  ]),
 });
 
 export const DEFAULT_UI_FILES = Object.freeze([

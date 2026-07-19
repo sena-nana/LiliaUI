@@ -45,7 +45,6 @@ function onKeydown(event: KeyboardEvent, index: number) {
       role="tab"
       :aria-selected="modelValue === option.value"
       :data-lilia-selected="modelValue === option.value ? 'true' : undefined"
-      data-lilia-selected-indicator="bottom"
       :tabindex="tabs.tabbableValue.value === option.value ? 0 : -1"
       :disabled="option.disabled"
       :data-agent-id="agentId ? `${agentId}.${String(option.value)}` : undefined"
