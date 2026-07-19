@@ -62,7 +62,7 @@ export function createTauriDevBuildConfig(port, options = {}) {
   };
   if (options.beforeDevCommand !== false) {
     build.beforeDevCommand = options.beforeDevCommand ??
-      `pnpm dev --host localhost --port ${port} --strictPort`;
+      `yarn dev --host localhost --port ${port} --strictPort`;
   }
   return build;
 }
@@ -85,17 +85,15 @@ export function viteDevArgs(projectRoot = process.cwd(), args = [], env = proces
   return nextArgs;
 }
 
-export function pnpmSpawn(platform = process.platform, env = process.env) {
+export function yarnSpawn(platform = process.platform, env = process.env) {
   if (platform !== "win32") {
-    return { command: "pnpm", argsPrefix: [] };
+    return { command: "yarn", argsPrefix: [] };
   }
   return {
     command: env.ComSpec || "cmd.exe",
-    argsPrefix: ["/d", "/s", "/c", "pnpm.cmd"],
+    argsPrefix: ["/d", "/s", "/c", "yarn.cmd"],
   };
 }
-
-export const yarnSpawn = pnpmSpawn;
 
 export function resolveToolCommand(packageName, binName, args = [], projectRoot = process.cwd()) {
   return {

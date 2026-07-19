@@ -22,8 +22,8 @@ export default defineToolsProfile({
     ],
   },
   entrypoints: [
-    { id: "typecheck", command: "pnpm typecheck", purpose: "type-check every public package" },
-    { id: "test", command: "pnpm test", purpose: "run functional package and component tests" },
-    { id: "verify", command: "pnpm verify", purpose: "run browser and component performance gates" },
+    { id: "typecheck", command: "yarn typecheck", purpose: "type-check every public package" },
+    { id: "test", command: "yarn test", purpose: "run functional package and component tests" },
+    { id: "verify", command: "yarn verify", purpose: "run browser and component performance gates" },
   ],
 });

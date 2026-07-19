@@ -6,9 +6,9 @@ Treat every public Vue component exported from `packages/ui/src/index.ts` as par
 
 ## Required Evidence
 
-- Run `pnpm perf:components:light` for public component, shell, settings, overlay, menu, search, input, or composable changes that can affect rendering.
-- Run `pnpm perf:components:browser` when layout, transition, Teleport, overlay positioning, global listeners, scroll/resize handling, or repeated user interaction can affect real browser responsiveness.
-- Use `pnpm perf:components:update-baseline` only after reviewing that the new baseline reflects an intended implementation change, not local noise.
+- Run `yarn perf:components:light` for public component, shell, settings, overlay, menu, search, input, or composable changes that can affect rendering.
+- Run `yarn perf:components:browser` when layout, transition, Teleport, overlay positioning, global listeners, scroll/resize handling, or repeated user interaction can affect real browser responsiveness.
+- Use `yarn perf:components:update-baseline` only after reviewing that the new baseline reflects an intended implementation change, not local noise.
 
 ## Scenario Design
 

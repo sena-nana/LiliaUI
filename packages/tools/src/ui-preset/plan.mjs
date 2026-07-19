@@ -56,8 +56,8 @@ function collect(operation, operations, blockers) {
 
 function planCommands(manifest, options) {
   if (options.commands) return options.commands;
-  const commands = [{ id: "install", command: "pnpm", args: ["install"] }];
-  if (manifest.scripts?.typecheck) commands.push({ id: "typecheck", command: "pnpm", args: ["typecheck"] });
-  else if (manifest.scripts?.build) commands.push({ id: "build", command: "pnpm", args: ["build"] });
+  const commands = [{ id: "install", command: "yarn", args: ["install"] }];
+  if (manifest.scripts?.typecheck) commands.push({ id: "typecheck", command: "yarn", args: ["typecheck"] });
+  else if (manifest.scripts?.build) commands.push({ id: "build", command: "yarn", args: ["build"] });
   return commands;
 }

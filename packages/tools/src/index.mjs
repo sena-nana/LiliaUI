@@ -28,18 +28,18 @@ export const LILIA_TOOLS_ASSETS_ROOT = fileURLToPath(new URL("../assets/", impor
 export function checkPackageManager(projectRoot = process.cwd(), env = process.env) {
   const packageJson = readJson(resolve(projectRoot, "package.json"));
   const requiredPackageManager = packageJson.packageManager;
-  const requiredPnpmVersion = /^pnpm@([^+]+)/.exec(requiredPackageManager ?? "")?.[1];
+  const requiredYarnVersion = /^yarn@([^+]+)/.exec(requiredPackageManager ?? "")?.[1];
   const userAgent = env.npm_config_user_agent ?? "";
-  const pnpmMatch = userAgent.match(/\bpnpm\/([^\s]+)/);
-  const pnpmVersion = pnpmMatch?.[1];
-  const pnpmMajor = Number.parseInt(pnpmVersion?.split(".")[0] ?? "", 10);
+  const yarnMatch = userAgent.match(/\byarn\/([^\s]+)/);
+  const yarnVersion = yarnMatch?.[1];
+  const yarnMajor = Number.parseInt(yarnVersion?.split(".")[0] ?? "", 10);
 
-  if (pnpmMajor >= 11 && pnpmVersion === requiredPnpmVersion) {
+  if (yarnMajor >= 4 && yarnVersion === requiredYarnVersion) {
     return { ok: true, message: "" };
   }
 
-  const reason = pnpmVersion
-    ? `Detected pnpm ${pnpmVersion}.`
+  const reason = yarnVersion
+    ? `Detected Yarn ${yarnVersion}.`
     : userAgent
       ? `Detected package manager: ${userAgent}.`
       : "Could not detect the active package manager.";
@@ -423,14 +423,19 @@ function walkFiles(dir) {
 function formatPackageManagerMessage({ productTitle, reason, requiredPackageManager }) {
   return [
     "",
-    `${productTitle} requires ${requiredPackageManager}.`,
+    `${productTitle} requires Yarn 4 through Corepack.`,
     reason,
     "",
     `Expected package manager: ${requiredPackageManager}`,
     "",
     "Fix:",
-    "  npm install --global pnpm@11.14.0",
-    "  pnpm install --frozen-lockfile",
+    "  npm install --global corepack@0.35.0",
+    "  corepack enable yarn",
+    "  yarn install",
+    "",
+    "If the `yarn` command still resolves to Yarn 1, run the commands through Corepack:",
+    "  corepack yarn install",
+    "  corepack yarn dev",
     "",
   ].join("\n");
 }

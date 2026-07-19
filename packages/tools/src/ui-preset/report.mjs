@@ -22,7 +22,7 @@ export function createUiReport({ kind, inspection, plan = null, result = null })
           restored: result.rollback?.complete === true,
           details: result.rollback,
           error: result.error,
-          command: "pnpm install",
+          command: "yarn install",
         }
       : null,
   };
