@@ -16,7 +16,7 @@ export default defineConfig({
     viewport: { width: 880, height: 780 },
   },
   webServer: {
-    command: "pnpm vite --config tests/visual/vite.config.ts",
+    command: "yarn vite --config tests/visual/vite.config.ts",
     url: "http://127.0.0.1:4178/tests/visual/harness.html",
     reuseExistingServer: false,
     timeout: 30_000,

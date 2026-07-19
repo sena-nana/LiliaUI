@@ -8,9 +8,9 @@
     "examples/*"
   ],
   "scripts": {
-    "check:contract-fixtures": "pnpm --filter @lilia/example-contract-layers check",
-    "check:nana-example": "pnpm --filter @lilia/example-nana-basic typecheck && pnpm --filter @lilia/example-nana-basic build",
-    "check:workspace-example": "pnpm --filter @lilia/example-workspace-regions typecheck && pnpm --filter @lilia/example-workspace-regions build",
+    "check:contract-fixtures": "yarn workspace @lilia/example-contract-layers check",
+    "check:nana-example": "yarn workspace @lilia/example-nana-basic typecheck && yarn workspace @lilia/example-nana-basic build",
+    "check:workspace-example": "yarn workspace @lilia/example-workspace-regions typecheck && yarn workspace @lilia/example-workspace-regions build",
     "check:ui-boundaries": "node scripts/check-ui-boundaries.mjs",
     "perf:components:browser": "node tests/perf/componentPerformance.browser.ts",
     "perf:components:light": "cross-env NODE_DISABLE_COMPILE_CACHE=1 vitest run --config vitest.perf.config.ts",
@@ -19,14 +19,13 @@
     "test:ui:surface": "node tests/ui/surfaceStateLayer.browser.mjs",
     "test:ui:visual": "playwright test --config playwright.visual.config.ts",
     "test:ui:visual:update": "playwright test --config playwright.visual.config.ts --update-snapshots=all",
-    "typecheck": "pnpm -r --parallel --if-present run typecheck && pnpm typecheck:scripts",
+    "typecheck": "yarn workspaces foreach -Ap run typecheck && yarn typecheck:scripts",
     "typecheck:scripts": "tsc -p tsconfig.node-scripts.json && vue-tsc --noEmit -p tests/visual/tsconfig.json",
     "test": "cross-env NODE_DISABLE_COMPILE_CACHE=1 vitest run",
-    "verify": "pnpm check:ui-boundaries && pnpm check:contract-fixtures && pnpm check:nana-example && pnpm check:workspace-example && pnpm typecheck && pnpm test && pnpm test:ui:browser && pnpm test:ui:surface && pnpm test:ui:visual && pnpm perf:components:light"
+    "verify": "yarn check:ui-boundaries && yarn check:contract-fixtures && yarn check:nana-example && yarn check:workspace-example && yarn typecheck && yarn test && yarn test:ui:browser && yarn test:ui:surface && yarn test:ui:visual && yarn perf:components:light"
   },
   "engines": {
-    "node": ">=26.0.0 <27",
-    "pnpm": ">=11.0.0 <12"
+    "node": ">=26.0.0 <27"
   },
   "devDependencies": {
     "@lilia/build": "workspace:*",
@@ -56,5 +55,5 @@
     "vue-router": "^5.1.0",
     "vue-tsc": "^3.3.7"
   },
-  "packageManager": "pnpm@11.14.0"
+  "packageManager": "yarn@4.17.1+sha512.ccbfabf7d7b6b32075088be9386fb9a2e00bb6887ef07fa56effabc890a56d53da1ccc4128d62db245fcbd3961b236d75335bdf7d5320ed6eafb7588b7ad4697"
 }

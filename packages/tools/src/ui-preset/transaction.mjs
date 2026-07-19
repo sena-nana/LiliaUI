@@ -3,7 +3,7 @@ import { mkdir, rename, rm, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { readText } from "./files.mjs";
 
-const LOCKFILES = ["pnpm-lock.yaml", "package-lock.json", "pnpm-lock.yaml"];
+const LOCKFILES = ["yarn.lock", "package-lock.json", "pnpm-lock.yaml"];
 
 export async function executeUiTransaction(plan, options = {}) {
   if (plan.blockers.length) return result("blocked", { blockers: plan.blockers });

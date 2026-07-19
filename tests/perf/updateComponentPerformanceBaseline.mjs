@@ -16,7 +16,7 @@ function run(command) {
 }
 
 for (const command of [
-  "pnpm vitest run --config vitest.perf.config.ts",
+  "yarn vitest run --config vitest.perf.config.ts",
   "node tests/perf/componentPerformance.browser.ts",
 ]) {
   const status = run(command);

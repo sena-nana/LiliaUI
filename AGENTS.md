@@ -45,11 +45,11 @@
 - 公共 UI、配置、工具或构建流程变更后,至少运行:
 
 ```bash
-pnpm typecheck
-pnpm test
+yarn typecheck
+yarn test
 ```
 
-- 修改 `@lilia/build` 或跨平台 CLI 时,优先用消费模板再验证 `pnpm install`、`pnpm agent:debug --json`、`pnpm test`、`pnpm build`。
+- 修改 `@lilia/build` 或跨平台 CLI 时,优先用消费模板再验证 `yarn install --immutable`、`yarn agent:debug --json`、`yarn test`、`yarn build`。
 - 修改导出、包间依赖或 Git workspace 消费方式时,必须确认消费仓库能通过 `github:sena-nana/LiliaUI#workspace=<package>&head=main` 安装。
 - 修改 `tauri-plugin-lilia` 后,至少运行 `cargo test -p tauri-plugin-lilia`,并用消费模板运行 `cargo check --manifest-path src-tauri/Cargo.toml`。
 - 文档-only 改动可不跑测试,但最终说明要写清楚未运行原因。

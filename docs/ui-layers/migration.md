@@ -119,6 +119,6 @@ src/ui/
 - `--check` / `--dry-run` 永不写文件，可在脏树运行。
 - 默认实际迁移要求干净 Git 工作区；`--force` 只表示接受脏树风险，不允许静默覆盖无法识别的自定义。
 - 事务写入使用同目录临时文件替换，并在命令失败后恢复原文件和 lockfile。
-- 如果依赖安装已改变本地 artifact，回滚报告会提示再次运行 `pnpm install` 与恢复后的 manifest 对齐。
+- 如果依赖安装已改变本地 artifact，回滚报告会提示再次运行 `yarn install` 与恢复后的 manifest 对齐。
 
 版本与远端固定规则见[发布策略](./release.md)。

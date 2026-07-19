@@ -39,14 +39,14 @@ import {
 } from "../packages/build/src/tauriInstall.mjs";
 
 describe("@lilia/tools", () => {
-  it("checks the pinned pnpm line from package metadata", () => {
+  it("checks the pinned Yarn line from package metadata", () => {
     const root = createProject();
 
     expect(
-      checkPackageManager(root, { npm_config_user_agent: "pnpm/11.14.0 npm/? node/?" }).ok,
+      checkPackageManager(root, { npm_config_user_agent: "yarn/4.17.1 npm/? node/?" }).ok,
     ).toBe(true);
     expect(
-      checkPackageManager(root, { npm_config_user_agent: "pnpm/11.13.0 npm/? node/?" }).ok,
+      checkPackageManager(root, { npm_config_user_agent: "yarn/4.14.1 npm/? node/?" }).ok,
     ).toBe(false);
     expect(
       checkPackageManager(root, { npm_config_user_agent: "npm/11.0.0 node/?" }).ok,
@@ -168,7 +168,7 @@ describe("@lilia/tools", () => {
         expectedDependencies: ["@lilia/ui"],
         importantFiles: [],
         agentTargetFiles: {},
-        entrypoints: [{ id: "agent-debug", command: "pnpm agent:debug --json", purpose: "readiness" }],
+        entrypoints: [{ id: "agent-debug", command: "yarn agent:debug --json", purpose: "readiness" }],
       },
     });
 
@@ -225,7 +225,7 @@ describe("@lilia/build", () => {
 
     expect(createTauriDevBuildConfig(34120)).toEqual({
       devUrl: "http://localhost:34120",
-      beforeDevCommand: "pnpm dev --host localhost --port 34120 --strictPort",
+      beforeDevCommand: "yarn dev --host localhost --port 34120 --strictPort",
     });
     expect(
       viteDevArgs(root, [], {
@@ -290,7 +290,7 @@ describe("@lilia/build", () => {
     rmSync(join(root, "app.config.json"));
 
     expect(() =>
-      runPrepare(root, { npm_config_user_agent: "pnpm/11.14.0 npm/? node/?" }),
+      runPrepare(root, { npm_config_user_agent: "yarn/4.17.1 npm/? node/?" }),
     ).not.toThrow();
   });
 
@@ -490,7 +490,7 @@ function createProject(overrides = {}) {
     `${JSON.stringify({
       name: "lilia-test",
       version: "0.1.0",
-      packageManager: "pnpm@11.14.0",
+      packageManager: "yarn@4.17.1+sha512.ccbfabf7d7b6b32075088be9386fb9a2e00bb6887ef07fa56effabc890a56d53da1ccc4128d62db245fcbd3961b236d75335bdf7d5320ed6eafb7588b7ad4697",
       dependencies: {
         "@lilia/ui": "workspace:*",
         ...(overrides.dependencies ?? {}),

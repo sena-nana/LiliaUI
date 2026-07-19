@@ -5,16 +5,16 @@
 ## 基础门禁
 
 ```bash
-pnpm typecheck
-pnpm test
-pnpm perf:components:light
+yarn typecheck
+yarn test
+yarn perf:components:light
 ```
 
 涉及 overlay、Shell、菜单、transition、全局监听、重复交互或布局时，再运行：
 
 ```bash
-pnpm perf:components:browser
-pnpm test:ui:browser
+yarn perf:components:browser
+yarn test:ui:browser
 ```
 
 ## 验证映射
@@ -56,7 +56,7 @@ pnpm test:ui:browser
 
 ## 浏览器质量证据
 
-以下证据由 `pnpm test:ui:visual` 自动执行，并已接入 `pnpm verify`：
+以下证据由 `yarn test:ui:visual` 自动执行，并已接入 `yarn verify`：
 
 - Lilia/Nana 分别维护 light/dark × comfortable/compact 的真实截图矩阵；
 - 截图覆盖 hover、focus、disabled、loading、selected 和语义状态；
@@ -65,7 +65,7 @@ pnpm test:ui:browser
 - `prefers-reduced-motion: reduce` 下两层 loading 动画的 computed style 均为 `none`。
 - Solid/Translucent 状态色、Reduced Transparency/High Contrast 回退、Backdrop 单一所有权和 Solid 项无独立合成层。
 
-有意调整视觉结构后，使用 `pnpm test:ui:visual:update` 更新截图，再立即运行普通视觉命令确认基线稳定。
+有意调整视觉结构后，使用 `yarn test:ui:visual:update` 更新截图，再立即运行普通视觉命令确认基线稳定。
 
 人工验证可以作为临时发布证据，但必须记录环境、步骤、结果与截图；未记录的人工判断不算已验收。
 
@@ -92,10 +92,10 @@ pnpm test:ui:browser
 当 Template 或应用更新到新 commit 后，至少运行：
 
 ```bash
-pnpm install --frozen-lockfile
-pnpm agent:debug --json
-pnpm test
-pnpm build
+yarn install --immutable
+yarn agent:debug --json
+yarn test
+yarn build
 ```
 
 涉及 Tauri 公共运行时时，再增加消费应用的 `cargo check --manifest-path src-tauri/Cargo.toml`。验证结果必须区分本次改动失败与已知环境/基线失败。
