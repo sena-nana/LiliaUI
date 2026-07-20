@@ -140,7 +140,7 @@
   }
 
   .lilia-workspace-region--primary > .lilia-workspace-region__content {
-    padding: 12px;
+    padding: var(--lilia-primary-inset, 12px);
   }
 }
 

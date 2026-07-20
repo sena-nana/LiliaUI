@@ -103,6 +103,7 @@ function getGeometry(id: string) {
     subscribers: 0,
     rect: shallowRef(null),
     safeRect: shallowRef(null),
+    overlayOccluded: ref(false),
     visible: ref(false),
     stable: ref(false),
   };
@@ -121,6 +122,37 @@ function unobserve(element: Element | null) {
   resizeObserver?.unobserve(element);
 }
 
+function hasGeometrySubscribers() {
+  for (const state of geometryStates.values()) {
+    if (state.subscribers > 0) return true;
+  }
+  return false;
+}
+
+function reconcileRegionObservers(measuredElements: ReadonlySet<Element>) {
+  for (const element of [...observedElements]) {
+    if (element !== root.value && !measuredElements.has(element)) unobserve(element);
+  }
+  for (const element of measuredElements) observe(element);
+}
+
+function isOverlayOccluded(
+  targetKey: symbol,
+  safeRect: DOMRectReadOnly,
+  overlayRects: ReadonlyMap<symbol, DOMRectReadOnly>,
+) {
+  for (const [key, overlayRect] of overlayRects) {
+    if (
+      key !== targetKey
+      && safeRect.left < overlayRect.right
+      && safeRect.right > overlayRect.left
+      && safeRect.top < overlayRect.bottom
+      && safeRect.bottom > overlayRect.top
+    ) return true;
+  }
+  return false;
+}
+
 function measureGeometry() {
   measureFrame = null;
   const workspaceElement = root.value;
@@ -130,9 +162,18 @@ function measureGeometry() {
     inlineSize.value = workspaceRect.width;
     refreshLayout();
   }
-  for (const registration of registrations.value) {
+  const measuredElements = new Set<Element>();
+  const subscribedRegistrations = registrations.value.filter((registration) => (
+    (geometryStates.get(registration.id)?.subscribers ?? 0) > 0
+  ));
+  const visibleSubscriptions: Array<{
+    element: HTMLElement;
+    registration: WorkspaceRegionRegistration;
+    state: WorkspaceGeometryState;
+  }> = [];
+  for (const registration of subscribedRegistrations) {
     const state = geometryStates.get(registration.id);
-    if (!state || state.subscribers === 0) continue;
+    if (!state) continue;
     const regionLayout = layout.value.regions.get(registration.key);
     const element = registration.element.value;
     const visible = Boolean(regionLayout?.visible && element?.isConnected);
@@ -140,13 +181,30 @@ function measureGeometry() {
     if (!visible || !element) {
       state.rect.value = null;
       state.safeRect.value = null;
+      state.overlayOccluded.value = false;
       continue;
     }
-    const rect = element.getBoundingClientRect();
-    state.rect.value = rect;
-    state.safeRect.value = intersectRects(rect, workspaceRect);
-    observe(element);
+    visibleSubscriptions.push({ element, registration, state });
   }
+  const overlayRects = new Map<symbol, DOMRectReadOnly>();
+  if (visibleSubscriptions.length > 0) {
+    for (const registration of registrations.value) {
+      const regionLayout = layout.value.regions.get(registration.key);
+      const element = registration.element.value;
+      if (!regionLayout?.visible || !regionLayout.overlay || !element?.isConnected) continue;
+      overlayRects.set(registration.key, element.getBoundingClientRect());
+      measuredElements.add(element);
+    }
+  }
+  for (const { element, registration, state } of visibleSubscriptions) {
+    const rect = overlayRects.get(registration.key) ?? element.getBoundingClientRect();
+    measuredElements.add(element);
+    const safeRect = intersectRects(rect, workspaceRect);
+    state.rect.value = rect;
+    state.safeRect.value = safeRect;
+    state.overlayOccluded.value = isOverlayOccluded(registration.key, safeRect, overlayRects);
+  }
+  reconcileRegionObservers(measuredElements);
   stableFrame = requestFrame(() => {
     stableFrame = null;
     for (const state of geometryStates.values()) state.stable.value = true;
@@ -214,6 +272,7 @@ function registerRegion(registration: WorkspaceRegionRegistration) {
       state.visible.value = false;
       state.rect.value = null;
       state.safeRect.value = null;
+      state.overlayOccluded.value = false;
       state.stable.value = true;
       if (state.subscribers === 0) geometryStates.delete(registration.id);
     }
@@ -233,13 +292,15 @@ function subscribeGeometry(id: string) {
       active = false;
       state.subscribers = Math.max(0, state.subscribers - 1);
       if (state.subscribers > 0) return;
-      const registration = registrationsById.get(id);
-      unobserve(registration?.element.value ?? null);
       state.rect.value = null;
       state.safeRect.value = null;
+      state.overlayOccluded.value = false;
       state.visible.value = false;
       state.stable.value = true;
+      const registration = registrationsById.get(id);
       if (!registration) geometryStates.delete(id);
+      if (hasGeometrySubscribers()) refreshGeometry();
+      else reconcileRegionObservers(new Set());
     },
   };
 }

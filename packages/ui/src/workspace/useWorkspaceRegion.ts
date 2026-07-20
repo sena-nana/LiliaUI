@@ -13,6 +13,7 @@ export function useWorkspaceRegion(id: string): WorkspaceRegionGeometry {
     id,
     rect: readonly(geometry.rect),
     safeRect: readonly(geometry.safeRect),
+    overlayOccluded: readonly(geometry.overlayOccluded),
     visible: readonly(geometry.visible),
     stable: readonly(geometry.stable),
   };

@@ -103,7 +103,10 @@ Region 通过 `narrowBehavior` 与 `collapseBelow` 声明窄窗口行为：
 const editor = useWorkspaceRegion("editor");
 
 watchEffect(() => {
-  if (!editor.visible.value || !editor.stable.value) return;
+  if (!editor.visible.value || !editor.stable.value || editor.overlayOccluded.value) {
+    hideNativeViewport();
+    return;
+  }
   syncNativeViewport(editor.safeRect.value);
 });
 ```
@@ -112,10 +115,13 @@ watchEffect(() => {
 
 - `rect`：Region 当前窗口坐标；
 - `safeRect`：裁切到 Workspace Surface 后的安全矩形；
+- `overlayOccluded`：另一个可见响应式 Region overlay 是否与 `safeRect` 存在正面积相交；
 - `visible`：当前是否参与布局或响应式 overlay；
 - `stable`：最近一次布局变化后的测量是否完成。
 
-Workspace 共享一个 `ResizeObserver`，并监听窗口与 `visualViewport` resize，以覆盖拖拽、折叠、动态显隐、DPI 与页面缩放变化。LiliaUI 不实现 wgpu/Tauri IPC；应用只把通用几何结果传给自己的原生桥接层。该 API 与 `useOverlayActivity` 正交：Region 负责几何，Overlay Activity 负责遮挡期间的原生视口存续策略。
+Workspace 共享一个 `ResizeObserver`，并监听窗口与 `visualViewport` resize，以覆盖拖拽、折叠、动态显隐、DPI 与页面缩放变化。存在 geometry 订阅时，Workspace 还会惰性测量可见的响应式 Region overlay；最后一个订阅释放时立即停止 Region 观察，overlay 隐藏、折叠、卸载或退出窄窗布局后也会释放对应观察。LiliaUI 不实现 wgpu/Tauri IPC；应用只把通用几何结果传给自己的原生桥接层。
+
+`overlayOccluded` 只描述 Workspace 自己管理的响应式 Region overlay。Dialog、Menu、Popover、Drawer 与错误提示等临时浮层继续由 `useOverlayActivity` 描述；原生子视口通常需要同时满足 geometry 可见且稳定、`overlayOccluded` 为 false、页面可见且 Overlay Activity 不活跃。
 
 ## 从旧 Shell 迁移
 

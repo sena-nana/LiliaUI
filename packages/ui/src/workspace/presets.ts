@@ -16,6 +16,13 @@ type WorkspaceRegionPreset = DefineComponent<WorkspaceRegionPresetProps>;
 const regionRuntimeProps = (
   LiliaWorkspaceRegion as unknown as { props: ComponentObjectPropsOptions }
 ).props;
+const presetRuntimeProps = {
+  ...regionRuntimeProps,
+  role: {
+    ...(regionRuntimeProps.role as Record<string, unknown>),
+    required: false,
+  },
+} as ComponentObjectPropsOptions;
 
 function hyphenate(value: string) {
   return value.replace(/\B([A-Z])/g, "-$1").toLowerCase();
@@ -29,13 +36,13 @@ function createWorkspaceRegionPreset(
   return defineComponent({
     name,
     inheritAttrs: false,
-    props: regionRuntimeProps,
+    props: presetRuntimeProps,
     setup(props, { attrs, slots }) {
       const instance = getCurrentInstance();
       const regionProps = props as Record<string, unknown>;
       return () => h(LiliaWorkspaceRegion as Component, {
         ...defaults,
-        ...Object.fromEntries(Object.keys(regionRuntimeProps).flatMap((key) => {
+        ...Object.fromEntries(Object.keys(presetRuntimeProps).flatMap((key) => {
           const provided = instance?.vnode.props;
           return provided && (
             Object.prototype.hasOwnProperty.call(provided, key)

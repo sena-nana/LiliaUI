@@ -52,6 +52,7 @@ export interface WorkspaceRegionGeometry {
   readonly id: string;
   readonly rect: Readonly<ShallowRef<DOMRectReadOnly | null>>;
   readonly safeRect: Readonly<ShallowRef<DOMRectReadOnly | null>>;
+  readonly overlayOccluded: Readonly<Ref<boolean>>;
   readonly visible: Readonly<Ref<boolean>>;
   readonly stable: Readonly<Ref<boolean>>;
 }
