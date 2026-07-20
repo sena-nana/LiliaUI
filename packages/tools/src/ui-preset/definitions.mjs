@@ -22,7 +22,7 @@ export const UI_LAYER_SUBPATHS = Object.freeze({
     "/styles/sidebar.css", "/styles/state-layer.css", "/styles/tokens.css", "/styles/workspace.css", "/theme/base.css",
     "/components/action-menu.css", "/components/popup-titlebar-frame.css", "/components/search-dropdown.css",
     "/components/ActionMenuItem", "/components/AnchoredActionMenu", "/components/CalendarHeatmap",
-    "/components/ConfirmDialog", "/components/ContextMenuHost", "/components/Dropdown",
+    "/components/ConfirmDialog", "/components/ContextMenuHost", "/components/Dropdown", "/components/ImageViewer",
     "/components/OverlayHost", "/components/PopupTitleBarFrame", "/components/SearchDropdown",
     "/components/TitleBar", "/composables/menuMotion", "/composables/useAnchoredActionMenu",
     "/composables/useAnchoredOverlay", "/composables/useComponentEpoch", "/composables/useContextMenu",
