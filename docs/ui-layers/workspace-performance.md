@@ -2,13 +2,14 @@
 
 ## 稳定化结论
 
-`LiliaWorkspace` 的 geometry 测量按订阅启用：没有 `useWorkspaceRegion()` 消费者时只测量 Workspace 根元素；Region 首次订阅后才读取 rect 并注册 `ResizeObserver`，最后一个订阅释放时立即停止观察。连续刷新合并到同一 animation frame，动态插入、隐藏、折叠和 overlay 布局仍由布局刷新覆盖。
+`LiliaWorkspace` 的 geometry 测量按订阅启用：没有 `useWorkspaceRegion()` 消费者时只测量 Workspace 根元素；Region 首次订阅后才读取目标 rect，并惰性读取所有可见响应式 Region overlay 以计算 `overlayOccluded`。目标与相关 overlay 共用一个 `ResizeObserver`，最后一个订阅释放时立即停止 Region 观察。连续刷新合并到同一 animation frame，动态插入、隐藏、折叠和 overlay 布局仍由布局刷新覆盖。
 
 单元测试的可观察结果：
 
 - 20 个未订阅 Region 挂载和更新时，Region `getBoundingClientRect()` 调用数为 `0`；
-- 仅订阅 1 个 Region 时，只观察 Workspace 根元素和该 Region 各 1 次；连续 8 次刷新合并为该 Region 1 次 rect 读取；
-- 订阅释放后会 `unobserve`，清空暴露 geometry，不再继续测量。
+- 仅订阅 1 个 Region 且没有响应式 overlay 时，只观察 Workspace 根元素和该 Region 各 1 次；连续 8 次刷新合并为该 Region 1 次 rect 读取；
+- 可见响应式 overlay 只在存在 geometry 订阅时读取和观察，折叠或退出 overlay 布局后释放观察；
+- 最后一个订阅释放后会 `unobserve` 所有 Region，清空暴露 geometry，不再继续测量。
 
 ## 浏览器基线
 
@@ -32,4 +33,3 @@ yarn perf:components:update-baseline
 ```
 
 日常门禁继续使用 `yarn perf:components:light`；真实浏览器检查使用 `yarn perf:components:browser`。
-

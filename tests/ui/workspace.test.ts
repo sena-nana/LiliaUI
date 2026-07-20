@@ -25,6 +25,35 @@ function region(container: HTMLElement, id: string) {
 }
 
 describe("Workspace Region layout", () => {
+  it("registers preset defaults without requiring role and preserves explicit overrides", async () => {
+    const view = render(LiliaWorkspace, {
+      slots: {
+        default: () => [
+          h(LiliaResourcePanel, { id: "resources" }),
+          h(LiliaPrimaryContent, { id: "primary" }),
+          h(LiliaInspector, { id: "inspector" }),
+          h(LiliaInspector, { id: "console", role: "console" }),
+        ],
+      },
+    });
+    const workspace = view.container.querySelector(".lilia-workspace");
+    if (!(workspace instanceof HTMLElement)) throw new Error("Missing workspace");
+
+    await waitFor(() => {
+      expect(region(view.container, "resources")).toHaveAttribute("data-region-role", "resources");
+      expect(region(view.container, "resources")).toHaveAttribute("data-region-placement", "start");
+      expect(region(view.container, "resources")).not.toHaveAttribute("hidden");
+      expect(region(view.container, "primary")).toHaveAttribute("data-region-role", "primary");
+      expect(region(view.container, "primary")).toHaveAttribute("data-region-placement", "primary");
+      expect(region(view.container, "primary")).not.toHaveAttribute("hidden");
+      expect(region(view.container, "inspector")).toHaveAttribute("data-region-role", "inspector");
+      expect(region(view.container, "inspector")).toHaveAttribute("data-region-placement", "end");
+      expect(region(view.container, "inspector")).not.toHaveAttribute("hidden");
+      expect(region(view.container, "console")).toHaveAttribute("data-region-role", "console");
+      expect(workspace).toHaveAttribute("data-has-primary", "true");
+    });
+  });
+
   it("publishes the default Surface boundary and keeps backdrop ownership on a translucent workspace", () => {
     const view = render(LiliaWorkspace, {
       props: {
@@ -278,6 +307,98 @@ describe("Workspace Region layout", () => {
     expect(handle).toHaveAttribute("aria-valuenow", "180");
   });
 
+  it("provides bounded pointer, keyboard, reset, event, and separator accessibility behavior", async () => {
+    const onResizeStart = vi.fn();
+    const onResize = vi.fn();
+    const onResizeEnd = vi.fn();
+    const onUpdateSize = vi.fn();
+    const view = render(LiliaWorkspace, {
+      slots: {
+        default: () => [
+          h(LiliaWorkspaceRegion, {
+            id: "start-tools",
+            role: "resources",
+            placement: "start",
+            defaultSize: 200,
+            minSize: 100,
+            maxSize: 300,
+            resizeStep: 10,
+            resizeLabel: "Resize resources",
+            resizable: true,
+            onResizeStart,
+            onResize,
+            onResizeEnd,
+            "onUpdate:size": onUpdateSize,
+          }),
+          h(LiliaPrimaryContent, { id: "primary" }),
+          h(LiliaWorkspaceRegion, {
+            id: "end-tools",
+            role: "inspector",
+            placement: "end",
+            defaultSize: 180,
+            minSize: 120,
+            maxSize: 240,
+            resizeStep: 10,
+            resizable: true,
+          }),
+        ],
+      },
+    });
+    const startHandle = view.container.querySelector('[data-agent-id="workspace.region.start-tools.resize"]');
+    const endHandle = view.container.querySelector('[data-agent-id="workspace.region.end-tools.resize"]');
+    if (!(startHandle instanceof HTMLElement) || !(endHandle instanceof HTMLElement)) {
+      throw new Error("Missing resize handles");
+    }
+
+    expect(startHandle).toHaveAttribute("role", "separator");
+    expect(startHandle).toHaveAttribute("tabindex", "0");
+    expect(startHandle).toHaveAttribute("aria-label", "Resize resources");
+    expect(startHandle).toHaveAttribute("aria-orientation", "vertical");
+    expect(startHandle).toHaveAttribute("aria-valuemin", "100");
+    expect(startHandle).toHaveAttribute("aria-valuemax", "300");
+    expect(startHandle).toHaveAttribute("aria-valuenow", "200");
+    expect(startHandle).not.toHaveAttribute("aria-disabled");
+
+    await fireEvent.keyDown(startHandle, { key: "ArrowLeft" });
+    expect(startHandle).toHaveAttribute("aria-valuenow", "190");
+    await fireEvent.keyDown(startHandle, { key: "ArrowRight" });
+    expect(startHandle).toHaveAttribute("aria-valuenow", "200");
+    await fireEvent.keyDown(startHandle, { key: "ArrowRight", shiftKey: true });
+    expect(startHandle).toHaveAttribute("aria-valuenow", "230");
+    await fireEvent.keyDown(startHandle, { key: "Home" });
+    expect(startHandle).toHaveAttribute("aria-valuenow", "100");
+    await fireEvent.keyDown(startHandle, { key: "End" });
+    expect(startHandle).toHaveAttribute("aria-valuenow", "300");
+    await fireEvent.dblClick(startHandle);
+    expect(startHandle).toHaveAttribute("aria-valuenow", "200");
+
+    onResizeStart.mockClear();
+    onResize.mockClear();
+    onResizeEnd.mockClear();
+    onUpdateSize.mockClear();
+    await fireEvent.pointerDown(startHandle, { button: 0, clientX: 200, pointerId: 17 });
+    await fireEvent.pointerMove(window, { clientX: 1000, pointerId: 17 });
+    await fireEvent.pointerUp(window, { pointerId: 17 });
+    expect(startHandle).toHaveAttribute("aria-valuenow", "300");
+    expect(onResizeStart).toHaveBeenCalledWith(200);
+    expect(onResize).toHaveBeenLastCalledWith(300);
+    expect(onResizeEnd).toHaveBeenLastCalledWith(300);
+    expect(onUpdateSize).toHaveBeenLastCalledWith(300);
+
+    await fireEvent.pointerDown(startHandle, { button: 0, clientX: 1000, pointerId: 18 });
+    await fireEvent.pointerMove(window, { clientX: -1000, pointerId: 18 });
+    await fireEvent.pointerUp(window, { pointerId: 18 });
+    expect(startHandle).toHaveAttribute("aria-valuenow", "100");
+    expect(onResize).toHaveBeenLastCalledWith(100);
+    expect(onResizeEnd).toHaveBeenLastCalledWith(100);
+    expect(onUpdateSize).toHaveBeenLastCalledWith(100);
+
+    await fireEvent.keyDown(endHandle, { key: "ArrowLeft" });
+    expect(endHandle).toHaveAttribute("aria-valuenow", "190");
+    await fireEvent.keyDown(endHandle, { key: "ArrowRight", shiftKey: true });
+    expect(endHandle).toHaveAttribute("aria-valuenow", "160");
+  });
+
   it("preserves explicit false boolean props through Region presets", async () => {
     const Fixture = defineComponent({
       setup() {
@@ -494,7 +615,7 @@ describe("Workspace region geometry", () => {
     vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function mockRect() {
       if (this.dataset.regionId) regionReads += 1;
       return this.classList.contains("lilia-workspace")
-        ? new DOMRect(0, 0, 1200, 800)
+        ? new DOMRect(0, 0, 700, 800)
         : new DOMRect(0, 0, 120, 80);
     });
     const Host = defineComponent({
@@ -502,9 +623,10 @@ describe("Workspace region geometry", () => {
         const revision = ref(0);
         return { revision };
       },
-      components: { LiliaWorkspace, LiliaWorkspaceRegion },
+      components: { LiliaResourcePanel, LiliaWorkspace, LiliaWorkspaceRegion },
       template: `
         <LiliaWorkspace>
+          <LiliaResourcePanel id="responsive-overlay" />
           <LiliaWorkspaceRegion
             v-for="index in 20"
             :key="index"
@@ -522,6 +644,114 @@ describe("Workspace region geometry", () => {
     await fireEvent.click(view.getByRole("button", { name: "update" }));
     await new Promise((resolve) => requestAnimationFrame(() => resolve(undefined)));
     expect(regionReads).toBe(0);
+  });
+
+  it("reports responsive overlay occlusion and releases overlay observation on collapse and unsubscribe", async () => {
+    let workspaceWidth = 700;
+    const observed = new Set<Element>();
+    const observe = vi.fn((element: Element) => observed.add(element));
+    const unobserve = vi.fn((element: Element) => observed.delete(element));
+    vi.stubGlobal("ResizeObserver", vi.fn(class {
+      observe = observe;
+      unobserve = unobserve;
+      disconnect = vi.fn(() => observed.clear());
+    }));
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function mockRect() {
+      if (this.classList.contains("lilia-workspace")) return new DOMRect(0, 0, workspaceWidth, 600);
+      if (this.dataset.regionId === "resources") return new DOMRect(0, 0, 260, 600);
+      if (this.dataset.regionId === "primary") {
+        return workspaceWidth < 860
+          ? new DOMRect(0, 0, workspaceWidth, 600)
+          : new DOMRect(260, 0, workspaceWidth - 260, 600);
+      }
+      return new DOMRect();
+    });
+
+    const GeometryProbe = defineComponent({
+      setup() { return { geometry: useWorkspaceRegion("primary") }; },
+      template: `<output data-testid="overlay-geometry">{{ geometry.stable.value }}|{{ geometry.overlayOccluded.value }}</output>`,
+    });
+    const Host = defineComponent({
+      setup() {
+        const primaryHidden = ref(false);
+        const resourcesCollapsed = ref(false);
+        const subscribed = ref(true);
+        return { primaryHidden, resourcesCollapsed, subscribed };
+      },
+      components: { GeometryProbe, LiliaPrimaryContent, LiliaResourcePanel, LiliaWorkspace },
+      template: `
+        <div>
+          <button @click="primaryHidden = !primaryHidden">primary</button>
+          <LiliaWorkspace>
+            <LiliaResourcePanel
+              id="resources"
+              v-model:collapsed="resourcesCollapsed"
+              collapsible
+            />
+            <LiliaPrimaryContent id="primary" :hidden="primaryHidden">
+              <GeometryProbe v-if="subscribed" />
+              <button @click="resourcesCollapsed = !resourcesCollapsed">resources</button>
+              <button @click="subscribed = false">unsubscribe</button>
+            </LiliaPrimaryContent>
+          </LiliaWorkspace>
+        </div>
+      `,
+    });
+    const view = render(Host);
+    const resources = region(view.container, "resources");
+    const primary = region(view.container, "primary");
+
+    await waitFor(() => {
+      expect(view.getByTestId("overlay-geometry")).toHaveTextContent("true|true");
+      expect(observed).toContain(resources);
+      expect(observed).toContain(primary);
+    });
+
+    await fireEvent.click(view.getByRole("button", { name: "resources" }));
+    await waitFor(() => {
+      expect(view.getByTestId("overlay-geometry")).toHaveTextContent("true|false");
+      expect(unobserve).toHaveBeenCalledWith(resources);
+      expect(observed).not.toContain(resources);
+    });
+
+    await fireEvent.click(view.getByRole("button", { name: "resources" }));
+    await waitFor(() => {
+      expect(view.getByTestId("overlay-geometry")).toHaveTextContent("true|true");
+      expect(observed).toContain(resources);
+    });
+
+    await fireEvent.click(view.getByRole("button", { name: "primary" }));
+    await waitFor(() => {
+      expect(view.getByTestId("overlay-geometry")).toHaveTextContent("true|false");
+      expect(observed).not.toContain(resources);
+      expect(observed).not.toContain(primary);
+    });
+    await fireEvent.click(view.getByRole("button", { name: "primary" }));
+    await waitFor(() => {
+      expect(view.getByTestId("overlay-geometry")).toHaveTextContent("true|true");
+      expect(observed).toContain(resources);
+      expect(observed).toContain(primary);
+    });
+
+    workspaceWidth = 1100;
+    window.dispatchEvent(new Event("resize"));
+    await waitFor(() => {
+      expect(view.getByTestId("overlay-geometry")).toHaveTextContent("true|false");
+      expect(observed).not.toContain(resources);
+    });
+
+    workspaceWidth = 700;
+    window.dispatchEvent(new Event("resize"));
+    await waitFor(() => {
+      expect(view.getByTestId("overlay-geometry")).toHaveTextContent("true|true");
+      expect(observed).toContain(resources);
+    });
+    await fireEvent.click(view.getByRole("button", { name: "unsubscribe" }));
+    await waitFor(() => {
+      expect(view.queryByTestId("overlay-geometry")).not.toBeInTheDocument();
+      expect(observed).not.toContain(resources);
+      expect(observed).not.toContain(primary);
+    });
   });
 
   it("measures only subscribed regions and coalesces refreshes in one frame", async () => {

@@ -17,6 +17,7 @@ export interface WorkspaceGeometryState {
   subscribers: number;
   rect: ShallowRef<DOMRectReadOnly | null>;
   safeRect: ShallowRef<DOMRectReadOnly | null>;
+  overlayOccluded: Ref<boolean>;
   visible: Ref<boolean>;
   stable: Ref<boolean>;
 }
