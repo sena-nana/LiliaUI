@@ -40,6 +40,7 @@
     "./components/ConfirmDialog": "./src/components/ConfirmDialog.vue",
     "./components/ContextMenuHost": "./src/components/ContextMenuHost.vue",
     "./components/Dropdown": "./src/components/Dropdown.vue",
+    "./components/ImageViewer": "./src/components/UiImageViewer.vue",
     "./components/OverlayHost": "./src/components/OverlayHost.vue",
     "./components/PopupTitleBarFrame": "./src/components/PopupTitleBarFrame.vue",
     "./components/SearchDropdown": "./src/components/SearchDropdown.vue",
