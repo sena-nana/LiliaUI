@@ -141,6 +141,21 @@ describe("Workspace Region layout", () => {
     expect(region(view.container, "primary")).toHaveAttribute("data-lilia-surface-boundary");
   });
 
+  it("keeps primary top-left radius when a start region is attached", async () => {
+    const view = render(LiliaWorkspace, {
+      slots: {
+        default: () => [
+          h(LiliaSectionNavigation, { id: "sections" }, () => "Nav"),
+          h(LiliaPrimaryContent, { id: "primary" }, () => "Editor"),
+        ],
+      },
+    });
+    await nextTick();
+
+    expect(region(view.container, "sections")).toHaveAttribute("data-edge-start", "true");
+    expect(region(view.container, "primary")).not.toHaveAttribute("data-edge-start");
+  });
+
   it("recomputes attached edges and separators after independently hiding regions", async () => {
     const Fixture = defineComponent({
       setup() {
