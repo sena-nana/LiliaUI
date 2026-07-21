@@ -151,21 +151,23 @@
 
 .lilia-workspace-region--primary {
   --lilia-region-surface: var(--bg);
-  border-top-left-radius: var(--radius-lg);
+  --lilia-primary-corner-radius: var(--radius-lg);
+  border-top-left-radius: var(--lilia-primary-corner-radius);
   contain: content;
 }
 
 .lilia-workspace-region--primary[data-edge-start="true"] {
-  border-top-left-radius: 0;
+  --lilia-primary-corner-radius: 0;
 }
 
 .lilia-workspace-region--primary > .lilia-workspace-region__content {
   padding: var(--lilia-primary-inset, 20px 24px);
+  border-top-left-radius: var(--lilia-primary-corner-radius);
 }
 
 @media (max-width: 760px) {
   .lilia-workspace-region--primary {
-    border-top-left-radius: 0;
+    --lilia-primary-corner-radius: 0;
   }
 
   .lilia-workspace-region--primary > .lilia-workspace-region__content {
