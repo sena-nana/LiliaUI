@@ -128,7 +128,7 @@
 
 .lilia-workspace-region__resize-handle:hover::after,
 .lilia-workspace-region__resize-handle:focus-visible::after {
-  background: var(--accent);
+  background: var(--border-strong);
 }
 
 .lilia-workspace-region__resize-handle:focus-visible {
