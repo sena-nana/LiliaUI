@@ -47,6 +47,7 @@ const geometryStates = new Map<string, WorkspaceGeometryState>();
 function sameRegionLayout(left: WorkspaceRegionLayout, right: WorkspaceRegionLayout) {
   if (
     left.visible !== right.visible
+    || left.collapsed !== right.collapsed
     || left.overlay !== right.overlay
     || left.separator !== right.separator
     || left.edgeStart !== right.edgeStart
@@ -176,7 +177,7 @@ function measureGeometry() {
     if (!state) continue;
     const regionLayout = layout.value.regions.get(registration.key);
     const element = registration.element.value;
-    const visible = Boolean(regionLayout?.visible && element?.isConnected);
+    const visible = Boolean(regionLayout?.visible && !regionLayout?.collapsed && element?.isConnected);
     state.visible.value = visible;
     if (!visible || !element) {
       state.rect.value = null;

@@ -97,6 +97,8 @@ const registration: WorkspaceRegionRegistration = {
   collapseBelow: computed(() => props.collapseBelow ?? null),
   responsivePriority: computed(() => props.responsivePriority),
   requestedVisible,
+  hidden: computed(() => props.hidden),
+  collapsed: computed(() => isCollapsed.value && !props.hidden),
 };
 
 const unregister = workspace.registerRegion(registration);
@@ -275,6 +277,7 @@ defineExpose({
     :data-region-placement="placement"
     :data-region-scope="scope"
     :data-region-visible="layout?.visible ? 'true' : 'false'"
+    :data-region-collapsed="isCollapsed ? 'true' : undefined"
     :data-region-overlay="layout?.overlay ? 'true' : undefined"
     :data-region-separator="layout?.separator ?? undefined"
     :data-edge-start="layout?.edgeStart ? 'true' : undefined"

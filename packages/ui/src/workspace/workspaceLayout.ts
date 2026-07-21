@@ -29,7 +29,26 @@ function isResponsiveCollapsed(region: WorkspaceRegionRegistration, inlineSize: 
 }
 
 function isVisible(region: WorkspaceRegionRegistration, inlineSize: number) {
-  return region.requestedVisible.value && !isResponsiveCollapsed(region, inlineSize);
+  if (region.hidden?.value) return false;
+  return !isResponsiveCollapsed(region, inlineSize);
+}
+
+function isCollapsedTrack(region: WorkspaceRegionRegistration) {
+  return Boolean(region.collapsed?.value);
+}
+
+function firstNonCollapsedIndex(middle: readonly WorkspaceRegionRegistration[]) {
+  for (let i = 0; i < middle.length; i += 1) {
+    if (!isCollapsedTrack(middle[i])) return i;
+  }
+  return -1;
+}
+
+function lastNonCollapsedIndex(middle: readonly WorkspaceRegionRegistration[]) {
+  for (let i = middle.length - 1; i >= 0; i -= 1) {
+    if (!isCollapsedTrack(middle[i])) return i;
+  }
+  return -1;
 }
 
 function clampedSize(region: WorkspaceRegionRegistration) {
@@ -39,6 +58,9 @@ function clampedSize(region: WorkspaceRegionRegistration) {
 }
 
 function track(region: WorkspaceRegionRegistration) {
+  if (isCollapsedTrack(region)) {
+    return region.fillPriority.value > 0 ? "minmax(0px, 0fr)" : "minmax(0px, 0px)";
+  }
   const fill = region.fillPriority.value;
   if (fill > 0) return `minmax(${region.minSize.value}px, ${fill}fr)`;
   const size = clampedSize(region);
@@ -50,6 +72,7 @@ function regionLayout(style: CSSProperties): WorkspaceRegionLayout {
   return {
     style,
     visible: true,
+    collapsed: false,
     overlay: false,
     separator: null,
     edgeStart: false,
@@ -99,7 +122,7 @@ export function createWorkspaceLayout(
   const workspaceBottom: WorkspaceRegionRegistration[] = [];
   for (const region of regions) {
     if (!isVisible(region, inlineSize)) continue;
-    if (isResponsiveOverlay(region, inlineSize)) {
+    if (!isCollapsedTrack(region) && isResponsiveOverlay(region, inlineSize)) {
       overlays.push(region);
       continue;
     }
@@ -151,19 +174,23 @@ export function createWorkspaceLayout(
     layouts.set(region.key, layout);
   });
 
+  const firstMiddle = firstNonCollapsedIndex(middle);
+  const lastMiddle = lastNonCollapsedIndex(middle);
   middle.forEach((region, index) => {
     const placement = region.placement.value;
+    const collapsed = isCollapsedTrack(region);
     const layout = regionLayout({
       gridColumn: `${index + 1}`,
       gridRow: placement === "primary"
         ? `${middleRow}`
         : `${attachedMiddleRowStart} / span ${attachedMiddleRowSpan}`,
     });
+    layout.collapsed = collapsed;
     layout.separator = index > 0 ? "inline" : null;
-    layout.edgeStart = index === 0;
-    layout.edgeEnd = index === middle.length - 1;
-    layout.edgeTop = workspaceTop.length === 0 && (placement !== "primary" || primaryTop.length === 0);
-    layout.edgeBottom = workspaceBottom.length === 0 && (placement !== "primary" || primaryBottom.length === 0);
+    layout.edgeStart = !collapsed && index === firstMiddle;
+    layout.edgeEnd = !collapsed && index === lastMiddle;
+    layout.edgeTop = !collapsed && workspaceTop.length === 0 && (placement !== "primary" || primaryTop.length === 0);
+    layout.edgeBottom = !collapsed && workspaceBottom.length === 0 && (placement !== "primary" || primaryBottom.length === 0);
     layouts.set(region.key, layout);
   });
 
@@ -204,6 +231,7 @@ export function createWorkspaceLayout(
     layouts.set(region.key, {
       ...regionLayout({ display: "none" }),
       visible: false,
+      collapsed: false,
     });
   }
 

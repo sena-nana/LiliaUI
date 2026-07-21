@@ -54,6 +54,8 @@ import {
 
 Workspace 自身维护外边框、背景、阴影和裁切圆角。内部 Region 不生成独立 Card；实际可见 Region 改变后，外侧边缘和内部分隔线会重新计算。
 
+手动折叠（`collapsible` + `collapsed`）与 `hidden` 语义不同：`hidden` 将 Region 从网格中移除（无过渡），而手动折叠保留 Region 的网格轨道并将其尺寸过渡到 `0`，同时内容通过 opacity/transform 淡出，从而实现 `grid-template-columns` / `grid-template-rows` 的平滑插值动画。响应式 `narrowBehavior: "collapse"` 仍按视口阈值从布局中移除。折叠态 Region 不参与边缘与分隔线计算，几何订阅将其视为不可见。
+
 ## 官方预设
 
 | 组件 | 默认角色 | 默认位置 | HTML 语义 |

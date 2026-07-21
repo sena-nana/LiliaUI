@@ -37,11 +37,14 @@ export interface WorkspaceRegionRegistration {
   collapseBelow: ComputedRef<number | null>;
   responsivePriority: ComputedRef<number>;
   requestedVisible: ComputedRef<boolean>;
+  hidden: ComputedRef<boolean>;
+  collapsed: ComputedRef<boolean>;
 }
 
 export interface WorkspaceRegionLayout {
   style: CSSProperties;
   visible: boolean;
+  collapsed: boolean;
   overlay: boolean;
   separator: "inline" | "block" | null;
   edgeStart: boolean;
