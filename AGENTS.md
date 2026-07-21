@@ -7,7 +7,7 @@
 - 当前公共包边界:
   - `@lilia/ui`: Vue 组件、桌面壳、设置页、主题、全局 CSS、页面基础类和交互 composable。
   - `@lilia/config`: app 配置契约、同步逻辑、可继承 TS/Vite/VitePress 配置。
-  - `@lilia/tools`: 默认资源、模板检查、迁移和周边 CLI。
+  - `@lilia/tools`: 默认资源、模板检查和周边 CLI。
   - `@lilia/build`: dev/build/docs/Tauri/verify 流程封装。
   - `tauri-plugin-lilia`: Tauri 运行时公共边界,包含主窗口状态恢复、持久化和默认桌面窗口准备逻辑。
 
@@ -19,7 +19,7 @@
 - `@lilia/ui` 不创建 Vue App、Router、应用 Root、业务路由或设置路由;消费应用显式组合 Root、Shell、Hosts、命令、设置 model 和可选安装器。
 - 根入口只承载稳定常用组件;Shell、Settings、Runtime、Commands 和 Diagnostics 分别从明确 subpath 导入,禁止重新汇总到根入口。
 - `@lilia/config` 只负责配置读取、校验、同步和可继承配置;不承担 CLI 输出和流程编排。
-- `@lilia/tools` 负责面向项目的检查、资源复制、迁移和工具 CLI;不要放运行时 UI 状态。
+- `@lilia/tools` 负责面向项目的检查、资源复制和工具 CLI;不要放运行时 UI 状态。preset 与依赖来源的切换由消费应用自行管理,本仓库不提供自动迁移/切换工具。
 - `@lilia/build` 负责流程封装和跨平台命令执行;不要复制 `@lilia/config` 或 `@lilia/tools` 的业务逻辑。
 - `tauri-plugin-lilia` 负责 Rust/Tauri 运行时复用逻辑;不要把应用业务命令、业务状态或前端路由放进插件。
 - 包间运行时依赖优先用 peer dependency,并在 devDependency 用 `workspace:*` 支撑本仓库开发;消费端必须显式声明所需 `@lilia/*` 包。
@@ -38,7 +38,7 @@
 - 可由 Agent 定位和操作的稳定交互应提供 `data-agent-id`;命名应描述语义边界,不要绑定易变文案。
 - `@lilia/tools` 的 `doctor` / `template-check` 是消费仓库的边界报告来源;新增关键壳层目标时同步更新检查 profile。
 - `doctor` / `template-check` 默认只做最小公共检查;模板和应用在 `lilia.tools.profile.mjs` 声明自己的文件、Agent target 与入口,公共工具不得硬编码消费目录。
-- 迁移工具只能迁移通用结构、默认资源和公共配置;不要把消费仓库或 Lilia 应用专属业务协议带进默认模板。
+- `@lilia/tools` 不再提供 UI preset 切换或 Shell 迁移工具;消费应用按 [迁移边界](docs/ui-layers/migration.md) 自行切换到组合 Shell,不要把消费仓库或 Lilia 应用专属业务协议带进公共包。
 
 ## 验证
 

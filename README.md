@@ -12,7 +12,7 @@ LiliaUI 是 Lilia 桌面应用生态的公共 UI、配置、工具、构建与 T
 - [Workspace 性能基线](./docs/ui-layers/workspace-performance.md)
 - [版本、发布与 Changelog 策略](./docs/ui-layers/release.md)
 - [本次变更记录](./CHANGELOG.md)
-- [Preset 与现有应用迁移边界](./docs/ui-layers/migration.md)
+- [Preset 与应用迁移边界](./docs/ui-layers/migration.md)
 - [Contract、包导出与质量验证矩阵](./docs/ui-layers/verification.md)
 
 仓库级最低验证为：

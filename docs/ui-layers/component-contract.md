@@ -42,8 +42,8 @@
 1. 在新 API 可用后再标记旧 API deprecated，不做“先删除后迁移”。
 2. Changelog 记录替代入口、迁移示例、影响的 Layer 与计划移除版本。
 3. 至少跨一个兼容发布周期保留旧入口；0.x 阶段也不以“尚未 1.0”为由静默破坏。
-4. `ui-migrate --check` 能识别的弃用应进入结构化 `Contract incompatibilities`；无法安全转换的内容只报告，不强写。
-5. 移除前更新双 Layer 类型 fixture、包导出检查、迁移 fixture 与消费模板验证。
+4. 弃用应进入结构化 `Contract incompatibilities` 报告；无法安全转换的内容只报告，不强写。自动迁移工具已移除，由应用按 [迁移边界](./migration.md) 手动切换到组合 Shell。
+5. 移除前更新双 Layer 类型 fixture、包导出检查与消费模板验证。
 6. 真正移除只发生在显式 breaking release，并在 Changelog 的 `Contract breaking` 分类中列出。
 
 ## 变更 Contract 的评审问题

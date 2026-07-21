@@ -6,8 +6,8 @@ import type {
 } from "../../config/appShell";
 
 defineProps<{
-  links: SidebarFooterLink[];
-  statuses: SidebarFooterStatus[];
+  links: readonly SidebarFooterLink[];
+  statuses: readonly SidebarFooterStatus[];
 }>();
 </script>
 

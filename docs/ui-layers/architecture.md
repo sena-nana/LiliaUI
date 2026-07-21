@@ -39,7 +39,7 @@ nana-ui      ─X→ ui
 | `@lilia/ui-foundation` | 无视觉 primitive、共享 commands/settings、状态机 | 专业或消费视觉、业务页面 |
 | `@lilia/ui` | Professional 组件、Router-free Shell、Policy Provider、Settings、主题和诊断 | Nana 任务流程、应用业务 |
 | `@lilia/nana-ui` | Consumer 组件、Router-free Shell、Policy Provider、Settings、patterns、恢复反馈 | Professional Layer、应用业务协议 |
-| `@lilia/tools` | preset 状态、切换、迁移、事务与报告 | 自动判断业务信息架构 |
+| `@lilia/tools` | 默认资源、模板检查、迁移周边 CLI、license manifest | 自动判断业务信息架构、preset/来源自动切换 |
 
 ## Theme 与 UI Policy
 
@@ -68,6 +68,6 @@ UI Policy 回答“界面默认如何工作”，由 `UIPolicy` 明确注入：
 
 ## 所有权判断
 
-通用组件契约、primitive、主题、UI Policy Provider、Router-free Shell 与迁移工具属于本仓库。Vue App、Router、业务页面、业务 provider 协议、业务状态、导航信息架构和应用专属 Tauri 命令属于消费应用。
+通用组件契约、primitive、主题、UI Policy Provider、Router-free Shell 与组合 Shell 属于本仓库。Vue App、Router、业务页面、业务 provider 协议、业务状态、导航信息架构和应用专属 Tauri 命令属于消费应用。preset 与依赖来源的切换由消费应用自行管理；本仓库不再提供自动迁移/切换工具。
 
 相关文档：[Contract 与组件分类](./component-contract.md)、[Surface Material 与 Interaction State Layer](./surface-material.md)、[迁移边界](./migration.md)。

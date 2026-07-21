@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-07-21 — 删除迁移骨架并新增组合 Shell
+
+### Contract breaking
+
+- 移除 `lilia-tools ui-migrate`、`lilia-tools ui-preset` 子命令与 `@lilia/tools/ui-migrate`、`@lilia/tools/ui-preset` 公共导出;本仓库不再向消费仓库生成 `src/ui/LegacyShell.vue` / `src/ui/legacy-shell.ts`,也不再重新导出 `LegacyAppShell` / `LiliaDesktopShell` / `NanaAppShell` / `NanaDesktopShell` 旧名字。preset 与依赖来源的切换由消费应用自行管理。
+- 删除 `tests/tools/uiMigration.test.mjs`、`tests/tools/uiPreset.test.mjs`、`tests/tools/uiTransaction.test.mjs`、`tests/tools/uiFixture.mjs` 与聚合入口 `tests/ui-tools.test.mjs`。
+
+### Lilia Layer
+
+- 新增 Router-free 组合 Shell `LiliaDesktopShell`(`@lilia/ui/shell`),内部组合 `LiliaAppShell` + `LiliaWorkspace` + `LiliaSectionNavigation`(导航 + `SidebarFooter`)+ `LiliaPrimaryContent` + 可选 `LiliaBottomPanel` / `LiliaInspector`,消费端把 `<RouterView />` 放进默认槽即可,无需手动拼 Region。
+
+### Nana Layer
+
+- 新增 Router-free 组合 Shell `NanaDesktopShell`(`@lilia/nana-ui/shell`),内部组合 `NanaAppShell` + `NanaSidebar` + 主区 + 可选 context/status,作为被删除的 Nana legacy scaffold 的公共包内替代品,Router 仍由消费端持有且不重新导出旧名字。
+
+### Validation and performance
+
+- 新增 `tests/ui/desktopShell.test.ts` 覆盖两个组合 Shell 的 Region 组合、Router-free 边界、header slot 透传与 sidebar 受控事件;`tests/ui/publicEntrypoints.test.ts` 补充两个新组件的 subpath 导出断言。
+
+### Tooling and migration
+
+- `packages/tools/bin/lilia-tools.mjs` 移除 `ui-preset` / `ui-migrate` 分发分支;`packages/tools/package.json` 移除对应 exports 与 typecheck 范围。迁移文档改为指向组合 Shell 的手动迁移路径。
+
 ## 2026-07-19 — 旧 Shell 自动迁移
 
 ### Tooling and migration

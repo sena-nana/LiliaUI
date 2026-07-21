@@ -13,7 +13,7 @@
 | `@lilia/ui/layouts` | Workspace、Region、布局预设与 geometry 订阅 |
 | `@lilia/ui/preset/definition` | 不加载任何 Shell 的 Lilia preset 元数据与默认 policy |
 | `@lilia/ui/provider` | Lilia Policy Provider 与 context |
-| `@lilia/ui/shell` | Router-free LiliaAppShell 与可组合 Sidebar 能力 |
+| `@lilia/ui/shell` | Router-free LiliaAppShell、组合 LiliaDesktopShell 与可组合 Sidebar 能力 |
 | `@lilia/ui/shell/app` | LiliaAppShell |
 | `@lilia/ui/shell/sidebar` | 可组合 Sidebar frame、row 与 footer |
 | `@lilia/ui/shell/config` | Shell 配置、元数据与图标解析 |
@@ -25,7 +25,7 @@
 | `@lilia/ui/diagnostics` | 显式加载的 Agent Debug 与性能诊断 |
 | `@lilia/nana-ui/preset/definition` | 不加载 Shell 的 Nana preset 元数据与默认 policy |
 | `@lilia/nana-ui/provider` | Nana Policy Provider 与 context |
-| `@lilia/nana-ui/shell` | Router-free NanaAppShell 与可组合 NanaSidebar |
+| `@lilia/nana-ui/shell` | Router-free NanaAppShell、组合 NanaDesktopShell 与分组 NanaSidebar |
 
 历史 `components/<name>`、`composables/<name>` 与 `layouts/PopupShell` 只对已经公开的确定路径保留显式兼容映射；不再允许通配路径。新代码使用上表中的职责入口。
 
@@ -42,13 +42,13 @@ LiliaTemplate 迁移后的生产构建报告为 CSS `42,755 / 42,890` bytes、4 
 | 入口 | 稳定职责 |
 | --- | --- |
 | `@lilia/nana-ui` | Nana Contract 通用组件与 Provider |
-| `@lilia/nana-ui/shell` | NanaAppShell、NanaTitleBar 与分组 NanaSidebar |
+| `@lilia/nana-ui/shell` | NanaAppShell、NanaDesktopShell、NanaTitleBar 与分组 NanaSidebar |
 | `@lilia/nana-ui/settings` | Settings model、Tab 页面、外观与关于区块 |
 | `@lilia/nana-ui/runtime` | 浏览器安全的 Native Appearance adapter 契约 |
 | `@lilia/nana-ui/runtime/tauri` | 复用 tauri-plugin-lilia backdrop 命令的 Tauri adapter |
 | `@lilia/nana-ui/diagnostics` | 与视觉 Layer 无关的 Agent Debug harness |
 
-应用通过 `ui-preset` 生成的本地 facade 使用上述入口；业务代码不得直接混用 Nana 与 Professional Layer。
+应用通过本地 `src/ui` facade 使用上述入口；preset 与依赖来源的切换由应用自行管理，业务代码不得直接混用 Nana 与 Professional Layer。
 
 ## Contract 审计结果
 
