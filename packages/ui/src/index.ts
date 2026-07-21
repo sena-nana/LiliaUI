@@ -39,7 +39,6 @@ export { default as Tabs, default as UiTabs } from "./components/UiTabs.vue";
 export { default as Textarea, default as UiTextarea } from "./components/UiTextarea.vue";
 export { default as Toast, default as UiToast } from "./components/UiToast.vue";
 export { default as UiValidationMessage, default as ValidationMessage } from "./components/UiValidationMessage.vue";
-export { default as ViewTabs } from "./components/ViewTabs.vue";
 export {
   default as LiliaSidebarRow,
   type LiliaSidebarRowProps,

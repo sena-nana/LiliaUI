@@ -16,7 +16,6 @@ import {
   UiSpinner,
   UiSwitch,
   UiTextarea,
-  ViewTabs,
   type UiSegmentedOption,
   type UiSelectOption,
 } from "@lilia/ui";
@@ -283,16 +282,5 @@ describe("common UI components", () => {
     await fireEvent.click(sectionToggle);
     expect(sectionToggle).toHaveAttribute("aria-expanded", "false");
     expect(row).not.toBeVisible();
-  });
-
-  it("renders shared view tabs with the active tab exposed", () => {
-    render(defineComponent({
-      components: { ViewTabs },
-      template: `<ViewTabs active="overview" />`,
-    }));
-
-    expect(screen.getByRole("tab", { name: "概览" })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByRole("tab", { name: "看板" })).toBeDisabled();
-    expect(screen.getByRole("tab", { name: "Todo" })).toBeDisabled();
   });
 });

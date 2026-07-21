@@ -2,12 +2,12 @@ import {
   NanaProgress,
   NanaToast,
 } from "@lilia/nana-ui";
+import { OperationalStatus } from "@lilia/nana-ui/feedback";
 import {
-  OperationalStatus,
   OperationResult,
   RecoveryError,
   UndoableActionNotice,
-} from "@lilia/nana-ui/feedback";
+} from "@lilia/nana-ui/consumer";
 import { h } from "vue";
 import type { ComponentPerfScenario } from "../../componentScenarios";
 import { click } from "./helpers";

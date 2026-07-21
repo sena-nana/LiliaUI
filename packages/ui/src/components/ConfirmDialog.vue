@@ -1,9 +1,11 @@
 <script setup lang="ts">
+/**
+ * 预设确认对话框：danger/secondary/busy 变体，初始焦点随 danger 切换到取消或确认按钮。
+ * 基于 `UiDialog`；需要完全自定义内容/页脚时直接使用 `UiDialog`。
+ */
 import AlertTriangle from "@lucide/vue/dist/esm/icons/triangle-alert.mjs";
-import { useDialogPrimitive } from "@lilia/ui-foundation/dialog";
-import { ref, watch } from "vue";
-import { useOverlayPresence } from "../composables/useOverlayActivity";
 import UiButton from "./UiButton.vue";
+import UiDialog from "./UiDialog.vue";
 
 const props = withDefaults(defineProps<{
   open: boolean;
@@ -17,7 +19,6 @@ const props = withDefaults(defineProps<{
   busyText?: string;
 }>(), {
   confirmText: "确认",
-  secondaryText: undefined,
   cancelText: "取消",
   danger: false,
   busy: false,
@@ -30,195 +31,76 @@ const emit = defineEmits<{
   cancel: [];
 }>();
 
-const overlay = ref<HTMLElement | null>(null);
-const overlayPresence = useOverlayPresence();
-
 function cancel() {
   if (props.busy) return;
   emit("cancel");
 }
 
-const dialog = useDialogPrimitive(
-  {
-    get open() { return props.open; },
-    closeOnEscape: true,
-    closeOnOutside: true,
-    initialFocus: "first-action",
-  },
-  overlay,
-  cancel,
-  () => overlay.value?.querySelector<HTMLButtonElement>(
-    `[data-agent-id="${props.danger ? "confirm-dialog.cancel" : "confirm-dialog.confirm"}"]:not(:disabled)`,
-  ) ?? null,
-);
-
-watch(() => props.busy, (busy, wasBusy) => {
-  if (!props.open || !wasBusy || busy) return;
-  overlay.value?.querySelector<HTMLButtonElement>(
-    `[data-agent-id="${props.danger ? "confirm-dialog.cancel" : "confirm-dialog.confirm"}"]:not(:disabled)`,
-  )?.focus();
-});
-
-watch(() => props.open, (open) => {
-  if (open) overlayPresence.activate();
-}, { immediate: true });
-
-function onAfterLeave() {
-  if (!props.open) overlayPresence.deactivate();
-}
+const focusTargetAgentId = () => (props.danger ? "confirm-dialog.cancel" : "confirm-dialog.confirm");
 </script>
 
 <template>
-  <Teleport to="body">
-    <Transition name="modal" @after-leave="onAfterLeave">
-      <div
-        v-if="open"
-        ref="overlay"
-        class="modal-overlay"
-        data-lilia-surface-mode="translucent"
-        data-lilia-backdrop="css-blur"
-        data-lilia-surface-level="overlay"
-        data-lilia-surface-boundary
-        role="dialog"
-        aria-modal="true"
-        :aria-label="title"
-        data-agent-id="confirm-dialog"
-        tabindex="-1"
-        @click="dialog.onOutsidePointer"
-        @keydown="dialog.onKeydown"
+  <UiDialog
+    :open="open"
+    :title="title"
+    agent-id="confirm-dialog"
+    close-hidden
+    :close-disabled="busy"
+    :initial-focus-agent-id="focusTargetAgentId()"
+    @close="cancel"
+  >
+    <p class="confirm-dialog__message">{{ message }}</p>
+    <template #title>
+      <span class="confirm-dialog__title" :class="{ 'confirm-dialog__title--danger': danger }">
+        <AlertTriangle v-if="danger" :size="14" aria-hidden="true" />
+        <span>{{ title }}</span>
+      </span>
+    </template>
+    <template #footer>
+      <UiButton
+        variant="ghost"
+        :disabled="busy"
+        agent-id="confirm-dialog.cancel"
+        @click="cancel"
       >
-        <div class="modal-card dialog-card" data-lilia-surface-mode="solid" data-lilia-backdrop="none" data-lilia-surface-level="floating" data-lilia-surface-boundary>
-          <div class="dialog-card__header" :class="{ 'dialog-card__header--danger': danger }">
-            <AlertTriangle v-if="danger" :size="14" aria-hidden="true" />
-            <span>{{ title }}</span>
-          </div>
-          <div class="dialog-card__body">
-            <p>{{ message }}</p>
-          </div>
-          <div class="dialog-card__actions">
-            <UiButton
-              variant="ghost"
-              :disabled="busy"
-              agent-id="confirm-dialog.cancel"
-              @click="cancel"
-            >
-              {{ cancelText }}
-            </UiButton>
-            <UiButton
-              v-if="secondaryText"
-              variant="ghost"
-              :disabled="busy"
-              agent-id="confirm-dialog.secondary"
-              @click="emit('secondary')"
-            >
-              {{ secondaryText }}
-            </UiButton>
-            <UiButton
-              :variant="danger ? 'danger' : 'primary'"
-              :busy="busy"
-              agent-id="confirm-dialog.confirm"
-              @click="emit('confirm')"
-            >
-              {{ busy ? busyText : confirmText }}
-            </UiButton>
-          </div>
-        </div>
-      </div>
-    </Transition>
-  </Teleport>
+        {{ cancelText }}
+      </UiButton>
+      <UiButton
+        v-if="secondaryText"
+        variant="ghost"
+        :disabled="busy"
+        agent-id="confirm-dialog.secondary"
+        @click="emit('secondary')"
+      >
+        {{ secondaryText }}
+      </UiButton>
+      <UiButton
+        :variant="danger ? 'danger' : 'primary'"
+        :busy="busy"
+        agent-id="confirm-dialog.confirm"
+        @click="emit('confirm')"
+      >
+        {{ busy ? busyText : confirmText }}
+      </UiButton>
+    </template>
+  </UiDialog>
 </template>
 
 <style scoped>
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-dialog);
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 12vh;
-  background: var(--scrim);
-  --lilia-surface-css-blur: 2px;
-}
-
-.modal-card {
-  width: min(520px, 92vw);
-  max-height: 72vh;
-  overflow: hidden;
-  background: var(--bg-elev);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-dialog);
-}
-
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.16s ease;
-}
-
-.modal-enter-active .modal-card,
-.modal-leave-active .modal-card {
-  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
-    opacity 0.16s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
-.modal-enter-from .modal-card,
-.modal-leave-to .modal-card {
-  opacity: 0;
-  transform: translateY(-8px) scale(0.98);
-}
-
-.dialog-card {
-  display: flex;
-  flex-direction: column;
-}
-
-.dialog-card__header {
-  display: flex;
+.confirm-dialog__title {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 14px 16px 8px;
-  font-weight: 600;
 }
 
-.dialog-card__header--danger {
+.confirm-dialog__title--danger {
   color: var(--err);
 }
 
-.dialog-card__body {
-  padding: 4px 16px 12px;
-}
-
-.dialog-card__body p {
+.confirm-dialog__message {
   margin: 0;
   color: var(--text);
   font-size: 13px;
   line-height: 1.5;
-}
-
-.dialog-card__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 0 16px 14px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .modal-enter-active,
-  .modal-leave-active,
-  .modal-enter-active .modal-card,
-  .modal-leave-active .modal-card {
-    transition: none;
-  }
-
-  .modal-enter-from .modal-card,
-  .modal-leave-to .modal-card {
-    transform: none;
-  }
 }
 </style>

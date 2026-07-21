@@ -34,7 +34,7 @@ export const UI_LAYER_SUBPATHS = Object.freeze({
     "/utils/textSegments",
   ]),
   nana: Object.freeze([
-    "", "/consumer", "/expressive", "/feedback", "/lazy", "/patterns",
+    "", "/consumer", "/feedback", "/lazy", "/patterns",
     "/commands", "/diagnostics", "/preset", "/preset/definition", "/provider", "/runtime", "/runtime/tauri",
     "/settings", "/shell", "/state",
     "/styles.css", "/styles/state-layer.css", "/theme/base.css", "/theme/tokens.css",

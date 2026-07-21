@@ -12,7 +12,7 @@ export {
   setNativeAppearanceAdapter,
   type NativeAppearanceAdapter,
   type NativeBackdropRequest,
-} from "./runtime/nativeAppearanceAdapter";
+} from "@lilia/ui-foundation/native-appearance";
 
 const contextMenuApps = new WeakSet<App>();
 

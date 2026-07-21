@@ -20,6 +20,7 @@
     "./surface": "./src/surface.ts",
     "./theme": "./src/useThemeSync.ts",
     "./native-appearance": "./src/nativeAppearance.ts",
+    "./tauri": "./src/tauri.ts",
     "./window-controls": "./src/useTauriWindowControls.ts",
     "./tooltip": "./src/useTooltipPrimitive.ts"
   },

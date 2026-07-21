@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * 全局右键上下文菜单宿主：监听 `openContextMenuAt` 调度并渲染锚定菜单与子菜单。
+ * 需要显式坐标触发的 action 列表改用 `AnchoredActionMenu`；基于值的选择改用 `Dropdown`。
+ */
 import { computed, ref, watch } from "vue";
 import {
   finalizeClosedContextMenu,

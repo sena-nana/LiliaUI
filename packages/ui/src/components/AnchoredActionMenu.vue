@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * 坐标锚定的通用 action 菜单容器，用于工具栏溢出、显式坐标触发等场景。
+ * 右键上下文菜单改用 `ContextMenuHost`；基于值的单/多选改用 `Dropdown` 或 `UiSelect`。
+ */
 import { computed, watch } from "vue";
 import {
   SB_MENU_POP_TRANSITION_MS,

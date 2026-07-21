@@ -7,7 +7,6 @@
     "./commands": "./src/commands.ts",
     "./diagnostics": "./src/diagnostics.ts",
     "./consumer": "./src/consumer/index.ts",
-    "./expressive": "./src/expressive/index.ts",
     "./feedback": "./src/feedback/index.ts",
     "./lazy": "./src/lazy.ts",
     "./patterns": "./src/patterns/index.ts",

@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * 通用模态对话框：标题/描述/正文/页脚 slot，支持 ESC、外部点击关闭与焦点陷阱。
+ * 危险或带 busy 态的确认场景改用 `ConfirmDialog`（基于此组件的预设变体）。
+ */
 import X from "@lucide/vue/dist/esm/icons/x.mjs";
 import type { DialogProps, OpenStateEmits } from "@lilia/ui-contract";
 import { useDialogPrimitive } from "@lilia/ui-foundation/dialog";
@@ -6,7 +10,7 @@ import { ref, watch } from "vue";
 import { useOverlayPresence } from "../composables/useOverlayActivity";
 import "./overlay.css";
 
-const props = withDefaults(defineProps<DialogProps>(), {
+const props = withDefaults(defineProps<DialogProps & { closeHidden?: boolean; initialFocusAgentId?: string }>(), {
   description: undefined,
   size: "default",
   closeOnEscape: true,
@@ -14,8 +18,10 @@ const props = withDefaults(defineProps<DialogProps>(), {
   closeDisabled: false,
   closeAgentId: undefined,
   closeLabel: "关闭",
+  closeHidden: false,
   initialFocus: "first-action",
   agentId: undefined,
+  initialFocusAgentId: undefined,
 });
 const emit = defineEmits<OpenStateEmits>();
 const overlay = ref<HTMLElement | null>(null);
@@ -27,7 +33,14 @@ function close() {
   emit("close");
 }
 
-const dialog = useDialogPrimitive(props, overlay, close);
+const dialog = useDialogPrimitive(props, overlay, close, () => {
+  if (props.initialFocusAgentId) {
+    return overlay.value?.querySelector<HTMLElement>(
+      `[data-agent-id="${props.initialFocusAgentId}"]:not(:disabled)`,
+    ) ?? null;
+  }
+  return null;
+});
 
 watch(() => props.open, (open) => {
   if (open) overlayPresence.activate();
@@ -60,6 +73,7 @@ function onAfterLeave() {
               <p v-if="description" class="ui-overlay__description">{{ description }}</p>
             </div>
             <button
+              v-if="!closeHidden"
               class="ui-overlay__close"
               type="button"
               :aria-label="closeLabel"

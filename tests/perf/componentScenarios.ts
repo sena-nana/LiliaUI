@@ -26,7 +26,6 @@ import {
   UiSwitch,
   UiTextarea,
   buildCalendarHeatmapModel,
-  ViewTabs,
 } from "@lilia/ui";
 import ContextMenuHost from "@lilia/ui/components/ContextMenuHost";
 import OverlayHost from "@lilia/ui/components/OverlayHost";
@@ -825,9 +824,5 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
       agentId: "perf.textarea",
     }),
     interact: (root) => input(root, "[data-agent-id='perf.textarea']", "updated\ncontent"),
-  },
-  {
-    name: "ViewTabs",
-    render: (step) => h(ViewTabs, { active: step.value % 2 === 0 ? "overview" : "board" }),
   },
 ];
