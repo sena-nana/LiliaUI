@@ -23,6 +23,7 @@ yarn test:ui:browser
 | --- | --- | --- |
 | Contract 控件调用与 Professional aliases | `tests/ui/contractForms.test.ts`、`contractOverlays.test.ts`、`contractFeedbackSurfaces.test.ts` | 已有 |
 | Professional 既有入口兼容 | `tests/ui/publicEntrypoints.test.ts`、现有 `tests/ui/**` 行为测试 | 已有 |
+| 组合 Desktop Shell 的 Region 组合与 Router-free 边界 | `tests/ui/desktopShell.test.ts` | 已有 |
 | 双 Layer Shell/Provider/Settings 框架一致性 | `tests/ui/frameworkLayerConformance.test.ts` | 已有 |
 | Nana Provider/Policy 与基础组件 | `tests/ui/nana/providerComponents.test.ts` | 已有 |
 | Nana Overlay、Shell、Sidebar | `tests/ui/nana/overlayShell.test.ts` | 已有 |
@@ -30,9 +31,6 @@ yarn test:ui:browser
 | Nana 恢复、autosave、undo 状态机 | `tests/ui/nana/state.test.ts` | 已有 |
 | Nana 独立包、非法反向依赖 | `tests/nana-package.test.mjs` 的 manifest/import 检查 | 已有 |
 | Nana tree-shaking 与 lazy chunk | `tests/nana-package.test.mjs` 的 base-only/lazy build 场景 | 已有 |
-| preset/source 漂移、幂等与 dry-run | `tests/tools/uiPreset.test.mjs` | 已有 |
-| 非破坏迁移和 Contract stop | `tests/tools/uiMigration.test.mjs` | 已有 |
-| 原子回滚与脏树保护 | `tests/tools/uiTransaction.test.mjs` | 已有 |
 | app config 的 preset/layout/onboarding | `tests/config.test.mjs`、`tests/config-types.test.ts` | 已有 |
 | 组件性能回归 | `tests/perf/componentScenarios.ts`、拆分 Nana 场景与两套性能 baseline | 已有 |
 | 同一 shared fixture 分别编译 Lilia/Nana | `examples/contract-layers` 同源页面的双 typecheck/build | 已有 |

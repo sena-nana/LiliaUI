@@ -39,6 +39,7 @@ describe("public package entrypoints", () => {
     expect(presetDefinition.liliaPresetDefinition.id).toBe("lilia");
     expect(provider.LiliaUIProvider).toBeDefined();
     expect(shell.LiliaAppShell).toBeDefined();
+    expect(shell.LiliaDesktopShell).toBeDefined();
     expect(shellApp.LiliaAppShell).toBe(shell.LiliaAppShell);
     expect(shellConfig.setLiliaUiConfig).toBeTypeOf("function");
     expect(shellSidebar.LiliaSidebarFrame).toBeDefined();
@@ -66,6 +67,7 @@ describe("public package entrypoints", () => {
     ]);
     expect(shell.NanaTitleBar).toBeDefined();
     expect(shell.NanaAppShell).toBeDefined();
+    expect(shell.NanaDesktopShell).toBeDefined();
     expect(settings.NanaAppearanceSection).toBeDefined();
     expect(settings.NanaAboutSection).toBeDefined();
     expect(runtime.setNativeAppearanceAdapter).toBeTypeOf("function");

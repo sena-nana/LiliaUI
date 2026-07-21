@@ -127,17 +127,15 @@ Workspace 共享一个 `ResizeObserver`，并监听窗口与 `visualViewport` re
 
 ## 从旧 Shell 迁移
 
-`LiliaDesktopShell` 与 `LiliaShellOptions.mainSidebar` 已在双 Layer 框架统一的 breaking release 中移除。消费应用按以下步骤迁移：
+`LiliaDesktopShell` 与 `LiliaShellOptions.mainSidebar` 已在双 Layer 框架统一的 breaking release 中移除，并复活为 Router-free 组合 Shell。消费应用按以下步骤迁移：
 
 1. 将应用 Root、Router 与 settings provider 继续保留在应用仓库。
 2. 确认应用显式声明 `@lilia/ui` 的 `@lilia/ui-contract` 与 `@lilia/ui-foundation` peer，并让所有 `@lilia/*` Git workspace 依赖固定到同一 commit；本地验证时同时 link 这两个包。
-3. 用一个应用自有的布局组件组合 `LiliaAppShell` 和 `LiliaWorkspace`。
-4. 把旧主侧栏内容放入 `LiliaGlobalNavigation`、`LiliaSectionNavigation` 或普通 `LiliaWorkspaceRegion`。
+3. 典型"导航 + 主滚动区 + 底部/footer"布局直接使用 `LiliaDesktopShell`（`@lilia/ui/shell`）或 `NanaDesktopShell`（`@lilia/nana-ui/shell`），把 `<RouterView />` 放进默认槽，导航/footer 通过 props 传入。
+4. 需要非典型 Region 数量、跨列顶部工具栏或自定义响应式策略时，改用 `LiliaAppShell` + `LiliaWorkspace` + 各 Region 预设手动组合；把旧主侧栏内容放入 `LiliaGlobalNavigation`、`LiliaSectionNavigation` 或普通 `LiliaWorkspaceRegion`。
 5. 把页面 `RouterView` 放入 `LiliaPrimaryContent`；设置页也作为业务声明的 Region 组合，不再通过 Shell route meta 替换侧栏。
 6. 将侧栏宽度与折叠偏好改为 `v-model:size` / `v-model:collapsed`，由应用现有设置存储持久化。
-7. 删除消费端针对 `.shell__main`、`.secondary-panel`、`leftSidebar1/2` 等内部选择器的覆盖。
-8. 将应用 Root 直接切换为 `LiliaAppShell`，并确认 Shell 在未安装 Router 时也能独立挂载。
+7. 删除消费端针对 `.shell__main`、`.secondary-panel`、`leftSidebar1/2` 等内部选择器的覆盖，以及任何本地 `LegacyShell.vue` / `legacy-shell.ts` 残留。
+8. 将应用 Root 直接切换为 `LiliaDesktopShell` / `NanaDesktopShell`（或 `LiliaAppShell` / `NanaAppShell`），并确认 Shell 在未安装 Router 时也能独立挂载。
 
-现有应用可以先运行 `lilia-tools ui-migrate --check` 查看结构化 `legacyShellMigrations`，再用带 `--preset lilia` 或 `--preset nana` 的 dry-run/实际迁移生成消费端最小骨架。工具只把旧导入改到应用自己的 `src/ui/legacy-shell.ts`；生成的 `LegacyShell.vue` 持有 `RouterView`，公共 Layer 仍保持 Router-free。缺失的 `@lilia/ui-contract` 与 `@lilia/ui-foundation` 会按目标 Layer 的依赖来源和 commit 一并补齐。
-
-可运行示例位于 [`examples/workspace-regions`](../examples/workspace-regions)，同一页面覆盖 LiliaCode、LiliaGithub 与 Live2DEditor 三类典型组合，并用 `safeRect` 更新预览画布的 backing size。
+本仓库不再提供 `lilia-tools ui-migrate` / `lilia-tools ui-preset` 自动迁移或 preset 切换工具；preset 与依赖来源的切换由应用自行管理。可运行示例位于 [`examples/workspace-regions`](../examples/workspace-regions)，同一页面覆盖 LiliaCode、LiliaGithub 与 Live2DEditor 三类典型组合，并用 `safeRect` 更新预览画布的 backing size。
