@@ -4,6 +4,8 @@
 | --- | --- | --- | --- | --- |
 | `LiliaDesktopShell` / `LegacyAppShell.vue` | 已移除的 Router-owning 实现 | `LiliaAppShell` + `@lilia/ui/layouts` Workspace Regions | 已结束 | 当前 breaking release 已移除 |
 | `NanaDesktopShell`、旧 `NanaAppShell` navigation/context props | 已移除的 Router-owning 实现 | Router-free `NanaAppShell` + 应用组合 `NanaSidebar`/Router/pattern | 已结束 | 当前 breaking release 已移除 |
+| `useShellSidebar`、`@lilia/ui/styles/shell.css` | 已移除的 legacy `.shell` grid 编排 | `LiliaWorkspaceRegion` 的 `collapsible`/`v-model:collapsed`/`resizable` | 已结束 | 当前 breaking release 已移除 |
+| `LiliaUiConfig.sidebar.nav`/`groups`/`globalActions`/`topContent`/`navTitle`、`SIDEBAR_NAV`/`SIDEBAR_GROUPS`/`SIDEBAR_GLOBAL_ACTIONS`/`SIDEBAR_TOP_CONTENT`/`SIDEBAR_CONFIG` | 已移除的配置驱动侧栏 store（无渲染者） | 应用直接向 `LiliaSidebarNavRow`/`LiliaSidebarSection` 传入 `SidebarNavItem`，或用 Workspace Region 组合 | 已结束 | 当前 breaking release 已移除 |
 | `components/<name>`、`composables/<name>` 历史路径 | 显式兼容入口 | 职责 subpath，见 `public-api.md` | `0.2.x` | 最早 `0.3.0`，逐项 breaking changelog |
 | `Button` / `UiButton` 等双名称 | 长期 Contract alias | 无需迁移 | 长期保留 | 无计划移除 |
 | `createLiliaSettingsModel` / `createSettingsModel` 等双名称 | 长期 Layer alias | 无需迁移 | 长期保留 | 无计划移除 |

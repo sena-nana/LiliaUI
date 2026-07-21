@@ -625,6 +625,31 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
     },
   },
   {
+    name: "LiliaWorkspaceRegionCollapse",
+    covers: ["LiliaWorkspaceRegion"],
+    render: (step) => h(LiliaWorkspace, { ariaLabel: "Collapse workspace" }, {
+      default: () => [
+        h(LiliaResourcePanel, {
+          id: "perf-collapse-resources",
+          role: "resources",
+          collapsible: true,
+          collapsed: step.value % 2 === 0,
+          resizable: true,
+          size: 240,
+        }, () => h("div", "Resources")),
+        h(LiliaInspector, {
+          id: "perf-collapse-inspector",
+          role: "inspector",
+          collapsible: true,
+          collapsed: step.value % 2 === 1,
+          resizable: true,
+          size: 260,
+        }, () => h("div", "Inspector")),
+        h(LiliaPrimaryContent, { id: "perf-collapse-primary", role: "primary" }, () => h("div", `Editor ${step.value}`)),
+      ],
+    }),
+  },
+  {
     name: "LiliaSettingsPage",
     prepare: resetAppConfig,
     createPlugins: () => [createScenarioRouter("/settings?tab=appearance"), settingsPlugin],

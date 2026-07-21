@@ -6,21 +6,6 @@ export const testAppConfig = {
   version: "0.1.0",
   storageKeyPrefix: "lilia-ui-test",
   sidebar: {
-    navTitle: "导航",
-    nav: [
-      {
-        key: "overview",
-        to: "/",
-        label: "首页",
-        icon: "home",
-      },
-      {
-        key: "components",
-        to: "/components",
-        label: "组件",
-        icon: "puzzle",
-      },
-    ],
     footerLinks: [{ key: "settings", to: "/settings", label: "设置", icon: "settings" }],
     footerStatuses: [{
       key: "ready",

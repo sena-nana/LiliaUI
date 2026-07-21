@@ -12,6 +12,5 @@ export * from "./composables/useNativeWindowChrome";
 export * from "./composables/usePersistentState";
 export * from "./composables/useResizablePane";
 export * from "./composables/useRouteReturnTarget";
-export * from "./composables/useShellSidebar";
 export * from "./composables/useTauriWindowControls";
 export * from "./composables/useTheme";

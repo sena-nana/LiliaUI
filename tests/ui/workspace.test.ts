@@ -255,12 +255,14 @@ describe("Workspace Region layout", () => {
 
     await fireEvent.click(view.getByRole("button", { name: "resources" }));
     await nextTick();
-    expect(resources).toHaveAttribute("hidden");
+    expect(resources).toHaveAttribute("data-region-collapsed", "true");
+    expect(resources).not.toHaveAttribute("hidden");
     expect(region(view.container, "sections")).toHaveAttribute("data-edge-start", "true");
 
     await fireEvent.click(view.getByRole("button", { name: "inspector" }));
     await nextTick();
-    expect(region(view.container, "inspector")).toHaveAttribute("hidden");
+    expect(region(view.container, "inspector")).toHaveAttribute("data-region-collapsed", "true");
+    expect(region(view.container, "inspector")).not.toHaveAttribute("hidden");
     expect(region(view.container, "tools")).toHaveAttribute("data-edge-end", "true");
 
     await fireEvent.click(view.getByRole("button", { name: "inspector" }));
@@ -433,7 +435,8 @@ describe("Workspace Region layout", () => {
 
     await fireEvent.click(view.getByRole("button", { name: "toggle" }));
     await nextTick();
-    expect(resources).toHaveAttribute("hidden");
+    expect(resources).toHaveAttribute("data-region-collapsed", "true");
+    expect(resources).not.toHaveAttribute("hidden");
   });
 
   it("supports bounded fixed tracks, weighted fill tracks, and explicit overflow", async () => {
@@ -514,7 +517,8 @@ describe("Workspace Region layout", () => {
     expect(region(view.container, "uncontrolled")).not.toHaveAttribute("hidden");
     await fireEvent.click(view.getByRole("button", { name: "toggle uncontrolled" }));
     await nextTick();
-    expect(region(view.container, "uncontrolled")).toHaveAttribute("hidden");
+    expect(region(view.container, "uncontrolled")).toHaveAttribute("data-region-collapsed", "true");
+    expect(region(view.container, "uncontrolled")).not.toHaveAttribute("hidden");
 
     expect(region(view.container, "disabled")).not.toHaveAttribute("hidden");
     await fireEvent.click(view.getByRole("button", { name: "toggle disabled" }));

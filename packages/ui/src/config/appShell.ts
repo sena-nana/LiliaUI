@@ -1,4 +1,4 @@
-import { markRaw, reactive, shallowRef, type Component } from "vue";
+import { reactive, type Component } from "vue";
 import Bot from "@lucide/vue/dist/esm/icons/bot.mjs";
 import Brain from "@lucide/vue/dist/esm/icons/brain.mjs";
 import Download from "@lucide/vue/dist/esm/icons/download.mjs";
@@ -48,35 +48,6 @@ type IconName =
 
 export type IconInput = IconName | Component;
 
-export interface LiliaSidebarActionInput {
-  active?: boolean;
-  disabled?: boolean;
-  icon: IconInput;
-  key: string;
-  label: string;
-  onSelect?: () => void | Promise<void>;
-}
-
-export interface LiliaSidebarNavInput {
-  active?: boolean;
-  disabled?: boolean;
-  emphasis?: "default" | "muted";
-  icon: IconInput;
-  key: string;
-  label: string;
-  onSelect?: () => void | Promise<void>;
-  to?: string;
-  tools?: LiliaSidebarActionInput[];
-}
-
-export interface LiliaSidebarGroupInput {
-  emptyText?: string;
-  items?: LiliaSidebarNavInput[];
-  key: string;
-  title: string;
-  tools?: LiliaSidebarActionInput[];
-}
-
 export interface LiliaSidebarFooterLinkInput {
   icon: IconInput;
   key: string;
@@ -95,18 +66,8 @@ export interface LiliaSidebarFooterStatusInput {
 }
 
 export interface LiliaSidebarConfigInput {
-  collapsedStorageKey?: string;
-  defaultWidth?: number;
   footerLinks?: LiliaSidebarFooterLinkInput[];
   footerStatuses?: LiliaSidebarFooterStatusInput[];
-  globalActions?: LiliaSidebarActionInput[];
-  groups?: LiliaSidebarGroupInput[];
-  maxWidth?: number;
-  minWidth?: number;
-  nav?: LiliaSidebarNavInput[];
-  navTitle?: string;
-  topContent?: Component;
-  widthStorageKey?: string;
 }
 
 export type NativePlatform = "macos" | "windows" | "linux";
@@ -141,15 +102,6 @@ export const APP_METADATA = reactive({
   storageKeyPrefix: "lilia-app",
 });
 
-export const SIDEBAR_CONFIG = reactive({
-  widthStorageKey: "lilia-app.sidebarWidth",
-  collapsedStorageKey: "lilia-app.sidebarCollapsed",
-  minWidth: 180,
-  maxWidth: 480,
-  defaultWidth: 220,
-  navTitle: "",
-});
-
 export interface SidebarActionItem {
   active?: boolean;
   disabled?: boolean;
@@ -176,14 +128,6 @@ export interface SidebarNavItem {
   label: string;
   onSelect?: () => void | Promise<void>;
   to?: string;
-  tools?: SidebarActionItem[];
-}
-
-export interface SidebarGroup {
-  emptyText?: string;
-  items?: SidebarNavItem[];
-  key: string;
-  title: string;
   tools?: SidebarActionItem[];
 }
 
@@ -229,10 +173,6 @@ const lucideIcons = {
   workflow: Workflow,
 } satisfies Record<IconName, Component>;
 
-export const SIDEBAR_GLOBAL_ACTIONS = reactive<SidebarActionItem[]>([]);
-export const SIDEBAR_NAV = reactive<SidebarNavItem[]>([]);
-export const SIDEBAR_GROUPS = reactive<SidebarGroup[]>([]);
-export const SIDEBAR_TOP_CONTENT = shallowRef<Component | null>(null);
 export const SIDEBAR_FOOTER_LINKS = reactive<SidebarFooterLink[]>([]);
 export const SIDEBAR_FOOTER_STATUSES = reactive<SidebarFooterStatus[]>([]);
 
@@ -251,21 +191,6 @@ function resolveLazyLucideIcon(icon: IconName): Component {
   return lucideIcons[icon];
 }
 
-function resolveAction(action: LiliaSidebarActionInput): SidebarActionItem {
-  return {
-    ...action,
-    icon: resolveLiliaIcon(action.icon),
-  };
-}
-
-function resolveNav(item: LiliaSidebarNavInput): SidebarNavItem {
-  return {
-    ...item,
-    icon: resolveLiliaIcon(item.icon),
-    tools: item.tools?.map(resolveAction),
-  };
-}
-
 function replaceArray<T>(target: T[], next: T[]) {
   target.splice(0, target.length, ...next);
 }
@@ -278,26 +203,6 @@ export function setLiliaUiConfig(config: LiliaUiConfig) {
   APP_METADATA.storageKeyPrefix = config.storageKeyPrefix;
 
   const sidebar = config.sidebar ?? {};
-  Object.assign(SIDEBAR_CONFIG, {
-    widthStorageKey: sidebar.widthStorageKey ?? `${config.storageKeyPrefix}.sidebarWidth`,
-    collapsedStorageKey: sidebar.collapsedStorageKey ?? `${config.storageKeyPrefix}.sidebarCollapsed`,
-    minWidth: sidebar.minWidth ?? 180,
-    maxWidth: sidebar.maxWidth ?? 480,
-    defaultWidth: sidebar.defaultWidth ?? 220,
-    navTitle: sidebar.navTitle ?? "",
-  });
-
-  replaceArray(SIDEBAR_GLOBAL_ACTIONS, (sidebar.globalActions ?? []).map(resolveAction));
-  SIDEBAR_TOP_CONTENT.value = sidebar.topContent ? markRaw(sidebar.topContent) : null;
-  replaceArray(SIDEBAR_NAV, (sidebar.nav ?? []).map(resolveNav));
-  replaceArray(
-    SIDEBAR_GROUPS,
-    (sidebar.groups ?? []).map((group) => ({
-      ...group,
-      items: group.items?.map(resolveNav),
-      tools: group.tools?.map(resolveAction),
-    })),
-  );
   replaceArray(
     SIDEBAR_FOOTER_LINKS,
     (sidebar.footerLinks ?? []).map((link) => ({

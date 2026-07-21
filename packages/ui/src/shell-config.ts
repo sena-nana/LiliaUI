@@ -1,12 +1,7 @@
 export {
   APP_METADATA,
-  SIDEBAR_CONFIG,
   SIDEBAR_FOOTER_LINKS,
   SIDEBAR_FOOTER_STATUSES,
-  SIDEBAR_GLOBAL_ACTIONS,
-  SIDEBAR_GROUPS,
-  SIDEBAR_NAV,
-  SIDEBAR_TOP_CONTENT,
   getLiliaUiConfig,
   resolveLiliaIcon,
   setLiliaUiConfig,
@@ -22,7 +17,6 @@ export {
   type SidebarActionItem,
   type SidebarFooterLink,
   type SidebarFooterStatus,
-  type SidebarGroup,
   type SidebarNavItem,
 } from "./config/appShell";
 export {
