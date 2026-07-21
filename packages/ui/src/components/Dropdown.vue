@@ -1,9 +1,13 @@
 <script setup lang="ts" generic="T extends string | number">
+/**
+ * 自定义锚定选择菜单：支持单/多选、图标、hint 与 `v-model`。
+ * 仅需原生表单语义的单选场景改用 `UiSelect`；需要坐标触发的 action 列表改用 `AnchoredActionMenu`。
+ */
 import { computed, ref, watch } from "vue";
 import ChevronDown from "@lucide/vue/dist/esm/icons/chevron-down.mjs";
 import { SB_MENU_POP_TRANSITION_MS } from "../composables/menuMotion";
 import { useAnchoredMenuMotion } from "../composables/useAnchoredMenuMotion";
-import { useDismissableOverlay } from "../composables/useDismissableOverlay";
+import { useDismissableLayer } from "@lilia/ui-foundation/overlay";
 import { useOverlayPresence } from "../composables/useOverlayActivity";
 import "./action-menu.css";
 
@@ -105,12 +109,13 @@ function isSelected(option: Option) {
     : option.value === props.modelValue;
 }
 
-useDismissableOverlay({
+useDismissableLayer({
   open,
   closeOnOutside: true,
   closeOnEscape: true,
   containsTarget: menuMotion.containsTarget,
-  onDismiss: () => {
+  stopEscapePropagation: true,
+  close: () => {
     open.value = false;
   },
 });

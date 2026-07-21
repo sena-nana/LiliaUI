@@ -1,4 +1,8 @@
 <script setup lang="ts" generic="T extends string | number">
+/**
+ * 原生 `<select>` 表单选择器：单选、可访问、可被表单原生提交流程识别。
+ * 需要多选、图标、hint、自定义锚定菜单时改用 `Dropdown`。
+ */
 import type { SelectEmits, SelectOption, SelectProps, UIControlSize } from "@lilia/ui-contract";
 
 export type UiSelectOption<T extends string | number = string | number> = SelectOption<T>;

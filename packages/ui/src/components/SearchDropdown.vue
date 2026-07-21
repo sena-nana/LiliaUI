@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, watch, type ComponentPublicInstance } from "vue";
 import { useAnchoredOverlay } from "../composables/useAnchoredOverlay";
-import { useDismissableOverlay } from "../composables/useDismissableOverlay";
+import { useDismissableLayer } from "@lilia/ui-foundation/overlay";
 import { useOverlayPresence } from "../composables/useOverlayActivity";
 import {
   highlightQuerySegments as createQuerySegments,
@@ -81,12 +81,13 @@ function highlightQuerySegments(text: string, query = props.modelValue) {
   return createQuerySegments(text, query);
 }
 
-useDismissableOverlay({
+useDismissableLayer({
   open: openState,
   closeOnOutside: computed(() => props.closeOnOutside),
   closeOnEscape: computed(() => props.closeOnEscape),
   containsTarget,
-  onDismiss: () => {
+  stopEscapePropagation: true,
+  close: () => {
     emit("update:open", false);
   },
 });

@@ -21,8 +21,7 @@ describe("@lilia/ui package exports", () => {
   it("rejects undeclared internal files", () => {
     for (const specifier of [
       "@lilia/ui/components/UiButton",
-      "@lilia/ui/composables/useDismissableOverlay",
-      "@lilia/ui/layouts/SecondaryPanel",
+      "@lilia/ui/composables/useOverlayActivity",
       "@lilia/ui/pages/SettingsPage",
     ]) {
       expect(() => require.resolve(specifier)).toThrow(/not defined by "exports"|Package subpath/);

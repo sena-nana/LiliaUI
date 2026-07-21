@@ -3,7 +3,7 @@ import {
   createAnchoredMenuPosition,
   type AnchoredMenuPosition,
 } from "./menuMotion";
-import { useDismissableOverlay } from "./useDismissableOverlay";
+import { useDismissableLayer } from "@lilia/ui-foundation/overlay";
 
 const MENU_SELECTOR = ".sb-menu";
 
@@ -30,12 +30,13 @@ export function useAnchoredActionMenu() {
     return Boolean(element?.closest?.(MENU_SELECTOR));
   }
 
-  useDismissableOverlay({
+  useDismissableLayer({
     open,
     closeOnOutside: true,
     closeOnEscape: true,
     containsTarget: containsMenuTarget,
-    onDismiss: close,
+    stopEscapePropagation: true,
+    close,
   });
 
   return {

@@ -10,7 +10,6 @@ import * as publicUiSettingsExports from "../../packages/ui/src/settings/index";
 import * as publicUiShellExports from "../../packages/ui/src/shell";
 import * as publicNanaExports from "../../packages/nana-ui/src/index";
 import * as publicNanaConsumerExports from "../../packages/nana-ui/src/consumer/index";
-import * as publicNanaExpressiveExports from "../../packages/nana-ui/src/expressive/index";
 import * as publicNanaFeedbackExports from "../../packages/nana-ui/src/feedback/index";
 import * as publicNanaPatternExports from "../../packages/nana-ui/src/patterns/index";
 import * as publicNanaProviderExports from "../../packages/nana-ui/src/provider/index";
@@ -77,7 +76,6 @@ describe("component performance scenarios", () => {
       ...missingScenarios(publicUiShellExports, coveredNames),
       ...missingScenarios(publicNanaExports, coveredNames),
       ...missingScenarios(publicNanaConsumerExports, coveredNames),
-      ...missingScenarios(publicNanaExpressiveExports, coveredNames),
       ...missingScenarios(publicNanaFeedbackExports, coveredNames),
       ...missingScenarios(publicNanaPatternExports, coveredNames),
       ...missingScenarios(publicNanaProviderExports, coveredNames),

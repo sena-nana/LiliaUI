@@ -5,7 +5,6 @@ export * from "./composables/useAnchoredOverlay";
 export * from "./composables/useComponentEpoch";
 export * from "./composables/useContextMenu";
 export * from "./composables/useCornerStyle";
-export * from "./composables/useDismissableOverlay";
 export * from "./composables/useFocusOnActivation";
 export * from "./composables/useGlobalScrollbarVisibility";
 export * from "./composables/useNativeAppearance";

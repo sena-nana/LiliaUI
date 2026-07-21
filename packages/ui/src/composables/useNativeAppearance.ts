@@ -7,7 +7,7 @@ import {
   type NativePlatform,
 } from "../config/appShell";
 import { useTheme } from "./useTheme";
-import { getNativeAppearanceAdapter } from "../runtime/nativeAppearanceAdapter";
+import { getNativeAppearanceAdapter } from "@lilia/ui-foundation/native-appearance";
 
 export interface NativeAppearanceSettings {
   backdropMode: BackdropMode;

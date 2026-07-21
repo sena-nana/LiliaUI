@@ -1436,8 +1436,8 @@
     },
     "ConfirmDialog": {
       "domNodes": {
-        "median": 16,
-        "p95": 16
+        "median": 19,
+        "p95": 19
       },
       "interaction": {
         "median": 0.454,
@@ -2202,28 +2202,6 @@
       "update": {
         "median": 0.068,
         "p95": 0.081
-      }
-    },
-    "ViewTabs": {
-      "domNodes": {
-        "median": 19,
-        "p95": 19
-      },
-      "interaction": {
-        "median": 0,
-        "p95": 0
-      },
-      "mount": {
-        "median": 0.553,
-        "p95": 0.576
-      },
-      "unmount": {
-        "median": 0.034,
-        "p95": 0.038
-      },
-      "update": {
-        "median": 0.06,
-        "p95": 0.076
       }
     }
   },
