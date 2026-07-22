@@ -30,13 +30,9 @@ watch(() => props.modelValue, (value) => {
 });
 
 const progressPercent = computed(() => {
-  const min = Number(props.min);
-  const max = Number(props.max);
-  const span = max - min;
-  if (!Number.isFinite(span) || span <= 0) return 0;
-  const value = Number(displayValue.value);
-  const clamped = Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
-  return ((clamped - min) / span) * 100;
+  const span = Number(props.max) - Number(props.min);
+  if (!(span > 0)) return 0;
+  return ((Number(displayValue.value) - Number(props.min)) / span) * 100;
 });
 
 function endInteraction() {
@@ -55,10 +51,7 @@ function onInput(event: Event) {
 <template>
   <div
     class="ui-range-field"
-    :class="[
-      `ui-range-field--${size}`,
-      { 'is-invalid': invalid },
-    ]"
+    :class="[`ui-range-field--${size}`, { 'is-invalid': invalid }]"
   >
     <input
       type="range"
@@ -88,15 +81,14 @@ function onInput(event: Event) {
   display: grid;
   grid-template-columns: minmax(80px, 1fr) auto;
   align-items: center;
+  gap: 10px;
   min-width: 0;
+  min-height: 30px;
   color: var(--text-muted);
   --ui-range-track-size: 8px;
   --ui-range-thumb-size: 14px;
-}
-
-.ui-range-field--md {
-  min-height: 30px;
-  gap: 10px;
+  --ui-range-track: color-mix(in srgb, var(--bg-hover) 78%, var(--bg));
+  --ui-range-fill: var(--accent);
 }
 
 .ui-range-field--sm {
@@ -109,7 +101,6 @@ function onInput(event: Event) {
 .ui-range-field--lg {
   min-height: 36px;
   gap: 12px;
-  --ui-range-track-size: 8px;
   --ui-range-thumb-size: 16px;
 }
 
@@ -117,27 +108,19 @@ function onInput(event: Event) {
   grid-template-columns: minmax(0, 1fr);
 }
 
+.ui-range-field.is-invalid {
+  --ui-range-fill: var(--err);
+}
+
 .ui-range-field input {
-  --ui-range-track: color-mix(in srgb, var(--bg-hover) 78%, var(--bg));
-  --ui-range-fill: var(--accent);
   width: 100%;
   min-width: 0;
   height: var(--ui-range-thumb-size);
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  appearance: none;
-  -webkit-appearance: none;
-  background: transparent;
-  box-shadow: none;
-  color: inherit;
   cursor: pointer;
 }
 
 .ui-range-field input::-webkit-slider-runnable-track {
   height: var(--ui-range-track-size);
-  border: 0;
   border-radius: var(--radius-pill);
   background: linear-gradient(
     to right,
@@ -164,15 +147,12 @@ function onInput(event: Event) {
 
 .ui-range-field input::-webkit-slider-thumb {
   -webkit-appearance: none;
-  appearance: none;
   width: var(--ui-range-thumb-size);
   height: var(--ui-range-thumb-size);
   margin-top: calc((var(--ui-range-track-size) - var(--ui-range-thumb-size)) / 2);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
   background: var(--bg-elev);
-  box-shadow: none;
-  transition: border-color 0.12s ease, background-color 0.12s ease;
 }
 
 .ui-range-field input::-moz-range-thumb {
@@ -181,41 +161,28 @@ function onInput(event: Event) {
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
   background: var(--bg-elev);
-  box-shadow: none;
-  transition: border-color 0.12s ease, background-color 0.12s ease;
 }
 
 .ui-range-field input:hover:not(:disabled)::-webkit-slider-thumb,
-.ui-range-field input:active:not(:disabled)::-webkit-slider-thumb {
+.ui-range-field input:hover:not(:disabled)::-moz-range-thumb,
+.ui-range-field input:active:not(:disabled)::-webkit-slider-thumb,
+.ui-range-field input:active:not(:disabled)::-moz-range-thumb {
   border-color: color-mix(in srgb, var(--accent) 72%, var(--border-strong));
 }
 
-.ui-range-field input:hover:not(:disabled)::-moz-range-thumb,
-.ui-range-field input:active:not(:disabled)::-moz-range-thumb {
-  border-color: color-mix(in srgb, var(--accent) 72%, var(--border-strong));
+.ui-range-field.is-invalid input::-webkit-slider-thumb,
+.ui-range-field.is-invalid input::-moz-range-thumb {
+  border-color: var(--err);
 }
 
 .ui-range-field input:focus-visible {
   outline: none;
 }
 
-.ui-range-field input:focus-visible::-webkit-slider-thumb {
-  outline: 2px solid color-mix(in srgb, var(--accent) 58%, transparent);
-  outline-offset: 2px;
-}
-
+.ui-range-field input:focus-visible::-webkit-slider-thumb,
 .ui-range-field input:focus-visible::-moz-range-thumb {
-  outline: 2px solid color-mix(in srgb, var(--accent) 58%, transparent);
+  outline: 2px solid var(--accent-soft);
   outline-offset: 2px;
-}
-
-.ui-range-field.is-invalid input {
-  --ui-range-fill: var(--err);
-}
-
-.ui-range-field.is-invalid input::-webkit-slider-thumb,
-.ui-range-field.is-invalid input::-moz-range-thumb {
-  border-color: var(--err);
 }
 
 .ui-range-field input:disabled {
@@ -225,16 +192,8 @@ function onInput(event: Event) {
 
 .ui-range-field output {
   min-width: 44px;
-  color: var(--text-muted);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
   text-align: right;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ui-range-field input::-webkit-slider-thumb,
-  .ui-range-field input::-moz-range-thumb {
-    transition: none;
-  }
 }
 </style>
