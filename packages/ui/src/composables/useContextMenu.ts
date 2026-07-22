@@ -9,12 +9,24 @@ export interface ContextMenuItem {
   danger?: boolean;
   confirmLabel?: string;
   children?: ContextMenuItem[];
+  /** Extra tokens included when filtering searchable menus (e.g. ids, aliases). */
+  keywords?: string[];
   onSelect?: () => void | Promise<void>;
+}
+
+export interface ContextMenuOptions {
+  searchable?: boolean;
+  searchPlaceholder?: string;
+  emptyText?: string;
+}
+
+export interface ContextMenuContent extends ContextMenuOptions {
+  items: ContextMenuItem[];
 }
 
 export type ContextMenuProvider = (
   event: MouseEvent,
-) => ContextMenuItem[] | null | undefined;
+) => ContextMenuContent | ContextMenuItem[] | null | undefined;
 
 interface MenuState {
   open: boolean;
@@ -25,6 +37,9 @@ interface MenuState {
   items: ContextMenuItem[];
   pendingConfirmId: string | null;
   openSeq: number;
+  searchable: boolean;
+  searchPlaceholder: string;
+  emptyText: string;
 }
 
 type ContextMenuStore = {
@@ -39,6 +54,9 @@ declare global {
   var __liliaUiContextMenuStore: ContextMenuStore | undefined;
 }
 
+const DEFAULT_SEARCH_PLACEHOLDER = "搜索";
+const DEFAULT_EMPTY_TEXT = "没有匹配项";
+
 const store = globalThis.__liliaUiContextMenuStore ??= {
   state: reactive<MenuState>({
     open: false,
@@ -49,6 +67,9 @@ const store = globalThis.__liliaUiContextMenuStore ??= {
     items: [],
     pendingConfirmId: null,
     openSeq: 0,
+    searchable: false,
+    searchPlaceholder: DEFAULT_SEARCH_PLACEHOLDER,
+    emptyText: DEFAULT_EMPTY_TEXT,
   }),
   providers: new WeakMap<Element, ContextMenuProvider>(),
   installed: false,
@@ -69,26 +90,39 @@ function itemKey(item: ContextMenuItem): string {
   return item.id ?? item.label;
 }
 
-function collectItemsFor(event: MouseEvent): ContextMenuItem[] {
+function normalizeContent(
+  content: ContextMenuContent | ContextMenuItem[] | null | undefined,
+): ContextMenuContent | null {
+  if (!content) return null;
+  if (Array.isArray(content)) {
+    return content.length ? { items: content } : null;
+  }
+  return content.items.length ? content : null;
+}
+
+function collectContentFor(event: MouseEvent): ContextMenuContent | null {
   let node = event.target as Element | null;
   while (node) {
     const provider = providers.get(node);
-    const items = provider?.(event);
-    if (items?.length) return items;
+    const content = normalizeContent(provider?.(event));
+    if (content) return content;
     node = node.parentElement;
   }
-  return [];
+  return null;
 }
 
-function openMenu(x: number, y: number, items: ContextMenuItem[]) {
+function openMenu(x: number, y: number, content: ContextMenuContent) {
   const position = createAnchoredMenuPosition(x, y);
-  state.items = items;
+  state.items = content.items;
   state.x = position.x;
   state.y = position.y;
   state.anchorX = position.anchorX;
   state.anchorY = position.anchorY;
-  state.open = items.length > 0;
+  state.open = content.items.length > 0;
   state.pendingConfirmId = null;
+  state.searchable = Boolean(content.searchable);
+  state.searchPlaceholder = content.searchPlaceholder ?? DEFAULT_SEARCH_PLACEHOLDER;
+  state.emptyText = content.emptyText ?? DEFAULT_EMPTY_TEXT;
   state.openSeq += 1;
   if (state.open) attachOpenListeners();
 }
@@ -97,9 +131,11 @@ export function openContextMenuAt(
   x: number,
   y: number,
   items: ContextMenuItem[],
+  options?: ContextMenuOptions,
 ) {
-  if (!items.length) return;
-  openMenu(x, y, items);
+  const content = normalizeContent({ items, ...options });
+  if (!content) return;
+  openMenu(x, y, content);
 }
 
 export function closeContextMenu() {
@@ -112,6 +148,7 @@ export function finalizeClosedContextMenu() {
   if (state.open) return;
   state.items = [];
   state.pendingConfirmId = null;
+  state.searchable = false;
 }
 
 export function isContextMenuItemPending(item: ContextMenuItem): boolean {
@@ -179,8 +216,8 @@ export function installContextMenu() {
 
   const onContextMenu = (event: MouseEvent) => {
     event.preventDefault();
-    const items = collectItemsFor(event);
-    if (items.length) openMenu(event.clientX, event.clientY, items);
+    const content = collectContentFor(event);
+    if (content) openMenu(event.clientX, event.clientY, content);
     else closeContextMenu();
   };
 

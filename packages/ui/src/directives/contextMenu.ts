@@ -1,11 +1,17 @@
 import type { Directive } from "vue";
 import {
   registerContextMenu,
+  type ContextMenuContent,
   type ContextMenuItem,
   type ContextMenuProvider,
 } from "../composables/useContextMenu";
 
-type ContextMenuValue = ContextMenuItem[] | ContextMenuProvider | null | undefined;
+type ContextMenuValue =
+  | ContextMenuContent
+  | ContextMenuItem[]
+  | ContextMenuProvider
+  | null
+  | undefined;
 
 const cleanups = new WeakMap<Element, () => void>();
 
