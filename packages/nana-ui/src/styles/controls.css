@@ -64,7 +64,7 @@
   --ui-range-track: color-mix(in srgb, var(--bg-hover) 78%, var(--bg));
   --ui-range-fill: var(--accent);
   --ui-range-thumb: var(--accent);
-  --ui-range-thumb-border: color-mix(in oklch, var(--accent-strong) 55%, var(--bg));
+  --ui-range-thumb-border: var(--accent-strong);
   width: 100%;
   min-width: 0;
   height: var(--ui-range-thumb-size);
@@ -80,7 +80,7 @@
 .nana-slider[aria-invalid="true"] {
   --ui-range-fill: var(--err);
   --ui-range-thumb: var(--err);
-  --ui-range-thumb-border: color-mix(in oklch, var(--err-solid, var(--err)) 55%, var(--bg));
+  --ui-range-thumb-border: var(--err-solid, var(--err));
 }
 .nana-slider::-webkit-slider-runnable-track {
   height: var(--ui-range-track-size);
@@ -110,25 +110,23 @@
   width: var(--ui-range-thumb-size);
   height: var(--ui-range-thumb-size);
   margin-top: calc((var(--ui-range-track-size) - var(--ui-range-thumb-size)) / 2);
-  border: 1.5px solid var(--ui-range-thumb-border);
+  border: 1px solid var(--ui-range-thumb-border);
   border-radius: var(--radius-pill);
   background: var(--ui-range-thumb);
-  box-shadow: 0 0 0 1.5px var(--bg);
 }
 .nana-slider::-moz-range-thumb {
   width: var(--ui-range-thumb-size);
   height: var(--ui-range-thumb-size);
-  border: 1.5px solid var(--ui-range-thumb-border);
+  border: 1px solid var(--ui-range-thumb-border);
   border-radius: var(--radius-pill);
   background: var(--ui-range-thumb);
-  box-shadow: 0 0 0 1.5px var(--bg);
 }
 .nana-slider:hover:not(:disabled)::-webkit-slider-thumb,
 .nana-slider:hover:not(:disabled)::-moz-range-thumb,
 .nana-slider:active:not(:disabled)::-webkit-slider-thumb,
 .nana-slider:active:not(:disabled)::-moz-range-thumb {
   background: var(--accent-strong);
-  border-color: color-mix(in oklch, var(--accent-strong) 70%, var(--bg));
+  border-color: var(--accent-strong);
 }
 .nana-slider.is-invalid:hover:not(:disabled)::-webkit-slider-thumb,
 .nana-slider[aria-invalid="true"]:hover:not(:disabled)::-webkit-slider-thumb,
@@ -139,7 +137,7 @@
 .nana-slider.is-invalid:active:not(:disabled)::-moz-range-thumb,
 .nana-slider[aria-invalid="true"]:active:not(:disabled)::-moz-range-thumb {
   background: var(--err-solid, var(--err));
-  border-color: color-mix(in oklch, var(--err-solid, var(--err)) 70%, var(--bg));
+  border-color: var(--err-solid, var(--err));
 }
 .nana-slider:focus-visible { outline: none; }
 .nana-slider:focus-visible::-webkit-slider-thumb,
