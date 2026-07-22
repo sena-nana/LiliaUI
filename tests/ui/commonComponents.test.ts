@@ -226,6 +226,49 @@ describe("common UI components", () => {
     expect(screen.getByRole("option", { name: "Unavailable" })).toBeDisabled();
   });
 
+  it("hides range progress fill and keeps non-progress thumb when showProgress is false", () => {
+    const withProgress = render(defineComponent({
+      components: { UiRangeField },
+      setup() {
+        const value = ref(40);
+        return { value };
+      },
+      template: `
+        <UiRangeField
+          v-model="value"
+          :min="0"
+          :max="100"
+          aria-label="With progress"
+        />
+      `,
+    }));
+    const progressRoot = withProgress.container.querySelector(".ui-range-field");
+    expect(progressRoot).not.toHaveClass("ui-range-field--no-progress");
+    expect(progressRoot?.querySelector(".ui-range-field__fill")).toBeInTheDocument();
+    withProgress.unmount();
+
+    const withoutProgress = render(defineComponent({
+      components: { UiRangeField },
+      setup() {
+        const value = ref(40);
+        return { value };
+      },
+      template: `
+        <UiRangeField
+          v-model="value"
+          :min="0"
+          :max="100"
+          :show-progress="false"
+          aria-label="Without progress"
+        />
+      `,
+    }));
+    const root = withoutProgress.container.querySelector(".ui-range-field");
+    expect(root).toHaveClass("ui-range-field--no-progress");
+    expect(root?.querySelector(".ui-range-field__fill")).toBeNull();
+    expect(root?.querySelector(".ui-range-field__thumb")).toBeInTheDocument();
+  });
+
   it("range field follows continuous input and ignores stale prop writes while dragging", async () => {
     let forceStale = () => {};
     const view = render(defineComponent({

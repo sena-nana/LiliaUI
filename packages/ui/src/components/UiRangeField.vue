@@ -7,6 +7,7 @@ const props = withDefaults(defineProps<SliderProps & {
   unit?: string;
   size?: UiControlSize;
   showOutput?: boolean;
+  showProgress?: boolean;
 }>(), {
   modelValue: 0,
   min: 0,
@@ -19,6 +20,7 @@ const props = withDefaults(defineProps<SliderProps & {
   invalid: false,
   size: "md",
   showOutput: true,
+  showProgress: true,
 });
 
 const emit = defineEmits<SliderEmits>();
@@ -125,7 +127,14 @@ function onKeydown(event: KeyboardEvent) {
 <template>
   <div
     class="ui-range-field"
-    :class="[`ui-range-field--${size}`, { 'is-invalid': invalid, 'is-disabled': inactive }]"
+    :class="[
+      `ui-range-field--${size}`,
+      {
+        'ui-range-field--no-progress': !showProgress,
+        'is-invalid': invalid,
+        'is-disabled': inactive,
+      },
+    ]"
     :style="{ '--ui-range-progress': `${progressPercent}%` }"
   >
     <div
@@ -149,7 +158,7 @@ function onKeydown(event: KeyboardEvent) {
       @keydown="onKeydown"
     >
       <div class="ui-range-field__rail" aria-hidden="true">
-        <div class="ui-range-field__fill" />
+        <div v-if="showProgress" class="ui-range-field__fill" />
       </div>
       <div class="ui-range-field__thumb" aria-hidden="true" />
     </div>
@@ -195,6 +204,18 @@ function onKeydown(event: KeyboardEvent) {
   --ui-range-fill: var(--err);
   --ui-range-thumb: var(--err);
   --ui-range-thumb-active: var(--err-solid, var(--err));
+}
+
+.ui-range-field--no-progress {
+  --ui-range-thumb: var(--bg);
+  --ui-range-thumb-active: var(--bg-hover);
+  --ui-range-thumb-border: var(--accent);
+}
+
+.ui-range-field--no-progress.is-invalid {
+  --ui-range-thumb: var(--bg);
+  --ui-range-thumb-active: var(--bg-hover);
+  --ui-range-thumb-border: var(--err);
 }
 
 .ui-range-field__track {
@@ -246,13 +267,23 @@ function onKeydown(event: KeyboardEvent) {
   border: 0;
   border-radius: var(--radius-pill);
   background: var(--ui-range-thumb);
+  box-sizing: border-box;
   transform: translate(-50%, -50%);
   pointer-events: none;
+}
+
+.ui-range-field--no-progress .ui-range-field__thumb {
+  border: 1px solid var(--ui-range-thumb-border, var(--accent));
 }
 
 .ui-range-field__track:hover:not([aria-disabled="true"]) .ui-range-field__thumb,
 .ui-range-field__track:active:not([aria-disabled="true"]) .ui-range-field__thumb {
   background: var(--ui-range-thumb-active);
+}
+
+.ui-range-field--no-progress .ui-range-field__track:hover:not([aria-disabled="true"]) .ui-range-field__thumb,
+.ui-range-field--no-progress .ui-range-field__track:active:not([aria-disabled="true"]) .ui-range-field__thumb {
+  border-color: var(--ui-range-thumb-border, var(--accent));
 }
 
 .ui-range-field.is-disabled .ui-range-field__track {
