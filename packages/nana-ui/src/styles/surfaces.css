@@ -1,8 +1,10 @@
-.nana-card { min-width: 0; padding: 18px; border-radius: var(--radius-md); background: var(--bg-elev); box-shadow: 0 1px 0 var(--border-soft); }
+.nana-card { min-width: 0; padding: 18px; border-radius: var(--radius-md); background: var(--lilia-surface-fill-raised, var(--bg-elev)); box-shadow: 0 1px 0 var(--border-soft); }
 .nana-card--outlined { box-shadow: inset 0 0 0 1px var(--border); }
 .nana-card--raised { box-shadow: var(--shadow-surface); }
 .nana-card--interactive { padding: 0; transition: background var(--motion-fast), box-shadow var(--motion-fast); }
-.nana-card[data-lilia-surface-mode="translucent"] { background: transparent; }
+.nana-card[data-lilia-surface-mode="translucent"] {
+  background: var(--lilia-surface-fill, var(--lilia-surface-fill-raised-translucent, transparent));
+}
 .nana-card--interactive:hover:not(.is-disabled) { background: var(--lilia-state-layer-hover); }
 .nana-card--interactive:active:not(.is-disabled) { background: var(--lilia-state-layer-pressed); }
 .nana-card.is-selected { color: var(--lilia-state-foreground-selected); background: var(--lilia-state-layer-selected); }

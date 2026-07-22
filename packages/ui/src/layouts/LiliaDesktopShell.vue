@@ -16,6 +16,8 @@ import type {
   SidebarFooterStatus,
   SidebarNavItem,
 } from "../config/appShell";
+import { useNativeAppearance } from "../composables/useNativeAppearance";
+import { resolveBackdropSurfaces } from "../composables/resolveBackdropSurfaces";
 
 export interface LiliaDesktopShellNavSection {
   title: string;
@@ -52,6 +54,11 @@ const emit = defineEmits<{
 }>();
 
 const slots = useSlots();
+const appearance = useNativeAppearance();
+const surfaces = computed(() => resolveBackdropSurfaces(
+  appearance.backdropMode.value,
+  appearance.backdropTarget.value,
+));
 const hasNavigation = computed(
   () => Boolean(slots.navigation)
     || props.navigation.length > 0
@@ -76,7 +83,11 @@ const hasFooter = computed(
       <slot name="header-actions" />
     </template>
 
-    <LiliaWorkspace :aria-label="`${title ?? '应用'} 工作区`">
+    <LiliaWorkspace
+      :aria-label="`${title ?? '应用'} 工作区`"
+      :surface-mode="surfaces.workspace"
+      backdrop-effect="none"
+    >
       <LiliaSectionNavigation
         v-if="hasNavigation"
         id="navigation"
@@ -85,6 +96,7 @@ const hasFooter = computed(
         overflow="hidden"
         :collapsed="navCollapsed"
         :size="navSize"
+        :surface-mode="surfaces.sidebar"
         @update:collapsed="emit('update:navCollapsed', $event)"
         @update:size="emit('update:navSize', $event)"
       >
@@ -121,7 +133,7 @@ const hasFooter = computed(
         </div>
       </LiliaSectionNavigation>
 
-      <LiliaPrimaryContent id="primary">
+      <LiliaPrimaryContent id="primary" :surface-mode="surfaces.main">
         <slot />
       </LiliaPrimaryContent>
 

@@ -1,5 +1,5 @@
 .lilia-workspace {
-  --lilia-workspace-surface: var(--bg-elev);
+  --lilia-workspace-surface: var(--lilia-surface-fill-raised, var(--bg-elev));
   --lilia-workspace-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
   position: relative;
   display: grid;
@@ -146,11 +146,11 @@
 .lilia-workspace-region--resources,
 .lilia-workspace-region--inspector,
 .lilia-workspace-region--bottom {
-  --lilia-region-surface: var(--bg-elev);
+  --lilia-region-surface: var(--lilia-surface-fill-raised, var(--bg-elev));
 }
 
 .lilia-workspace-region--primary {
-  --lilia-region-surface: var(--bg);
+  --lilia-region-surface: var(--lilia-surface-fill-base, var(--bg));
   --lilia-primary-corner-radius: var(--radius-lg);
   border-top-left-radius: var(--lilia-primary-corner-radius);
   contain: content;

@@ -1,4 +1,5 @@
 export * from "./composables/menuMotion";
+export * from "./composables/resolveBackdropSurfaces";
 export * from "./composables/useAnchoredActionMenu";
 export * from "./composables/useAnchoredMenuMotion";
 export * from "./composables/useAnchoredOverlay";

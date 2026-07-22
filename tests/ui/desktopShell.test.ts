@@ -111,6 +111,51 @@ describe("LiliaDesktopShell", () => {
     expect(screen.getByRole("button", { name: "保存" })).toBeInTheDocument();
     expect(screen.getByText("标题")).toBeInTheDocument();
   });
+
+  it("wires workspace sidebar/main surfaces from backdropMode and backdropTarget", async () => {
+    window.__LILIA_NATIVE_PLATFORM__ = "windows";
+    localStorage.setItem("lilia-ui-test.backdropMode", "mica");
+    localStorage.setItem("lilia-ui-test.backdropTarget", "sidebar");
+    vi.resetModules();
+
+    const { setLiliaUiConfig } = await import("@lilia/ui/shell");
+    const { LiliaDesktopShell: Shell } = await import("@lilia/ui/shell");
+    setLiliaUiConfig({
+      appName: "lilia-ui-test",
+      productTitle: "Lilia UI Test",
+      storageKeyPrefix: "lilia-ui-test",
+      version: "0.0.0",
+    });
+
+    const router = await prepare();
+    const view = render(Shell, {
+      props: {
+        title: "Lilia",
+        navigation: [{ key: "home", label: "首页", icon: Home, to: "/" }],
+      },
+      slots: { default: "<div>主要</div>" },
+      global: { plugins: [router] },
+    });
+
+    await waitFor(() => {
+      expect(view.container.querySelector('[data-region-id="navigation"]')).not.toHaveAttribute("hidden");
+      expect(view.container.querySelector('[data-region-id="primary"]')).not.toHaveAttribute("hidden");
+    });
+
+    const workspace = view.container.querySelector(".lilia-workspace");
+    const navigation = view.container.querySelector('[data-region-id="navigation"]');
+    const primary = view.container.querySelector('[data-region-id="primary"]');
+    if (!(workspace instanceof HTMLElement) || !(navigation instanceof HTMLElement) || !(primary instanceof HTMLElement)) {
+      throw new Error("Missing desktop shell surfaces");
+    }
+
+    expect(workspace).toHaveAttribute("data-lilia-surface-mode", "translucent");
+    expect(workspace).toHaveAttribute("data-lilia-backdrop", "none");
+    expect(navigation).toHaveAttribute("data-lilia-surface-mode", "translucent");
+    expect(navigation).toHaveAttribute("data-lilia-backdrop", "none");
+    expect(primary).toHaveAttribute("data-lilia-surface-mode", "solid");
+    expect(primary).toHaveAttribute("data-lilia-backdrop", "none");
+  });
 });
 
 describe("NanaDesktopShell", () => {

@@ -48,7 +48,9 @@ const surfaceAttributes = computed(() => resolveSurfaceAttributes(props));
 
 <style>
 .ui-card.card--interactive { transition: background-color 0.12s ease, border-color 0.12s ease; }
-.ui-card[data-lilia-surface-mode="translucent"] { background: transparent; }
+.ui-card[data-lilia-surface-mode="translucent"] {
+  background: var(--lilia-surface-fill, var(--lilia-surface-fill-raised-translucent));
+}
 .ui-card.card--interactive:hover:not(.is-disabled) { background: var(--lilia-state-layer-hover); }
 .ui-card.card--interactive:active:not(.is-disabled) { background: var(--lilia-state-layer-pressed); }
 .ui-card.is-selected { border: 1px solid var(--lilia-state-indicator-selected); background: var(--lilia-state-layer-selected); color: var(--lilia-state-foreground-selected); }

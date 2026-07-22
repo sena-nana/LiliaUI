@@ -7,12 +7,42 @@
   --lilia-state-layer-selected-pressed: var(--lilia-color-state-selected-pressed-solid);
 }
 
+[data-lilia-surface-mode="solid"][data-lilia-surface-level="base"] {
+  --lilia-surface-fill: var(--lilia-surface-fill-base);
+}
+
+[data-lilia-surface-mode="solid"][data-lilia-surface-level="raised"],
+[data-lilia-surface-mode="solid"][data-lilia-surface-level="floating"],
+[data-lilia-surface-mode="solid"][data-lilia-surface-level="overlay"] {
+  --lilia-surface-fill: var(--lilia-surface-fill-raised);
+}
+
 [data-lilia-surface-mode="translucent"] {
   --lilia-state-layer-hover: var(--lilia-color-state-hover-translucent);
   --lilia-state-layer-pressed: var(--lilia-color-state-pressed-translucent);
   --lilia-state-layer-selected: var(--lilia-color-state-selected-translucent);
   --lilia-state-layer-selected-hover: var(--lilia-color-state-selected-hover-translucent);
   --lilia-state-layer-selected-pressed: var(--lilia-color-state-selected-pressed-translucent);
+}
+
+[data-lilia-surface-mode="translucent"][data-lilia-surface-level="base"] {
+  --lilia-surface-fill: var(--lilia-surface-fill-base-translucent);
+}
+
+[data-lilia-surface-mode="translucent"][data-lilia-surface-level="raised"],
+[data-lilia-surface-mode="translucent"][data-lilia-surface-level="floating"],
+[data-lilia-surface-mode="translucent"][data-lilia-surface-level="overlay"] {
+  --lilia-surface-fill: var(--lilia-surface-fill-raised-translucent);
+}
+
+/* Cards inside translucent regions stay tinted so solid defaults do not cover the backdrop. */
+[data-lilia-surface-mode="translucent"] :is(
+  .card,
+  .card--surface,
+  .ui-interactive-card,
+  .nana-card
+):not([data-lilia-surface-mode="translucent"]) {
+  background: var(--lilia-surface-fill-raised-translucent);
 }
 
 [data-lilia-surface-mode="solid"][data-lilia-backdrop],
@@ -65,6 +95,16 @@
   --lilia-state-layer-selected: var(--lilia-color-state-selected-solid);
   --lilia-state-layer-selected-hover: var(--lilia-color-state-selected-hover-solid);
   --lilia-state-layer-selected-pressed: var(--lilia-color-state-selected-pressed-solid);
+  --lilia-surface-fill: var(--lilia-surface-fill-raised);
+}
+
+[data-lilia-reduced-transparency="true"] [data-lilia-surface-mode="translucent"] :is(
+  .card,
+  .card--surface,
+  .ui-interactive-card,
+  .nana-card
+) {
+  background: var(--lilia-surface-fill-raised);
 }
 
 @media (prefers-contrast: more), (forced-colors: active) {
@@ -74,5 +114,15 @@
     --lilia-state-layer-selected: var(--lilia-color-state-selected-solid);
     --lilia-state-layer-selected-hover: var(--lilia-color-state-selected-hover-solid);
     --lilia-state-layer-selected-pressed: var(--lilia-color-state-selected-pressed-solid);
+    --lilia-surface-fill: var(--lilia-surface-fill-raised);
+  }
+
+  [data-lilia-surface-mode="translucent"] :is(
+    .card,
+    .card--surface,
+    .ui-interactive-card,
+    .nana-card
+  ) {
+    background: var(--lilia-surface-fill-raised);
   }
 }

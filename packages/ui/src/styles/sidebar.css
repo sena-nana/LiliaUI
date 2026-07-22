@@ -1,7 +1,7 @@
 .secondary-panel {
   grid-area: secondary;
   height: 100%;
-  background: var(--lilia-sidebar-surface, var(--bg-elev));
+  background: var(--lilia-sidebar-surface, var(--lilia-surface-fill-raised, var(--bg-elev)));
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   display: flex;
@@ -23,7 +23,7 @@
 }
 
 [data-lilia-reduced-transparency="true"] .secondary-panel[data-lilia-surface-mode="translucent"] {
-  background: var(--lilia-sidebar-surface, var(--bg-elev));
+  background: var(--lilia-sidebar-surface, var(--lilia-surface-fill-raised, var(--bg-elev)));
 }
 
 .secondary-panel__top,
