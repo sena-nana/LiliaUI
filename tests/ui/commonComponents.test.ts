@@ -225,6 +225,58 @@ describe("common UI components", () => {
     expect(screen.getByRole("option", { name: "Unavailable" })).toBeDisabled();
   });
 
+  it("range field follows continuous input and ignores stale prop writes while dragging", async () => {
+    let forceStale = () => {};
+    const view = render(defineComponent({
+      components: { UiRangeField },
+      setup() {
+        const size = ref(4);
+        forceStale = () => {
+          size.value = 4;
+        };
+        return { size };
+      },
+      template: `
+        <UiRangeField
+          :model-value="size"
+          :min="1"
+          :max="8"
+          unit="px"
+          aria-label="Size"
+          @update:model-value="size = $event"
+        />
+        <output data-testid="values">{{ size }}</output>
+      `,
+    }));
+
+    const slider = screen.getByRole("slider", { name: "Size" });
+    const output = slider.closest(".ui-range-field")?.querySelector("output");
+
+    await fireEvent.input(slider, { target: { value: "5" } });
+    await fireEvent.input(slider, { target: { value: "6" } });
+    await fireEvent.input(slider, { target: { value: "7" } });
+
+    expect(slider).toHaveValue("7");
+    expect(output).toHaveTextContent("7px");
+    expect(view.getByTestId("values")).toHaveTextContent("7");
+
+    await fireEvent.pointerDown(slider);
+    await fireEvent.input(slider, { target: { value: "8" } });
+    expect(slider).toHaveValue("8");
+    expect(output).toHaveTextContent("8px");
+    expect(view.getByTestId("values")).toHaveTextContent("8");
+
+    forceStale();
+    await Promise.resolve();
+    expect(view.getByTestId("values")).toHaveTextContent("4");
+    expect(slider).toHaveValue("8");
+    expect(output).toHaveTextContent("8px");
+
+    await fireEvent.pointerUp(slider);
+    expect(slider).toHaveValue("4");
+    expect(output).toHaveTextContent("4px");
+  });
+
   it("exposes compact sidebar hierarchy, selection, metadata, tools, and collapse behavior", async () => {
     const select = vi.fn();
     const tool = vi.fn();

@@ -79,19 +79,15 @@ function ensureCornerState() {
 
 export function useCornerStyle() {
   const state = ensureCornerState();
-  applyCornerPreferences(state.cornerStyle.value, state.cornerRadius.value);
 
   return {
     cornerStyle: state.cornerStyle,
     cornerRadius: state.cornerRadius,
     setCornerStyle(next: CornerStyle) {
       state.cornerStyle.value = next;
-      applyCornerPreferences(next, state.cornerRadius.value);
     },
     setCornerRadius(next: number) {
-      const radius = clampRadius(next);
-      state.cornerRadius.value = radius;
-      applyCornerPreferences(state.cornerStyle.value, radius);
+      state.cornerRadius.value = clampRadius(next);
     },
   };
 }

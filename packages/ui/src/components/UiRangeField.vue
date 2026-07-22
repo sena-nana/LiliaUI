@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { SliderEmits, SliderProps } from "@lilia/ui-contract";
+import { ref, watch } from "vue";
 import type { UiControlSize } from "./UiInput.vue";
 
 const props = withDefaults(defineProps<SliderProps & {
@@ -21,14 +22,23 @@ const props = withDefaults(defineProps<SliderProps & {
 });
 
 const emit = defineEmits<SliderEmits>();
+const interacting = ref(false);
+const displayValue = ref(props.modelValue);
 
-function onInput(event: Event) {
-  emit("update:modelValue", Number((event.target as HTMLInputElement).value));
-  emit("input", event);
+watch(() => props.modelValue, (value) => {
+  if (!interacting.value) displayValue.value = value;
+});
+
+function endInteraction() {
+  interacting.value = false;
+  displayValue.value = props.modelValue;
 }
 
-function onChange(event: Event) {
-  emit("change", event);
+function onInput(event: Event) {
+  const next = Number((event.target as HTMLInputElement).value);
+  displayValue.value = next;
+  emit("update:modelValue", next);
+  emit("input", event);
 }
 </script>
 
@@ -39,17 +49,20 @@ function onChange(event: Event) {
       :min="min"
       :max="max"
       :step="props.step"
-      :value="modelValue"
+      :value="displayValue"
       :aria-label="props.ariaLabel"
       :aria-describedby="props.ariaDescribedby"
       :aria-invalid="props.invalid || undefined"
       :aria-busy="props.loading || undefined"
       :data-agent-id="agentId"
       :disabled="disabled || loading"
+      @pointerdown="interacting = true"
+      @pointerup="endInteraction"
+      @pointercancel="endInteraction"
       @input="onInput"
-      @change="onChange"
+      @change="endInteraction(); emit('change', $event)"
     />
-    <output v-if="showOutput">{{ modelValue }}{{ unit }}</output>
+    <output v-if="showOutput">{{ displayValue }}{{ unit }}</output>
   </div>
 </template>
 
