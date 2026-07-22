@@ -20,13 +20,9 @@ watch(() => props.modelValue, (value) => {
 });
 
 const progressPercent = computed(() => {
-  const min = Number(props.min);
-  const max = Number(props.max);
-  const span = max - min;
-  if (!Number.isFinite(span) || span <= 0) return 0;
-  const value = Number(displayValue.value);
-  const clamped = Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
-  return ((clamped - min) / span) * 100;
+  const span = Number(props.max) - Number(props.min);
+  if (!(span > 0)) return 0;
+  return ((Number(displayValue.value) - Number(props.min)) / span) * 100;
 });
 
 function endInteraction() {
