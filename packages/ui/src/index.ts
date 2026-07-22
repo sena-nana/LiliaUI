@@ -29,6 +29,7 @@ export { default as ListItem, default as UiListItem } from "./components/UiListI
 export { default as Popover, default as UiPopover } from "./components/UiPopover.vue";
 export { default as Progress, default as UiProgress } from "./components/UiProgress.vue";
 export { default as Slider, default as UiRangeField } from "./components/UiRangeField.vue";
+export { default as UiXYPad, default as XYPad } from "./components/UiXYPad.vue";
 export { default as SegmentedControl, default as UiSegmentedControl, type UiSegmentedOption } from "./components/UiSegmentedControl.vue";
 export { default as Select, default as UiSelect, type UiSelectOption } from "./components/UiSelect.vue";
 export { default as Skeleton, default as UiSkeleton } from "./components/UiSkeleton.vue";
