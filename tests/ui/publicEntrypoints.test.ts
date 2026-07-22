@@ -57,24 +57,6 @@ describe("public package entrypoints", () => {
     expect(window.__liliaAgentDebug).toBeUndefined();
   });
 
-  it("loads Nana desktop, diagnostics, and runtime entrypoints", async () => {
-    const [shell, settings, runtime, tauriRuntime, diagnostics] = await Promise.all([
-      import("@lilia/nana-ui/shell"),
-      import("@lilia/nana-ui/settings"),
-      import("@lilia/nana-ui/runtime"),
-      import("@lilia/nana-ui/runtime/tauri"),
-      import("@lilia/nana-ui/diagnostics"),
-    ]);
-    expect(shell.NanaTitleBar).toBeDefined();
-    expect(shell.NanaAppShell).toBeDefined();
-    expect(shell.NanaDesktopShell).toBeDefined();
-    expect(settings.NanaAppearanceSection).toBeDefined();
-    expect(settings.NanaAboutSection).toBeDefined();
-    expect(runtime.setNativeAppearanceAdapter).toBeTypeOf("function");
-    expect(tauriRuntime.installTauriNativeAppearanceAdapter).toBeTypeOf("function");
-    expect(diagnostics.installAgentDebugHarness).toBeTypeOf("function");
-  });
-
   it("renders application-owned overlays through the router-free host", async () => {
     const { OverlayHost } = await import("@lilia/ui/overlay");
     const Overlay = defineComponent({ template: `<div data-testid="overlay">overlay</div>` });

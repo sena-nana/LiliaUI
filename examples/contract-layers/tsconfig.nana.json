@@ -1,8 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "paths": {
-      "#ui-layer": ["../../packages/nana-ui/src/index.ts"]
-    }
-  }
-}

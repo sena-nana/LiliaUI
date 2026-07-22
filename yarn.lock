@@ -417,30 +417,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lilia/example-contract-layers@workspace:examples/contract-layers"
   dependencies:
-    "@lilia/nana-ui": "workspace:*"
     "@lilia/ui": "workspace:*"
     "@lilia/ui-contract": "workspace:*"
     "@lilia/ui-foundation": "workspace:*"
     "@lucide/vue": "npm:^1.22.0"
     "@tauri-apps/api": "npm:^2.11.1"
-    "@vitejs/plugin-vue": "npm:^6.0.8"
-    cross-env: "npm:^10.1.0"
-    typescript: "npm:^6.0.3"
-    vite: "npm:^8.1.4"
-    vue: "npm:^3.5.39"
-    vue-router: "npm:^5.1.0"
-    vue-tsc: "npm:^3.3.7"
-  languageName: unknown
-  linkType: soft
-
-"@lilia/example-nana-basic@workspace:examples/nana-basic":
-  version: 0.0.0-use.local
-  resolution: "@lilia/example-nana-basic@workspace:examples/nana-basic"
-  dependencies:
-    "@lilia/nana-ui": "workspace:*"
-    "@lilia/ui-contract": "workspace:*"
-    "@lilia/ui-foundation": "workspace:*"
-    "@lucide/vue": "npm:^1.22.0"
     "@vitejs/plugin-vue": "npm:^6.0.8"
     typescript: "npm:^6.0.3"
     vite: "npm:^8.1.4"
@@ -460,27 +441,6 @@ __metadata:
     vite: "npm:^8.1.4"
     vue: "npm:^3.5.39"
     vue-tsc: "npm:^3.3.7"
-  languageName: unknown
-  linkType: soft
-
-"@lilia/nana-ui@workspace:*, @lilia/nana-ui@workspace:packages/nana-ui":
-  version: 0.0.0-use.local
-  resolution: "@lilia/nana-ui@workspace:packages/nana-ui"
-  dependencies:
-    "@lilia/ui-contract": "workspace:*"
-    "@lilia/ui-foundation": "workspace:*"
-    "@lucide/vue": "npm:^1.22.0"
-    "@tauri-apps/api": "npm:^2.11.1"
-    typescript: "npm:^6.0.3"
-    vue: "npm:^3.5.39"
-    vue-router: "npm:^5.1.0"
-    vue-tsc: "npm:^3.3.7"
-  peerDependencies:
-    "@lilia/ui-contract": ^0.1.0
-    "@lilia/ui-foundation": ^0.1.0
-    "@lucide/vue": ^1.22.0
-    vue: ^3.5.39
-    vue-router: ^5.1.0
   languageName: unknown
   linkType: soft
 
@@ -2812,7 +2772,6 @@ __metadata:
   dependencies:
     "@lilia/build": "workspace:*"
     "@lilia/config": "workspace:*"
-    "@lilia/nana-ui": "workspace:*"
     "@lilia/tools": "workspace:*"
     "@lilia/ui": "workspace:*"
     "@lilia/ui-contract": "workspace:*"

@@ -1,11 +1,9 @@
 import Home from "@lucide/vue/dist/esm/icons/house.mjs";
 import Settings from "@lucide/vue/dist/esm/icons/settings.mjs";
 import { render, screen, waitFor } from "@testing-library/vue";
-import { defineComponent } from "vue";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LiliaDesktopShell } from "@lilia/ui/shell";
-import { NanaDesktopShell } from "@lilia/nana-ui/shell";
 
 function routerPlugin() {
   return createRouter({
@@ -155,61 +153,5 @@ describe("LiliaDesktopShell", () => {
     expect(navigation).toHaveAttribute("data-lilia-backdrop", "none");
     expect(primary).toHaveAttribute("data-lilia-surface-mode", "solid");
     expect(primary).toHaveAttribute("data-lilia-backdrop", "none");
-  });
-});
-
-describe("NanaDesktopShell", () => {
-  it("composes sidebar, main, and optional context/footer without owning a router", async () => {
-    const router = await prepare();
-    const view = render(NanaDesktopShell, {
-      props: {
-        title: "Nana Workspace",
-        navigation: [{ id: "home", label: "首页", icon: Home, href: "/" }],
-        settingsItem: { id: "settings", label: "设置", icon: Settings, href: "/settings" },
-        contextVisible: true,
-        contextTitle: "属性",
-      },
-      slots: {
-        default: '<div data-testid="main-content">主要任务</div>',
-        context: '<div data-testid="context-content">属性内容</div>',
-        status: '<div data-testid="status-content">状态栏</div>',
-      },
-      global: { plugins: [router] },
-    });
-
-    expect(view.container.querySelector(".nana-sidebar")).not.toBeNull();
-    expect(screen.getByTestId("main-content")).toBeInTheDocument();
-    expect(screen.getByTestId("context-content")).toBeInTheDocument();
-    expect(screen.getByTestId("status-content")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "首页" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "设置" })).toBeInTheDocument();
-    const context = view.container.querySelector(".nana-desktop-shell__context");
-    expect(context).toHaveAttribute("aria-label", "属性");
-  });
-
-  it("emits update:sidebarMode when the sidebar toggle is activated", async () => {
-    const router = await prepare();
-    const view = render(NanaDesktopShell, {
-      props: {
-        title: "Nana",
-        navigation: [{ id: "home", label: "首页", icon: Home, href: "/" }],
-      },
-      slots: { default: '<div>主要</div>' },
-      global: { plugins: [router] },
-    });
-    const toggle = screen.getByRole("button", { name: "收起侧边栏" });
-    await toggle.click();
-    expect(view.emitted("update:sidebarMode")?.[0]).toEqual(["icon"]);
-  });
-
-  it("omits the sidebar when no navigation or sidebar slots are provided", async () => {
-    const router = await prepare();
-    const view = render(defineComponent({
-      components: { NanaDesktopShell },
-      template: '<NanaDesktopShell title="Nana"><div data-testid="main-content">主要</div></NanaDesktopShell>',
-    }), { global: { plugins: [router] } });
-
-    expect(view.container.querySelector(".nana-sidebar")).toBeNull();
-    expect(screen.getByTestId("main-content")).toBeInTheDocument();
   });
 });

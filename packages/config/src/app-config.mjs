@@ -1,12 +1,6 @@
-export const APP_UI_PRESETS = Object.freeze(["lilia", "nana"]);
+export const APP_UI_PRESETS = Object.freeze(["lilia"]);
 export const APP_UI_DENSITIES = Object.freeze(["comfortable", "compact"]);
 export const APP_UI_ACCENTS = Object.freeze(["blue"]);
-export const APP_LAYOUT_TYPES = Object.freeze([
-  "nana-home",
-  "nana-editor",
-  "nana-settings",
-  "nana-onboarding",
-]);
 
 const REQUIRED_METADATA = [
   "appName",
@@ -32,14 +26,10 @@ export function validateAppConfig(config) {
     validateUiConfig(config.ui);
   }
   if (config.layout !== undefined) {
-    validateLayoutConfig(config.layout);
+    throw new Error('app.config.json does not support "layout".');
   }
   if (config.onboarding !== undefined) {
     validateOnboardingConfig(config.onboarding);
-  }
-
-  if (config.layout !== undefined && config.ui?.preset !== "nana") {
-    throw new Error('app.config.json requires "ui.preset" to be "nana" when "layout" is set.');
   }
 }
 
@@ -53,20 +43,6 @@ function validateUiConfig(ui) {
   }
   if (ui.accent !== undefined) {
     assertEnum(ui.accent, APP_UI_ACCENTS, "ui.accent");
-  }
-}
-
-function validateLayoutConfig(layout) {
-  assertRecord(layout, "layout");
-  assertAllowedKeys(layout, ["type", "sidebar"], "layout");
-  assertEnum(layout.type, APP_LAYOUT_TYPES, "layout.type");
-
-  if (layout.sidebar !== undefined) {
-    assertRecord(layout.sidebar, "layout.sidebar");
-    assertAllowedKeys(layout.sidebar, ["collapsible"], "layout.sidebar");
-    if (typeof layout.sidebar.collapsible !== "boolean") {
-      throw new Error('app.config.json requires a boolean "layout.sidebar.collapsible".');
-    }
   }
 }
 

@@ -5,37 +5,13 @@ import { afterEach, describe, expect, it } from "vitest";
 import { LiliaUIProvider, useLiliaUI } from "@lilia/ui/provider";
 import { LiliaAppShell } from "@lilia/ui/shell";
 import { LiliaSettingsPage } from "@lilia/ui/settings";
-import { NanaUIProvider, useNanaUI } from "@lilia/nana-ui/provider";
-import { NanaAppShell } from "@lilia/nana-ui/shell";
-import { NanaSettingsPage } from "@lilia/nana-ui/settings";
 import { createSettingsModel, settingsKey } from "@lilia/ui-foundation/settings";
-
-const layers = [
-  {
-    name: "Lilia",
-    Shell: LiliaAppShell,
-    Provider: LiliaUIProvider,
-    SettingsPage: LiliaSettingsPage,
-    useLayerUI: useLiliaUI,
-    density: "compact",
-    selector: ".lilia-ui",
-  },
-  {
-    name: "Nana",
-    Shell: NanaAppShell,
-    Provider: NanaUIProvider,
-    SettingsPage: NanaSettingsPage,
-    useLayerUI: useNanaUI,
-    density: "comfortable",
-    selector: ".nana-ui",
-  },
-] as const;
 
 afterEach(cleanup);
 
-describe.each(layers)("$name framework layer", ({ Shell, Provider, SettingsPage, useLayerUI, density, selector }) => {
+describe("Lilia framework layer", () => {
   it("mounts its shell without a Router and renders the common slots", () => {
-    const view = render(Shell, {
+    const view = render(LiliaAppShell, {
       props: { title: "Workspace", agentId: "framework.shell" },
       slots: {
         "header-leading": "Leading",
@@ -57,22 +33,22 @@ describe.each(layers)("$name framework layer", ({ Shell, Provider, SettingsPage,
   it("uses the shared policy context with layer defaults and reset behavior", async () => {
     const PolicyControl = defineComponent({
       setup() {
-        const context = useLayerUI();
+        const context = useLiliaUI();
         const currentDensity = computed(() => context.policy.value.density);
         return () => h("button", {
-          onClick: () => context.setPolicy({ density: "compact" }),
+          onClick: () => context.setPolicy({ density: "comfortable" }),
           onDblclick: () => context.resetPolicy(),
         }, currentDensity.value);
       },
     });
-    const view = render(Provider, { slots: { default: () => h(PolicyControl) } });
-    const root = view.container.querySelector(selector);
-    expect(root).toHaveAttribute("data-density", density);
+    const view = render(LiliaUIProvider, { slots: { default: () => h(PolicyControl) } });
+    const root = view.container.querySelector(".lilia-ui");
+    expect(root).toHaveAttribute("data-density", "compact");
     const button = view.getByRole("button");
     await fireEvent.click(button);
-    expect(root).toHaveAttribute("data-density", "compact");
+    expect(root).toHaveAttribute("data-density", "comfortable");
     await fireEvent.dblClick(button);
-    expect(root).toHaveAttribute("data-density", density);
+    expect(root).toHaveAttribute("data-density", "compact");
   });
 
   it("resolves standard and full-page settings through the same Foundation model", async () => {
@@ -92,11 +68,11 @@ describe.each(layers)("$name framework layer", ({ Shell, Provider, SettingsPage,
     });
     const router = createRouter({
       history: createMemoryHistory(),
-      routes: [{ path: "/settings", component: SettingsPage }],
+      routes: [{ path: "/settings", component: LiliaSettingsPage }],
     });
     await router.push("/settings");
     await router.isReady();
-    const view = render(SettingsPage, {
+    const view = render(LiliaSettingsPage, {
       global: { plugins: [router], provide: { [settingsKey as symbol]: model } },
     });
     expect(view.getByText("Standard section")).toBeVisible();

@@ -2,17 +2,13 @@ import { cleanup, fireEvent, render } from "@testing-library/vue";
 import { defineComponent, h } from "vue";
 import { afterEach, describe, expect, it } from "vitest";
 import * as Lilia from "@lilia/ui";
-import * as Nana from "@lilia/nana-ui";
 
-const layers = [
-  { name: "Lilia", api: Lilia },
-  { name: "Nana", api: Nana },
-] as const;
+const api = Lilia;
 const TestIcon = defineComponent(() => () => h("span", { "aria-hidden": "true" }, "◆"));
 
 afterEach(cleanup);
 
-describe.each(layers)("$name Contract layer", ({ api }) => {
+describe("Lilia Contract layer", () => {
   it("keeps disabled, loading, invalid, ARIA and model events aligned for form controls", async () => {
     const button = render(api.Button, {
       props: { loading: true, invalid: true },
