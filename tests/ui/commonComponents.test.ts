@@ -242,6 +242,7 @@ describe("common UI components", () => {
     const root = container.querySelector(".ui-range-field");
     expect(root).toHaveClass("ui-range-field--no-progress");
     expect(root?.querySelector(".ui-range-field__fill")).toBeNull();
+    expect(root?.querySelector(".ui-range-field__thumb")).not.toBeNull();
   });
 
   it("range field follows continuous input and ignores stale prop writes while dragging", async () => {

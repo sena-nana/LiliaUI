@@ -206,12 +206,6 @@ function onKeydown(event: KeyboardEvent) {
   --ui-range-thumb-active: var(--err-solid, var(--err));
 }
 
-.ui-range-field--no-progress,
-.ui-range-field--no-progress.is-invalid {
-  --ui-range-thumb: var(--bg);
-  --ui-range-thumb-active: var(--bg-hover);
-}
-
 .ui-range-field__track {
   position: relative;
   width: 100%;
@@ -264,10 +258,6 @@ function onKeydown(event: KeyboardEvent) {
   box-sizing: border-box;
   transform: translate(-50%, -50%);
   pointer-events: none;
-}
-
-.ui-range-field--no-progress .ui-range-field__thumb {
-  border: 1px solid var(--ui-range-fill);
 }
 
 .ui-range-field__track:hover:not([aria-disabled="true"]) .ui-range-field__thumb,
