@@ -63,6 +63,8 @@
   --ui-range-thumb-size: 14px;
   --ui-range-track: color-mix(in srgb, var(--bg-hover) 78%, var(--bg));
   --ui-range-fill: var(--accent);
+  --ui-range-thumb: color-mix(in oklch, var(--text) 92%, var(--bg));
+  --ui-range-thumb-border: color-mix(in oklch, var(--text) 32%, var(--border-strong));
   width: 100%;
   min-width: 0;
   height: var(--ui-range-thumb-size);
@@ -104,22 +106,24 @@
   width: var(--ui-range-thumb-size);
   height: var(--ui-range-thumb-size);
   margin-top: calc((var(--ui-range-track-size) - var(--ui-range-thumb-size)) / 2);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--ui-range-thumb-border);
   border-radius: var(--radius-pill);
-  background: var(--bg-elev);
+  background: var(--ui-range-thumb);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--bg) 78%, transparent);
 }
 .nana-slider::-moz-range-thumb {
   width: var(--ui-range-thumb-size);
   height: var(--ui-range-thumb-size);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--ui-range-thumb-border);
   border-radius: var(--radius-pill);
-  background: var(--bg-elev);
+  background: var(--ui-range-thumb);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--bg) 78%, transparent);
 }
 .nana-slider:hover:not(:disabled)::-webkit-slider-thumb,
 .nana-slider:hover:not(:disabled)::-moz-range-thumb,
 .nana-slider:active:not(:disabled)::-webkit-slider-thumb,
 .nana-slider:active:not(:disabled)::-moz-range-thumb {
-  border-color: color-mix(in srgb, var(--accent) 72%, var(--border-strong));
+  border-color: color-mix(in oklch, var(--accent) 72%, var(--ui-range-thumb-border));
 }
 .nana-slider.is-invalid::-webkit-slider-thumb,
 .nana-slider[aria-invalid="true"]::-webkit-slider-thumb,
