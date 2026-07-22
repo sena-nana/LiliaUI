@@ -89,9 +89,8 @@ function onInput(event: Event) {
   --ui-range-thumb-size: 14px;
   --ui-range-track: color-mix(in srgb, var(--bg-hover) 78%, var(--bg));
   --ui-range-fill: var(--accent);
-  /* 跟随前景色，避免深色主题下 bg-elev 拇指与轨道融成一团 */
-  --ui-range-thumb: color-mix(in oklch, var(--text) 92%, var(--bg));
-  --ui-range-thumb-border: color-mix(in oklch, var(--text) 32%, var(--border-strong));
+  --ui-range-thumb: var(--accent);
+  --ui-range-thumb-border: color-mix(in oklch, var(--accent-strong) 55%, var(--bg));
 }
 
 .ui-range-field--sm {
@@ -113,6 +112,8 @@ function onInput(event: Event) {
 
 .ui-range-field.is-invalid {
   --ui-range-fill: var(--err);
+  --ui-range-thumb: var(--err);
+  --ui-range-thumb-border: color-mix(in oklch, var(--err-solid, var(--err)) 55%, var(--bg));
 }
 
 .ui-range-field input {
@@ -153,31 +154,35 @@ function onInput(event: Event) {
   width: var(--ui-range-thumb-size);
   height: var(--ui-range-thumb-size);
   margin-top: calc((var(--ui-range-track-size) - var(--ui-range-thumb-size)) / 2);
-  border: 1px solid var(--ui-range-thumb-border);
+  border: 1.5px solid var(--ui-range-thumb-border);
   border-radius: var(--radius-pill);
   background: var(--ui-range-thumb);
-  box-shadow: 0 0 0 1px color-mix(in oklch, var(--bg) 78%, transparent);
+  box-shadow: 0 0 0 1.5px var(--bg);
 }
 
 .ui-range-field input::-moz-range-thumb {
   width: var(--ui-range-thumb-size);
   height: var(--ui-range-thumb-size);
-  border: 1px solid var(--ui-range-thumb-border);
+  border: 1.5px solid var(--ui-range-thumb-border);
   border-radius: var(--radius-pill);
   background: var(--ui-range-thumb);
-  box-shadow: 0 0 0 1px color-mix(in oklch, var(--bg) 78%, transparent);
+  box-shadow: 0 0 0 1.5px var(--bg);
 }
 
 .ui-range-field input:hover:not(:disabled)::-webkit-slider-thumb,
 .ui-range-field input:hover:not(:disabled)::-moz-range-thumb,
 .ui-range-field input:active:not(:disabled)::-webkit-slider-thumb,
 .ui-range-field input:active:not(:disabled)::-moz-range-thumb {
-  border-color: color-mix(in oklch, var(--accent) 72%, var(--ui-range-thumb-border));
+  background: var(--accent-strong);
+  border-color: color-mix(in oklch, var(--accent-strong) 70%, var(--bg));
 }
 
-.ui-range-field.is-invalid input::-webkit-slider-thumb,
-.ui-range-field.is-invalid input::-moz-range-thumb {
-  border-color: var(--err);
+.ui-range-field.is-invalid input:hover:not(:disabled)::-webkit-slider-thumb,
+.ui-range-field.is-invalid input:hover:not(:disabled)::-moz-range-thumb,
+.ui-range-field.is-invalid input:active:not(:disabled)::-webkit-slider-thumb,
+.ui-range-field.is-invalid input:active:not(:disabled)::-moz-range-thumb {
+  background: var(--err-solid, var(--err));
+  border-color: color-mix(in oklch, var(--err-solid, var(--err)) 70%, var(--bg));
 }
 
 .ui-range-field input:focus-visible {
