@@ -90,7 +90,7 @@ function onInput(event: Event) {
   --ui-range-track: color-mix(in srgb, var(--bg-hover) 78%, var(--bg));
   --ui-range-fill: var(--accent);
   --ui-range-thumb: var(--accent);
-  --ui-range-thumb-border: var(--accent-strong);
+  --ui-range-thumb-active: var(--accent-strong);
 }
 
 .ui-range-field--sm {
@@ -113,7 +113,7 @@ function onInput(event: Event) {
 .ui-range-field.is-invalid {
   --ui-range-fill: var(--err);
   --ui-range-thumb: var(--err);
-  --ui-range-thumb-border: var(--err-solid, var(--err));
+  --ui-range-thumb-active: var(--err-solid, var(--err));
 }
 
 .ui-range-field input {
@@ -154,7 +154,7 @@ function onInput(event: Event) {
   width: var(--ui-range-thumb-size);
   height: var(--ui-range-thumb-size);
   margin-top: calc((var(--ui-range-track-size) - var(--ui-range-thumb-size)) / 2);
-  border: 1px solid var(--ui-range-thumb-border);
+  border: 0;
   border-radius: var(--radius-pill);
   background: var(--ui-range-thumb);
 }
@@ -162,7 +162,7 @@ function onInput(event: Event) {
 .ui-range-field input::-moz-range-thumb {
   width: var(--ui-range-thumb-size);
   height: var(--ui-range-thumb-size);
-  border: 1px solid var(--ui-range-thumb-border);
+  border: 0;
   border-radius: var(--radius-pill);
   background: var(--ui-range-thumb);
 }
@@ -171,16 +171,7 @@ function onInput(event: Event) {
 .ui-range-field input:hover:not(:disabled)::-moz-range-thumb,
 .ui-range-field input:active:not(:disabled)::-webkit-slider-thumb,
 .ui-range-field input:active:not(:disabled)::-moz-range-thumb {
-  background: var(--accent-strong);
-  border-color: var(--accent-strong);
-}
-
-.ui-range-field.is-invalid input:hover:not(:disabled)::-webkit-slider-thumb,
-.ui-range-field.is-invalid input:hover:not(:disabled)::-moz-range-thumb,
-.ui-range-field.is-invalid input:active:not(:disabled)::-webkit-slider-thumb,
-.ui-range-field.is-invalid input:active:not(:disabled)::-moz-range-thumb {
-  background: var(--err-solid, var(--err));
-  border-color: var(--err-solid, var(--err));
+  background: var(--ui-range-thumb-active);
 }
 
 .ui-range-field input:focus-visible {
