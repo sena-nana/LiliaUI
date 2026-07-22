@@ -90,8 +90,8 @@ function onInput(event: Event) {
   align-items: center;
   min-width: 0;
   color: var(--text-muted);
-  --ui-range-track-size: 4px;
-  --ui-range-thumb-size: 12px;
+  --ui-range-track-size: 8px;
+  --ui-range-thumb-size: 14px;
 }
 
 .ui-range-field--md {
@@ -102,15 +102,15 @@ function onInput(event: Event) {
 .ui-range-field--sm {
   min-height: 28px;
   gap: 8px;
-  --ui-range-track-size: 3px;
-  --ui-range-thumb-size: 10px;
+  --ui-range-track-size: 6px;
+  --ui-range-thumb-size: 12px;
 }
 
 .ui-range-field--lg {
   min-height: 36px;
   gap: 12px;
-  --ui-range-track-size: 4px;
-  --ui-range-thumb-size: 14px;
+  --ui-range-track-size: 8px;
+  --ui-range-thumb-size: 16px;
 }
 
 .ui-range-field:not(:has(output)) {
@@ -133,7 +133,7 @@ function onInput(event: Event) {
 
 .ui-range-field input::-webkit-slider-runnable-track {
   height: var(--ui-range-track-size);
-  border: 1px solid color-mix(in srgb, var(--border-strong) 82%, transparent);
+  border: 0;
   border-radius: var(--radius-pill);
   background: linear-gradient(
     to right,
@@ -146,13 +146,14 @@ function onInput(event: Event) {
 
 .ui-range-field input::-moz-range-track {
   height: var(--ui-range-track-size);
-  border: 1px solid color-mix(in srgb, var(--border-strong) 82%, transparent);
+  border: 0;
   border-radius: var(--radius-pill);
   background: var(--ui-range-track);
 }
 
 .ui-range-field input::-moz-range-progress {
   height: var(--ui-range-track-size);
+  border: 0;
   border-radius: var(--radius-pill);
   background: var(--ui-range-fill);
 }
@@ -162,7 +163,7 @@ function onInput(event: Event) {
   appearance: none;
   width: var(--ui-range-thumb-size);
   height: var(--ui-range-thumb-size);
-  margin-top: calc((var(--ui-range-track-size) - var(--ui-range-thumb-size)) / 2 - 1px);
+  margin-top: calc((var(--ui-range-track-size) - var(--ui-range-thumb-size)) / 2);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
   background: var(--bg-elev);
