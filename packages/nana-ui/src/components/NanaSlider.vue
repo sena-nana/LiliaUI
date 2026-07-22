@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SliderEmits, SliderProps } from "@lilia/ui-contract";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
 const props = withDefaults(defineProps<SliderProps>(), {
   modelValue: 0,
@@ -17,6 +17,16 @@ const displayValue = ref(props.modelValue);
 
 watch(() => props.modelValue, (value) => {
   if (!interacting.value) displayValue.value = value;
+});
+
+const progressPercent = computed(() => {
+  const min = Number(props.min);
+  const max = Number(props.max);
+  const span = max - min;
+  if (!Number.isFinite(span) || span <= 0) return 0;
+  const value = Number(displayValue.value);
+  const clamped = Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
+  return ((clamped - min) / span) * 100;
 });
 
 function endInteraction() {
@@ -36,6 +46,7 @@ function onInput(event: Event) {
   <input
     type="range"
     class="nana-slider"
+    :class="{ 'is-invalid': invalid }"
     :value="displayValue"
     :min="min"
     :max="max"
@@ -46,6 +57,7 @@ function onInput(event: Event) {
     :aria-label="ariaLabel"
     :aria-describedby="ariaDescribedby"
     :data-agent-id="agentId"
+    :style="{ '--ui-range-progress': `${progressPercent}%` }"
     @pointerdown="interacting = true"
     @pointerup="endInteraction"
     @pointercancel="endInteraction"
