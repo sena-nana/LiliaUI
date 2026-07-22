@@ -25,9 +25,6 @@ function renderWithTemplate(template: string, setup: () => Record<string, unknow
       directives: {
         contextMenu: vContextMenu,
       },
-      stubs: {
-        transition: false,
-      },
     },
   });
 }
@@ -277,12 +274,19 @@ describe("ContextMenuHost", () => {
 
   it("Esc 会关闭菜单", async () => {
     vi.useFakeTimers();
-    renderWithTemplate(
-      `<button data-testid="target" v-context-menu="items">目标</button>`,
-      () => ({
+    const Wrapper = defineComponent({
+      components: { ContextMenuHost },
+      template: `<button data-testid="target" v-context-menu="items">目标</button><ContextMenuHost />`,
+      setup: () => ({
         items: [{ id: "open", label: "打开", onSelect: vi.fn() }],
       }),
-    );
+    });
+    render(Wrapper, {
+      global: {
+        directives: { contextMenu: vContextMenu },
+        stubs: { transition: false },
+      },
+    });
 
     await fireEvent.contextMenu(screen.getByTestId("target"));
     expect(await screen.findByRole("menu")).toBeInTheDocument();
@@ -300,6 +304,66 @@ describe("ContextMenuHost", () => {
     openContextMenuAt(40, 52, [{ id: "open", label: "打开", onSelect: vi.fn() }]);
 
     await expectMenuTranslate(40, 52);
+  });
+
+  it("可搜索菜单支持分类二级菜单与查询扁平化", async () => {
+    const addInput = vi.fn();
+    const addMath = vi.fn();
+    renderWithTemplate(
+      `<button data-testid="target" v-context-menu="menu">目标</button>`,
+      () => ({
+        menu: {
+          searchable: true,
+          searchPlaceholder: "搜索节点",
+          emptyText: "没有匹配节点",
+          items: [
+            {
+              id: "input",
+              label: "Input",
+              children: [
+                { id: "input.uv", label: "UV", keywords: ["input.uv"], onSelect: addInput },
+              ],
+            },
+            {
+              id: "math",
+              label: "Math",
+              children: [
+                { id: "math.add", label: "Add", keywords: ["math.add_float"], onSelect: addMath },
+              ],
+            },
+          ],
+        },
+      }),
+    );
+
+    await fireEvent.contextMenu(screen.getByTestId("target"));
+    expect(await screen.findByRole("menuitem", { name: "Input" })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("搜索节点")).toBeInTheDocument();
+
+    await fireEvent.mouseEnter(screen.getByRole("menuitem", { name: "Input" }));
+    expect(screen.getByRole("menuitem", { name: "UV" })).toBeInTheDocument();
+
+    await fireEvent.update(screen.getByPlaceholderText("搜索节点"), "add");
+    expect(screen.queryByRole("menuitem", { name: "Input" })).toBeNull();
+    expect(screen.getByRole("menuitem", { name: "Add" })).toBeInTheDocument();
+    expect(screen.getByText("Math")).toBeInTheDocument();
+
+    await fireEvent.click(screen.getByRole("menuitem", { name: "Add" }));
+    expect(addMath).toHaveBeenCalledTimes(1);
+    expect(addInput).not.toHaveBeenCalled();
+  });
+
+  it("可搜索菜单在无匹配时显示空态", async () => {
+    render(ContextMenuHost);
+    openContextMenuAt(
+      40,
+      52,
+      [{ id: "input", label: "Input", children: [{ id: "uv", label: "UV", onSelect: vi.fn() }] }],
+      { searchable: true, searchPlaceholder: "搜索空态", emptyText: "没有匹配节点" },
+    );
+
+    await fireEvent.update(await screen.findByPlaceholderText("搜索空态"), "missing");
+    expect(screen.getByText("没有匹配节点")).toBeInTheDocument();
   });
 
   it("退场期间重新打开时应显示新的菜单内容", async () => {
