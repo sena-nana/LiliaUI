@@ -130,7 +130,6 @@ function onKeydown(event: KeyboardEvent) {
     :class="[
       `ui-range-field--${size}`,
       {
-        'ui-range-field--no-progress': !showProgress,
         'is-invalid': invalid,
         'is-disabled': inactive,
       },
@@ -252,10 +251,8 @@ function onKeydown(event: KeyboardEvent) {
   left: var(--ui-range-progress, 0%);
   width: var(--ui-range-thumb-size);
   height: var(--ui-range-thumb-size);
-  border: 0;
   border-radius: var(--radius-pill);
   background: var(--ui-range-thumb);
-  box-sizing: border-box;
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
