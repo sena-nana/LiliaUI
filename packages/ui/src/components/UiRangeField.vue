@@ -206,16 +206,10 @@ function onKeydown(event: KeyboardEvent) {
   --ui-range-thumb-active: var(--err-solid, var(--err));
 }
 
-.ui-range-field--no-progress {
-  --ui-range-thumb: var(--bg);
-  --ui-range-thumb-active: var(--bg-hover);
-  --ui-range-thumb-border: var(--accent);
-}
-
+.ui-range-field--no-progress,
 .ui-range-field--no-progress.is-invalid {
   --ui-range-thumb: var(--bg);
   --ui-range-thumb-active: var(--bg-hover);
-  --ui-range-thumb-border: var(--err);
 }
 
 .ui-range-field__track {
@@ -273,17 +267,12 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 .ui-range-field--no-progress .ui-range-field__thumb {
-  border: 1px solid var(--ui-range-thumb-border, var(--accent));
+  border: 1px solid var(--ui-range-fill);
 }
 
 .ui-range-field__track:hover:not([aria-disabled="true"]) .ui-range-field__thumb,
 .ui-range-field__track:active:not([aria-disabled="true"]) .ui-range-field__thumb {
   background: var(--ui-range-thumb-active);
-}
-
-.ui-range-field--no-progress .ui-range-field__track:hover:not([aria-disabled="true"]) .ui-range-field__thumb,
-.ui-range-field--no-progress .ui-range-field__track:active:not([aria-disabled="true"]) .ui-range-field__thumb {
-  border-color: var(--ui-range-thumb-border, var(--accent));
 }
 
 .ui-range-field.is-disabled .ui-range-field__track {
