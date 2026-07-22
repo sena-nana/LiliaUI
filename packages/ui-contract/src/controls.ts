@@ -97,10 +97,6 @@ export interface XYPadProps extends ControlStateProps, AccessibleLabelProps {
   yMax?: number;
   /** When > 0, quantize both axes to this step. */
   step?: number;
-  /** When true, pad top maps to yMax (default). */
-  yIncreasesUp?: boolean;
-  /** When true, holding Shift locks to the dominant drag axis (default). */
-  lockAxisWithShift?: boolean;
 }
 export interface XYPadEmits {
   "update:modelValue": [value: XYPadValue];
