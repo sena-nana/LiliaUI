@@ -125,9 +125,13 @@ function onInput(event: Event) {
   height: var(--ui-range-thumb-size);
   margin: 0;
   padding: 0;
+  border: 0;
+  border-radius: 0;
   appearance: none;
   -webkit-appearance: none;
   background: transparent;
+  box-shadow: none;
+  color: inherit;
   cursor: pointer;
 }
 
