@@ -30,6 +30,15 @@
   --lilia-state-indicator-selected: var(--accent);
   --lilia-state-focus-ring: var(--accent);
   --lilia-surface-css-blur: 24px;
+  --lilia-surface-opacity-raised: 0.82;
+  --lilia-surface-fill-base: var(--bg);
+  --lilia-surface-fill-raised: var(--bg-elev);
+  --lilia-backdrop-opacity: 0.64;
+  --lilia-backdrop-tint: 100% 0.006 245;
+  --lilia-surface-fill-base-translucent: transparent;
+  --lilia-surface-fill-raised-translucent: oklch(
+    var(--lilia-backdrop-tint) / var(--lilia-surface-opacity-raised)
+  );
   --border-soft: oklch(88% 0.02 245);
   --border: oklch(83% 0.03 245);
   --border-strong: oklch(73% 0.06 245);
@@ -86,6 +95,7 @@
   --lilia-color-state-selected-translucent: oklch(72% 0.15 245 / var(--lilia-alpha-selected));
   --lilia-color-state-selected-hover-translucent: oklch(72% 0.15 245 / var(--lilia-alpha-selected-hover));
   --lilia-color-state-selected-pressed-translucent: oklch(72% 0.15 245 / var(--lilia-alpha-selected-pressed));
+  --lilia-backdrop-tint: 27% 0.03 250;
   --border-soft: oklch(34% 0.035 250);
   --border: oklch(40% 0.04 250);
   --border-strong: oklch(51% 0.055 250);

@@ -42,10 +42,12 @@ function onClick(event: MouseEvent) {
 </template>
 
 <style scoped>
-.ui-interactive-card { display: block; width: 100%; min-width: 0; padding: 14px 16px; border: 1px solid transparent; border-radius: var(--radius-md); background: var(--bg-elev); color: var(--text); cursor: pointer; font: inherit; text-align: left; overflow-wrap: anywhere; transition: background-color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease; }
+.ui-interactive-card { display: block; width: 100%; min-width: 0; padding: 14px 16px; border: 1px solid transparent; border-radius: var(--radius-md); background: var(--lilia-surface-fill-raised); color: var(--text); cursor: pointer; font: inherit; text-align: left; overflow-wrap: anywhere; transition: background-color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease; }
 .ui-interactive-card--outlined { border-color: var(--border); }
 .ui-interactive-card--raised { box-shadow: var(--shadow-surface); }
-.ui-interactive-card[data-lilia-surface-mode="translucent"] { background: transparent; }
+.ui-interactive-card[data-lilia-surface-mode="translucent"] {
+  background: var(--lilia-surface-fill, var(--lilia-surface-fill-raised-translucent));
+}
 .ui-interactive-card:hover:not(:disabled) { border-color: var(--border-strong); background: var(--lilia-state-layer-hover); }
 .ui-interactive-card:active:not(:disabled) { background: var(--lilia-state-layer-pressed); }
 .ui-interactive-card.is-selected { border-color: var(--lilia-state-indicator-selected); background: var(--lilia-state-layer-selected); color: var(--lilia-state-foreground-selected); }
