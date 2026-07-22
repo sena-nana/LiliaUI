@@ -87,6 +87,27 @@ export interface SliderEmits {
   change: [event: Event];
 }
 
+export type XYPadValue = { x: number; y: number };
+
+export interface XYPadProps extends ControlStateProps, AccessibleLabelProps {
+  modelValue?: XYPadValue;
+  xMin?: number;
+  xMax?: number;
+  yMin?: number;
+  yMax?: number;
+  /** When > 0, quantize both axes to this step. */
+  step?: number;
+  /** When true, pad top maps to yMax (default). */
+  yIncreasesUp?: boolean;
+  /** When true, holding Shift locks to the dominant drag axis (default). */
+  lockAxisWithShift?: boolean;
+}
+export interface XYPadEmits {
+  "update:modelValue": [value: XYPadValue];
+  input: [event: Event];
+  change: [event: Event];
+}
+
 export interface FormFieldProps extends AgentTargetProps {
   label: string;
   hint?: string;

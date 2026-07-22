@@ -16,6 +16,7 @@ import {
   UiSpinner,
   UiSwitch,
   UiTextarea,
+  UiXYPad,
   type UiSegmentedOption,
   type UiSelectOption,
 } from "@lilia/ui";
@@ -334,5 +335,62 @@ describe("common UI components", () => {
     await fireEvent.click(sectionToggle);
     expect(sectionToggle).toHaveAttribute("aria-expanded", "false");
     expect(row).not.toBeVisible();
+  });
+
+  it("xy pad maps pointer position and locks the dominant axis with Shift", async () => {
+    const changed = vi.fn();
+    const view = render(defineComponent({
+      components: { UiXYPad },
+      setup() {
+        const value = ref({ x: 0, y: 0 });
+        return { value, changed };
+      },
+      template: `
+        <UiXYPad
+          v-model="value"
+          :x-min="-30"
+          :x-max="30"
+          :y-min="-30"
+          :y-max="30"
+          size="sm"
+          aria-label="Blend pad"
+          agent-id="demo.xy-pad"
+          @change="changed"
+        />
+        <output data-testid="xy">{{ value.x }},{{ value.y }}</output>
+      `,
+    }));
+
+    const pad = screen.getByRole("group", { name: "Blend pad" });
+    expect(pad).toHaveAttribute("data-agent-id", "demo.xy-pad");
+    expect(pad).toHaveClass("ui-xy-pad--sm");
+    pad.getBoundingClientRect = () => ({
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 100,
+      top: 0,
+      left: 0,
+      right: 100,
+      bottom: 100,
+      toJSON: () => ({}),
+    });
+
+    await fireEvent.pointerDown(pad, { button: 0, clientX: 50, clientY: 50, pointerId: 1 });
+    expect(view.getByTestId("xy").textContent).toBe("0,0");
+
+    await fireEvent.pointerMove(pad, {
+      button: 0,
+      clientX: 90,
+      clientY: 55,
+      pointerId: 1,
+      shiftKey: true,
+    });
+    const locked = view.getByTestId("xy").textContent!.split(",").map(Number);
+    expect(locked[0]).toBeCloseTo(24, 5);
+    expect(locked[1]).toBeCloseTo(0, 5);
+
+    await fireEvent.pointerUp(pad, { button: 0, clientX: 90, clientY: 55, pointerId: 1 });
+    expect(changed).toHaveBeenCalledTimes(1);
   });
 });
