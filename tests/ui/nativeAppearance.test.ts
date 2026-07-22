@@ -282,9 +282,13 @@ describe("LiliaAppearanceSection", () => {
     expect(titlebarFollow).not.toBeChecked();
     const opacity = view.getByRole("slider", { name: "材质不透明度" });
     expect(opacity).toHaveValue("64");
+    expect(opacity).toHaveAttribute("min", "28");
+    expect(opacity).toHaveAttribute("max", "92");
     expect(opacity).toHaveAttribute("data-agent-id", "settings.appearance.backdrop-opacity");
 
-    await fireEvent.update(opacity, "70");
+    await fireEvent.input(opacity, { target: { value: "50" } });
+    await fireEvent.input(opacity, { target: { value: "70" } });
+    expect(opacity).toHaveValue("70");
     expect(document.documentElement.style.getPropertyValue("--lilia-backdrop-opacity")).toBe("0.7");
     expect(localStorage.getItem("lilia-ui-test.backdropOpacity")).toBe("0.7");
 

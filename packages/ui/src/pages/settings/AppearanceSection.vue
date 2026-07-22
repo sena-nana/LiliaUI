@@ -220,8 +220,8 @@ function onBackdropTargetChange(value: string | number) {
     >
       <UiRangeField
         v-model="backdropOpacityPercent"
-        :min="BACKDROP_OPACITY_MIN * 100"
-        :max="BACKDROP_OPACITY_MAX * 100"
+        :min="Math.round(BACKDROP_OPACITY_MIN * 100)"
+        :max="Math.round(BACKDROP_OPACITY_MAX * 100)"
         :step="1"
         unit="%"
         aria-label="材质不透明度"
