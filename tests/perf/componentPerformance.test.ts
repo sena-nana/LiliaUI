@@ -8,13 +8,6 @@ import * as publicUiProviderExports from "../../packages/ui/src/provider/index";
 import * as publicUiSearchExports from "../../packages/ui/src/search";
 import * as publicUiSettingsExports from "../../packages/ui/src/settings/index";
 import * as publicUiShellExports from "../../packages/ui/src/shell";
-import * as publicNanaExports from "../../packages/nana-ui/src/index";
-import * as publicNanaConsumerExports from "../../packages/nana-ui/src/consumer/index";
-import * as publicNanaFeedbackExports from "../../packages/nana-ui/src/feedback/index";
-import * as publicNanaPatternExports from "../../packages/nana-ui/src/patterns/index";
-import * as publicNanaProviderExports from "../../packages/nana-ui/src/provider/index";
-import * as publicNanaSettingsExports from "../../packages/nana-ui/src/settings/index";
-import * as publicNanaShellExports from "../../packages/nana-ui/src/shell/index";
 import {
   type ComponentPerfReport,
   compareComponentPerfReport,
@@ -74,13 +67,6 @@ describe("component performance scenarios", () => {
       ...missingScenarios(publicUiSearchExports, coveredNames),
       ...missingScenarios(publicUiSettingsExports, coveredNames),
       ...missingScenarios(publicUiShellExports, coveredNames),
-      ...missingScenarios(publicNanaExports, coveredNames),
-      ...missingScenarios(publicNanaConsumerExports, coveredNames),
-      ...missingScenarios(publicNanaFeedbackExports, coveredNames),
-      ...missingScenarios(publicNanaPatternExports, coveredNames),
-      ...missingScenarios(publicNanaProviderExports, coveredNames),
-      ...missingScenarios(publicNanaSettingsExports, coveredNames),
-      ...missingScenarios(publicNanaShellExports, coveredNames),
     ];
     expect(uniqueScenarioNames).toHaveLength(scenarioNames.length);
     expect(missingComponents).toEqual([]);

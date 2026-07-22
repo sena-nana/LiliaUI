@@ -20,16 +20,12 @@ describe("@lilia/config", () => {
     );
   });
 
-  it("validates Nana UI, layout, and onboarding config", () => {
+  it("validates Lilia UI and onboarding config", () => {
     const config = createAppConfig({
       ui: {
-        preset: "nana",
+        preset: "lilia",
         density: "comfortable",
         accent: "blue",
-      },
-      layout: {
-        type: "nana-editor",
-        sidebar: { collapsible: true },
       },
       onboarding: { enabled: true },
     });
@@ -40,25 +36,15 @@ describe("@lilia/config", () => {
 
   it.each([
     [{ ui: { preset: "consumer" } }, /ui\.preset/],
-    [{ ui: { preset: "nana", density: "dense" } }, /ui\.density/],
-    [{ ui: { preset: "nana", accent: "red" } }, /ui\.accent/],
-    [{ ui: { preset: "nana", theme: "dark" } }, /ui\.theme/],
-    [{ ui: { preset: "nana" }, layout: { type: "dashboard" } }, /layout\.type/],
-    [
-      { ui: { preset: "nana" }, layout: { type: "nana-editor", sidebar: {} } },
-      /layout\.sidebar\.collapsible/,
-    ],
+    [{ ui: { preset: "nana" } }, /ui\.preset/],
+    [{ ui: { preset: "lilia", density: "dense" } }, /ui\.density/],
+    [{ ui: { preset: "lilia", accent: "red" } }, /ui\.accent/],
+    [{ ui: { preset: "lilia", theme: "dark" } }, /ui\.theme/],
+    [{ layout: { type: "nana-home" } }, /layout/],
     [{ onboarding: { enabled: "yes" } }, /onboarding\.enabled/],
     [{ onboarding: { enabled: true, skippable: true } }, /onboarding\.skippable/],
   ])("rejects unsupported app config values %#", (extension, expectedError) => {
     expect(() => validateAppConfig(createAppConfig(extension))).toThrow(expectedError);
-  });
-
-  it("requires Nana preset when a Nana page layout is configured", () => {
-    expect(() => validateAppConfig(createAppConfig({
-      ui: { preset: "lilia" },
-      layout: { type: "nana-home" },
-    }))).toThrow(/ui\.preset/);
   });
 
   it("syncs app config into package, Tauri config, and Cargo metadata", () => {

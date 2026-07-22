@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-07-22 — 移除官方 NanaUI
+
+### Contract breaking
+
+- 删除 `@lilia/nana-ui`、`examples/nana-basic` 及全部官方 Nana 导出、测试、视觉与性能场景。
+- `AppUIPreset` / `UIPreset.id` 仅保留 `"lilia"`；`app.config.json` 拒绝 `ui.preset = "nana"` 与已移除的 `layout`。业务样式分叉由消费应用自行实现。
+
+### Validation and performance
+
+- 移除 Nana 专项测试与 `nana-layer` 视觉基线；验证收敛到 `@lilia/ui`。根脚本与 UI 边界检查不再包含 `nana-ui`。
+
 ## 2026-07-21 — 删除迁移骨架并新增组合 Shell
 
 ### Contract breaking

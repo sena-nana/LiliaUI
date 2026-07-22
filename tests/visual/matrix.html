@@ -16,17 +16,16 @@
   <body>
     <main id="matrix"></main>
     <script>
-      const layer = new URLSearchParams(location.search).get("layer") === "nana" ? "nana" : "lilia";
       const matrix = document.querySelector("#matrix");
       for (const theme of ["light", "dark"]) {
         for (const density of ["comfortable", "compact"]) {
           const figure = document.createElement("figure");
           const caption = document.createElement("figcaption");
           const frame = document.createElement("iframe");
-          caption.textContent = `${layer} / ${theme} / ${density}`;
+          caption.textContent = `lilia / ${theme} / ${density}`;
           frame.title = caption.textContent;
           const focus = theme === "dark" && density === "compact" ? "1" : "0";
-          frame.src = `/tests/visual/harness.html?layer=${layer}&theme=${theme}&density=${density}&focus=${focus}`;
+          frame.src = `/tests/visual/harness.html?theme=${theme}&density=${density}&focus=${focus}`;
           figure.append(caption, frame);
           matrix.append(figure);
         }

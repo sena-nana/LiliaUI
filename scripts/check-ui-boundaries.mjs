@@ -2,7 +2,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { extname, join, relative, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
-const packageRoots = ["ui-contract", "ui-foundation", "ui", "nana-ui"]
+const packageRoots = ["ui-contract", "ui-foundation", "ui"]
   .map((name) => resolve(root, "packages", name));
 const sourceFiles = packageRoots.flatMap((packageRoot) => walk(resolve(packageRoot, "src")));
 const violations = [];
@@ -24,14 +24,8 @@ for (const file of sourceFiles) {
   if (name.startsWith("packages/ui-contract/") && /from\s+["'](?:vue|@lilia\/|.*\.css)/.test(source)) {
     violations.push(`${name}: ui-contract must remain type-first and visual-layer independent`);
   }
-  if (name.startsWith("packages/ui-foundation/") && /from\s+["']@lilia\/(?:ui|nana-ui)(?:\/|["'])/.test(source)) {
+  if (name.startsWith("packages/ui-foundation/") && /from\s+["']@lilia\/ui(?:\/|["'])/.test(source)) {
     violations.push(`${name}: ui-foundation cannot depend on a visual layer`);
-  }
-  if (name.startsWith("packages/ui/") && /from\s+["']@lilia\/nana-ui(?:\/|["'])/.test(source)) {
-    violations.push(`${name}: Professional Layer cannot depend on nana-ui`);
-  }
-  if (name.startsWith("packages/nana-ui/") && /from\s+["']@lilia\/ui(?:\/|["'])/.test(source)) {
-    violations.push(`${name}: nana-ui cannot depend on the Professional Layer`);
   }
 }
 

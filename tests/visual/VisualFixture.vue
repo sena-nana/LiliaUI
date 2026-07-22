@@ -3,19 +3,12 @@ import type { VisualLayerComponents } from "./types";
 
 const props = defineProps<{
   density: "comfortable" | "compact";
-  layer: "lilia" | "nana";
   longText: boolean;
   theme: "light" | "dark";
   ui: VisualLayerComponents;
 }>();
 
-const providerProps = props.layer === "nana"
-  ? {
-      theme: props.theme,
-      policy: { density: props.density },
-      storageKeyPrefix: `visual-${props.theme}-${props.density}`,
-    }
-  : { class: "visual-provider", "data-density": props.density };
+const providerProps = { class: "visual-provider", "data-density": props.density };
 const longLabel = props.longText
   ? "这是用于验证百分之二百缩放和连续超长内容不会遮挡关键操作的应用状态说明-example.with.a.very.long.identifier.without-spaces"
   : "长文本应换行，关键操作保持可见。";
@@ -23,9 +16,9 @@ const longLabel = props.longText
 
 <template>
   <component :is="ui.Provider ?? 'div'" v-bind="providerProps">
-    <main class="visual-fixture" :data-layer="layer" data-visual-critical="fixture">
+    <main class="visual-fixture" data-layer="lilia" data-visual-critical="fixture">
       <header>
-        <div><strong>{{ layer === "nana" ? "NanaUI" : "LiliaUI" }}</strong><span>{{ theme }} · {{ density }}</span></div>
+        <div><strong>LiliaUI</strong><span>{{ theme }} · {{ density }}</span></div>
         <component :is="ui.StatusBadge" label="运行正常" tone="success" />
       </header>
       <component :is="ui.Card" variant="outlined" selected data-visual-critical="card">
@@ -96,7 +89,7 @@ body { overflow: auto !important; background: var(--bg); }
 .visual-fixture > header { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 8px; }
 .visual-fixture > header > div { display: flex; min-width: 0; flex-direction: column; }
 .visual-fixture > header span { color: var(--text-muted); font-size: 12px; }
-.visual-fixture .nana-card, .visual-fixture .ui-card { display: grid; min-width: 0; gap: 9px; padding: 12px; }
+.visual-fixture .ui-card { display: grid; min-width: 0; gap: 9px; padding: 12px; }
 .visual-long { min-width: 0; margin: 0; color: var(--text-muted); overflow-wrap: anywhere; }
 .visual-actions { display: flex; min-width: 0; flex-wrap: wrap; gap: 7px; }
 .visual-surfaces { display: grid; min-width: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }

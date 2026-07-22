@@ -4,12 +4,11 @@ import {
   recordAgentDebugLog,
   uninstallAgentDebugHarness,
 } from "@lilia/ui/diagnostics";
-import * as NanaDiagnostics from "@lilia/nana-ui/diagnostics";
 
 describe("Agent debug harness", () => {
-  it("shares the same visual-layer-neutral diagnostics implementation", () => {
-    expect(NanaDiagnostics.installAgentDebugHarness).toBe(installAgentDebugHarness);
-    expect(NanaDiagnostics.recordAgentDebugLog).toBe(recordAgentDebugLog);
+  it("installs a visual-layer-neutral diagnostics API", () => {
+    expect(installAgentDebugHarness).toBeTypeOf("function");
+    expect(recordAgentDebugLog).toBeTypeOf("function");
   });
   it("observes and operates stable data-agent-id targets", async () => {
     let clicks = 0;

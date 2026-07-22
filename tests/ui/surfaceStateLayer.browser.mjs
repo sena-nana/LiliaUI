@@ -5,7 +5,6 @@ import { launchChromium } from "../browser/chromium.ts";
 
 const layerStyles = [
   ["lilia", "packages/ui/src/styles/tokens.css", "packages/ui/src/styles/state-layer.css"],
-  ["nana", "packages/nana-ui/src/styles/tokens.css", "packages/nana-ui/src/styles/state-layer.css"],
 ];
 const workspaceStyles = [
   "packages/ui/src/styles/tokens.css",

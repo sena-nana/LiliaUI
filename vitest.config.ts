@@ -33,7 +33,6 @@ export default defineConfig({
     server: {
       deps: {
         inline: [
-          "@lilia/nana-ui",
           "@lilia/ui",
           "@lilia/ui-contract",
           "@lilia/ui-foundation",

@@ -58,7 +58,6 @@ import { createMemoryHistory, createRouter } from "vue-router";
 import { testAppConfig } from "../ui/fixtures/appConfig";
 import type { ComponentPerfRunner } from "./componentPerformanceRunner";
 import { professionalContractComponentScenarios } from "./scenarios/professionalContractComponents";
-import { nanaComponentScenarios } from "./scenarios/nana";
 import { publicSubpathComponentScenarios } from "./scenarios/publicSubpathComponents";
 
 export interface ComponentPerfScenario {
@@ -324,7 +323,6 @@ let resizeFrames: ReturnType<typeof captureAnimationFrames> | null = null;
 
 export const componentPerformanceScenarios: ComponentPerfScenario[] = [
   ...professionalContractComponentScenarios,
-  ...nanaComponentScenarios,
   ...publicSubpathComponentScenarios,
   {
     name: "ActionMenuItem",

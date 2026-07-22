@@ -11,7 +11,7 @@ export interface UIPolicy {
 }
 
 export interface UIPreset {
-  id: "lilia" | "nana";
+  id: "lilia";
   policy: UIPolicy;
   defaultDensity: UIDensity;
   capabilities: readonly string[];

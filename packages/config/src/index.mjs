@@ -6,7 +6,6 @@ import { defineConfig as defineVitePressConfig } from "vitepress";
 
 export { calculateNextVersion } from "./version.mjs";
 export {
-  APP_LAYOUT_TYPES,
   APP_UI_ACCENTS,
   APP_UI_DENSITIES,
   APP_UI_PRESETS,

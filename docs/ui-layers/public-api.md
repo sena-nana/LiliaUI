@@ -23,32 +23,18 @@
 | `@lilia/ui/runtime/tauri` | Native Appearance 的显式 Tauri adapter |
 | `@lilia/ui/commands` | 独立 command registry |
 | `@lilia/ui/diagnostics` | 显式加载的 Agent Debug 与性能诊断 |
-| `@lilia/nana-ui/preset/definition` | 不加载 Shell 的 Nana preset 元数据与默认 policy |
-| `@lilia/nana-ui/provider` | Nana Policy Provider 与 context |
-| `@lilia/nana-ui/shell` | Router-free NanaAppShell、组合 NanaDesktopShell 与分组 NanaSidebar |
 
 历史 `components/<name>`、`composables/<name>` 与 `layouts/PopupShell` 只对已经公开的确定路径保留显式兼容映射；不再允许通配路径。新代码使用上表中的职责入口。
 
-两个 Layer 的根入口只承载 Contract 基础组件；Provider、Shell、Settings 与 Commands 从明确 subpath 导入。Lilia 新模板继续优先从 `shell/app`、`shell/sidebar`、`shell/config` 按职责导入，避免不相关 CSS 进入 bundle。
+根入口只承载 Contract 基础组件；Provider、Shell、Settings 与 Commands 从明确 subpath 导入。Lilia 新模板继续优先从 `shell/app`、`shell/sidebar`、`shell/config` 按职责导入，避免不相关 CSS 进入 bundle。
 
-应用可从对应 Layer 的 `preset/definition` 读取无 Shell side effect 的 metadata，或从 `preset` 取得包含 Router-free Shell 与 Provider 的完整 adapter。Router、导航、业务布局和 Settings 路由均由应用显式组合。
+应用可从 `preset/definition` 读取无 Shell side effect 的 metadata，或从 `preset` 取得包含 Router-free Shell 与 Provider 的完整 adapter。Router、导航、业务布局和 Settings 路由均由应用显式组合。
 
 组件根 class 已使用 `ui-*`、`lilia-*`、`ctx-*`、`settings-*` 等公共命名空间时，样式保持显式组件根选择器而不重复生成 Vue scope 属性；这不会扩大选择器职责，并可避免消费 bundle 的机械性 CSS 膨胀。
 
 LiliaTemplate 迁移后的生产构建报告为 CSS `42,755 / 42,890` bytes、4 个异步 chunk；预算与最小异步 chunk 数均未放宽。
 
-`@lilia/nana-ui` 同样使用显式 allowlist，并提供以下桌面应用入口：
-
-| 入口 | 稳定职责 |
-| --- | --- |
-| `@lilia/nana-ui` | Nana Contract 通用组件与 Provider |
-| `@lilia/nana-ui/shell` | NanaAppShell、NanaDesktopShell、NanaTitleBar 与分组 NanaSidebar |
-| `@lilia/nana-ui/settings` | Settings model、Tab 页面、外观与关于区块 |
-| `@lilia/nana-ui/runtime` | 浏览器安全的 Native Appearance adapter 契约 |
-| `@lilia/nana-ui/runtime/tauri` | 复用 tauri-plugin-lilia backdrop 命令的 Tauri adapter |
-| `@lilia/nana-ui/diagnostics` | 与视觉 Layer 无关的 Agent Debug harness |
-
-应用通过本地 `src/ui` facade 使用上述入口；preset 与依赖来源的切换由应用自行管理，业务代码不得直接混用 Nana 与 Professional Layer。
+`@lilia/nana-ui` 已移除，不再作为官方公共入口。
 
 ## Contract 审计结果
 
@@ -63,12 +49,12 @@ LiliaTemplate 迁移后的生产构建报告为 CSS `42,755 / 42,890` bytes、4 
 | Tabs / SegmentedControl | `TabsProps<T>` / `SegmentedControlProps<T>` | 共享 roving focus、Home/End、disabled、空/动态 options |
 | Card / InteractiveCard / ListItem | 对应 Contract props | selected、disabled、select/press/click |
 
-两层行为 fixture 位于 `tests/ui/contractLayerConformance.test.ts`；双 Layer 类型与生产构建 fixture 位于 `examples/contract-layers`。
+行为 fixture 位于 `tests/ui/contractLayerConformance.test.ts`；Contract 类型与生产构建 fixture 位于 `examples/contract-layers`。
 
 文本 Input 接受 `string | number` 作为显示值，但与原生 input 一致始终 emit `string`。Select 按 options 查回原值并保持 `string | number` 的实际类型，找不到匹配项时不发出 model update，避免运行时类型漂移。
 
 ## 平台依赖审计
 
 - `@lilia/ui-foundation` 的 settings 使用中性 `NavigationTarget`，没有 Router 运行时或类型 peer dependency。
-- Router adapter 留在 Professional/Nana 的具体页面和 Shell。
+- Router adapter 留在 Professional Layer 的具体页面和 Shell。
 - `useNativeAppearance` 与 `@lilia/ui/runtime` 不静态导入或调用 Tauri。桌面应用从 `@lilia/ui/runtime/tauri` 显式安装 adapter；浏览器和测试在没有 adapter 时仍保持完整 CSS 状态。`@lilia/ui` 现有 TitleBar 窗口控制仍使用 Tauri API，因此包依赖保持向后兼容。

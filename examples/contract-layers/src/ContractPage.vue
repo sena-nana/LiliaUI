@@ -89,7 +89,7 @@ const views = [
     <Dialog
       :open="dialogOpen"
       title="共享 Contract"
-      description="同一页面可以由 LiliaUI 或 NanaUI 编译。"
+      description="同一页面使用官方 @lilia/ui Contract 组件编译。"
       @close="dialogOpen = false"
     >
       <p>{{ name }}：{{ enabled ? "已启用" : "未启用" }}</p>
