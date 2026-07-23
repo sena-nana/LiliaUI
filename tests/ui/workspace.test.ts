@@ -170,6 +170,29 @@ describe("Workspace Region layout", () => {
     expect(region(view.container, "console")).toHaveAttribute("data-edge-bottom", "true");
   });
 
+  it("keeps primary left radius when primary owns the start edge", async () => {
+    const view = render(LiliaWorkspace, {
+      slots: {
+        default: () => [
+          h(LiliaWorkspaceRegion, {
+            id: "editor-tools",
+            role: "utility",
+            placement: "top",
+            scope: "primary",
+          }, () => "Toolbar"),
+          h(LiliaPrimaryContent, { id: "primary" }, () => "Editor"),
+          h(LiliaInspector, { id: "inspector" }, () => "Inspector"),
+        ],
+      },
+    });
+    await nextTick();
+
+    const primary = region(view.container, "primary");
+    expect(primary).toHaveAttribute("data-edge-start", "true");
+    expect(getComputedStyle(primary).borderTopLeftRadius).not.toBe("0px");
+    expect(getComputedStyle(primary).borderBottomLeftRadius).not.toBe("0px");
+  });
+
   it("recomputes attached edges and separators after independently hiding regions", async () => {
     const Fixture = defineComponent({
       setup() {

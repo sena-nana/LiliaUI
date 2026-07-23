@@ -157,19 +157,9 @@
   contain: content;
 }
 
-.lilia-workspace-region--primary[data-edge-start="true"] {
-  border-start-start-radius: 0;
-  border-end-start-radius: 0;
-}
-
-.lilia-workspace-region--primary[data-edge-end="true"] {
-  border-start-end-radius: 0;
-  border-end-end-radius: 0;
-}
-
 .lilia-workspace-region--primary > .lilia-workspace-region__content {
   padding: var(--lilia-primary-inset, 20px 24px);
-  border-radius: inherit;
+  border-radius: var(--lilia-primary-corner-radius);
 }
 
 @media (max-width: 760px) {
