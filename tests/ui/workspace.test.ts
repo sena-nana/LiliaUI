@@ -141,19 +141,33 @@ describe("Workspace Region layout", () => {
     expect(region(view.container, "primary")).toHaveAttribute("data-lilia-surface-boundary");
   });
 
-  it("keeps primary top-left radius when a start region is attached", async () => {
+  it("keeps primary corners when start regions and toolbars are attached", async () => {
     const view = render(LiliaWorkspace, {
       slots: {
         default: () => [
           h(LiliaSectionNavigation, { id: "sections" }, () => "Nav"),
+          h(LiliaWorkspaceRegion, {
+            id: "editor-tools",
+            role: "utility",
+            placement: "top",
+            scope: "primary",
+          }, () => "Toolbar"),
           h(LiliaPrimaryContent, { id: "primary" }, () => "Editor"),
+          h(LiliaBottomPanel, { id: "console", role: "console" }, () => "Console"),
+          h(LiliaInspector, { id: "inspector" }, () => "Inspector"),
         ],
       },
     });
     await nextTick();
 
+    const primary = region(view.container, "primary");
     expect(region(view.container, "sections")).toHaveAttribute("data-edge-start", "true");
-    expect(region(view.container, "primary")).not.toHaveAttribute("data-edge-start");
+    expect(primary).not.toHaveAttribute("data-edge-start");
+    expect(primary).not.toHaveAttribute("data-edge-end");
+    expect(primary).not.toHaveAttribute("data-edge-top");
+    expect(primary).not.toHaveAttribute("data-edge-bottom");
+    expect(region(view.container, "editor-tools")).toHaveAttribute("data-edge-top", "true");
+    expect(region(view.container, "console")).toHaveAttribute("data-edge-bottom", "true");
   });
 
   it("recomputes attached edges and separators after independently hiding regions", async () => {
