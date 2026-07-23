@@ -25,6 +25,30 @@ const TestIcon = defineComponent({
   template: `<svg aria-hidden="true" />`,
 });
 
+async function stepSlider(slider: HTMLElement, steps: number) {
+  const key = steps < 0 ? "ArrowLeft" : "ArrowRight";
+  for (let i = 0; i < Math.abs(steps); i += 1) {
+    await fireEvent.keyDown(slider, { key });
+  }
+}
+
+function mockSliderTrack(slider: HTMLElement, width = 100) {
+  slider.getBoundingClientRect = () => ({
+    x: 0,
+    y: 0,
+    width,
+    height: 14,
+    top: 0,
+    left: 0,
+    right: width,
+    bottom: 14,
+    toJSON: () => ({}),
+  });
+  Object.defineProperty(slider, "setPointerCapture", { configurable: true, value: () => undefined });
+  Object.defineProperty(slider, "hasPointerCapture", { configurable: true, value: () => true });
+  Object.defineProperty(slider, "releasePointerCapture", { configurable: true, value: () => undefined });
+}
+
 describe("common UI components", () => {
   it("invokes enabled button actions and blocks disabled icon buttons", async () => {
     const action = vi.fn();
@@ -176,7 +200,7 @@ describe("common UI components", () => {
     expect(screen.getByRole("radio", { name: "A" })).toHaveAttribute("aria-checked", "true");
 
     await fireEvent.click(screen.getByRole("radio", { name: "B" }));
-    await fireEvent.update(screen.getByRole("slider", { name: "Size" }), "7");
+    await stepSlider(screen.getByRole("slider", { name: "Size" }), 3);
 
     expect(screen.getByRole("radio", { name: "B" })).toHaveAttribute("aria-checked", "true");
     expect(view.container.querySelector(".settings-row:not(.settings-row--divided)")).toBeInTheDocument();
@@ -218,10 +242,11 @@ describe("common UI components", () => {
     expect(slider.closest(".ui-range-field")).toHaveClass("ui-range-field--sm");
     expect(slider.closest(".ui-range-field")?.querySelector("output")).toBeNull();
 
-    await fireEvent.change(slider, { target: { value: "6" } });
+    await stepSlider(slider, 1);
     await fireEvent.update(screen.getByRole("combobox", { name: "Mode" }), "2");
 
     expect(changed).toHaveBeenCalledTimes(1);
+    expect(slider).toHaveAttribute("aria-valuenow", "6");
     expect(view.getByTestId("typed-value")).toHaveTextContent("number:2");
     expect(screen.getByRole("option", { name: "Unavailable" })).toBeDisabled();
   });
@@ -270,29 +295,28 @@ describe("common UI components", () => {
 
     const slider = screen.getByRole("slider", { name: "Size" });
     const output = slider.closest(".ui-range-field")?.querySelector("output");
+    mockSliderTrack(slider);
 
-    await fireEvent.input(slider, { target: { value: "5" } });
-    await fireEvent.input(slider, { target: { value: "6" } });
-    await fireEvent.input(slider, { target: { value: "7" } });
-
-    expect(slider).toHaveValue("7");
+    await stepSlider(slider, 3);
+    expect(slider).toHaveAttribute("aria-valuenow", "7");
     expect(output).toHaveTextContent("7px");
-    expect(view.getByTestId("values")).toHaveTextContent("7");
 
-    await fireEvent.pointerDown(slider);
-    await fireEvent.input(slider, { target: { value: "8" } });
-    expect(slider).toHaveValue("8");
-    expect(output).toHaveTextContent("8px");
+    await fireEvent.pointerDown(slider, { button: 0, clientX: 100, pointerId: 1 });
+    expect(slider).toHaveAttribute("aria-valuenow", "8");
     expect(view.getByTestId("values")).toHaveTextContent("8");
 
     forceStale();
     await Promise.resolve();
     expect(view.getByTestId("values")).toHaveTextContent("4");
-    expect(slider).toHaveValue("8");
+    expect(slider).toHaveAttribute("aria-valuenow", "8");
     expect(output).toHaveTextContent("8px");
 
-    await fireEvent.pointerUp(slider);
-    expect(slider).toHaveValue("4");
+    await fireEvent.pointerUp(slider, { button: 0, clientX: 100, pointerId: 1 });
+    expect(view.getByTestId("values")).toHaveTextContent("8");
+
+    forceStale();
+    await Promise.resolve();
+    expect(slider).toHaveAttribute("aria-valuenow", "4");
     expect(output).toHaveTextContent("4px");
   });
 

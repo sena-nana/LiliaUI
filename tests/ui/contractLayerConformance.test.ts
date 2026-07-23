@@ -74,9 +74,12 @@ describe("Lilia Contract layer", () => {
     const slider = render(api.Slider, {
       props: { modelValue: 5, min: 0, max: 10, invalid: true, ariaLabel: "Level" },
     });
-    await fireEvent.update(slider.getByRole("slider", { name: "Level" }), "7");
-    expect(slider.emitted("update:modelValue")?.[0]).toEqual([7]);
-    expect(slider.getByRole("slider", { name: "Level" })).toHaveAttribute("aria-invalid", "true");
+    const level = slider.getByRole("slider", { name: "Level" });
+    await fireEvent.keyDown(level, { key: "ArrowRight" });
+    await fireEvent.keyDown(level, { key: "ArrowRight" });
+    expect(slider.emitted("update:modelValue")?.at(-1)).toEqual([7]);
+    expect(level).toHaveAttribute("aria-valuenow", "7");
+    expect(level).toHaveAttribute("aria-invalid", "true");
 
     const iconButton = render(api.IconButton, {
       props: { icon: TestIcon, label: "Tools", active: true, invalid: true },
