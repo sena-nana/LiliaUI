@@ -145,24 +145,31 @@
 .lilia-workspace-region--section-navigation,
 .lilia-workspace-region--resources,
 .lilia-workspace-region--inspector,
-.lilia-workspace-region--bottom {
+.lilia-workspace-region--bottom,
+.lilia-workspace-region[data-region-placement="top"] {
   --lilia-region-surface: var(--lilia-surface-fill-raised, var(--bg-elev));
 }
 
 .lilia-workspace-region--primary {
   --lilia-region-surface: var(--lilia-surface-fill-base, var(--bg));
   --lilia-primary-corner-radius: var(--radius-lg);
-  border-top-left-radius: var(--lilia-primary-corner-radius);
+  border-radius: var(--lilia-primary-corner-radius);
   contain: content;
 }
 
 .lilia-workspace-region--primary[data-edge-start="true"] {
-  --lilia-primary-corner-radius: 0;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.lilia-workspace-region--primary[data-edge-end="true"] {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
 }
 
 .lilia-workspace-region--primary > .lilia-workspace-region__content {
   padding: var(--lilia-primary-inset, 20px 24px);
-  border-top-left-radius: var(--lilia-primary-corner-radius);
+  border-radius: inherit;
 }
 
 @media (max-width: 760px) {
