@@ -281,19 +281,18 @@ describe("LiliaAppearanceSection", () => {
     expect(titlebarFollow).toBeDisabled();
     expect(titlebarFollow).not.toBeChecked();
     const opacity = view.getByRole("slider", { name: "材质不透明度" });
-    expect(opacity).toHaveValue("64");
-    expect(opacity).toHaveAttribute("min", "28");
-    expect(opacity).toHaveAttribute("max", "92");
+    expect(opacity).toHaveAttribute("aria-valuenow", "64");
+    expect(opacity).toHaveAttribute("aria-valuemin", "28");
+    expect(opacity).toHaveAttribute("aria-valuemax", "92");
     expect(opacity).toHaveAttribute("data-agent-id", "settings.appearance.backdrop-opacity");
 
-    await fireEvent.input(opacity, { target: { value: "50" } });
-    await fireEvent.input(opacity, { target: { value: "70" } });
-    expect(opacity).toHaveValue("70");
+    for (let i = 0; i < 6; i += 1) await fireEvent.keyDown(opacity, { key: "ArrowRight" });
+    expect(opacity).toHaveAttribute("aria-valuenow", "70");
     expect(document.documentElement.style.getPropertyValue("--lilia-backdrop-opacity")).toBe("0.7");
     expect(localStorage.getItem("lilia-ui-test.backdropOpacity")).toBe("0.7");
 
     await fireEvent.click(view.getByRole("radio", { name: "实色" }));
-    expect(opacity).toBeDisabled();
+    expect(opacity).toHaveAttribute("aria-disabled", "true");
     expect(sidebarTarget).toBeDisabled();
     expect(mainTarget).toBeDisabled();
     expect(titlebarFollow).toBeDisabled();
