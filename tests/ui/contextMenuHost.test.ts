@@ -342,6 +342,13 @@ describe("ContextMenuHost", () => {
 
     await fireEvent.mouseEnter(screen.getByRole("menuitem", { name: "Input" }));
     expect(screen.getByRole("menuitem", { name: "UV" })).toBeInTheDocument();
+    const rootMenu = document.querySelector<HTMLElement>("[data-agent-id='context-menu']");
+    const submenu = document.querySelector<HTMLElement>("[data-agent-id='context-menu.submenu.input']");
+    expect(rootMenu).toBeTruthy();
+    expect(submenu).toBeTruthy();
+    expect(submenu!.getBoundingClientRect().left).toBeGreaterThanOrEqual(
+      rootMenu!.getBoundingClientRect().right - 1,
+    );
 
     await fireEvent.update(screen.getByPlaceholderText("搜索节点"), "add");
     expect(screen.queryByRole("menuitem", { name: "Input" })).toBeNull();
