@@ -210,7 +210,7 @@ watch(searchMatches, (matches) => {
           >
         </label>
 
-        <template v-if="isSearching">
+        <div v-if="isSearching" class="ctx-menu__scroll">
           <button
             v-for="(match, index) in searchMatches"
             :key="match.item.id ?? `${match.groupLabel ?? ''}:${match.item.label}:${index}`"
@@ -232,7 +232,7 @@ watch(searchMatches, (matches) => {
             <small v-if="match.groupLabel" class="ctx-menu__meta" aria-hidden="true">{{ match.groupLabel }}</small>
           </button>
           <p v-if="searchMatches.length === 0" class="ctx-menu__empty">{{ state.emptyText }}</p>
-        </template>
+        </div>
 
         <template v-else>
           <div
@@ -304,7 +304,6 @@ watch(searchMatches, (matches) => {
   top: 0;
   min-width: 180px;
   max-width: min(320px, calc(100vw - 8px));
-  max-height: min(420px, calc(100vh - 8px));
   padding: 4px;
   background: var(--bg-elev);
   color: var(--text);
@@ -314,14 +313,22 @@ watch(searchMatches, (matches) => {
   display: flex;
   flex-direction: column;
   gap: 1px;
-  overflow: auto;
+  overflow: visible;
   user-select: none;
-  contain: layout style;
+  contain: style;
   transform-origin: var(--sb-menu-origin-x, 0px) var(--sb-menu-origin-y, 0px);
 }
 
 .ctx-menu--searchable {
   min-width: 220px;
+}
+
+.ctx-menu__scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-height: min(420px, calc(100vh - 8px));
+  overflow: auto;
 }
 
 .ctx-menu__search {
@@ -431,7 +438,7 @@ watch(searchMatches, (matches) => {
 
 .ctx-menu__submenu {
   position: absolute;
-  left: calc(100% + 5px);
+  left: calc(100% - 1px);
   top: -4px;
   z-index: 1;
   min-width: 180px;
