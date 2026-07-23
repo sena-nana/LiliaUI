@@ -24,21 +24,21 @@ defineEmits<ToastEmits>();
       <slot />
     </div>
     <button v-if="dismissible" class="ui-toast__dismiss" type="button" aria-label="关闭通知" @click="$emit('dismiss')">
-      <X :size="15" aria-hidden="true" />
+      <X :size="12" aria-hidden="true" />
     </button>
   </section>
 </template>
 
 <style scoped>
-.ui-toast { display: flex; width: min(360px, 92vw); min-width: 0; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 11px 12px; border: 1px solid var(--border-soft); border-left: 3px solid var(--text-muted); border-radius: var(--radius-md); background: var(--bg-elev); box-shadow: var(--shadow-menu); color: var(--text); }
-.ui-toast--info { border-left-color: var(--accent); }
-.ui-toast--success { border-left-color: var(--ok); }
-.ui-toast--warning { border-left-color: var(--warn); }
-.ui-toast--error { border-left-color: var(--err); }
+.ui-toast { display: flex; width: min(240px, 92vw); min-width: 0; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 6px 8px; border: 0; border-radius: var(--radius-sm); background: var(--bg-subtle); box-shadow: var(--shadow-menu); color: var(--text); }
+.ui-toast--info { background: var(--accent-soft); color: var(--accent); }
+.ui-toast--success { background: var(--ok-soft); color: var(--ok); }
+.ui-toast--warning { background: var(--warn-soft); color: var(--warn); }
+.ui-toast--error { background: var(--err-soft); color: var(--err); }
 .ui-toast__content { min-width: 0; }
-.ui-toast__title { display: block; font-size: 13px; overflow-wrap: anywhere; }
-.ui-toast__description { margin: 3px 0 0; color: var(--text-muted); font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
-.ui-toast__dismiss { display: inline-grid; width: 26px; height: 26px; flex: 0 0 26px; place-items: center; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-muted); cursor: pointer; }
-.ui-toast__dismiss:hover { background: var(--bg-hover); color: var(--text); }
+.ui-toast__title { display: block; font-size: 12px; font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
+.ui-toast__description { margin: 2px 0 0; opacity: 0.85; font-size: 11px; font-weight: 400; line-height: 1.4; overflow-wrap: anywhere; }
+.ui-toast__dismiss { display: inline-grid; width: 20px; height: 20px; flex: 0 0 20px; place-items: center; border: 0; border-radius: var(--radius-xs); background: transparent; color: inherit; opacity: 0.7; cursor: pointer; }
+.ui-toast__dismiss:hover { background: var(--bg-hover); opacity: 1; }
 .ui-toast__dismiss:focus-visible { outline: 2px solid var(--accent); }
 </style>
