@@ -313,9 +313,7 @@ watch(searchMatches, (matches) => {
   display: flex;
   flex-direction: column;
   gap: 1px;
-  overflow: visible;
   user-select: none;
-  contain: style;
   transform-origin: var(--sb-menu-origin-x, 0px) var(--sb-menu-origin-y, 0px);
 }
 
@@ -324,9 +322,6 @@ watch(searchMatches, (matches) => {
 }
 
 .ctx-menu__scroll {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
   max-height: min(420px, calc(100vh - 8px));
   overflow: auto;
 }

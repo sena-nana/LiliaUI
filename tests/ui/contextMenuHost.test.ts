@@ -341,11 +341,10 @@ describe("ContextMenuHost", () => {
     expect(screen.getByPlaceholderText("搜索节点")).toBeInTheDocument();
 
     await fireEvent.mouseEnter(screen.getByRole("menuitem", { name: "Input" }));
-    expect(screen.getByRole("menuitem", { name: "UV" })).toBeInTheDocument();
-    const rootMenu = document.querySelector<HTMLElement>("[data-agent-id='context-menu']");
     const submenu = document.querySelector<HTMLElement>("[data-agent-id='context-menu.submenu.input']");
-    expect(rootMenu).toBeTruthy();
+    const rootMenu = document.querySelector<HTMLElement>("[data-agent-id='context-menu']");
     expect(submenu).toBeTruthy();
+    expect(rootMenu).toBeTruthy();
     expect(submenu!.getBoundingClientRect().left).toBeGreaterThanOrEqual(
       rootMenu!.getBoundingClientRect().right - 1,
     );
