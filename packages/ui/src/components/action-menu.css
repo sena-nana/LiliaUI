@@ -34,9 +34,11 @@
 
 .sb-menu__item {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 10px;
   height: 28px;
+  min-height: 28px;
   padding: 0 10px;
   border: 0;
   border-radius: var(--radius-sm);

@@ -195,6 +195,7 @@ watch(searchMatches, (matches) => {
         data-agent-id="context-menu"
         :style="menuStyle"
         @mouseleave="clearSubmenu"
+        @wheel.stop
       >
         <label v-if="state.searchable" class="ctx-menu__search">
           <input
@@ -324,6 +325,7 @@ watch(searchMatches, (matches) => {
 .ctx-menu__scroll {
   max-height: min(420px, calc(100vh - 8px));
   overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .ctx-menu__search {
@@ -356,14 +358,17 @@ watch(searchMatches, (matches) => {
 .ctx-menu__entry {
   position: relative;
   display: flex;
+  flex-shrink: 0;
 }
 
 .ctx-menu__item {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 10px;
   width: 100%;
   height: 28px;
+  min-height: 28px;
   min-width: 0;
   padding: 0 10px;
   border: 0;
@@ -441,6 +446,7 @@ watch(searchMatches, (matches) => {
   max-height: min(360px, calc(100vh - 8px));
   padding: 4px;
   overflow: auto;
+  overscroll-behavior: contain;
   background: var(--bg-elev);
   color: var(--text);
   border: 1px solid var(--border-soft);

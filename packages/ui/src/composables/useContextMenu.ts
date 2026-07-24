@@ -185,7 +185,9 @@ function onKeydown(event: KeyboardEvent) {
   event.stopPropagation();
 }
 
-function onScroll() {
+function onScroll(event: Event) {
+  const target = event.target;
+  if (target instanceof Element && target.closest(".ctx-menu")) return;
   closeContextMenu();
 }
 
