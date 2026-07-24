@@ -162,6 +162,9 @@ export function createTemplateReport(projectRoot = process.cwd(), options = {}) 
   const nativeBackdropPermission = profile.nativeBackdropPermissions.find((permission) =>
     nativeBackdropPermissions.includes(permission),
   );
+  const nativeBackdropWindow = profile.nativeBackdropPermissions.length
+    ? checkNativeBackdropWindow(projectRoot)
+    : null;
   const checks = [
     profile.packageManager ? {
       id: "package-manager",
@@ -186,6 +189,10 @@ export function createTemplateReport(projectRoot = process.cwd(), options = {}) 
       detail: nativeBackdropPermission
         ? `permission=${nativeBackdropPermission}`
         : `expected one of ${profile.nativeBackdropPermissions.join(", ")}`,
+    } : null,
+    nativeBackdropWindow ? {
+      id: "native-backdrop-window",
+      ...nativeBackdropWindow,
     } : null,
     {
       id: "important-files-present",
@@ -404,6 +411,90 @@ function readCapabilityPermissions(projectRoot) {
   } catch {
     return [];
   }
+}
+
+function checkNativeBackdropWindow(projectRoot) {
+  const configPath = resolve(projectRoot, "src-tauri/tauri.conf.json");
+  if (!existsSync(configPath)) {
+    return {
+      ok: false,
+      detail: "src-tauri/tauri.conf.json is missing",
+    };
+  }
+
+  let config;
+  try {
+    config = readJson(configPath);
+  } catch {
+    return {
+      ok: false,
+      detail: "src-tauri/tauri.conf.json is not valid JSON",
+    };
+  }
+
+  const mainWindow = Array.isArray(config?.app?.windows)
+    ? config.app.windows.find((window) => window?.label === "main")
+    : undefined;
+  if (!mainWindow) {
+    return {
+      ok: false,
+      detail: "main window is missing",
+    };
+  }
+
+  if (mainWindow.transparent !== true) {
+    return {
+      ok: false,
+      detail: `main window transparent=${String(mainWindow.transparent ?? "missing")}`,
+    };
+  }
+
+  const backgroundColor = mainWindow.backgroundColor;
+  if (backgroundColor === undefined || backgroundColor === null) {
+    return {
+      ok: true,
+      detail: "main window is transparent with no opaque background color",
+    };
+  }
+
+  const alpha = readColorAlpha(backgroundColor);
+  return alpha === 0
+    ? {
+        ok: true,
+        detail: "main window is transparent with backgroundColor alpha=0",
+      }
+    : {
+        ok: false,
+        detail: alpha === null
+          ? "main window backgroundColor is invalid"
+          : `main window backgroundColor alpha=${alpha}`,
+      };
+}
+
+function readColorAlpha(color) {
+  if (typeof color === "string") {
+    const hex = /^#?([a-f\d]{3}|[a-f\d]{6}|[a-f\d]{8})$/i.exec(color)?.[1];
+    if (!hex) return null;
+    return hex.length === 8 ? Number.parseInt(hex.slice(6), 16) : 255;
+  }
+
+  if (Array.isArray(color)) {
+    if (color.length !== 3 && color.length !== 4) return null;
+    if (!color.every(isColorChannel)) return null;
+    return color.length === 4 ? color[3] : 255;
+  }
+
+  if (color && typeof color === "object") {
+    if (![color.red, color.green, color.blue].every(isColorChannel)) return null;
+    if (color.alpha === undefined) return 255;
+    return isColorChannel(color.alpha) ? color.alpha : null;
+  }
+
+  return null;
+}
+
+function isColorChannel(value) {
+  return Number.isInteger(value) && value >= 0 && value <= 255;
 }
 
 function walkFiles(dir) {
