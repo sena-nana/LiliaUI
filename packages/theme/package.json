@@ -1,0 +1,29 @@
+{
+  "name": "@lilia/theme",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./base.css": "./src/base.css",
+    "./styles/fonts.css": "./src/styles/fonts.css",
+    "./styles/tokens.css": "./src/styles/tokens.css",
+    "./styles/state-layer.css": "./src/styles/state-layer.css",
+    "./styles/workspace.css": "./src/styles/workspace.css",
+    "./styles/sidebar.css": "./src/styles/sidebar.css",
+    "./styles/page.css": "./src/styles/page.css",
+    "./styles/app-shell.css": "./src/styles/app-shell.css",
+    "./styles/global-scrollbar.css": "./src/styles/global-scrollbar.css"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "engines": {
+    "node": ">=26.0.0 <27"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

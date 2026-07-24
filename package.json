@@ -30,6 +30,7 @@
   "devDependencies": {
     "@lilia/build": "workspace:*",
     "@lilia/config": "workspace:*",
+    "@lilia/theme": "workspace:*",
     "@lilia/tools": "workspace:*",
     "@lilia/ui": "workspace:*",
     "@lilia/ui-contract": "workspace:*",

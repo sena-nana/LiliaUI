@@ -4,12 +4,12 @@ import { resolve } from "node:path";
 import { launchChromium } from "../browser/chromium.ts";
 
 const layerStyles = [
-  ["lilia", "packages/ui/src/styles/tokens.css", "packages/ui/src/styles/state-layer.css"],
+  ["lilia", "packages/theme/src/styles/tokens.css", "packages/theme/src/styles/state-layer.css"],
 ];
 const workspaceStyles = [
-  "packages/ui/src/styles/tokens.css",
-  "packages/ui/src/styles/state-layer.css",
-  "packages/ui/src/styles/workspace.css",
+  "packages/theme/src/styles/tokens.css",
+  "packages/theme/src/styles/state-layer.css",
+  "packages/theme/src/styles/workspace.css",
 ].map((path) => readFileSync(resolve(path), "utf8")).join("\n");
 
 const browser = await launchChromium();

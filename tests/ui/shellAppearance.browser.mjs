@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { launchChromium } from "../browser/chromium.ts";
 
-const sidebarCss = readFileSync(resolve("packages/ui/src/styles/sidebar.css"), "utf8");
+const sidebarCss = readFileSync(resolve("packages/theme/src/styles/sidebar.css"), "utf8");
 const tokens = `
   :root {
     --bg: rgb(17, 18, 19);
