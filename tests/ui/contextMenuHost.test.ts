@@ -372,6 +372,35 @@ describe("ContextMenuHost", () => {
     expect(screen.getByText("没有匹配节点")).toBeInTheDocument();
   });
 
+  it("菜单内部滚动不关闭，外部滚动仍关闭", async () => {
+    vi.useFakeTimers();
+    render(ContextMenuHost);
+    openContextMenuAt(
+      40,
+      52,
+      Array.from({ length: 8 }, (_, index) => ({
+        id: `group-${index}`,
+        label: `分组 ${index}`,
+        children: [
+          { id: `item-${index}`, label: `节点 ${index}`, keywords: ["node"], onSelect: vi.fn() },
+        ],
+      })),
+      { searchable: true, searchPlaceholder: "搜索滚动", emptyText: "没有匹配节点" },
+    );
+
+    await fireEvent.update(await screen.findByPlaceholderText("搜索滚动"), "node");
+    const scrollArea = document.querySelector<HTMLElement>(".ctx-menu__scroll");
+    expect(scrollArea).toBeTruthy();
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+
+    scrollArea!.dispatchEvent(new Event("scroll", { bubbles: true }));
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+
+    document.body.dispatchEvent(new Event("scroll", { bubbles: true }));
+    await waitForMenuLeave();
+    await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
+  });
+
   it("退场期间重新打开时应显示新的菜单内容", async () => {
     vi.useFakeTimers();
     render(ContextMenuHost, {
