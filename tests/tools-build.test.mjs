@@ -139,6 +139,7 @@ describe("@lilia/tools", () => {
   it("requires a native backdrop permission in the default Tauri capability", () => {
     const root = createProject();
     const capabilityPath = join(root, "src-tauri", "capabilities", "default.json");
+    writeTauriMainWindow(root, { transparent: true });
     const profile = {
       expectedDependencies: ["@lilia/ui"],
       nativeBackdropPermissions: ["lilia:default", "lilia:allow-set-window-backdrop"],
@@ -157,8 +158,71 @@ describe("@lilia/tools", () => {
       const ready = createTemplateReport(root, { profile });
       expect(ready.checks.find((check) => check.id === "native-backdrop-permission")?.ok)
         .toBe(true);
+      expect(ready.checks.find((check) => check.id === "native-backdrop-window")?.ok)
+        .toBe(true);
       expect(ready.status).toBe("ready");
     }
+  });
+
+  it("requires a transparent main Tauri window for native backdrop profiles", () => {
+    const root = createProject();
+    const profile = {
+      nativeBackdropPermissions: ["lilia:default"],
+      importantFiles: [],
+      agentTargetFiles: {},
+    };
+    const windowCheck = () =>
+      createTemplateReport(root, { profile }).checks.find(
+        (check) => check.id === "native-backdrop-window",
+      );
+
+    writeTauriMainWindow(root, { transparent: false });
+    expect(windowCheck()?.ok).toBe(false);
+
+    writeFileSync(
+      join(root, "src-tauri/tauri.conf.json"),
+      `${JSON.stringify({ app: { windows: [{ label: "secondary", transparent: true }] } })}\n`,
+    );
+    expect(windowCheck()?.ok).toBe(false);
+
+    for (const backgroundColor of [undefined, null, "#00000000", "00000000", [0, 0, 0, 0], {
+      red: 0,
+      green: 0,
+      blue: 0,
+      alpha: 0,
+    }]) {
+      writeTauriMainWindow(root, { transparent: true, backgroundColor });
+      expect(windowCheck()?.ok, JSON.stringify(backgroundColor)).toBe(true);
+    }
+
+    for (const backgroundColor of ["#000", "#000000", "#000000ff", [0, 0, 0], [0, 0, 0, 1], {
+      red: 0,
+      green: 0,
+      blue: 0,
+    }, {
+      red: 0,
+      green: 0,
+      blue: 0,
+      alpha: 1,
+    }]) {
+      writeTauriMainWindow(root, { transparent: true, backgroundColor });
+      expect(windowCheck()?.ok, JSON.stringify(backgroundColor)).toBe(false);
+    }
+  });
+
+  it("does not inspect the Tauri window without a native backdrop profile", () => {
+    const root = createProject();
+    writeTauriMainWindow(root, { transparent: false, backgroundColor: "#ffffff" });
+
+    const report = createTemplateReport(root, {
+      profile: {
+        importantFiles: [],
+        agentTargetFiles: {},
+      },
+    });
+
+    expect(report.checks.some((check) => check.id === "native-backdrop-window")).toBe(false);
+    expect(report.status).toBe("ready");
   });
 
   it("reports Agent debug readiness without requiring desktop replay tools", () => {
@@ -513,6 +577,13 @@ function createProject(overrides = {}) {
     `${JSON.stringify({ permissions: ["lilia:default"] }, null, 2)}\n`,
   );
   return root;
+}
+
+function writeTauriMainWindow(root, window) {
+  writeFileSync(
+    join(root, "src-tauri/tauri.conf.json"),
+    `${JSON.stringify({ app: { windows: [{ label: "main", ...window }] } })}\n`,
+  );
 }
 
 function createAppConfig() {
