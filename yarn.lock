@@ -417,6 +417,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lilia/example-contract-layers@workspace:examples/contract-layers"
   dependencies:
+    "@lilia/theme": "workspace:*"
     "@lilia/ui": "workspace:*"
     "@lilia/ui-contract": "workspace:*"
     "@lilia/ui-foundation": "workspace:*"
@@ -435,12 +436,21 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lilia/example-workspace-regions@workspace:examples/workspace-regions"
   dependencies:
+    "@lilia/theme": "workspace:*"
     "@lilia/ui": "workspace:*"
     "@vitejs/plugin-vue": "npm:^6.0.8"
     typescript: "npm:^6.0.3"
     vite: "npm:^8.1.4"
     vue: "npm:^3.5.39"
     vue-tsc: "npm:^3.3.7"
+  languageName: unknown
+  linkType: soft
+
+"@lilia/theme@workspace:*, @lilia/theme@workspace:packages/theme":
+  version: 0.0.0-use.local
+  resolution: "@lilia/theme@workspace:packages/theme"
+  dependencies:
+    typescript: "npm:^6.0.3"
   languageName: unknown
   linkType: soft
 
@@ -482,6 +492,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lilia/ui@workspace:packages/ui"
   dependencies:
+    "@lilia/theme": "workspace:*"
     "@lilia/ui-contract": "workspace:*"
     "@lilia/ui-foundation": "workspace:*"
     "@lucide/vue": "npm:^1.22.0"
@@ -491,6 +502,7 @@ __metadata:
     vue-router: "npm:^5.1.0"
     vue-tsc: "npm:^3.3.7"
   peerDependencies:
+    "@lilia/theme": ^0.1.0
     "@lilia/ui-contract": ^0.1.0
     "@lilia/ui-foundation": ^0.1.0
     "@lucide/vue": ^1.22.0
@@ -2772,6 +2784,7 @@ __metadata:
   dependencies:
     "@lilia/build": "workspace:*"
     "@lilia/config": "workspace:*"
+    "@lilia/theme": "workspace:*"
     "@lilia/tools": "workspace:*"
     "@lilia/ui": "workspace:*"
     "@lilia/ui-contract": "workspace:*"

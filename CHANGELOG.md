@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-07-24 — 抽取 `@lilia/theme` 唯一视觉事实源
+
+### Theme
+
+- 新增 `@lilia/theme`（`packages/theme`）：纯 CSS + 框架无关 `applyTheme`，无 Vue/Tauri 依赖。迁入 `base.css`（原 `@lilia/ui` `styles.css`）、`styles/{fonts,tokens,state-layer,workspace,sidebar,page,app-shell,global-scrollbar}.css`，字体拆出独立 `styles/fonts.css` 子入口。
+- `applyTheme(options)` 框架无关地写 `data-theme` / `data-corners` / `--app-corner-radius` / `data-lilia-surface-mode`。
+
+### Lilia Layer
+
+- `@lilia/ui` 新增对 `@lilia/theme`（`^0.1.0`）的依赖并 re-export 其 CSS 与 `applyTheme`；`./styles.css`、`./theme/base.css`、`./styles/*.css` 改为 `@import "@lilia/theme/..."` 转发，`@lilia/ui` 不再维护第二份 token/基座样式源。
+
+### Validation and performance
+
+- `check:ui-boundaries` 纳入 `packages/theme`，禁止其反向依赖 Contract/Foundation/UI 或引入 Vue/Tauri；token/基座视觉测试改从 `packages/theme/src` 读取源。CSS bundle 预算（`42,755 / 42,890` bytes、4 async chunk）不放宽，基座 CSS 每段仅出现一次。
+
 ## 2026-07-22 — 移除官方 NanaUI
 
 ### Contract breaking

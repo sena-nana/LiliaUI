@@ -12,7 +12,7 @@ interface OklchColor {
   alpha: number;
 }
 
-const tokenCss = readFileSync("packages/ui/src/styles/tokens.css", "utf8");
+const tokenCss = readFileSync("packages/theme/src/styles/tokens.css", "utf8");
 const forbiddenColorSyntax = /#[\da-fA-F]{3,8}\b|\brgba?\s*\(|\bhsla?\s*\(/;
 const oklchSyntax = /oklch\(\s*([\d.]+)%\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\s*\)/g;
 

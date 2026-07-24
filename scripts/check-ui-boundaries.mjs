@@ -2,7 +2,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { extname, join, relative, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
-const packageRoots = ["ui-contract", "ui-foundation", "ui"]
+const packageRoots = ["ui-contract", "ui-foundation", "theme", "ui"]
   .map((name) => resolve(root, "packages", name));
 const sourceFiles = packageRoots.flatMap((packageRoot) => walk(resolve(packageRoot, "src")));
 const violations = [];
@@ -18,7 +18,7 @@ for (const file of sourceFiles) {
   const source = readFileSync(file, "utf8");
   const name = relative(root, file).replaceAll("\\", "/");
   const lines = source.split(/\r?\n/).length;
-  if (!name.startsWith("packages/ui/") && lines > 300) {
+  if (!name.startsWith("packages/ui/") && !name.startsWith("packages/theme/") && lines > 300) {
     violations.push(`${name}: ${lines} lines exceeds the 300-line responsibility limit`);
   }
   if (name.startsWith("packages/ui-contract/") && /from\s+["'](?:vue|@lilia\/|.*\.css)/.test(source)) {
@@ -26,6 +26,11 @@ for (const file of sourceFiles) {
   }
   if (name.startsWith("packages/ui-foundation/") && /from\s+["']@lilia\/ui(?:\/|["'])/.test(source)) {
     violations.push(`${name}: ui-foundation cannot depend on a visual layer`);
+  }
+  if (name.startsWith("packages/theme/") && extname(file) === ".ts") {
+    if (/from\s+["'](?:vue|vue-router|@vue\/|@tauri-apps\/|@lucide\/|@lilia\/)/.test(source)) {
+      violations.push(`${name}: @lilia/theme must stay framework-agnostic (no Vue/Tauri/@lilia imports)`);
+    }
   }
 }
 

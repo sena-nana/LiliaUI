@@ -32,7 +32,26 @@
 
 组件根 class 已使用 `ui-*`、`lilia-*`、`ctx-*`、`settings-*` 等公共命名空间时，样式保持显式组件根选择器而不重复生成 Vue scope 属性；这不会扩大选择器职责，并可避免消费 bundle 的机械性 CSS 膨胀。
 
-LiliaTemplate 迁移后的生产构建报告为 CSS `42,755 / 42,890` bytes、4 个异步 chunk；预算与最小异步 chunk 数均未放宽。
+LiliaTemplate 迁移后的生产构建报告为 CSS `42,755 / 42,890` bytes、4 个异步 chunk；预算与最小异步 chunk 数均未放宽。视觉基座 CSS 已下沉到 `@lilia/theme`，`@lilia/ui` 的 `./styles.css`、`./theme/base.css`、`./styles/*.css` 仅 `@import` 转发到 `@lilia/theme`，最终 bundle 中每段基座 CSS 只出现一次，预算不变。
+
+## `@lilia/theme` 入口
+
+`@lilia/theme` 是唯一视觉事实源，纯 CSS + 框架无关 `applyTheme`，无 Vue/Tauri 依赖；无 Vue 消费方可直接依赖它，有 Vue 消费方经 `@lilia/ui` 传递。
+
+| 入口 | 稳定职责 |
+| --- | --- |
+| `@lilia/theme` | `applyTheme(options)` 与类型（写 `data-theme` / `data-corners` / `--app-corner-radius` / `data-lilia-surface-mode`） |
+| `@lilia/theme/base.css` | 主题入口：字体契约 + tokens + state-layer + reset + 表单控件基线 + 工具类 |
+| `@lilia/theme/styles/fonts.css` | 仅 `@font-face`（Noto Sans SC 400/500/600/700），供无 Vue 宿主单独控制字体加载 |
+| `@lilia/theme/styles/tokens.css` | 唯一 token 源（light/dark、oklch、radius、shadow、surface、backdrop） |
+| `@lilia/theme/styles/state-layer.css` | 交互 state layer 与 surface mode |
+| `@lilia/theme/styles/workspace.css` | Workspace + Region 布局与折叠动画 |
+| `@lilia/theme/styles/sidebar.css` | `.secondary-panel` 侧栏 frame 基础 |
+| `@lilia/theme/styles/page.css` | `.page-header` / `.card` / `.kv` 页面基础 |
+| `@lilia/theme/styles/app-shell.css` | AppShell chrome 基础样式 |
+| `@lilia/theme/styles/global-scrollbar.css` | 全局滚动条 |
+
+字体资源（`/fonts/*.woff2`）仍以 host-served 路径契约引用，由 `@lilia/tools` 提供默认 woff2；缺失时回退系统字体，不报错。
 
 `@lilia/nana-ui` 已移除，不再作为官方公共入口。
 

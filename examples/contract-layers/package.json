@@ -9,6 +9,7 @@
     "check": "yarn typecheck && yarn build"
   },
   "dependencies": {
+    "@lilia/theme": "workspace:*",
     "@lilia/ui": "workspace:*",
     "@lilia/ui-contract": "workspace:*",
     "@lilia/ui-foundation": "workspace:*",

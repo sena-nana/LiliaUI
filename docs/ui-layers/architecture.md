@@ -9,16 +9,17 @@
 ```text
 @lilia/ui-contract
         ↑
-@lilia/ui-foundation
-        ↑
-    @lilia/ui
-        ↑
-application
+@lilia/ui-foundation      @lilia/theme   (无 Vue、无 Tauri，纯 CSS + DOM helper)
+        ↑                      ↑
+              @lilia/ui  ──────┘
+                  ↑
+             application
 ```
 
 - `@lilia/ui-contract` 只定义类型和稳定组件调用契约，不依赖 Vue 组件实现或具体视觉层。
 - `@lilia/ui-foundation` 依赖 Contract，提供 commands、settings、focus、overlay、responsive、sidebar、theme sync 等可复用 primitive。
-- `@lilia/ui` 直接依赖 Contract/Foundation，是本仓库唯一官方视觉 Layer。
+- `@lilia/theme` 是本仓库**唯一视觉事实源**：design token、state layer、reset、字体契约、基础布局 CSS（workspace/sidebar/page/app-shell/scrollbar）与框架无关的 `applyTheme` helper。不依赖 Vue、Tauri、Contract、Foundation，可被任意（含无 Vue）消费方单独依赖。
+- `@lilia/ui` 直接依赖 Contract/Foundation 与 `@lilia/theme`，是本仓库唯一官方视觉 Layer；它 re-export `@lilia/theme` 的 CSS 与 helper，自身不再维护第二份 token/基座样式源。
 - `@lilia/config`、`@lilia/tools`、`@lilia/build` 与 `tauri-plugin-lilia` 是共享工程边界。
 
 禁止的方向：
@@ -34,12 +35,13 @@ ui-foundation ─X→ ui
 | --- | --- | --- |
 | `@lilia/ui-contract` | Props、events、slots 相关类型，Policy/Preset 类型 | CSS、Vue 实现、产品默认值 |
 | `@lilia/ui-foundation` | 无视觉 primitive、共享 commands/settings、状态机 | 视觉实现、业务页面 |
-| `@lilia/ui` | Professional 组件、Router-free Shell、Policy Provider、Settings、主题和诊断 | 应用业务协议、业务样式分叉 |
+| `@lilia/theme` | 唯一视觉事实源：token、state layer、reset、字体契约、基础布局 CSS、框架无关 `applyTheme` | Vue/Tauri 依赖、组件实现、业务样式 |
+| `@lilia/ui` | Professional 组件、Router-free Shell、Policy Provider、Settings、诊断；re-export `@lilia/theme` | 第二份 token/基座样式、应用业务协议、业务样式分叉 |
 | `@lilia/tools` | 默认资源、模板检查、周边 CLI、license manifest | 自动判断业务信息架构、样式分叉实现 |
 
 ## Theme 与 UI Policy
 
-Theme 回答“界面如何呈现”，由 CSS token 表达：
+Theme 回答“界面如何呈现”，由 `@lilia/theme` 的 CSS token 表达（唯一事实源）：
 
 - light/dark 表面、文字、边界与语义颜色；
 - comfortable/compact 的尺寸与间距；

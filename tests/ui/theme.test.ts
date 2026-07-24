@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { testAppConfig } from "./fixtures/appConfig";
 
 const themeStorageKey = `${testAppConfig.storageKeyPrefix}.theme`;
-const tokensCss = readFileSync(resolve("packages/ui/src/styles/tokens.css"), "utf8");
+const tokensCss = readFileSync(resolve("packages/theme/src/styles/tokens.css"), "utf8");
 
 function readCustomProperty(blockSelector: string, property: string) {
   const block = tokensCss.match(new RegExp(`${blockSelector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([\\s\\S]*?)\\}`))?.[1] ?? "";

@@ -1,5 +1,13 @@
 /// <reference path="./shims-vue.d.ts" />
 
+export {
+  applyTheme,
+  type ApplyThemeOptions,
+  type CornerStyle,
+  type ResolvedTheme,
+  type SurfaceMode,
+} from "@lilia/theme";
+
 export { default as ActionMenuItem } from "./components/ActionMenuItem.vue";
 export { default as AnchoredActionMenu } from "./components/AnchoredActionMenu.vue";
 export { default as CalendarHeatmap } from "./components/CalendarHeatmap.vue";
