@@ -76,7 +76,8 @@ describe("Lilia framework layer", () => {
       global: { plugins: [router], provide: { [settingsKey as symbol]: model } },
     });
     expect(view.getByText("Standard section")).toBeVisible();
-    expect(view.getByText("Shared settings")).toBeVisible();
+    expect(view.getByRole("heading", { name: "Standard" })).toBeVisible();
+    expect(view.queryByText("Shared settings")).toBeNull();
 
     await router.push("/settings?tab=full");
     expect(await view.findByText("Full page")).toBeVisible();

@@ -22,10 +22,7 @@ const activeView = computed(() => resolveSettingsView(settings, route.query.tab)
   />
   <section v-else class="settings-page" :data-agent-id="`settings.page.${activeView.key}`">
     <div v-if="!settings.hideHeader" class="page-header">
-      <div>
-        <h1>{{ activeView.label }}</h1>
-        <p v-if="settings.description">{{ settings.description }}</p>
-      </div>
+      <h1>{{ activeView.label }}</h1>
     </div>
 
     <component :is="activeView.section" v-bind="activeView.props" />
