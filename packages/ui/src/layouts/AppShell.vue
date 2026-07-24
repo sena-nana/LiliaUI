@@ -35,6 +35,7 @@ const resolvedTitle = computed(() => props.title ?? APP_METADATA.productTitle);
     :data-agent-id="agentId ?? 'app-shell'"
     :data-lilia-surface-mode="shellTranslucent ? 'translucent' : 'solid'"
     :data-lilia-backdrop="shellTranslucent ? 'native' : 'none'"
+    :data-lilia-backdrop-target="shellTranslucent ? appearance.backdropTarget.value : undefined"
     data-lilia-surface-level="base"
     data-lilia-surface-boundary
   >

@@ -9,6 +9,7 @@ const layerStyles = [
 const workspaceStyles = [
   "packages/theme/src/styles/tokens.css",
   "packages/theme/src/styles/state-layer.css",
+  "packages/theme/src/styles/app-shell.css",
   "packages/theme/src/styles/workspace.css",
 ].map((path) => readFileSync(resolve(path), "utf8")).join("\n");
 
@@ -113,6 +114,7 @@ try {
   }
 
   await assertWorkspaceSurfaceFallback(browser);
+  await assertMainBackdropOwnsRoundedTint(browser);
 
   console.log("Surface state-layer browser checks passed.");
 } finally {
@@ -144,6 +146,102 @@ async function assertWorkspaceSurfaceFallback(browser) {
   const reduced = await backgrounds();
   assert.notEqual(reduced.workspace, "rgba(0, 0, 0, 0)", "reduced transparency restores the Workspace fill");
   assert.notEqual(reduced.region, "rgba(0, 0, 0, 0)", "reduced transparency restores the Region fill");
+  await page.close();
+}
+
+async function assertMainBackdropOwnsRoundedTint(browser) {
+  const page = await browser.newPage({ viewport: { width: 900, height: 600 } });
+  await page.setContent(`<!doctype html>
+    <html>
+      <head><style>${workspaceStyles}
+        body { width: 900px; height: 600px; margin: 0; }
+        .lilia-app-shell { width: 900px; height: 600px; }
+        .lilia-workspace { grid-template-columns: 240px minmax(0, 1fr); }
+      </style></head>
+      <body>
+        <div class="lilia-app-shell" data-lilia-surface-mode="translucent"
+          data-lilia-backdrop="native" data-lilia-backdrop-target="main">
+          <div class="lilia-app-shell__content">
+            <div class="lilia-workspace" data-lilia-surface-mode="translucent" data-lilia-backdrop="none">
+              <aside class="lilia-workspace-region lilia-workspace-region--section-navigation"
+                data-lilia-surface-mode="solid" data-lilia-backdrop="none"></aside>
+              <main class="lilia-workspace-region lilia-workspace-region--primary"
+                data-lilia-surface-mode="translucent" data-lilia-backdrop="none">
+                <div class="lilia-workspace-region__content">
+                  Primary
+                  <div class="lilia-workspace" data-lilia-surface-mode="translucent" data-lilia-backdrop="none">
+                    <section class="lilia-workspace-region lilia-workspace-region--primary nested-primary"
+                      data-lilia-surface-mode="translucent" data-lilia-backdrop="none"></section>
+                  </div>
+                </div>
+              </main>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>`);
+
+  const surfaceState = async () => page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) throw new Error("Canvas 2D context unavailable");
+    const alpha = (node) => {
+      context.clearRect(0, 0, 1, 1);
+      context.fillStyle = getComputedStyle(node).backgroundColor;
+      context.fillRect(0, 0, 1, 1);
+      return context.getImageData(0, 0, 1, 1).data[3] / 255;
+    };
+    const shell = document.querySelector(".lilia-app-shell");
+    const workspace = document.querySelector(".lilia-workspace");
+    const primary = document.querySelector(".lilia-workspace-region--primary");
+    const nestedPrimary = document.querySelector(".nested-primary");
+    if (!shell || !workspace || !primary || !nestedPrimary) throw new Error("Main backdrop fixture incomplete");
+    const primaryStyle = getComputedStyle(primary);
+    const rect = primary.getBoundingClientRect();
+    return {
+      shellAlpha: alpha(shell),
+      workspaceAlpha: alpha(workspace),
+      primaryAlpha: alpha(primary),
+      nestedPrimaryAlpha: alpha(nestedPrimary),
+      radii: [
+        primaryStyle.borderTopLeftRadius,
+        primaryStyle.borderTopRightRadius,
+        primaryStyle.borderBottomRightRadius,
+        primaryStyle.borderBottomLeftRadius,
+      ].map(Number.parseFloat),
+      box: { width: rect.width, height: rect.height },
+    };
+  });
+
+  const primary = page.locator(".lilia-workspace-region--primary").first();
+  await primary.evaluate((node) => { node.dataset.liliaSurfaceMode = "solid"; });
+  const unowned = await surfaceState();
+  assert(unowned.shellAlpha > 0, "AppShell keeps its tint until the top-level Primary accepts ownership");
+
+  await primary.evaluate((node) => { node.dataset.liliaSurfaceMode = "translucent"; });
+  const normal = await surfaceState();
+  assert.equal(normal.shellAlpha, 0, "main target leaves the AppShell tint transparent");
+  assert.equal(normal.workspaceAlpha, 0, "Workspace does not duplicate the native tint");
+  assert(normal.primaryAlpha > 0 && normal.primaryAlpha < 1, "rounded Primary owns one translucent tint");
+  assert.equal(normal.nestedPrimaryAlpha, 0, "nested Primary does not duplicate the window tint");
+  assert(normal.radii.every((radius) => radius > 0), "desktop Primary keeps all four rounded corners");
+
+  await page.locator("html").evaluate((node) => { node.dataset.liliaReducedTransparency = "true"; });
+  const reduced = await surfaceState();
+  assert.equal(reduced.primaryAlpha, 1, "reduced transparency restores an opaque Primary fill");
+  assert.deepEqual(reduced.radii, normal.radii, "reduced transparency preserves Primary corners");
+  assert.deepEqual(reduced.box, normal.box, "reduced transparency preserves Primary geometry");
+
+  await page.locator("html").evaluate((node) => { delete node.dataset.liliaReducedTransparency; });
+  await page.emulateMedia({ forcedColors: "active" });
+  const forcedColors = await surfaceState();
+  assert.equal(forcedColors.primaryAlpha, 1, "forced colors restores an opaque Primary fill");
+  assert.equal(forcedColors.workspaceAlpha, 1, "forced colors restores an opaque Workspace fill");
+  await page.emulateMedia({ forcedColors: "none" });
+
+  await page.setViewportSize({ width: 760, height: 600 });
+  const compact = await surfaceState();
+  assert(compact.radii.every((radius) => radius === 0), "compact Primary intentionally removes its corners");
   await page.close();
 }
 

@@ -42,11 +42,13 @@ const attributes = resolveSurfaceAttributes({
 - 位于 translucent 祖先内的 Card，即便自身默认 solid，也会用 raised translucent fill，避免实色盖死 Mica/Acrylic。
 - `data-lilia-reduced-transparency`、`prefers-contrast: more` 与 `forced-colors: active` 回退到 solid fill。
 - `LiliaDesktopShell` 用 `resolveBackdropSurfaces` 按 `backdropTarget` 接线区域 `surfaceMode`；`AppShell` 保留唯一 `native`，workspace 显式 `backdropEffect: none`。
+- `backdropTarget=main` 且顶层 Workspace 的 Primary 为 translucent 时，AppShell 只保留原生采样所有权，CSS tint 由该带圆角的 Primary Surface 绘制；圆角内外因此保持材质差异，同时避免双重 tint。嵌套 Workspace 不参与窗口级 tint ownership。
 
 ## Surface Boundary 与 Backdrop 所有权
 
 - 新的实体卡片、菜单、浮层或独立材质区必须设置 `data-lilia-surface-boundary` 并显式给出 mode、backdrop、level。
 - 同一视觉区域只有最外层负责采样的 Surface 可以使用 `native` 或 `css-blur`；子组件一律使用 `none`。
+- 原生采样所有权与 CSS tint 绘制位置彼此独立；将 tint 放到圆角子 Surface 不会把 `native` backdrop 所有权下放给该 Surface。
 - `solid + native/css-blur` 会由 Foundation 规范化为 `solid + none`，避免在完全不透明的 Surface 上保留无效 Backdrop 所有权。
 - 原生 Mica、macOS Vibrancy 和 Windows Acrylic 都使用 `translucent + native`；CSS 模糊使用 `translucent + css-blur`；普通界面使用 `solid + none`。四种模式共享同一组件状态 API。
 
