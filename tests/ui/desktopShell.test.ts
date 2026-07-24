@@ -153,5 +153,18 @@ describe("LiliaDesktopShell", () => {
     expect(navigation).toHaveAttribute("data-lilia-backdrop", "none");
     expect(primary).toHaveAttribute("data-lilia-surface-mode", "solid");
     expect(primary).toHaveAttribute("data-lilia-backdrop", "none");
+    const shell = view.container.querySelector(".lilia-app-shell");
+    expect(shell).toHaveAttribute("data-lilia-backdrop-target", "sidebar");
+
+    const { useNativeAppearance } = await import("@lilia/ui/composables");
+    useNativeAppearance().setBackdropTarget("main");
+
+    await waitFor(() => {
+      expect(navigation).toHaveAttribute("data-lilia-surface-mode", "solid");
+      expect(primary).toHaveAttribute("data-lilia-surface-mode", "translucent");
+    });
+    expect(primary).toHaveAttribute("data-lilia-backdrop", "none");
+    expect(shell).toHaveAttribute("data-lilia-backdrop-target", "main");
+    expect(view.container.querySelectorAll('[data-lilia-backdrop="native"]')).toHaveLength(1);
   });
 });

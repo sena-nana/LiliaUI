@@ -12,6 +12,14 @@
   background: var(--lilia-backdrop-surface);
 }
 
+.lilia-app-shell[data-lilia-backdrop-target="main"]:has(
+  > .lilia-app-shell__content
+  > .lilia-workspace
+  > .lilia-workspace-region--primary[data-lilia-surface-mode="translucent"]:not([hidden])
+) {
+  background: transparent;
+}
+
 .lilia-app-shell > .titlebar {
   grid-row: 1;
   z-index: 6;
