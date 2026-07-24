@@ -12,12 +12,6 @@
   font-weight: 600;
 }
 
-.page-header p {
-  margin: 4px 0 0;
-  color: var(--text-muted);
-  font-size: 13px;
-}
-
 .card {
   background: var(--lilia-surface-fill-raised);
   border: 0;
