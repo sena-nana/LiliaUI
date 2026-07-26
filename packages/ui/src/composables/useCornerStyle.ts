@@ -1,8 +1,9 @@
+import type { CornerStyle } from "@lilia/theme";
 import { ref, watch, type Ref } from "vue";
 import { APP_METADATA, type NativePlatform } from "../config/appShell";
 import { readNativePlatform } from "./useNativeAppearance";
 
-export type CornerStyle = "smooth" | "round";
+export type { CornerStyle } from "@lilia/theme";
 
 export const DEFAULT_CORNER_RADIUS = 16;
 const MACOS_DEFAULT_CORNER_RADIUS = 8;
