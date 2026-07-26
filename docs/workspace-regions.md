@@ -54,6 +54,26 @@ import {
 
 Workspace 自身维护外边框、背景、阴影和裁切圆角。内部 Region 不生成独立 Card；实际可见 Region 改变后，外侧边缘和内部分隔线会重新计算。
 
+## Workspace 留白与间距
+
+Workspace 根 Grid 通过独立属性表达逻辑方向的留白和轨道间距，业务页面不需要覆盖根元素的 `padding` 或 `gap`：
+
+```vue
+<LiliaWorkspace
+  surface-level="base"
+  :content-inset="{ inlineStart: 24, blockEnd: 14 }"
+  :row-gap="14"
+  :column-gap="0"
+>
+  ...
+</LiliaWorkspace>
+```
+
+- `contentInset` 的 `blockStart`、`blockEnd`、`inlineStart`、`inlineEnd` 可分别设置；未设置的方向保持为 `0`。
+- `rowGap` 与 `columnGap` 相互独立，不提供会重新耦合两个方向的 `gap` shorthand。
+- 数字值按 px 处理；字符串作为 CSS length 原样传递，可使用 `rem`、`clamp()` 或 CSS 变量。
+- Workspace 默认使用 raised Surface 以保持既有壳层视觉；需要让留白与主内容底色一致时，显式设置 `surface-level="base"`。
+
 手动折叠（`collapsible` + `collapsed`）与 `hidden` 语义不同：`hidden` 将 Region 从网格中移除（无过渡），而手动折叠保留 Region 的网格轨道并将其尺寸过渡到 `0`，同时内容通过 opacity/transform 淡出，从而实现 `grid-template-columns` / `grid-template-rows` 的平滑插值动画。响应式 `narrowBehavior: "collapse"` 仍按视口阈值从布局中移除。折叠态 Region 不参与边缘与分隔线计算，几何订阅将其视为不可见。
 
 ## 官方预设
@@ -96,6 +116,8 @@ Region 通过 `narrowBehavior` 与 `collapseBelow` 声明窄窗口行为：
 - Home / End 移至最小 / 最大尺寸；
 - separator 暴露 `aria-orientation`、`aria-valuenow`、`aria-valuemin` 与 `aria-valuemax`；
 - 全局 pointer listener 只在实际拖动期间存在，并在结束、失焦或卸载时释放。
+
+布局模型发布的 `data-region-separator` 只描述 Region 邻接关系，供主题和诊断识别，不等同于可交互控件，也不承诺绘制全局 inline 边框。只有 `resizable` Region 的拖拽手柄使用 ARIA `role="separator"`。
 
 ## 原生视口几何
 

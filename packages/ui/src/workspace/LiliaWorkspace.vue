@@ -7,6 +7,7 @@ import {
   provide,
   ref,
   shallowRef,
+  type CSSProperties,
 } from "vue";
 import {
   workspaceContextKey,
@@ -16,7 +17,7 @@ import {
   type WorkspaceRegionRegistration,
 } from "./context";
 import { intersectRects } from "./geometry";
-import type { LiliaWorkspaceProps } from "./types";
+import type { LiliaWorkspaceProps, WorkspaceLayoutLength } from "./types";
 import { createWorkspaceLayout } from "./workspaceLayout";
 import "../styles/workspace.css";
 
@@ -25,8 +26,11 @@ const props = withDefaults(defineProps<LiliaWorkspaceProps>(), {
   agentId: "workspace",
   ariaLabel: undefined,
   shadow: false,
+  contentInset: undefined,
+  rowGap: undefined,
+  columnGap: undefined,
   surfaceMode: "solid",
-  surfaceLevel: "base",
+  surfaceLevel: "raised",
   surfaceBoundary: true,
 });
 
@@ -74,10 +78,25 @@ function commitLayout() {
   }
   layout.value = next;
 }
-const workspaceStyle = computed(() => ({
-  gridTemplateColumns: layout.value.columns,
-  gridTemplateRows: layout.value.rows,
-}));
+
+function resolveLayoutLength(value: WorkspaceLayoutLength) {
+  return typeof value === "number" ? `${value}px` : value;
+}
+
+const workspaceStyle = computed<CSSProperties>(() => {
+  const style: CSSProperties = {
+    gridTemplateColumns: layout.value.columns,
+    gridTemplateRows: layout.value.rows,
+  };
+  const inset = props.contentInset;
+  if (inset?.blockStart !== undefined) style.paddingBlockStart = resolveLayoutLength(inset.blockStart);
+  if (inset?.blockEnd !== undefined) style.paddingBlockEnd = resolveLayoutLength(inset.blockEnd);
+  if (inset?.inlineStart !== undefined) style.paddingInlineStart = resolveLayoutLength(inset.inlineStart);
+  if (inset?.inlineEnd !== undefined) style.paddingInlineEnd = resolveLayoutLength(inset.inlineEnd);
+  if (props.rowGap !== undefined) style.rowGap = resolveLayoutLength(props.rowGap);
+  if (props.columnGap !== undefined) style.columnGap = resolveLayoutLength(props.columnGap);
+  return style;
+});
 let resizeObserver: ResizeObserver | null = null;
 let mutationObserver: MutationObserver | null = null;
 const observedElements = new Set<Element>();
