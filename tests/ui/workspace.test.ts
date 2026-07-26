@@ -87,6 +87,49 @@ describe("Workspace Region layout", () => {
     expect(resources).toHaveAttribute("data-lilia-surface-boundary");
   });
 
+  it("applies logical content insets and independent row and column gaps reactively", async () => {
+    const view = render(LiliaWorkspace, {
+      props: {
+        contentInset: {
+          blockStart: 8,
+          blockEnd: "1.5rem",
+          inlineStart: 24,
+          inlineEnd: "var(--workspace-end-inset)",
+        },
+        rowGap: 14,
+        columnGap: "clamp(0px, 1vw, 10px)",
+      },
+      slots: {
+        default: () => h(LiliaPrimaryContent, { id: "primary" }),
+      },
+    });
+    const workspace = view.container.querySelector(".lilia-workspace");
+    if (!(workspace instanceof HTMLElement)) throw new Error("Missing workspace");
+
+    expect(workspace.style.paddingBlockStart).toBe("8px");
+    expect(workspace.style.paddingBlockEnd).toBe("1.5rem");
+    expect(workspace.style.paddingInlineStart).toBe("24px");
+    expect(workspace.style.paddingInlineEnd).toBe("var(--workspace-end-inset)");
+    expect(workspace.style.rowGap).toBe("14px");
+    expect(workspace.style.columnGap).toBe("clamp(0px, 1vw, 10px)");
+
+    await view.rerender({
+      contentInset: {
+        blockEnd: 20,
+        inlineEnd: "2rem",
+      },
+      rowGap: "0.75rem",
+      columnGap: undefined,
+    });
+
+    expect(workspace.style.paddingBlockStart).toBe("");
+    expect(workspace.style.paddingBlockEnd).toBe("20px");
+    expect(workspace.style.paddingInlineStart).toBe("");
+    expect(workspace.style.paddingInlineEnd).toBe("2rem");
+    expect(workspace.style.rowGap).toBe("0.75rem");
+    expect(workspace.style.columnGap).toBe("");
+  });
+
   it("allows explicit Surface overrides without weakening the stable Region Agent target", () => {
     const view = render(LiliaWorkspace, {
       props: {
@@ -129,7 +172,7 @@ describe("Workspace Region layout", () => {
     if (!(workspace instanceof HTMLElement)) throw new Error("Missing workspace");
     expect(workspace).toHaveAttribute("data-lilia-surface-mode", "solid");
     expect(workspace).toHaveAttribute("data-lilia-backdrop", "none");
-    expect(workspace).toHaveAttribute("data-lilia-surface-level", "base");
+    expect(workspace).toHaveAttribute("data-lilia-surface-level", "raised");
     expect(workspace).toHaveAttribute("data-lilia-surface-boundary");
     expect(workspace.style.gridTemplateColumns).toBe("minmax(320px, 1fr)");
     expect(view.queryByRole("navigation")).not.toBeInTheDocument();

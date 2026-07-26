@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-07-26 — Workspace 逻辑留白与 Surface 契约
+
+### Lilia Layer
+
+- `LiliaWorkspace` 新增 `contentInset`、`rowGap` 与 `columnGap` 公共布局属性，逻辑方向留白可独立配置；数字按 px 处理，字符串 CSS length 原样传递。
+- Workspace 默认 Surface 调整为 raised 以保持既有视觉；背景改为消费当前 `surfaceLevel` 对应的 `--lilia-surface-fill`，显式 base Surface 的留白不再错误显示为 raised 色块。
+- 补充 Workspace 布局间距、邻接标记与可拖动 ARIA separator 的职责说明，不恢复全局 inline 分隔边框。
+
+### Validation
+
+- Workspace 组件测试覆盖逻辑留白、行列间距及响应更新；浏览器 Surface 测试覆盖 base / raised Workspace 的实际计算背景。
+
 ## 2026-07-24 — 抽取 `@lilia/theme` 唯一视觉事实源
 
 ### Theme

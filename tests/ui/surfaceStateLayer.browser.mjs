@@ -64,7 +64,12 @@ try {
 
     const before = await selected.boundingBox();
     await page.locator("html").evaluate((node) => { node.dataset.liliaReducedTransparency = "true"; });
-    await page.waitForTimeout(160);
+    await page.waitForFunction(() => {
+      const background = getComputedStyle(
+        document.querySelector("[data-agent-id='surface.translucent.selected']"),
+      ).backgroundColor;
+      return !background.includes("/") && !/rgba\([^)]*,\s*0\./.test(background);
+    });
     const reduced = await selected.evaluate((node) => ({
       background: getComputedStyle(node).backgroundColor,
       box: node.getBoundingClientRect().toJSON(),
@@ -114,6 +119,7 @@ try {
   }
 
   await assertWorkspaceSurfaceFallback(browser);
+  await assertWorkspaceSurfaceLevels(browser);
   await assertMainBackdropOwnsRoundedTint(browser);
 
   console.log("Surface state-layer browser checks passed.");
@@ -146,6 +152,36 @@ async function assertWorkspaceSurfaceFallback(browser) {
   const reduced = await backgrounds();
   assert.notEqual(reduced.workspace, "rgba(0, 0, 0, 0)", "reduced transparency restores the Workspace fill");
   assert.notEqual(reduced.region, "rgba(0, 0, 0, 0)", "reduced transparency restores the Region fill");
+  await page.close();
+}
+
+async function assertWorkspaceSurfaceLevels(browser) {
+  const page = await browser.newPage();
+  await page.setContent(`<!doctype html>
+    <html>
+      <head><style>${workspaceStyles}
+        :root {
+          --lilia-surface-fill-base: rgb(18, 28, 38);
+          --lilia-surface-fill-raised: rgb(48, 58, 68);
+        }
+        .lilia-workspace { width: 120px; height: 80px; }
+      </style></head>
+      <body>
+        <div class="lilia-workspace" data-lilia-surface-mode="solid"
+          data-lilia-surface-level="raised" data-testid="raised"></div>
+        <div class="lilia-workspace" data-lilia-surface-mode="solid"
+          data-lilia-surface-level="base" data-testid="base"></div>
+      </body>
+    </html>`);
+
+  const backgrounds = await page.evaluate(() => ({
+    base: getComputedStyle(document.querySelector("[data-testid='base']")).backgroundColor,
+    raised: getComputedStyle(document.querySelector("[data-testid='raised']")).backgroundColor,
+  }));
+  assert.deepEqual(backgrounds, {
+    base: "rgb(18, 28, 38)",
+    raised: "rgb(48, 58, 68)",
+  }, "solid Workspace background follows its declared Surface level");
   await page.close();
 }
 

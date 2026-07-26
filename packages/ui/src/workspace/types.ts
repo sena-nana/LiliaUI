@@ -16,10 +16,22 @@ export type WorkspaceRegionScope = "workspace" | "primary";
 export type WorkspaceRegionOverflow = "auto" | "hidden" | "visible";
 export type WorkspaceRegionNarrowBehavior = "shrink" | "collapse" | "overlay" | "none";
 
+export type WorkspaceLayoutLength = number | string;
+
+export interface WorkspaceContentInset {
+  blockStart?: WorkspaceLayoutLength;
+  blockEnd?: WorkspaceLayoutLength;
+  inlineStart?: WorkspaceLayoutLength;
+  inlineEnd?: WorkspaceLayoutLength;
+}
+
 export interface LiliaWorkspaceProps extends SurfaceProps {
   as?: string | Component;
   ariaLabel?: string;
   shadow?: boolean;
+  contentInset?: WorkspaceContentInset;
+  rowGap?: WorkspaceLayoutLength;
+  columnGap?: WorkspaceLayoutLength;
 }
 
 export interface LiliaWorkspaceRegionProps extends Omit<SurfaceProps, "agentId"> {

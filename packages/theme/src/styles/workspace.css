@@ -1,5 +1,8 @@
 .lilia-workspace {
-  --lilia-workspace-surface: var(--lilia-surface-fill-raised, var(--bg-elev));
+  --lilia-workspace-surface: var(
+    --lilia-surface-fill,
+    var(--lilia-surface-fill-raised, var(--bg-elev))
+  );
   --lilia-workspace-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
   position: relative;
   display: grid;

@@ -12,6 +12,8 @@ export { useWorkspaceRegion } from "./useWorkspaceRegion";
 export type {
   LiliaWorkspaceProps,
   LiliaWorkspaceRegionProps,
+  WorkspaceContentInset,
+  WorkspaceLayoutLength,
   WorkspaceRegionGeometry,
   WorkspaceRegionNarrowBehavior,
   WorkspaceRegionOverflow,
