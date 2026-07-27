@@ -36,11 +36,11 @@ function onClick(event: MouseEvent) {
 </template>
 
 <style scoped>
-.ui-list-item { display: flex; width: 100%; min-width: 0; min-height: 34px; align-items: center; gap: 8px; padding: 6px 9px; border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--text); cursor: pointer; font: inherit; text-align: left; transition: background-color 0.12s ease, border-color 0.12s ease; }
+.ui-list-item { display: flex; width: 100%; min-width: 0; min-height: 34px; align-items: center; gap: 8px; padding: 6px 9px; border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--text); cursor: pointer; font: inherit; text-align: left; transition: background-color 0.12s ease; }
 .ui-list-item:hover:not(:disabled) { background: var(--lilia-state-layer-hover); }
 .ui-list-item:active:not(:disabled) { background: var(--lilia-state-layer-pressed); }
 .ui-list-item.is-active,
-.ui-list-item.is-selected { border-color: var(--lilia-state-indicator-selected); background: var(--lilia-state-layer-selected); color: var(--lilia-state-foreground-selected); }
+.ui-list-item.is-selected { background: var(--lilia-state-layer-selected); color: var(--lilia-state-foreground-selected); }
 .ui-list-item.is-active:hover:not(:disabled),
 .ui-list-item.is-selected:hover:not(:disabled) { background: var(--lilia-state-layer-selected-hover); }
 .ui-list-item.is-active:active:not(:disabled),
