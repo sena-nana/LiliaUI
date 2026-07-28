@@ -7,7 +7,9 @@ import * as publicUiOverlayExports from "../../packages/ui/src/overlay";
 import * as publicUiProviderExports from "../../packages/ui/src/provider/index";
 import * as publicUiSearchExports from "../../packages/ui/src/search";
 import * as publicUiSettingsExports from "../../packages/ui/src/settings/index";
+import * as publicUiSettingsSectionExports from "../../packages/ui/src/settings-sections";
 import * as publicUiShellExports from "../../packages/ui/src/shell";
+import UiImageViewer from "../../packages/ui/src/components/UiImageViewer.vue";
 import {
   type ComponentPerfReport,
   compareComponentPerfReport,
@@ -66,7 +68,9 @@ describe("component performance scenarios", () => {
       ...missingScenarios(publicUiProviderExports, coveredNames),
       ...missingScenarios(publicUiSearchExports, coveredNames),
       ...missingScenarios(publicUiSettingsExports, coveredNames),
+      ...missingScenarios(publicUiSettingsSectionExports, coveredNames),
       ...missingScenarios(publicUiShellExports, coveredNames),
+      ...missingScenarios({ UiImageViewer }, coveredNames),
     ];
     expect(uniqueScenarioNames).toHaveLength(scenarioNames.length);
     expect(missingComponents).toEqual([]);

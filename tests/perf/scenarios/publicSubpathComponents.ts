@@ -3,8 +3,8 @@ import Settings from "@lucide/vue/dist/esm/icons/settings.mjs";
 import {
   LiliaAboutSection,
   LiliaAppearanceSection,
-  LiliaSettingsSidebar,
-} from "@lilia/ui/settings";
+} from "@lilia/ui/settings/sections";
+import { LiliaSettingsSidebar } from "@lilia/ui/settings";
 import {
   LiliaSidebarFooter,
   LiliaSidebarFrame,

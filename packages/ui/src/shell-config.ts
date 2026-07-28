@@ -1,5 +1,5 @@
+export { APP_METADATA } from "./config/appShellMetadata";
 export {
-  APP_METADATA,
   SIDEBAR_FOOTER_LINKS,
   SIDEBAR_FOOTER_STATUSES,
   getLiliaUiConfig,

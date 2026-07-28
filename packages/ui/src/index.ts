@@ -8,11 +8,7 @@ export {
   type SurfaceMode,
 } from "@lilia/theme";
 
-export { default as ActionMenuItem } from "./components/ActionMenuItem.vue";
-export { default as AnchoredActionMenu } from "./components/AnchoredActionMenu.vue";
-export { default as CalendarHeatmap } from "./components/CalendarHeatmap.vue";
 export { default as ConfirmDialog } from "./components/ConfirmDialog.vue";
-export { default as Dropdown } from "./components/Dropdown.vue";
 export { default as PopupTitleBarFrame } from "./components/PopupTitleBarFrame.vue";
 export { default as SidebarCollapse } from "./components/sidebar/SidebarCollapse.vue";
 export {
@@ -55,18 +51,3 @@ export {
   type LiliaSidebarRowTone,
 } from "./components/sidebar/LiliaSidebarRow.vue";
 export { default as LiliaSidebarSection, type LiliaSidebarSectionProps } from "./components/sidebar/LiliaSidebarSection.vue";
-export {
-  buildCalendarHeatmapModel,
-  calendarHeatmapCellAtPoint,
-  type CalendarHeatmapActiveCell,
-  type CalendarHeatmapBuildOptions,
-  type CalendarHeatmapCell,
-  type CalendarHeatmapDatum,
-  type CalendarHeatmapDayLabel,
-  type CalendarHeatmapLevelPath,
-  type CalendarHeatmapLevelStrategy,
-  type CalendarHeatmapModel,
-  type CalendarHeatmapMonthLabel,
-  type CalendarHeatmapPoint,
-  type CalendarHeatmapWeekdayLabel,
-} from "./utils/calendarHeatmap";

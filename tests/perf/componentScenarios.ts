@@ -1,11 +1,7 @@
 import Search from "@lucide/vue/dist/esm/icons/search.mjs";
 import Settings from "@lucide/vue/dist/esm/icons/settings.mjs";
 import {
-  ActionMenuItem,
-  AnchoredActionMenu,
-  CalendarHeatmap,
   ConfirmDialog,
-  Dropdown,
   LiliaSidebarRow,
   LiliaSidebarSection,
   PopupTitleBarFrame,
@@ -25,11 +21,17 @@ import {
   UiSpinner,
   UiSwitch,
   UiTextarea,
-  buildCalendarHeatmapModel,
+  UiXYPad,
 } from "@lilia/ui";
-import ContextMenuHost from "@lilia/ui/components/ContextMenuHost";
-import OverlayHost from "@lilia/ui/components/OverlayHost";
-import { SearchDropdown } from "@lilia/ui/search";
+import UiImageViewer from "@lilia/ui/components/ImageViewer";
+import {
+  ActionMenuItem,
+  AnchoredActionMenu,
+  ContextMenuHost,
+  OverlayHost,
+} from "@lilia/ui/overlay";
+import { CalendarHeatmap, buildCalendarHeatmapModel } from "@lilia/ui/calendar";
+import { Dropdown, SearchDropdown } from "@lilia/ui/search";
 import PopupShell from "@lilia/ui/layouts/PopupShell";
 import {
   LiliaBottomPanel,
@@ -41,7 +43,7 @@ import {
   LiliaWorkspaceRegion,
   useWorkspaceRegion,
 } from "@lilia/ui/layouts";
-import { LiliaAppShell, setLiliaUiConfig } from "@lilia/ui/shell";
+import { LiliaAppShell, LiliaDesktopShell, setLiliaUiConfig } from "@lilia/ui/shell";
 import { LiliaUIProvider } from "@lilia/ui/provider";
 import {
   createLiliaSettingsModel,
@@ -188,6 +190,22 @@ const dropdownStressOptions = Array.from({ length: 500 }, (_, index) => ({
 }));
 const dropdownStressSelection = ref<readonly number[] | null>(null);
 
+const searchDropdownStressLabels = Array.from({ length: 200 }, (_, index) => `Result ${index}`);
+
+const contextMenuSearchLeaves = Array.from({ length: 120 }, (_, index) => ({
+  id: `leaf-${index}`,
+  label: `Action ${index}`,
+  keywords: [`kw-${index}`],
+}));
+
+const contextMenuSearchTree = Array.from({ length: 8 }, (_, group) => ({
+  id: `group-${group}`,
+  label: `Group ${group}`,
+  children: contextMenuSearchLeaves.slice(group * 15, group * 15 + 15),
+}));
+
+const PERF_IMAGE_SRC = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+
 function createScenarioRouter(initialPath = "/") {
   activeRouter = createRouter({
     history: createMemoryHistory(),
@@ -290,6 +308,30 @@ function pointerOffset(root: ParentNode, selector: string, type: string, offsetX
   element.dispatchEvent(event);
 }
 
+function wheel(root: ParentNode, selector: string, deltaY: number) {
+  const element = documentFor(root).querySelector(selector);
+  if (!(element instanceof HTMLElement)) {
+    throw new Error(`Missing perf wheel target: ${selector}`);
+  }
+  element.dispatchEvent(new WheelEvent("wheel", {
+    bubbles: true,
+    cancelable: true,
+    deltaY,
+  }));
+}
+
+function keydown(root: ParentNode, selector: string, key: string) {
+  const element = documentFor(root).querySelector(selector);
+  if (!(element instanceof HTMLElement)) {
+    throw new Error(`Missing perf keydown target: ${selector}`);
+  }
+  element.dispatchEvent(new KeyboardEvent("keydown", {
+    bubbles: true,
+    cancelable: true,
+    key,
+  }));
+}
+
 function captureAnimationFrames() {
   const originalRequest = window.requestAnimationFrame;
   const originalCancel = window.cancelAnimationFrame;
@@ -371,6 +413,19 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
     },
     render: () => h(ContextMenuHost),
     interact: (root) => click(root, "[data-agent-id='context-menu.item.danger']"),
+  },
+  {
+    name: "ContextMenuSearchable120",
+    runners: ["browser"],
+    budgets: { interaction: 8.3, update: 8.3 },
+    prepare: () => {
+      openContextMenuAt(24, 24, contextMenuSearchTree, {
+        searchable: true,
+        searchPlaceholder: "搜索动作",
+      });
+    },
+    render: () => h(ContextMenuHost),
+    interact: (root) => input(root, "[data-agent-id='context-menu.search']", "Action 42"),
   },
   {
     name: "Dropdown",
@@ -496,6 +551,23 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
       overlays: () => h("div", `Overlay ${step.value}`),
     }),
     interact: (root) => click(root, "[data-agent-id='perf.lilia.shell.action']"),
+  },
+  {
+    name: "LiliaDesktopShell",
+    runners: ["browser", "vitest-jsdom"],
+    prepare: resetAppConfig,
+    createPlugins: () => [createScenarioRouter("/")],
+    beforeMount: readyScenarioRouter,
+    render: (step) => h(LiliaDesktopShell, {
+      title: `Desktop ${step.value}`,
+      agentId: "perf.desktop-shell",
+      navigation: [
+        { key: "home", label: `Home ${step.value}`, icon: Search, to: "/", active: step.value % 2 === 0 },
+        { key: "inbox", label: "Inbox", icon: Settings, to: "/components", active: step.value % 2 === 1 },
+      ],
+      footerLinks: [{ key: "settings", label: "Settings", icon: Settings, to: "/settings" }],
+    }, () => h("main", { "data-agent-id": "perf.desktop-shell.main" }, `Primary ${step.value}`)),
+    interact: (root) => click(root, "[data-agent-id='perf.desktop-shell.nav.inbox']"),
   },
   {
     name: "LiliaUIProvider",
@@ -670,8 +742,9 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
     name: "SearchDropdown",
     render: (step) => h(SearchDropdown, {
       modelValue: step.value % 2 === 0 ? "li" : "ui",
-      open: true,
+      open: step.value % 2 === 1,
       placeholder: "Search components",
+      inputAgentId: "perf.search-dropdown.input",
     }, {
       default: ({ query, highlightQuerySegments }: any) => h("div", [
         ["Lilia shell", "UI Button", "Search dropdown"].map((label) =>
@@ -683,7 +756,40 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
         ),
       ]),
     }),
-    interact: (root) => input(root, ".search-dropdown__input", "shell"),
+    interact: async (root) => {
+      click(root, "[data-agent-id='perf.search-dropdown.input']");
+      await nextTick();
+      input(root, "[data-agent-id='perf.search-dropdown.input']", "shell");
+    },
+  },
+  {
+    name: "SearchDropdownResults200",
+    runners: ["browser"],
+    budgets: { interaction: 8.3, update: 8.3 },
+    render: (step) => h(SearchDropdown, {
+      modelValue: step.value % 2 === 0 ? "Result 1" : "Result 12",
+      open: true,
+      placeholder: "Search results",
+      inputAgentId: "perf.search-dropdown-stress.input",
+    }, {
+      default: ({ query, highlightQuerySegments }: any) => h("div", [
+        searchDropdownStressLabels
+          .filter((label) => label.toLocaleLowerCase().includes(String(query).toLocaleLowerCase()))
+          .slice(0, 80)
+          .map((label) =>
+            h("div", {
+              class: "search-dropdown__option",
+              role: "option",
+              "data-agent-id": `perf.search-dropdown-stress.option.${label}`,
+            }, [
+              h("span", highlightQuerySegments(label, query).map((part: any) =>
+                h("span", { class: part.highlight ? "is-highlight" : undefined }, part.text),
+              )),
+            ]),
+          ),
+      ]),
+    }),
+    interact: (root) => input(root, "[data-agent-id='perf.search-dropdown-stress.input']", "Result 12"),
   },
   {
     name: "SidebarCollapse",
@@ -800,7 +906,7 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
       ariaLabel: "Radius",
       agentId: "perf.range",
     }),
-    interact: (root) => input(root, "[data-agent-id='perf.range']", "16"),
+    interact: (root) => keydown(root, "[data-agent-id='perf.range']", "ArrowRight"),
   },
   {
     name: "UiSegmentedControl",
@@ -847,5 +953,52 @@ export const componentPerformanceScenarios: ComponentPerfScenario[] = [
       agentId: "perf.textarea",
     }),
     interact: (root) => input(root, "[data-agent-id='perf.textarea']", "updated\ncontent"),
+  },
+  {
+    name: "UiXYPad",
+    render: (step) => h(UiXYPad, {
+      modelValue: { x: 0.2 + (step.value % 5) * 0.1, y: 0.3 + (step.value % 4) * 0.1 },
+      ariaLabel: "XY pad",
+      agentId: "perf.xy-pad",
+    }),
+    interact: (root) => {
+      pointer(root, "[data-agent-id='perf.xy-pad']", "pointerdown", { clientX: 40, clientY: 40 });
+      pointer(root, "[data-agent-id='perf.xy-pad']", "pointermove", { clientX: 56, clientY: 28 });
+      pointer(root, "[data-agent-id='perf.xy-pad']", "pointerup", { clientX: 56, clientY: 28 });
+      keydown(root, "[data-agent-id='perf.xy-pad']", "ArrowRight");
+    },
+  },
+  {
+    name: "UiImageViewer",
+    runners: ["browser", "vitest-jsdom"],
+    render: (step) => h(UiImageViewer, {
+      source: {
+        src: PERF_IMAGE_SRC,
+        alt: `Perf image ${step.value}`,
+        name: `image-${step.value}.gif`,
+        metadata: "GIF · 1×1",
+      },
+      agentId: "perf.image-viewer",
+    }),
+    beforeInteract: async (root) => {
+      const image = documentFor(root).querySelector("[data-agent-id='perf.image-viewer.image']");
+      if (!(image instanceof HTMLImageElement)) {
+        throw new Error("Missing perf image viewer image");
+      }
+      Object.defineProperties(image, {
+        naturalWidth: { configurable: true, value: 1200 },
+        naturalHeight: { configurable: true, value: 800 },
+      });
+      image.dispatchEvent(new Event("load"));
+      await nextTick();
+    },
+    interact: async (root) => {
+      wheel(root, "[data-agent-id='perf.image-viewer']", -2400);
+      await nextTick();
+      pointer(root, "[data-agent-id='perf.image-viewer.image']", "pointerdown", { clientX: 80, clientY: 80 });
+      pointer(root, "[data-agent-id='perf.image-viewer.image']", "pointermove", { clientX: 96, clientY: 72 });
+      pointer(root, "[data-agent-id='perf.image-viewer.image']", "pointerup", { clientX: 96, clientY: 72 });
+      click(root, "[data-agent-id='perf.image-viewer.close']");
+    },
   },
 ];

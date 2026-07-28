@@ -17,7 +17,7 @@
 - 公共 API 要保持可被远端 Git workspace 直接消费;不要依赖本地未导出的路径或消费仓库专属文件。
 - `@lilia/ui` 只承载可复用 UI 和壳层能力;应用业务页面、业务数据模型、provider、timeline、agent runner 不进入本仓库。
 - `@lilia/ui` 不创建 Vue App、Router、应用 Root、业务路由或设置路由;消费应用显式组合 Root、Shell、Hosts、命令、设置 model 和可选安装器。
-- 根入口只承载稳定常用组件;Shell、Settings、Runtime、Commands 和 Diagnostics 分别从明确 subpath 导入,禁止重新汇总到根入口。
+- 根入口只承载稳定常用 Contract 组件与少量壳层原语;Calendar、Search、Overlay、Shell、Settings、Runtime、Commands、Diagnostics 与 Composables 分别从明确 subpath 导入,禁止重新汇总到根入口。Composables 新代码使用 `@lilia/ui/composables/<name>` 深路径,不要从 `@lilia/ui/composables` 聚合导入。
 - `@lilia/config` 只负责配置读取、校验、同步和可继承配置;不承担 CLI 输出和流程编排。
 - `@lilia/tools` 负责面向项目的检查、资源复制和工具 CLI;不要放运行时 UI 状态。preset 与依赖来源的切换由消费应用自行管理,本仓库不提供自动迁移/切换工具。
 - `@lilia/build` 负责流程封装和跨平台命令执行;不要复制 `@lilia/config` 或 `@lilia/tools` 的业务逻辑。

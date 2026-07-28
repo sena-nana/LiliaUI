@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { APP_METADATA } from "../../config/appShell";
+import { APP_METADATA } from "../../config/appShellMetadata";
 </script>
 
 <template>

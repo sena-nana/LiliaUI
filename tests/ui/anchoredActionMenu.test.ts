@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   ActionMenuItem,
   AnchoredActionMenu,
-} from "@lilia/ui";
+} from "@lilia/ui/overlay";
 import { useAnchoredActionMenu } from "@lilia/ui/composables/useAnchoredActionMenu";
 
 function renderActionMenu(action = vi.fn()) {

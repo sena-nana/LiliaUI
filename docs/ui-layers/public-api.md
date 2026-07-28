@@ -6,10 +6,10 @@
 
 | 入口 | 稳定职责 |
 | --- | --- |
-| `@lilia/ui` | Professional Contract 基础组件与常用公共组件 |
+| `@lilia/ui` | Professional Contract 基础组件与常用公共组件（不含 Calendar / Search / Overlay） |
 | `@lilia/ui/calendar` | CalendarHeatmap 与纯数据模型工具 |
 | `@lilia/ui/search` | Dropdown 与 SearchDropdown |
-| `@lilia/ui/overlay` | OverlayHost、ContextMenuHost、AnchoredActionMenu 与 overlay activity |
+| `@lilia/ui/overlay` | OverlayHost、ContextMenuHost、AnchoredActionMenu、ActionMenuItem 与 overlay activity |
 | `@lilia/ui/layouts` | Workspace、Region、布局预设与 geometry 订阅 |
 | `@lilia/ui/preset/definition` | 不加载任何 Shell 的 Lilia preset 元数据与默认 policy |
 | `@lilia/ui/provider` | Lilia Policy Provider 与 context |
@@ -17,16 +17,18 @@
 | `@lilia/ui/shell/app` | LiliaAppShell |
 | `@lilia/ui/shell/sidebar` | 可组合 Sidebar frame、row 与 footer |
 | `@lilia/ui/shell/config` | Shell 配置、元数据与图标解析 |
-| `@lilia/ui/settings` | Settings model、provider 与页面容器 |
+| `@lilia/ui/settings` | Settings model、provider 与页面容器（不含默认 Section） |
+| `@lilia/ui/settings/sections` | Appearance / About 等默认设置 Section |
 | `@lilia/ui/settings/sidebar` | 不加载设置页面与 section 的设置导航侧栏 |
 | `@lilia/ui/runtime` | 浏览器安全、显式安装的运行时能力与 NativeAppearanceAdapter |
 | `@lilia/ui/runtime/tauri` | Native Appearance 的显式 Tauri adapter |
 | `@lilia/ui/commands` | 独立 command registry |
 | `@lilia/ui/diagnostics` | 显式加载的 Agent Debug 与性能诊断 |
+| `@lilia/ui/composables/<name>` | 单一 composable 深路径；**新代码禁止**从 `@lilia/ui/composables` 聚合导入 |
 
 历史 `components/<name>`、`composables/<name>` 与 `layouts/PopupShell` 只对已经公开的确定路径保留显式兼容映射；不再允许通配路径。新代码使用上表中的职责入口。
 
-根入口只承载 Contract 基础组件；Provider、Shell、Settings 与 Commands 从明确 subpath 导入。Lilia 新模板继续优先从 `shell/app`、`shell/sidebar`、`shell/config` 按职责导入，避免不相关 CSS 进入 bundle。
+根入口只承载 Contract 基础组件与少量常用壳层原语（TitleBar、SettingsRow 等）；Calendar、Search、Overlay、Provider、Shell、Settings、Commands 与 Composables 从明确 subpath 导入。Lilia 新模板继续优先从 `shell/app`、`shell/sidebar`、`shell/config` 按职责导入，避免无关 CSS 与图标进入 bundle。设置页默认 Section 从 `settings/sections` 导入，避免仅使用 settings model/页面容器时连带 Appearance/About。
 
 应用可从 `preset/definition` 读取无 Shell side effect 的 metadata，或从 `preset` 取得包含 Router-free Shell 与 Provider 的完整 adapter。Router、导航、业务布局和 Settings 路由均由应用显式组合。
 

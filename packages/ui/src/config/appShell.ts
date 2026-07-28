@@ -1,52 +1,9 @@
 import { reactive, type Component } from "vue";
-import Bot from "@lucide/vue/dist/esm/icons/bot.mjs";
-import Brain from "@lucide/vue/dist/esm/icons/brain.mjs";
-import Download from "@lucide/vue/dist/esm/icons/download.mjs";
-import Ellipsis from "@lucide/vue/dist/esm/icons/ellipsis.mjs";
-import FilePlus from "@lucide/vue/dist/esm/icons/file-plus.mjs";
-import Folder from "@lucide/vue/dist/esm/icons/folder.mjs";
-import FolderCog from "@lucide/vue/dist/esm/icons/folder-cog.mjs";
-import Gauge from "@lucide/vue/dist/esm/icons/gauge.mjs";
-import House from "@lucide/vue/dist/esm/icons/house.mjs";
-import Info from "@lucide/vue/dist/esm/icons/info.mjs";
-import MonitorSmartphone from "@lucide/vue/dist/esm/icons/monitor-smartphone.mjs";
-import MessageSquare from "@lucide/vue/dist/esm/icons/message-square.mjs";
-import Network from "@lucide/vue/dist/esm/icons/network.mjs";
-import Palette from "@lucide/vue/dist/esm/icons/palette.mjs";
-import PanelTop from "@lucide/vue/dist/esm/icons/panel-top.mjs";
-import Plus from "@lucide/vue/dist/esm/icons/plus.mjs";
-import Puzzle from "@lucide/vue/dist/esm/icons/puzzle.mjs";
-import Search from "@lucide/vue/dist/esm/icons/search.mjs";
-import Server from "@lucide/vue/dist/esm/icons/server.mjs";
-import Settings from "@lucide/vue/dist/esm/icons/settings.mjs";
-import Sparkles from "@lucide/vue/dist/esm/icons/sparkles.mjs";
-import Workflow from "@lucide/vue/dist/esm/icons/workflow.mjs";
+import { APP_METADATA, syncAppMetadata } from "./appShellMetadata";
+import { resolveLiliaIcon, type IconInput } from "./appShellIcons";
 
-type IconName =
-  | "bot"
-  | "brain"
-  | "download"
-  | "file-plus"
-  | "folder"
-  | "folder-cog"
-  | "gauge"
-  | "home"
-  | "info"
-  | "message-square"
-  | "monitor-smartphone"
-  | "more"
-  | "network"
-  | "panel-top"
-  | "palette"
-  | "plus"
-  | "puzzle"
-  | "search"
-  | "server"
-  | "settings"
-  | "sparkles"
-  | "workflow";
-
-export type IconInput = IconName | Component;
+export { APP_METADATA } from "./appShellMetadata";
+export { resolveLiliaIcon, type IconInput, type IconName } from "./appShellIcons";
 
 export interface LiliaSidebarFooterLinkInput {
   icon: IconInput;
@@ -95,13 +52,6 @@ export interface LiliaUiConfig {
   version: string;
 }
 
-export const APP_METADATA = reactive({
-  appName: "lilia-app",
-  productTitle: "Lilia App",
-  version: "0.1.0",
-  storageKeyPrefix: "lilia-app",
-});
-
 export interface SidebarActionItem {
   active?: boolean;
   disabled?: boolean;
@@ -148,31 +98,6 @@ export interface SidebarFooterStatus {
   tone: "ok" | "warn" | "error";
 }
 
-const lucideIcons = {
-  bot: Bot,
-  brain: Brain,
-  download: Download,
-  "file-plus": FilePlus,
-  folder: Folder,
-  "folder-cog": FolderCog,
-  gauge: Gauge,
-  home: House,
-  info: Info,
-  "message-square": MessageSquare,
-  "monitor-smartphone": MonitorSmartphone,
-  more: Ellipsis,
-  network: Network,
-  "panel-top": PanelTop,
-  palette: Palette,
-  plus: Plus,
-  puzzle: Puzzle,
-  search: Search,
-  server: Server,
-  settings: Settings,
-  sparkles: Sparkles,
-  workflow: Workflow,
-} satisfies Record<IconName, Component>;
-
 export const SIDEBAR_FOOTER_LINKS = reactive<SidebarFooterLink[]>([]);
 export const SIDEBAR_FOOTER_STATUSES = reactive<SidebarFooterStatus[]>([]);
 
@@ -183,24 +108,13 @@ let currentConfig: LiliaUiConfig = {
   storageKeyPrefix: APP_METADATA.storageKeyPrefix,
 };
 
-export function resolveLiliaIcon(icon: IconInput): Component {
-  return typeof icon === "string" ? resolveLazyLucideIcon(icon) : icon;
-}
-
-function resolveLazyLucideIcon(icon: IconName): Component {
-  return lucideIcons[icon];
-}
-
 function replaceArray<T>(target: T[], next: T[]) {
   target.splice(0, target.length, ...next);
 }
 
 export function setLiliaUiConfig(config: LiliaUiConfig) {
   currentConfig = config;
-  APP_METADATA.appName = config.appName;
-  APP_METADATA.productTitle = config.productTitle;
-  APP_METADATA.version = config.version;
-  APP_METADATA.storageKeyPrefix = config.storageKeyPrefix;
+  syncAppMetadata(config);
 
   const sidebar = config.sidebar ?? {};
   replaceArray(

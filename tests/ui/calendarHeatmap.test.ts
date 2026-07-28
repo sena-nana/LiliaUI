@@ -7,7 +7,7 @@ import {
   calendarHeatmapCellAtPoint,
   type CalendarHeatmapActiveCell,
   type CalendarHeatmapDatum,
-} from "@lilia/ui";
+} from "@lilia/ui/calendar";
 
 describe("CalendarHeatmap", () => {
   it("builds pure heatmap data from date values", () => {

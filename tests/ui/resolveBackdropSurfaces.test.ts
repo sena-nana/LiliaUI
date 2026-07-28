@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveBackdropSurfaces } from "@lilia/ui/composables";
+import { resolveBackdropSurfaces } from "@lilia/ui/composables/resolveBackdropSurfaces";
 
 describe("resolveBackdropSurfaces", () => {
   it("keeps every region solid when backdropMode is solid", () => {

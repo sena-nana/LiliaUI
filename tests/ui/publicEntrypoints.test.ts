@@ -9,7 +9,7 @@ describe("public package entrypoints", () => {
   });
 
   it("loads stable boundaries without installing diagnostics", async () => {
-    const [root, calendar, search, overlay, preset, presetDefinition, provider, shell, shellApp, shellConfig, shellSidebar, layouts, settings, settingsSidebar, runtime, tauriRuntime, commands, diagnostics] = await Promise.all([
+    const [root, calendar, search, overlay, preset, presetDefinition, provider, shell, shellApp, shellConfig, shellSidebar, layouts, settings, settingsSections, settingsSidebar, runtime, tauriRuntime, commands, diagnostics] = await Promise.all([
       import("@lilia/ui"),
       import("@lilia/ui/calendar"),
       import("@lilia/ui/search"),
@@ -23,6 +23,7 @@ describe("public package entrypoints", () => {
       import("@lilia/ui/shell/sidebar"),
       import("@lilia/ui/layouts"),
       import("@lilia/ui/settings"),
+      import("@lilia/ui/settings/sections"),
       import("@lilia/ui/settings/sidebar"),
       import("@lilia/ui/runtime"),
       import("@lilia/ui/runtime/tauri"),
@@ -48,7 +49,17 @@ describe("public package entrypoints", () => {
     expect(layouts.LiliaWorkspaceRegion).toBeDefined();
     expect(layouts.useWorkspaceRegion).toBeTypeOf("function");
     expect(settings.createLiliaSettingsModel).toBeTypeOf("function");
+    expect(settings.LiliaSettingsPage).toBeDefined();
+    expect(settings.LiliaAppearanceSection).toBeUndefined();
+    expect(settingsSections.LiliaAppearanceSection).toBeDefined();
+    expect(settingsSections.LiliaAboutSection).toBeDefined();
     expect(settingsSidebar.LiliaSettingsSidebar).toBeDefined();
+    expect(overlay.ActionMenuItem).toBeDefined();
+    expect(overlay.AnchoredActionMenu).toBeDefined();
+    expect(root.CalendarHeatmap).toBeUndefined();
+    expect(root.Dropdown).toBeUndefined();
+    expect(root.AnchoredActionMenu).toBeUndefined();
+    expect(search.Dropdown).toBeDefined();
     expect(runtime.installLiliaContextMenu).toBeTypeOf("function");
     expect(runtime.setNativeAppearanceAdapter).toBeTypeOf("function");
     expect(tauriRuntime.installTauriNativeAppearanceAdapter).toBeTypeOf("function");

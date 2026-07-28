@@ -1,3 +1,4 @@
+export { default as ActionMenuItem } from "./components/ActionMenuItem.vue";
 export { default as AnchoredActionMenu } from "./components/AnchoredActionMenu.vue";
 export { default as ContextMenuHost } from "./components/ContextMenuHost.vue";
 export { default as OverlayHost } from "./components/OverlayHost.vue";

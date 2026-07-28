@@ -26,6 +26,12 @@
 
 历史场景的 DOM 数保持 19；计时仍低于既有阈值。新增场景覆盖 20/50 Region 静态挂载、订阅开关、动态插入/隐藏/折叠/overlay 和 12 次连续 resize。阈值保持 `4x + 20ms` 与 DOM `1.25x + 8`，没有放宽。
 
+## 组件门禁补充
+
+- light/browser 已覆盖 `UiXYPad`、`LiliaDesktopShell`、`UiImageViewer`
+- browser 加深：`SearchDropdownResults200`、`ContextMenuSearchable120`；`DropdownMulti500` 保持既有回归
+- 根入口不再重导出 Calendar / Search / Overlay；Settings Section 走 `@lilia/ui/settings/sections`；`APP_METADATA` 与图标 map 拆分
+
 更新基线使用：
 
 ```bash
@@ -33,3 +39,4 @@ yarn perf:components:update-baseline
 ```
 
 日常门禁继续使用 `yarn perf:components:light`；真实浏览器检查使用 `yarn perf:components:browser`。
+
