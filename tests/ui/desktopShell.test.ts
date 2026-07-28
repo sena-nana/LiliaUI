@@ -1,6 +1,6 @@
 import Home from "@lucide/vue/dist/esm/icons/house.mjs";
 import Settings from "@lucide/vue/dist/esm/icons/settings.mjs";
-import { render, screen, waitFor } from "@testing-library/vue";
+import { fireEvent, render, screen, waitFor } from "@testing-library/vue";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LiliaDesktopShell } from "@lilia/ui/shell";
@@ -56,6 +56,48 @@ describe("LiliaDesktopShell", () => {
     expect(screen.getByRole("link", { name: "首页" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "设置" })).toBeInTheDocument();
     expect(screen.getByText("已同步")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "折叠左侧栏" })).toBeInTheDocument();
+  });
+
+  it("toggles an uncontrolled navigation region from the shared titlebar button", async () => {
+    const router = await prepare();
+    const view = render(LiliaDesktopShell, {
+      props: {
+        title: "Lilia",
+        navigation: [{ key: "home", label: "首页", icon: Home, to: "/" }],
+      },
+      slots: { default: "<div>主要</div>" },
+      global: { plugins: [router] },
+    });
+    const navigation = view.container.querySelector('[data-region-id="navigation"]');
+
+    await waitFor(() => expect(navigation).not.toHaveAttribute("data-region-collapsed"));
+    await fireEvent.click(screen.getByRole("button", { name: "折叠左侧栏" }));
+    await waitFor(() => expect(navigation).toHaveAttribute("data-region-collapsed", "true"));
+    await fireEvent.click(screen.getByRole("button", { name: "展开左侧栏" }));
+    await waitFor(() => expect(navigation).not.toHaveAttribute("data-region-collapsed"));
+
+    expect(view.emitted("update:navCollapsed")).toEqual([[true], [false]]);
+  });
+
+  it("emits controlled navigation changes without overriding the provided state", async () => {
+    const router = await prepare();
+    const view = render(LiliaDesktopShell, {
+      props: {
+        title: "Lilia",
+        navigation: [{ key: "home", label: "首页", icon: Home, to: "/" }],
+        navCollapsed: true,
+      },
+      slots: { default: "<div>主要</div>" },
+      global: { plugins: [router] },
+    });
+    const navigation = view.container.querySelector('[data-region-id="navigation"]');
+
+    await waitFor(() => expect(navigation).toHaveAttribute("data-region-collapsed", "true"));
+    await fireEvent.click(screen.getByRole("button", { name: "展开左侧栏" }));
+
+    expect(view.emitted("update:navCollapsed")).toEqual([[false]]);
+    expect(navigation).toHaveAttribute("data-region-collapsed", "true");
   });
 
   it("renders optional bottom and inspector slots as workspace regions", async () => {
@@ -90,12 +132,16 @@ describe("LiliaDesktopShell", () => {
       expect(view.container.querySelector('[data-region-id="primary"]')).not.toHaveAttribute("hidden");
     });
     expect(view.container.querySelector('[data-region-id="navigation"]')).toBeNull();
+    expect(screen.queryByRole("button", { name: "折叠左侧栏" })).not.toBeInTheDocument();
   });
 
-  it("forwards header slots to the window shell", async () => {
+  it("forwards header slots without replacing the shared navigation toggle", async () => {
     const router = await prepare();
     render(LiliaDesktopShell, {
-      props: { title: "Lilia" },
+      props: {
+        title: "Lilia",
+        navigation: [{ key: "home", label: "首页", icon: Home, to: "/" }],
+      },
       slots: {
         default: '<div>主要</div>',
         "header-leading": '<button aria-label="命令">命令</button>',
@@ -106,8 +152,26 @@ describe("LiliaDesktopShell", () => {
     });
 
     expect(screen.getByRole("button", { name: "命令" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "折叠左侧栏" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "保存" })).toBeInTheDocument();
     expect(screen.getByText("标题")).toBeInTheDocument();
+  });
+
+  it("lets custom navigation content own its frame spacing", async () => {
+    const router = await prepare();
+    const view = render(LiliaDesktopShell, {
+      props: { title: "Lilia" },
+      slots: {
+        default: "<div>主要</div>",
+        navigation: '<aside data-testid="custom-navigation">自定义导航</aside>',
+      },
+      global: { plugins: [router] },
+    });
+
+    await waitFor(() => expect(screen.getByTestId("custom-navigation")).toBeVisible());
+    expect(view.container.querySelector(".lilia-desktop-shell__nav-body")).toHaveClass(
+      "lilia-desktop-shell__nav-body--custom",
+    );
   });
 
   it("wires workspace sidebar/main surfaces from backdropMode and backdropTarget", async () => {

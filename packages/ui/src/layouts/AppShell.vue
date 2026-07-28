@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AppShellProps, AppShellSlots } from "@lilia/ui-contract";
+import type { AppShellEmits, AppShellProps, AppShellSlots } from "@lilia/ui-contract";
 import { computed, inject, type Component } from "vue";
 import { APP_METADATA } from "../config/appShell";
 import { useNativeAppearance } from "../composables/useNativeAppearance";
@@ -19,8 +19,11 @@ interface LiliaAppShellSlots extends AppShellSlots {
 const props = withDefaults(defineProps<LiliaAppShellProps>(), {
   title: undefined,
   agentId: undefined,
+  showSidebarToggle: false,
+  leftSidebarCollapsed: false,
   overlayComponents: () => [],
 });
+const emit = defineEmits<AppShellEmits>();
 defineSlots<LiliaAppShellSlots>();
 
 const shellOptions = inject(liliaShellOptionsKey, {});
@@ -41,11 +44,13 @@ const resolvedTitle = computed(() => props.title ?? APP_METADATA.productTitle);
   >
     <TitleBar
       :title="resolvedTitle"
-      :show-sidebar-toggle="false"
+      :show-sidebar-toggle="showSidebarToggle"
+      :left-sidebar-collapsed="leftSidebarCollapsed"
       :data-lilia-surface-mode="shellTranslucent ? 'translucent' : 'solid'"
       data-lilia-backdrop="none"
       data-lilia-surface-level="raised"
       data-lilia-surface-boundary
+      @toggle-left-sidebar="emit('toggleLeftSidebar')"
     >
       <template v-if="$slots['header-leading']" #left-actions>
         <slot name="header-leading" />

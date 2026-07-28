@@ -203,6 +203,25 @@ describe("TitleBar dragging", () => {
     expect(action).toHaveBeenCalledOnce();
   });
 
+  it("keeps the shared sidebar toggle alongside app-provided leading actions", async () => {
+    const view = render(TitleBar, {
+      props: {
+        title: testAppConfig.productTitle,
+        showSidebarToggle: true,
+        leftSidebarCollapsed: false,
+      },
+      slots: {
+        "left-actions": '<button type="button" aria-label="业务入口">业务入口</button>',
+      },
+    });
+    await waitFor(() => expect(tauriWindow.appWindow.onResized).toHaveBeenCalled());
+
+    expect(view.getByRole("button", { name: "业务入口" })).toBeInTheDocument();
+    await fireEvent.click(view.getByRole("button", { name: "折叠左侧栏" }));
+
+    expect(view.emitted("toggleLeftSidebar")).toHaveLength(1);
+  });
+
   it("uses shared window controls in popup titlebars", async () => {
     const view = render(PopupTitleBarFrame);
 

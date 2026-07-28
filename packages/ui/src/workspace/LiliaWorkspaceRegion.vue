@@ -75,6 +75,7 @@ const currentSize = computed(() => {
 });
 const requestedVisible = computed(() => !props.hidden && !isCollapsed.value);
 const key = Symbol(props.id);
+const isResizing = ref(false);
 let pointer: { id: number; target: Element | null } | null = null;
 let startCoordinate = 0;
 let startSize = 0;
@@ -183,6 +184,7 @@ function stopResize(event?: PointerEvent) {
   window.removeEventListener("blur", onWindowBlur);
   if (pointer.target?.hasPointerCapture?.(pointer.id)) pointer.target.releasePointerCapture(pointer.id);
   pointer = null;
+  isResizing.value = false;
   emit("resizeEnd", finalSize);
 }
 
@@ -200,6 +202,7 @@ function startResize(event: PointerEvent) {
   const target = event.currentTarget instanceof Element ? event.currentTarget : null;
   target?.setPointerCapture?.(event.pointerId);
   pointer = { id: event.pointerId, target };
+  isResizing.value = true;
   window.addEventListener("pointermove", onPointerMove);
   window.addEventListener("pointerup", stopResize);
   window.addEventListener("pointercancel", stopResize);
@@ -278,6 +281,7 @@ defineExpose({
     :data-region-scope="scope"
     :data-region-visible="layout?.visible ? 'true' : 'false'"
     :data-region-collapsed="isCollapsed ? 'true' : undefined"
+    :data-resizing="isResizing ? 'true' : undefined"
     :data-region-overlay="layout?.overlay ? 'true' : undefined"
     :data-region-separator="layout?.separator ?? undefined"
     :data-edge-start="layout?.edgeStart ? 'true' : undefined"

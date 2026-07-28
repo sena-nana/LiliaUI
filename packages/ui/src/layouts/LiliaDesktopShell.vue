@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, useSlots } from "vue";
+import { computed, ref, useSlots } from "vue";
 import LiliaAppShell from "./AppShell.vue";
 import {
   LiliaBottomPanel,
@@ -55,6 +55,7 @@ const emit = defineEmits<{
 
 const slots = useSlots();
 const appearance = useNativeAppearance();
+const internalNavCollapsed = ref(false);
 const surfaces = computed(() => resolveBackdropSurfaces(
   appearance.backdropMode.value,
   appearance.backdropTarget.value,
@@ -69,10 +70,24 @@ const hasFooter = computed(
     || props.footerLinks.length > 0
     || props.footerStatuses.length > 0,
 );
+const effectiveNavCollapsed = computed(
+  () => props.navCollapsed ?? internalNavCollapsed.value,
+);
+
+function updateNavCollapsed(value: boolean) {
+  if (props.navCollapsed === undefined) internalNavCollapsed.value = value;
+  emit("update:navCollapsed", value);
+}
 </script>
 
 <template>
-  <LiliaAppShell :title="title" :agent-id="agentId">
+  <LiliaAppShell
+    :title="title"
+    :agent-id="agentId"
+    :show-sidebar-toggle="hasNavigation"
+    :left-sidebar-collapsed="effectiveNavCollapsed"
+    @toggle-left-sidebar="updateNavCollapsed(!effectiveNavCollapsed)"
+  >
     <template v-if="$slots['header-leading']" #header-leading>
       <slot name="header-leading" />
     </template>
@@ -94,14 +109,17 @@ const hasFooter = computed(
         collapsible
         resizable
         overflow="hidden"
-        :collapsed="navCollapsed"
+        :collapsed="effectiveNavCollapsed"
         :size="navSize"
         :surface-mode="surfaces.sidebar"
-        @update:collapsed="emit('update:navCollapsed', $event)"
+        @update:collapsed="updateNavCollapsed"
         @update:size="emit('update:navSize', $event)"
       >
         <div class="lilia-desktop-shell__nav">
-          <div class="lilia-desktop-shell__nav-body">
+          <div
+            class="lilia-desktop-shell__nav-body"
+            :class="{ 'lilia-desktop-shell__nav-body--custom': $slots.navigation }"
+          >
             <slot name="navigation">
               <LiliaSidebarSection
                 v-for="section in navigationSections"
@@ -169,6 +187,10 @@ const hasFooter = computed(
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+.lilia-desktop-shell__nav-body--custom {
+  padding: 0;
 }
 
 .lilia-desktop-shell__nav-footer {

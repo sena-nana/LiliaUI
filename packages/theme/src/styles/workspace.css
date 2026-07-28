@@ -27,11 +27,11 @@
   box-shadow: var(--shadow-surface);
 }
 
-.lilia-workspace.is-resizing {
+.lilia-workspace:has([data-resizing]) {
   transition: none;
 }
 
-.lilia-workspace.is-resizing .lilia-workspace-region__content {
+.lilia-workspace:has([data-resizing]) .lilia-workspace-region__content {
   pointer-events: none;
 }
 
