@@ -220,7 +220,7 @@ describe("LiliaDesktopShell", () => {
     const shell = view.container.querySelector(".lilia-app-shell");
     expect(shell).toHaveAttribute("data-lilia-backdrop-target", "sidebar");
 
-    const { useNativeAppearance } = await import("@lilia/ui/composables");
+    const { useNativeAppearance } = await import("@lilia/ui/composables/useNativeAppearance");
     useNativeAppearance().setBackdropTarget("main");
 
     await waitFor(() => {

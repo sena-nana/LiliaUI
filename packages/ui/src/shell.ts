@@ -5,8 +5,8 @@ export { default as LiliaDesktopShell } from "./layouts/LiliaDesktopShell.vue";
 export { default as LiliaSidebarFrame } from "./layouts/LiliaSidebarFrame.vue";
 export { default as LiliaSidebarNavRow } from "./components/sidebar/SidebarNavRow.vue";
 export { default as LiliaSidebarFooter } from "./components/sidebar/SidebarFooter.vue";
+export { APP_METADATA } from "./config/appShellMetadata";
 export {
-  APP_METADATA,
   SIDEBAR_FOOTER_LINKS,
   SIDEBAR_FOOTER_STATUSES,
   getLiliaUiConfig,

@@ -16,6 +16,7 @@ async function loadUi(options: { adapter?: boolean } = {}) {
   return {
     ...await import("@lilia/ui/shell"),
     ...await import("@lilia/ui/settings"),
+    ...await import("@lilia/ui/settings/sections"),
     ...await import("@lilia/ui/composables/useNativeAppearance"),
     ...await import("@lilia/ui/composables/useTheme"),
     ...runtime,
