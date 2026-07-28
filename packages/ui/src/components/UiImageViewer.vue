@@ -229,6 +229,7 @@ function clearDrag(event?: PointerEvent) {
         <div ref="stageRef" class="ui-image-viewer__stage">
           <img
             class="ui-image-viewer__image"
+            :class="{ 'is-dragging': drag }"
             :src="source.src"
             :alt="source.alt || source.name || '图片'"
             :style="imageStyle"
@@ -313,6 +314,10 @@ function clearDrag(event?: PointerEvent) {
   user-select: none;
   transform-origin: center;
   transition: transform 0.08s ease;
+}
+
+.ui-image-viewer__image.is-dragging {
+  transition: none;
 }
 
 .ui-image-viewer__meta {

@@ -342,10 +342,15 @@ describe("Workspace Region layout", () => {
     await nextTick();
     expect(handle).toHaveAttribute("aria-valuenow", "248");
 
+    expect(resources).not.toHaveAttribute("data-resizing");
+
     await fireEvent.pointerDown(handle, { button: 0, clientX: 100, pointerId: 7 });
+    expect(resources).toHaveAttribute("data-resizing");
     await fireEvent.pointerMove(window, { clientX: 120, pointerId: 7 });
+    expect(resources).toHaveAttribute("data-resizing");
     await fireEvent.pointerUp(window, { pointerId: 7 });
     await nextTick();
+    expect(resources).not.toHaveAttribute("data-resizing");
     expect(handle).toHaveAttribute("aria-valuenow", "268");
 
     await fireEvent.click(view.getByRole("button", { name: "resources" }));

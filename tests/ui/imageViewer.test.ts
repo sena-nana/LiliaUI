@@ -41,6 +41,13 @@ describe("UiImageViewer", () => {
 
     await fireEvent.wheel(dialog, { deltaY: -300 });
     expect(image.style.transform).not.toContain("scale(1)");
+    await fireEvent.pointerDown(image, { button: 0, clientX: 10, clientY: 10, pointerId: 3 });
+    expect(image).toHaveClass("is-dragging");
+    await fireEvent.pointerMove(image, { clientX: 40, clientY: 30, pointerId: 3 });
+    expect(image).toHaveClass("is-dragging");
+    await fireEvent.pointerUp(image, { pointerId: 3 });
+    expect(image).not.toHaveClass("is-dragging");
+
     await view.rerender({ source: { src: "asset://second.png", alt: "第二张" } });
     expect(image.style.transform).toContain("scale(1)");
 
