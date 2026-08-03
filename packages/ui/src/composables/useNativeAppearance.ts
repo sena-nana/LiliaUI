@@ -27,8 +27,8 @@ export const BACKDROP_OPACITY_MAX = 0.92;
 export const BACKDROP_OPACITY_DEFAULT = 0.64;
 
 const DEFAULT_BACKDROP_BY_PLATFORM: Record<NativePlatform, BackdropMode> = {
-  macos: "system",
-  windows: "mica",
+  macos: "solid",
+  windows: "solid",
   linux: "solid",
 };
 

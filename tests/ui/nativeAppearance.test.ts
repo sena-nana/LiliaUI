@@ -107,6 +107,21 @@ describe("useNativeAppearance", () => {
     });
   });
 
+  it.each(["windows", "macos", "linux"] as const)(
+    "无应用配置时回退为实色：%s",
+    async (platform) => {
+      window.__LILIA_NATIVE_PLATFORM__ = platform;
+      vi.resetModules();
+      const { setLiliaUiConfig, useNativeAppearance } = await loadUi();
+      setLiliaUiConfig(testAppConfig);
+      const appearance = useNativeAppearance();
+
+      expect(appearance.backdropMode.value).toBe("solid");
+      expect(document.documentElement.dataset.backdrop).toBe("solid");
+      expect(localStorage.getItem("lilia-ui-test.backdropMode")).toBe("solid");
+    },
+  );
+
   it("恢复持久化设置并限制不透明度范围", async () => {
     window.__LILIA_NATIVE_PLATFORM__ = "macos";
     localStorage.setItem("lilia-ui-test.backdropMode", "mica");
