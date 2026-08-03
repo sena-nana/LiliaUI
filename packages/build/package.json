@@ -24,15 +24,15 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/vue": "^8.1.0",
     "@vue/compiler-dom": "^3.5.39",
-    "@vue/compiler-sfc": "^3.5.39",
+    "@vue/compiler-sfc": "^3.5.40",
     "@vue/server-renderer": "^3.5.39",
     "jsdom": "^29.1.1",
     "typescript": "^6.0.3",
-    "vite": "^8.1.4",
+    "vite": "^8.2.0",
     "vitepress": "^2.0.0-alpha.18",
     "vitest": "^4.1.10",
-    "vue": "^3.5.39",
-    "vue-tsc": "^3.3.7"
+    "vue": "^3.5.40",
+    "vue-tsc": "^3.3.9"
   },
   "peerDependencies": {
     "@lilia/config": "0.1.0",

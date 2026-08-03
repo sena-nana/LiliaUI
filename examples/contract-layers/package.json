@@ -13,15 +13,15 @@
     "@lilia/ui": "workspace:*",
     "@lilia/ui-contract": "workspace:*",
     "@lilia/ui-foundation": "workspace:*",
-    "@lucide/vue": "^1.22.0",
+    "@lucide/vue": "^1.28.0",
     "@tauri-apps/api": "^2.11.1",
-    "vue": "^3.5.39",
-    "vue-router": "^5.1.0"
+    "vue": "^3.5.40",
+    "vue-router": "^5.2.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.8",
     "typescript": "^6.0.3",
-    "vite": "^8.1.4",
-    "vue-tsc": "^3.3.7"
+    "vite": "^8.2.0",
+    "vue-tsc": "^3.3.9"
   }
 }

@@ -211,7 +211,12 @@ describe("useNativeAppearance", () => {
     window.__LILIA_NATIVE_PLATFORM__ = "windows";
     vi.resetModules();
     const { setLiliaUiConfig, useNativeAppearance, useTheme } = await loadUi();
-    setLiliaUiConfig(testAppConfig);
+    setLiliaUiConfig({
+      ...testAppConfig,
+      appearance: {
+        platformDefaults: { windows: { backdropMode: "mica" } },
+      },
+    });
     const appearance = useNativeAppearance();
     const { setTheme } = useTheme();
     await waitFor(() => expect(invoke).toHaveBeenCalledTimes(1));
@@ -261,7 +266,12 @@ describe("LiliaAppearanceSection", () => {
     window.__LILIA_NATIVE_PLATFORM__ = "windows";
     vi.resetModules();
     const { LiliaAppearanceSection, setLiliaUiConfig } = await loadUi();
-    setLiliaUiConfig(testAppConfig);
+    setLiliaUiConfig({
+      ...testAppConfig,
+      appearance: {
+        platformDefaults: { windows: { backdropMode: "mica" } },
+      },
+    });
     const view = render(LiliaAppearanceSection);
 
     expect(view.getByRole("radio", { name: "Mica" })).toHaveAttribute(
