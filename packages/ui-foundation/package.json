@@ -41,6 +41,6 @@
     "@lilia/ui-contract": "workspace:*",
     "@tauri-apps/api": "^2.11.1",
     "typescript": "^6.0.3",
-    "vue": "^3.5.39"
+    "vue": "^3.5.40"
   }
 }
