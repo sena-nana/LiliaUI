@@ -512,7 +512,7 @@ __metadata:
     vue: "npm:^3.5.40"
   peerDependencies:
     "@lilia/ui-contract": ^0.1.0
-    vue: ^3.5.39
+    vue: ^3.5.40
   languageName: unknown
   linkType: soft
 
@@ -533,9 +533,9 @@ __metadata:
     "@lilia/theme": ^0.1.0
     "@lilia/ui-contract": ^0.1.0
     "@lilia/ui-foundation": ^0.1.0
-    "@lucide/vue": ^1.22.0
-    vue: ^3.5.39
-    vue-router: ^5.1.0
+    "@lucide/vue": ^1.28.0
+    vue: ^3.5.40
+    vue-router: ^5.2.0
   languageName: unknown
   linkType: soft
 
