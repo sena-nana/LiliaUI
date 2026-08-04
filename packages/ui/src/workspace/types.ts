@@ -37,6 +37,7 @@ export interface LiliaWorkspaceProps extends SurfaceProps {
 export interface LiliaWorkspaceRegionProps extends Omit<SurfaceProps, "agentId"> {
   id: string;
   role: WorkspaceRegionRole;
+  contentInset?: WorkspaceContentInset;
   placement?: WorkspaceRegionPlacement;
   side?: "start" | "end";
   scope?: WorkspaceRegionScope;

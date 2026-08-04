@@ -236,6 +236,33 @@ describe("Workspace Region layout", () => {
     expect(getComputedStyle(primary).borderBottomLeftRadius).not.toBe("0px");
   });
 
+  it("applies primary content insets without removing its corner radius", async () => {
+    const view = render(LiliaWorkspace, {
+      slots: {
+        default: () => h(LiliaPrimaryContent, {
+          id: "primary",
+          contentInset: {
+            blockStart: 20,
+            blockEnd: 14,
+            inlineStart: 24,
+            inlineEnd: 24,
+          },
+        }, () => "Editor"),
+      },
+    });
+    await nextTick();
+
+    const primary = region(view.container, "primary");
+    const content = primary.querySelector(".lilia-workspace-region__content");
+    if (!(content instanceof HTMLElement)) throw new Error("Missing primary content");
+
+    expect(content.style.paddingBlockStart).toBe("20px");
+    expect(content.style.paddingBlockEnd).toBe("14px");
+    expect(content.style.paddingInlineStart).toBe("24px");
+    expect(content.style.paddingInlineEnd).toBe("24px");
+    expect(getComputedStyle(primary).borderTopLeftRadius).not.toBe("0px");
+  });
+
   it("recomputes attached edges and separators after independently hiding regions", async () => {
     const Fixture = defineComponent({
       setup() {
