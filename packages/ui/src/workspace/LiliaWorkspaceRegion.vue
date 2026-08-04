@@ -8,10 +8,15 @@ import {
   shallowRef,
   watch,
   ref,
+  type CSSProperties,
   useAttrs,
 } from "vue";
 import { workspaceContextKey, type WorkspaceRegionRegistration } from "./context";
-import type { LiliaWorkspaceRegionProps, WorkspaceRegionPlacement } from "./types";
+import type {
+  LiliaWorkspaceRegionProps,
+  WorkspaceLayoutLength,
+  WorkspaceRegionPlacement,
+} from "./types";
 
 defineOptions({ inheritAttrs: false });
 
@@ -113,6 +118,18 @@ const canResize = computed(() => (
   && requestedVisible.value
   && currentSize.value !== null
 ));
+function resolveLayoutLength(value: WorkspaceLayoutLength) {
+  return typeof value === "number" ? `${value}px` : value;
+}
+const contentStyle = computed<CSSProperties>(() => {
+  const inset = props.contentInset;
+  return {
+    paddingBlockStart: inset?.blockStart === undefined ? undefined : resolveLayoutLength(inset.blockStart),
+    paddingBlockEnd: inset?.blockEnd === undefined ? undefined : resolveLayoutLength(inset.blockEnd),
+    paddingInlineStart: inset?.inlineStart === undefined ? undefined : resolveLayoutLength(inset.inlineStart),
+    paddingInlineEnd: inset?.inlineEnd === undefined ? undefined : resolveLayoutLength(inset.inlineEnd),
+  };
+});
 const regionStyle = computed(() => ({
   ...layout.value?.style,
   "--lilia-region-overflow": props.overflow,
@@ -291,7 +308,7 @@ defineExpose({
     :aria-disabled="disabled ? 'true' : undefined"
     :hidden="!layout?.visible"
   >
-    <div class="lilia-workspace-region__content">
+    <div class="lilia-workspace-region__content" :style="contentStyle">
       <slot
         :collapsed="isCollapsed"
         :disabled="disabled"
