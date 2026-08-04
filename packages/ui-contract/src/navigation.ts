@@ -78,6 +78,7 @@ export interface AppShellProps extends AgentTargetProps {
   title?: string;
   showSidebarToggle?: boolean;
   leftSidebarCollapsed?: boolean;
+  sidebarTogglesDisabled?: boolean;
 }
 
 export interface AppShellEmits {

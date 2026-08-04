@@ -44,4 +44,20 @@ describe("LiliaAppShell window boundary", () => {
     expect(view.getByRole("button", { name: "injected action" })).toBeVisible();
     expect(view.getByText("content")).toBeVisible();
   });
+
+  it("forwards the disabled state to the shared sidebar toggle", async () => {
+    const view = render(LiliaAppShell, {
+      props: {
+        showSidebarToggle: true,
+        sidebarTogglesDisabled: true,
+      },
+      slots: { default: "content" },
+    });
+
+    const toggle = view.getByRole("button", { name: "折叠左侧栏" });
+    expect(toggle).toBeDisabled();
+
+    toggle.click();
+    expect(view.emitted("toggleLeftSidebar")).toBeUndefined();
+  });
 });

@@ -21,6 +21,7 @@ const props = withDefaults(defineProps<LiliaAppShellProps>(), {
   agentId: undefined,
   showSidebarToggle: false,
   leftSidebarCollapsed: false,
+  sidebarTogglesDisabled: false,
   overlayComponents: () => [],
 });
 const emit = defineEmits<AppShellEmits>();
@@ -46,6 +47,7 @@ const resolvedTitle = computed(() => props.title ?? APP_METADATA.productTitle);
       :title="resolvedTitle"
       :show-sidebar-toggle="showSidebarToggle"
       :left-sidebar-collapsed="leftSidebarCollapsed"
+      :sidebar-toggles-disabled="sidebarTogglesDisabled"
       :data-lilia-surface-mode="shellTranslucent ? 'translucent' : 'solid'"
       data-lilia-backdrop="none"
       data-lilia-surface-level="raised"

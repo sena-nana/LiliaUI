@@ -70,7 +70,9 @@ describe("contract feedback, navigation, and surface components", () => {
     }));
     expect(screen.getByRole("alert")).toHaveTextContent("Try again");
     expect(screen.getByRole("progressbar", { name: "Uploading" })).toHaveAttribute("value", "25");
-    expect(screen.getByRole("status", { name: "Loading preview" })).toHaveStyle({ width: "8rem", height: "2rem" });
+    const skeleton = screen.getByRole("status", { name: "Loading preview" });
+    expect(skeleton).toHaveProperty("style.width", "8rem");
+    expect(skeleton).toHaveProperty("style.height", "2rem");
     expect(screen.getByText("Connected")).toBeInTheDocument();
     await fireEvent.click(screen.getByRole("button", { name: "关闭通知" }));
     await fireEvent.click(screen.getByRole("button", { name: "取消" }));
