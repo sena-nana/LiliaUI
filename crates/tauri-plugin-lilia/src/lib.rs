@@ -293,13 +293,13 @@ fn setup_tray<R: Runtime>(
         options.left_click_behavior == TrayLeftClickBehavior::ShowMenu,
     )?;
 
-    let runtime_state = Arc::new(TrayRuntimeState {
-        allow_close: Arc::new(AtomicBool::new(false)),
+    let allow_close = Arc::new(AtomicBool::new(false));
+    app.manage(TrayRuntimeState {
+        allow_close: allow_close.clone(),
     });
-    app.manage(runtime_state.clone());
 
     let main_window_label_for_menu = main_window_label.to_string();
-    let allow_close_for_menu = runtime_state.allow_close.clone();
+    let allow_close_for_menu = allow_close;
     app.on_menu_event(move |app, event| match event.id().as_ref() {
         TRAY_SHOW_MENU_ID => show_main_window(app, &main_window_label_for_menu),
         TRAY_QUIT_MENU_ID => request_quit(app, &main_window_label_for_menu, &allow_close_for_menu),
