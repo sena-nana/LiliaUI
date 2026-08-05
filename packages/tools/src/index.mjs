@@ -157,6 +157,11 @@ export function createTemplateReport(projectRoot = process.cwd(), options = {}) 
       exists: source.includes(`data-agent-id="${token}"`) || source.includes(token),
     }));
   });
+  const requiredScripts = profile.requiredScripts.map((name) => ({
+    name,
+    command: packageJson.scripts?.[name] ?? null,
+    exists: typeof packageJson.scripts?.[name] === "string" && packageJson.scripts[name].trim().length > 0,
+  }));
   const expectedDependencies = profile.expectedDependencies;
   const nativeBackdropPermissions = readCapabilityPermissions(projectRoot);
   const nativeBackdropPermission = profile.nativeBackdropPermissions.find((permission) =>
@@ -200,9 +205,29 @@ export function createTemplateReport(projectRoot = process.cwd(), options = {}) 
       detail: `${importantFiles.filter((file) => file.exists).length}/${importantFiles.length} files present`,
     },
     {
+      id: "entrypoints-declared",
+      ok: profile.entrypoints.length > 0,
+      detail: `${profile.entrypoints.length} entrypoints declared`,
+    },
+    {
+      id: "agent-targets-declared",
+      ok: agentTargets.length > 0,
+      detail: `${agentTargets.length} stable targets declared`,
+    },
+    {
       id: "agent-targets-present",
       ok: agentTargets.every((target) => target.exists),
       detail: `${agentTargets.filter((target) => target.exists).length}/${agentTargets.length} targets present`,
+    },
+    {
+      id: "required-scripts-declared",
+      ok: requiredScripts.length > 0,
+      detail: `${requiredScripts.length} required scripts declared`,
+    },
+    {
+      id: "required-scripts-present",
+      ok: requiredScripts.length > 0 && requiredScripts.every((script) => script.exists),
+      detail: `${requiredScripts.filter((script) => script.exists).length}/${requiredScripts.length} scripts present`,
     },
   ].filter(Boolean);
   const gitStatus = spawnSync("git", ["status", "--short"], {
@@ -222,6 +247,7 @@ export function createTemplateReport(projectRoot = process.cwd(), options = {}) 
     },
     boundaries: profile.boundaries,
     entrypoints: profile.entrypoints,
+    requiredScripts,
     importantFiles,
     agentTargets,
     checks,
@@ -242,6 +268,11 @@ export function printTemplateReport(report) {
   console.log("entrypoints:");
   for (const entry of report.entrypoints) {
     console.log(`- ${entry.command} (${entry.purpose})`);
+  }
+  console.log("");
+  console.log("required scripts:");
+  for (const script of report.requiredScripts) {
+    console.log(`- ${script.exists ? "ok" : "missing"} ${script.name}`);
   }
   console.log("");
   console.log("checks:");
@@ -382,6 +413,7 @@ function createToolsProfile(profile = {}) {
       ["package.json", "project package metadata"],
     ],
     agentTargetFiles: {},
+    requiredScripts: [],
     boundaries: { includes: [], excludes: [] },
     entrypoints: [],
     ...profile,

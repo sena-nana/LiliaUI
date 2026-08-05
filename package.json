@@ -19,6 +19,8 @@
     "test:ui:surface": "node tests/ui/surfaceStateLayer.browser.mjs",
     "test:ui:visual": "playwright test --config playwright.visual.config.ts",
     "test:ui:visual:update": "playwright test --config playwright.visual.config.ts --update-snapshots=all",
+    "agent:debug": "lilia-tools agent-debug --json",
+    "verify:agent-debug": "lilia-tools agent-debug --json",
     "typecheck": "yarn workspaces foreach -Ap run typecheck && yarn typecheck:scripts",
     "typecheck:scripts": "tsc -p tsconfig.node-scripts.json && vue-tsc --noEmit -p tests/visual/tsconfig.json",
     "test": "cross-env NODE_DISABLE_COMPILE_CACHE=1 vitest run",
