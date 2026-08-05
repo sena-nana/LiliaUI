@@ -76,18 +76,37 @@ describe("@lilia/tools", () => {
   it("reports template readiness from configurable boundary files", () => {
     const root = createProject();
     mkdirSync(join(root, "src"), { recursive: true });
-    writeFileSync(join(root, "src/main.ts"), "");
+    writeFileSync(join(root, "src/main.ts"), '<main data-agent-id="app.root"></main>');
 
     const report = createTemplateReport(root, {
       profile: {
         expectedDependencies: ["@lilia/ui"],
         importantFiles: [["src/main.ts", "entry"]],
-        agentTargetFiles: {},
+        agentTargetFiles: { "src/main.ts": [["app.root"]] },
+        entrypoints: [{ id: "agent-debug", command: "yarn agent:debug", purpose: "readiness" }],
+        requiredScripts: ["agent:debug", "verify:agent-debug"],
       },
     });
 
     expect(report.status).toBe("ready");
     expect(report.checks.every((check) => check.ok)).toBe(true);
+  });
+
+  it("rejects profiles without entrypoints, stable targets, or required scripts", () => {
+    const root = createProject({ scripts: null });
+    const report = createTemplateReport(root, {
+      profile: {
+        importantFiles: [],
+        agentTargetFiles: {},
+        entrypoints: [],
+        requiredScripts: ["agent:debug", "verify:agent-debug"],
+      },
+    });
+
+    expect(report.status).toBe("needs_attention");
+    expect(report.checks.find((check) => check.id === "entrypoints-declared")?.ok).toBe(false);
+    expect(report.checks.find((check) => check.id === "agent-targets-declared")?.ok).toBe(false);
+    expect(report.checks.find((check) => check.id === "required-scripts-present")?.ok).toBe(false);
   });
 
   it("checks only Lilia package boundaries for shared dependencies", () => {
@@ -144,7 +163,9 @@ describe("@lilia/tools", () => {
       expectedDependencies: ["@lilia/ui"],
       nativeBackdropPermissions: ["lilia:default", "lilia:allow-set-window-backdrop"],
       importantFiles: [],
-      agentTargetFiles: {},
+      agentTargetFiles: { "package.json": [["lilia-test"]] },
+      entrypoints: [{ id: "agent-debug", command: "yarn agent:debug", purpose: "readiness" }],
+      requiredScripts: ["agent:debug", "verify:agent-debug"],
     };
 
     writeFileSync(capabilityPath, `${JSON.stringify({ permissions: ["core:default"] })}\n`);
@@ -169,7 +190,9 @@ describe("@lilia/tools", () => {
     const profile = {
       nativeBackdropPermissions: ["lilia:default"],
       importantFiles: [],
-      agentTargetFiles: {},
+      agentTargetFiles: { "package.json": [["lilia-test"]] },
+      entrypoints: [{ id: "agent-debug", command: "yarn agent:debug", purpose: "readiness" }],
+      requiredScripts: ["agent:debug", "verify:agent-debug"],
     };
     const windowCheck = () =>
       createTemplateReport(root, { profile }).checks.find(
@@ -217,7 +240,9 @@ describe("@lilia/tools", () => {
     const report = createTemplateReport(root, {
       profile: {
         importantFiles: [],
-        agentTargetFiles: {},
+        agentTargetFiles: { "package.json": [["lilia-test"]] },
+        entrypoints: [{ id: "agent-debug", command: "yarn agent:debug", purpose: "readiness" }],
+        requiredScripts: ["agent:debug", "verify:agent-debug"],
       },
     });
 
@@ -231,8 +256,9 @@ describe("@lilia/tools", () => {
       profile: {
         expectedDependencies: ["@lilia/ui"],
         importantFiles: [],
-        agentTargetFiles: {},
+        agentTargetFiles: { "package.json": [["lilia-test"]] },
         entrypoints: [{ id: "agent-debug", command: "yarn agent:debug --json", purpose: "readiness" }],
+        requiredScripts: ["agent:debug", "verify:agent-debug"],
       },
     });
 
@@ -555,6 +581,11 @@ function createProject(overrides = {}) {
       name: "lilia-test",
       version: "0.1.0",
       packageManager: "yarn@4.17.1+sha512.ccbfabf7d7b6b32075088be9386fb9a2e00bb6887ef07fa56effabc890a56d53da1ccc4128d62db245fcbd3961b236d75335bdf7d5320ed6eafb7588b7ad4697",
+      scripts: overrides.scripts === null ? {} : {
+        "agent:debug": "lilia-tools agent-debug --json",
+        "verify:agent-debug": "lilia-tools agent-debug --json",
+        ...(overrides.scripts ?? {}),
+      },
       dependencies: {
         "@lilia/ui": "workspace:*",
         ...(overrides.dependencies ?? {}),

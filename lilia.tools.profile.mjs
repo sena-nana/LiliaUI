@@ -26,4 +26,11 @@ export default defineToolsProfile({
     { id: "test", command: "yarn test", purpose: "run functional package and component tests" },
     { id: "verify", command: "yarn verify", purpose: "run browser and component performance gates" },
   ],
+  requiredScripts: ["agent:debug", "verify:agent-debug"],
+  agentTargetFiles: {
+    "packages/ui/src/components/TitleBar.vue": [
+      ["titlebar"],
+      ["titlebar.window-controls"],
+    ],
+  },
 });
