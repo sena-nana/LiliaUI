@@ -164,7 +164,7 @@ function onKeydown(event: KeyboardEvent) {
   width: 100%;
   height: 28px;
   min-width: 0;
-  padding: 0 8px 0 calc(4px + var(--lilia-sidebar-depth) * 14px);
+  padding: 0 10px 0 calc(10px + var(--lilia-sidebar-depth) * 14px);
   border: 0;
   border-radius: var(--radius-sm);
   background: transparent;
