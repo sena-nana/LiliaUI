@@ -152,8 +152,9 @@ export async function runTauriDev(projectRoot = process.cwd(), argv = [], env = 
     beforeDevCommand: options.beforeDevCommand,
   });
   const config = JSON.stringify({ build });
+  // Tauri CLI 2.x has no top-level --cwd; monorepo apps set process cwd to appDir.
+  const appRoot = options.appDir ? resolve(projectRoot, options.appDir) : projectRoot;
   const cliArgs = [
-    ...(options.appDir ? ["--cwd", options.appDir] : []),
     "dev",
     "--config",
     config,
@@ -173,6 +174,7 @@ export async function runTauriDev(projectRoot = process.cwd(), argv = [], env = 
       command: tauriCommand.command,
       spawnArgs: tauriCommand.args,
       args: cliArgs,
+      cwd: appRoot,
       devUrl: build.devUrl,
       env: {
         [`${envPrefix}_DEV_PORT`]: nextEnv[`${envPrefix}_DEV_PORT`],
@@ -185,7 +187,7 @@ export async function runTauriDev(projectRoot = process.cwd(), argv = [], env = 
 
   console.log(`[${appConfig.appName}] Starting Tauri dev server at ${build.devUrl}`);
   await spawnInherited(tauriCommand.command, tauriCommand.args, {
-    cwd: projectRoot,
+    cwd: appRoot,
     env: nextEnv,
   });
 }
@@ -222,7 +224,8 @@ export function runTauriInstall(projectRoot = process.cwd(), env = process.env, 
     return;
   }
 
-  runSync(plan.build.command, plan.build.args, { cwd: projectRoot, env: buildEnv });
+  const appRoot = resolve(projectRoot, options.appDir || ".");
+  runSync(plan.build.command, plan.build.args, { cwd: appRoot, env: buildEnv });
   createDesktopShortcut(plan, appConfig, env);
   console.log(`[tauri:install] application: ${plan.artifact.path}`);
   console.log(`[tauri:install] desktop shortcut: ${plan.shortcut.path}`);

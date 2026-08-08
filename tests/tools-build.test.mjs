@@ -386,9 +386,8 @@ describe("@lilia/build", () => {
 
   it("plans native application builds without installer bundles", () => {
     expect(tauriInstallBuildArgs("win32")).toEqual(["build", "--no-bundle"]);
+    // appDir is applied via process cwd, not CLI --cwd (unsupported by Tauri CLI 2.x)
     expect(tauriInstallBuildArgs("linux", "desktop")).toEqual([
-      "--cwd",
-      "desktop",
       "build",
       "--no-bundle",
     ]);

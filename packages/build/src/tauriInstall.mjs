@@ -23,11 +23,11 @@ const WINDOWS_SHORTCUT_SCRIPT = [
   "$shortcut.Save()",
 ].join("; ");
 
-export function tauriInstallBuildArgs(platform, appDir = "") {
-  const prefix = appDir ? ["--cwd", appDir] : [];
-  if (platform === "darwin") return [...prefix, "build", "--bundles", "app"];
+export function tauriInstallBuildArgs(platform, _appDir = "") {
+  // appDir is applied via process cwd; Tauri CLI 2.x has no top-level --cwd flag.
+  if (platform === "darwin") return ["build", "--bundles", "app"];
   if (platform === "win32" || platform === "linux") {
-    return [...prefix, "build", "--no-bundle"];
+    return ["build", "--no-bundle"];
   }
   throw new Error(`Unsupported platform: ${platform}`);
 }
