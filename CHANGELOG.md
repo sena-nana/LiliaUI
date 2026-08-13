@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-08-13 — 托盘菜单支持应用扩展项
+
+### Tauri plugin
+
+- `tauri-plugin-lilia` 托盘增加 `TrayMenuNode`、`tray_extra_menu` 与 `on_tray_extra_menu`。应用可在「显示主窗口」和「退出」之间插入动态项，未知菜单 ID 转发给应用。
+- 右键按下时重建扩展项。扩展项为空时菜单与原来一致。
+
 ## 2026-07-26 — Workspace 逻辑留白与 Surface 契约
 
 ### Lilia Layer

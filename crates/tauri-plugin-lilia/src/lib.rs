@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::marker::PhantomData;
 use std::sync::Mutex;
 #[cfg(desktop)]
 use std::sync::{
@@ -9,7 +10,7 @@ use std::sync::{
 use tauri::window::EffectState;
 #[cfg(desktop)]
 use tauri::{
-    menu::{Menu, MenuItem, PredefinedMenuItem},
+    menu::{Menu, MenuBuilder, MenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconEvent},
 };
 use tauri::{
@@ -64,16 +65,25 @@ window.__LILIA_WINDOW_CHROME__ = Object.freeze({
 });
 "#;
 
-#[derive(Debug, Clone)]
-pub struct Builder {
+#[cfg(desktop)]
+type TrayExtraMenuProvider<R> = Arc<dyn Fn(&AppHandle<R>) -> Vec<TrayMenuNode> + Send + Sync>;
+#[cfg(desktop)]
+type TrayExtraMenuHandler<R> = Arc<dyn Fn(&AppHandle<R>, &str) + Send + Sync>;
+
+pub struct Builder<R: Runtime = tauri::Wry> {
     main_window_label: String,
     background_color: Option<Color>,
     window_state: WindowStateOptions,
     #[cfg(desktop)]
     tray: Option<TrayOptions>,
+    #[cfg(desktop)]
+    tray_extra_menu: Option<TrayExtraMenuProvider<R>>,
+    #[cfg(desktop)]
+    tray_extra_handler: Option<TrayExtraMenuHandler<R>>,
+    _runtime: PhantomData<fn() -> R>,
 }
 
-impl Default for Builder {
+impl<R: Runtime> Default for Builder<R> {
     fn default() -> Self {
         Self {
             main_window_label: DEFAULT_MAIN_WINDOW_LABEL.to_string(),
@@ -81,11 +91,16 @@ impl Default for Builder {
             window_state: WindowStateOptions::default(),
             #[cfg(desktop)]
             tray: None,
+            #[cfg(desktop)]
+            tray_extra_menu: None,
+            #[cfg(desktop)]
+            tray_extra_handler: None,
+            _runtime: PhantomData,
         }
     }
 }
 
-impl Builder {
+impl<R: Runtime> Builder<R> {
     pub fn new() -> Self {
         Self::default()
     }
@@ -111,12 +126,34 @@ impl Builder {
         self
     }
 
-    pub fn build<R: Runtime>(self) -> TauriPlugin<R> {
+    #[cfg(desktop)]
+    pub fn tray_extra_menu<F>(mut self, provider: F) -> Self
+    where
+        F: Fn(&AppHandle<R>) -> Vec<TrayMenuNode> + Send + Sync + 'static,
+    {
+        self.tray_extra_menu = Some(Arc::new(provider));
+        self
+    }
+
+    #[cfg(desktop)]
+    pub fn on_tray_extra_menu<F>(mut self, handler: F) -> Self
+    where
+        F: Fn(&AppHandle<R>, &str) + Send + Sync + 'static,
+    {
+        self.tray_extra_handler = Some(Arc::new(handler));
+        self
+    }
+
+    pub fn build(self) -> TauriPlugin<R> {
+        #[cfg(desktop)]
+        let tray_options = self.tray.clone();
+        #[cfg(desktop)]
+        let tray_extra_menu = self.tray_extra_menu.clone();
+        #[cfg(desktop)]
+        let tray_extra_handler = self.tray_extra_handler.clone();
+        #[cfg(desktop)]
+        let main_window_label_for_setup = self.main_window_label.clone();
         let event_options = self;
-        #[cfg(desktop)]
-        let tray_options = event_options.tray.clone();
-        #[cfg(desktop)]
-        let main_window_label_for_setup = event_options.main_window_label.clone();
 
         PluginBuilder::new(PLUGIN_NAME)
             .js_init_script(WINDOW_CHROME_INIT_SCRIPT)
@@ -125,7 +162,13 @@ impl Builder {
                 app.manage(BackdropRuntimeState::default());
                 #[cfg(desktop)]
                 if let Some(options) = tray_options.as_ref() {
-                    setup_tray(app, options, &main_window_label_for_setup)?;
+                    setup_tray(
+                        app,
+                        options,
+                        &main_window_label_for_setup,
+                        tray_extra_menu.clone(),
+                        tray_extra_handler.clone(),
+                    )?;
                 }
                 Ok(())
             })
@@ -158,7 +201,7 @@ impl Builder {
 }
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new().build()
+    Builder::<R>::new().build()
 }
 
 #[cfg(desktop)]
@@ -245,6 +288,56 @@ impl TrayOptions {
 }
 
 #[cfg(desktop)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TrayMenuNode {
+    Separator,
+    Item { id: String, label: String },
+}
+
+#[cfg(desktop)]
+impl TrayMenuNode {
+    pub fn item(id: impl Into<String>, label: impl Into<String>) -> Self {
+        Self::Item {
+            id: id.into(),
+            label: label.into(),
+        }
+    }
+}
+
+#[cfg(desktop)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum TrayMenuDispatch<'a> {
+    ShowWindow,
+    Quit,
+    Extra(&'a str),
+}
+
+#[cfg(desktop)]
+fn dispatch_tray_menu_id(id: &str) -> TrayMenuDispatch<'_> {
+    match id {
+        TRAY_SHOW_MENU_ID => TrayMenuDispatch::ShowWindow,
+        TRAY_QUIT_MENU_ID => TrayMenuDispatch::Quit,
+        extra => TrayMenuDispatch::Extra(extra),
+    }
+}
+
+#[cfg(desktop)]
+fn compose_tray_menu_nodes(
+    show_label: impl Into<String>,
+    extras: Vec<TrayMenuNode>,
+    quit_label: impl Into<String>,
+) -> Vec<TrayMenuNode> {
+    let mut nodes = vec![TrayMenuNode::item(TRAY_SHOW_MENU_ID, show_label)];
+    if !extras.is_empty() {
+        nodes.push(TrayMenuNode::Separator);
+        nodes.extend(extras);
+    }
+    nodes.push(TrayMenuNode::Separator);
+    nodes.push(TrayMenuNode::item(TRAY_QUIT_MENU_ID, quit_label));
+    nodes
+}
+
+#[cfg(desktop)]
 fn should_hide_on_close(close_behavior: TrayCloseBehavior, explicit_quit: bool) -> bool {
     close_behavior == TrayCloseBehavior::Hide && !explicit_quit
 }
@@ -255,9 +348,12 @@ fn should_show_on_toggle(is_visible: bool, is_minimized: bool) -> bool {
 }
 
 #[cfg(desktop)]
-#[derive(Debug)]
-struct TrayRuntimeState {
+struct TrayRuntimeState<R: Runtime> {
     allow_close: Arc<AtomicBool>,
+    tray_id: String,
+    show_window_label: String,
+    quit_label: String,
+    extra_menu: Option<TrayExtraMenuProvider<R>>,
 }
 
 #[cfg(desktop)]
@@ -265,6 +361,8 @@ fn setup_tray<R: Runtime>(
     app: &AppHandle<R>,
     options: &TrayOptions,
     main_window_label: &str,
+    extra_menu: Option<TrayExtraMenuProvider<R>>,
+    extra_handler: Option<TrayExtraMenuHandler<R>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let tray = app.tray_by_id(options.tray_id.as_str()).ok_or_else(|| {
         std::io::Error::new(
@@ -272,22 +370,14 @@ fn setup_tray<R: Runtime>(
             format!("configured tray icon '{}' was not created", options.tray_id),
         )
     })?;
-    let show_window = MenuItem::with_id(
+    let extras = extra_menu
+        .as_ref()
+        .map(|provider| provider(app))
+        .unwrap_or_default();
+    let menu = materialize_tray_menu(
         app,
-        TRAY_SHOW_MENU_ID,
-        &options.show_window_label,
-        true,
-        None::<&str>,
+        &compose_tray_menu_nodes(&options.show_window_label, extras, &options.quit_label),
     )?;
-    let separator = PredefinedMenuItem::separator(app)?;
-    let quit = MenuItem::with_id(
-        app,
-        TRAY_QUIT_MENU_ID,
-        &options.quit_label,
-        true,
-        None::<&str>,
-    )?;
-    let menu = Menu::with_items(app, &[&show_window, &separator, &quit])?;
     tray.set_menu(Some(menu))?;
     tray.set_show_menu_on_left_click(
         options.left_click_behavior == TrayLeftClickBehavior::ShowMenu,
@@ -296,37 +386,94 @@ fn setup_tray<R: Runtime>(
     let allow_close = Arc::new(AtomicBool::new(false));
     app.manage(TrayRuntimeState {
         allow_close: allow_close.clone(),
+        tray_id: options.tray_id.clone(),
+        show_window_label: options.show_window_label.clone(),
+        quit_label: options.quit_label.clone(),
+        extra_menu,
     });
 
     let main_window_label_for_menu = main_window_label.to_string();
     let allow_close_for_menu = allow_close;
-    app.on_menu_event(move |app, event| match event.id().as_ref() {
-        TRAY_SHOW_MENU_ID => show_main_window(app, &main_window_label_for_menu),
-        TRAY_QUIT_MENU_ID => request_quit(app, &main_window_label_for_menu, &allow_close_for_menu),
-        _ => {}
-    });
-
-    if options.left_click_behavior == TrayLeftClickBehavior::ToggleWindow {
-        let tray_id = tray.id().clone();
-        let main_window_label_for_click = main_window_label.to_string();
-        app.on_tray_icon_event(move |app, event| {
-            if event.id() != &tray_id {
-                return;
+    app.on_menu_event(
+        move |app, event| match dispatch_tray_menu_id(event.id().as_ref()) {
+            TrayMenuDispatch::ShowWindow => show_main_window(app, &main_window_label_for_menu),
+            TrayMenuDispatch::Quit => {
+                request_quit(app, &main_window_label_for_menu, &allow_close_for_menu)
             }
-            if matches!(
-                event,
-                TrayIconEvent::Click {
-                    button: MouseButton::Left,
-                    button_state: MouseButtonState::Up,
-                    ..
+            TrayMenuDispatch::Extra(id) => {
+                if let Some(handler) = extra_handler.as_ref() {
+                    handler(app, id);
                 }
-            ) {
+            }
+        },
+    );
+
+    let tray_id = tray.id().clone();
+    let main_window_label_for_click = main_window_label.to_string();
+    let toggle_on_left_click = options.left_click_behavior == TrayLeftClickBehavior::ToggleWindow;
+    app.on_tray_icon_event(move |app, event| {
+        if event.id() != &tray_id {
+            return;
+        }
+        match event {
+            TrayIconEvent::Click {
+                button: MouseButton::Right,
+                button_state: MouseButtonState::Down,
+                ..
+            } => {
+                let _ = refresh_tray_menu(app);
+            }
+            TrayIconEvent::Click {
+                button: MouseButton::Left,
+                button_state: MouseButtonState::Up,
+                ..
+            } if toggle_on_left_click => {
                 toggle_main_window(app, &main_window_label_for_click);
             }
-        });
-    }
+            _ => {}
+        }
+    });
 
     Ok(())
+}
+
+#[cfg(desktop)]
+fn refresh_tray_menu<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
+    let Some(state) = app.try_state::<TrayRuntimeState<R>>() else {
+        return Ok(());
+    };
+    let extras = state
+        .extra_menu
+        .as_ref()
+        .map(|provider| provider(app))
+        .unwrap_or_default();
+    let menu = materialize_tray_menu(
+        app,
+        &compose_tray_menu_nodes(&state.show_window_label, extras, &state.quit_label),
+    )
+    .map_err(|error| error.to_string())?;
+    let tray = app
+        .tray_by_id(state.tray_id.as_str())
+        .ok_or_else(|| format!("configured tray icon '{}' was not created", state.tray_id))?;
+    tray.set_menu(Some(menu))
+        .map_err(|error| format!("failed to refresh tray menu: {error}"))
+}
+
+#[cfg(desktop)]
+fn materialize_tray_menu<R: Runtime>(
+    app: &AppHandle<R>,
+    nodes: &[TrayMenuNode],
+) -> tauri::Result<Menu<R>> {
+    let mut builder = MenuBuilder::new(app);
+    for node in nodes {
+        builder = match node {
+            TrayMenuNode::Separator => builder.separator(),
+            TrayMenuNode::Item { id, label } => {
+                builder.item(&MenuItem::with_id(app, id, label, true, None::<&str>)?)
+            }
+        };
+    }
+    builder.build()
 }
 
 #[cfg(desktop)]
@@ -338,7 +485,7 @@ fn install_tray_window_behavior<R: Runtime>(
     let Some(window) = app.get_webview_window(main_window_label) else {
         return;
     };
-    let state = app.state::<TrayRuntimeState>();
+    let state = app.state::<TrayRuntimeState<R>>();
     let allow_close = state.allow_close.clone();
     let window_for_handler = window.clone();
     window.on_window_event(move |event| {
@@ -663,7 +810,7 @@ pub fn restore_main_window_state<R: Runtime>(window: &WebviewWindow<R>, state: M
     }
 }
 
-fn configure_main_window<R: Runtime>(app: &AppHandle<R>, options: &Builder) {
+fn configure_main_window<R: Runtime>(app: &AppHandle<R>, options: &Builder<R>) {
     if let Some(window) = app.get_webview_window(&options.main_window_label) {
         if let Some(color) = options.background_color {
             let _ = window.set_background_color(Some(color));
@@ -680,14 +827,14 @@ fn configure_main_window<R: Runtime>(app: &AppHandle<R>, options: &Builder) {
     }
 }
 
-fn present_main_window<R: Runtime>(app: &AppHandle<R>, options: &Builder) {
+fn present_main_window<R: Runtime>(app: &AppHandle<R>, options: &Builder<R>) {
     if let Some(window) = app.get_webview_window(&options.main_window_label) {
         let _ = window.show();
         let _ = window.set_focus();
     }
 }
 
-fn persist_main_window_state<R: Runtime>(app: &AppHandle<R>, options: &Builder) {
+fn persist_main_window_state<R: Runtime>(app: &AppHandle<R>, options: &Builder<R>) {
     let Some(window) = app.get_webview_window(&options.main_window_label) else {
         return;
     };
@@ -724,6 +871,58 @@ mod tests {
         assert!(!should_show_on_toggle(true, false));
     }
 
+    #[cfg(desktop)]
+    #[test]
+    fn tray_menu_without_extras_keeps_show_and_quit() {
+        assert_eq!(
+            compose_tray_menu_nodes("显示主窗口", Vec::new(), "退出"),
+            vec![
+                TrayMenuNode::item("lilia.tray.show-window", "显示主窗口"),
+                TrayMenuNode::Separator,
+                TrayMenuNode::item("lilia.tray.quit", "退出"),
+            ]
+        );
+    }
+
+    #[cfg(desktop)]
+    #[test]
+    fn tray_menu_inserts_extras_between_show_and_quit() {
+        let extras = vec![
+            TrayMenuNode::item("app.stop.repo-a", "停止 Demo · yarn dev"),
+            TrayMenuNode::Separator,
+            TrayMenuNode::item("app.start.repo-b", "运行 Other · cargo run"),
+        ];
+        assert_eq!(
+            compose_tray_menu_nodes("显示主窗口", extras, "退出"),
+            vec![
+                TrayMenuNode::item("lilia.tray.show-window", "显示主窗口"),
+                TrayMenuNode::Separator,
+                TrayMenuNode::item("app.stop.repo-a", "停止 Demo · yarn dev"),
+                TrayMenuNode::Separator,
+                TrayMenuNode::item("app.start.repo-b", "运行 Other · cargo run"),
+                TrayMenuNode::Separator,
+                TrayMenuNode::item("lilia.tray.quit", "退出"),
+            ]
+        );
+    }
+
+    #[cfg(desktop)]
+    #[test]
+    fn tray_menu_ids_keep_show_and_quit_and_forward_extras() {
+        assert_eq!(
+            dispatch_tray_menu_id("lilia.tray.show-window"),
+            TrayMenuDispatch::ShowWindow
+        );
+        assert_eq!(
+            dispatch_tray_menu_id("lilia.tray.quit"),
+            TrayMenuDispatch::Quit
+        );
+        assert_eq!(
+            dispatch_tray_menu_id("app.stop.repo-a"),
+            TrayMenuDispatch::Extra("app.stop.repo-a")
+        );
+    }
+
     #[test]
     fn backdrop_mode_uses_camel_case_wire_values() {
         assert_eq!(
@@ -746,7 +945,7 @@ mod tests {
 
     #[test]
     fn platform_defaults_match_native_materials() {
-        assert!(Builder::default().background_color.is_none());
+        assert!(Builder::<tauri::Wry>::default().background_color.is_none());
         assert_eq!(
             default_backdrop_action(NativePlatform::Macos),
             BackdropAction::Set(Some(Effect::Sidebar))
